@@ -1,0 +1,4 @@
+interface:
+  display_name: "Feature Design"
+  short_description: "Turn one delivery into an approval-ready design."
+  default_prompt: "Use $feature-design to write an implementation-ready feature design with acceptance criteria and a TDD test plan."

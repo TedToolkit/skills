@@ -1,0 +1,32 @@
+{
+  "name": "tedtoolkit",
+  "interface": {
+    "displayName": "TedToolkit Skills"
+  },
+  "plugins": [
+    {
+      "name": "tedtoolkit-shared",
+      "source": { "source": "local", "path": "./plugins/tedtoolkit-shared" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Productivity"
+    },
+    {
+      "name": "tedtoolkit-roslynhelper",
+      "source": { "source": "local", "path": "./plugins/tedtoolkit-roslynhelper" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "tedtoolkit-annotations",
+      "source": { "source": "local", "path": "./plugins/tedtoolkit-annotations" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Developer Tools"
+    },
+    {
+      "name": "tedtoolkit-project-development",
+      "source": { "source": "local", "path": "./plugins/tedtoolkit-project-development" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Developer Tools"
+    }
+  ]
+}

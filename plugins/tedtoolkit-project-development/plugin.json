@@ -1,0 +1,6 @@
+{
+  "name": "tedtoolkit-project-development",
+  "version": "0.1.2",
+  "description": "TedToolkit-style epic decomposition, project scaffolding, feature design and TDD implementation, README writing, and traceable technology selection skills.",
+  "skills": ["./skills/"]
+}

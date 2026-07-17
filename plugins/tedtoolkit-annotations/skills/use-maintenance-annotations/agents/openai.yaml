@@ -1,0 +1,4 @@
+interface:
+  display_name: "Use Maintenance Annotations"
+  short_description: "Record actionable C# maintenance work."
+  default_prompt: "Review maintenance annotations in this C# project."

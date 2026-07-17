@@ -1,0 +1,4 @@
+interface:
+  display_name: "Merge Default Branch"
+  short_description: "Sync the current branch with the remote default branch safely"
+  default_prompt: "Use $merge-default-branch to merge the latest default branch into my current branch and keep the Release build green."

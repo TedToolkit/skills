@@ -1,0 +1,28 @@
+{
+  "name": "tedtoolkit-skills",
+  "owner": {
+    "name": "TedToolkit"
+  },
+  "plugins": [
+    {
+      "name": "tedtoolkit-shared",
+      "source": "./plugins/tedtoolkit-shared",
+      "description": "通用的技能。"
+    },
+    {
+      "name": "tedtoolkit-annotations",
+      "source": "./plugins/tedtoolkit-annotations",
+      "description": "Skills for writing clear C# comments and annotations."
+    },
+    {
+      "name": "tedtoolkit-roslynhelper",
+      "source": "./plugins/tedtoolkit-roslynhelper",
+      "description": "Skill for composing generated C# with TedToolkit.RoslynHelper."
+    },
+    {
+      "name": "tedtoolkit-project-development",
+      "source": "./plugins/tedtoolkit-project-development",
+      "description": "Skills for repository structure, feature design and TDD implementation, README writing, and technical choices."
+    }
+  ]
+}

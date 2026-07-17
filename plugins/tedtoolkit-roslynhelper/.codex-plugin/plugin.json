@@ -1,0 +1,16 @@
+{
+  "name": "tedtoolkit-roslynhelper",
+  "version": "0.1.0",
+  "description": "Skills for TedToolkit.RoslynHelper generated C#.",
+  "author": { "name": "TedToolkit" },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "TedToolkit RoslynHelper",
+    "shortDescription": "Generate C# with RoslynHelper",
+    "longDescription": "Workflows for composing generated C# with TedToolkit.RoslynHelper.",
+    "developerName": "TedToolkit",
+    "category": "Developer Tools",
+    "capabilities": ["Write"],
+    "defaultPrompt": ["Help me compose generated C# with TedToolkit.RoslynHelper."]
+  }
+}

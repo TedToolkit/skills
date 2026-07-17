@@ -1,0 +1,16 @@
+{
+  "name": "tedtoolkit-project-development",
+  "version": "0.1.2",
+  "description": "TedToolkit project development workflows.",
+  "author": { "name": "TedToolkit" },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "TedToolkit Project Development",
+    "shortDescription": "Design and implement .NET projects",
+    "longDescription": "TedToolkit workflows for epic decomposition, project design, scaffolding, TDD, and documentation.",
+    "developerName": "TedToolkit",
+    "category": "Developer Tools",
+    "capabilities": ["Write"],
+    "defaultPrompt": ["Help me design and implement a TedToolkit-style .NET feature."]
+  }
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "TUnit Testing"
+  short_description: "Write TUnit tests with safe integration boundaries"
+  default_prompt: "Use $tunit-unit-testing to add or improve TUnit unit or integration tests in this .NET repository."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Fix C# Diagnostics"
+  short_description: "Fix C# warnings, errors, and build diagnostics"
+  default_prompt: "Use $fix-csharp-diagnostics to eliminate all C# build warnings and errors without using NoWarn or disable directives."

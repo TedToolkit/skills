@@ -1,0 +1,71 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 2
+
+scenarios:
+  - name: "Split a dirty tree into atomic commits"
+    prompt: "Commit my changes."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh two-unrelated-changes"
+    assertions:
+      - type: "exit_success"
+      # The whole tree is committed — nothing left dangling.
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      # At least two commits were created on top of the baseline.
+      - type: "command"
+        run: 'test "$(git rev-list --count eval-base..HEAD)" -ge 2'
+      # The history carries both a feature and a docs commit, gitmoji style.
+      - type: "command"
+        run: "git log eval-base..HEAD --format=%s%n%b"
+        stdout_contains: "feat"
+      - type: "command"
+        run: "git log eval-base..HEAD --format=%s%n%b"
+        stdout_contains: "docs"
+      # Subjects should be descriptive, not empty placeholders.
+      - type: "command"
+        run: "git log eval-base..HEAD --format=%s | grep -qE '^.+ .+: .+'"
+      # The README typo fix is isolated in its own commit, not bundled with the
+      # feature — this is the heart of "atomic" grouping.
+      - type: "command"
+        run: |
+          set -e
+          c=$(git log eval-base..HEAD --format=%H -- README.md | head -1)
+          test -n "$c"
+          files=$(git show --name-only --format= "$c" | grep -v '^$' || true)
+          test "$files" = "README.md"
+    rubric:
+      - "Produces at least two atomic commits: the new feature and its test together, and the unrelated README typo fix on its own."
+      - "src/Notifier.cs and tests/NotifierTests.cs land in the SAME commit (an implementation and its test are one logical change)."
+      - "Each subject follows the house style: a gitmoji, a Conventional-Commits type, and a concise descriptive subject."
+      - "Each body explains what changed and why, not how."
+      - "Leaves a clean working tree."
+      - "After committing, offers to push the branch rather than pushing automatically — pushing is gated on the user's approval."
+    timeout: 360
+
+  - name: "Message-only request must not commit"
+    prompt: "What would good commit messages be for my current changes? Just show me — don't commit anything yet."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh message-only"
+    assertions:
+      - type: "exit_success"
+      # The defining behavior: it must NOT create any commit.
+      - type: "command"
+        run: 'test "$(git rev-list --count eval-base..HEAD)" -eq 0'
+      # The working tree is left untouched (changes still present, uncommitted).
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_contains: "Notifier.cs"
+      # It still produced a message for the user to read.
+      - type: "output_contains"
+        value: "feat"
+    rubric:
+      - "Reads the intent correctly: the user only wants to SEE messages, so nothing is staged or committed."
+      - "Still presents well-formed messages (gitmoji + type + descriptive subject) for the changes."
+      - "Ideally proposes the same atomic split (feature+test, then the docs fix) as separate messages."
+    timeout: 300

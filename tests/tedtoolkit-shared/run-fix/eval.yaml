@@ -1,0 +1,71 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Fix a library that won't compile in Release"
+    prompt: "Build the MathLib project in Release and fix whatever's stopping it from compiling. You have my approval to apply the fix and verify it — don't stop to ask."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh library-compile-error"
+    assertions:
+      - type: "exit_success"
+      - type: "file_exists"
+        path: "bin/Release/net10.0/MathLib.dll"
+      - type: "file_not_contains"
+        path: "*.cs"
+        value: "run-fix:debug"
+      - type: "command"
+        run: "dotnet build -c Release MathLib.csproj"
+        expect_exit: 0
+    rubric:
+      - "Locates the MathLib project from its name and builds it in Release (not Debug)."
+      - "Identifies the real compile error (the undefined identifier in Square) and fixes the cause rather than deleting the method."
+      - "Leaves no temporary debug instrumentation behind — no `run-fix:debug` lines remain."
+      - "The project compiles cleanly in Release after the fix."
+    timeout: 420
+
+  - name: "Fix an app that throws at runtime in Release"
+    prompt: "Run the Calc app in release and fix the error it hits. Go ahead and apply the fix and verify it — you have my approval, don't stop to confirm."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh exe-runtime-error"
+    assertions:
+      - type: "exit_success"
+      - type: "file_not_contains"
+        path: "*.cs"
+        value: "run-fix:debug"
+      - type: "command"
+        run: "dotnet run -c Release --project Calc.csproj"
+        expect_exit: 0
+        stdout_contains: "sum=6"
+    rubric:
+      - "Detects this is an executable and runs it in Release, observing the runtime failure (the out-of-bounds loop)."
+      - "Fixes the loop bound so the program runs to completion and prints the correct sum (6), rather than masking the exception."
+      - "Removes any debug instrumentation it added — no `run-fix:debug` lines remain — and re-verifies the program runs clean afterward."
+    timeout: 420
+
+  # NOTE: this scenario needs a NuGet restore (xunit / Test.Sdk), so unlike the
+  # other two it is NOT offline — it requires network or a populated package
+  # cache. The .NET 10 SDK is required by all three.
+  - name: "Fix a failing test by correcting the code under test"
+    prompt: "Run the Widget.Tests project in release and fix the failing test. The bug is in the production code, not the test — fix the cause. You have my approval to apply the fix; don't stop to confirm."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh test-failure"
+    assertions:
+      - type: "exit_success"
+      - type: "file_not_contains"
+        path: "*.cs"
+        value: "run-fix:debug"
+      - type: "command"
+        run: "dotnet test -c Release Widget.Tests.csproj"
+        expect_exit: 0
+    rubric:
+      - "Detects this is a test project and runs `dotnet test` in Release."
+      - "Fixes the bug in Pricing.Discount (it must apply a percentage, not subtract the raw number) so the test passes — without altering the test to fit the bug."
+      - "Leaves no `run-fix:debug` instrumentation behind in any source file."
+    timeout: 540

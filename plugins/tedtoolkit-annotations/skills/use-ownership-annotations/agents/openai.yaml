@@ -1,0 +1,4 @@
+interface:
+  display_name: "Use Ownership Annotations"
+  short_description: "Document disposable-resource ownership contracts."
+  default_prompt: "Review resource ownership in this C# project."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Run and Fix"
+  short_description: "Diagnose and fix a failing named .NET project in Release"
+  default_prompt: "Use $run-fix to diagnose and fix a failing named .NET project in Release, and use TUnit-specific rules only when the target project is a TUnit test project."

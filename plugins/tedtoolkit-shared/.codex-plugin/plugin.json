@@ -1,0 +1,16 @@
+{
+  "name": "tedtoolkit-shared",
+  "version": "0.1.0",
+  "description": "TedToolkit shared development skills.",
+  "author": { "name": "TedToolkit" },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "TedToolkit Shared",
+    "shortDescription": "Shared .NET development skills",
+    "longDescription": "Shared TedToolkit workflows for .NET development.",
+    "developerName": "TedToolkit",
+    "category": "Productivity",
+    "capabilities": ["Write"],
+    "defaultPrompt": ["Help me use the TedToolkit shared development skills."]
+  }
+}

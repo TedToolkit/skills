@@ -1,0 +1,4 @@
+interface:
+  display_name: "Generate Commit Messages"
+  short_description: "Split changes into atomic commits in the repo's house style"
+  default_prompt: "Use $generate-commit-message to group my current changes into atomic commits and write gitmoji + Conventional Commit messages."

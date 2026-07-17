@@ -1,0 +1,52 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Create an implementation-ready feature design"
+    prompt: "Design a feature that adds a TryParse(string?, out Temperature) API to the existing Temperature value object. It must accept invariant-culture decimal Celsius input, reject null, whitespace, invalid text, and values below absolute zero. Write the design document only; do not change production code or tests."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh temperature-design"
+    assertions:
+      - type: "exit_success"
+      - type: "file_exists"
+        path: "docs/features/*.md"
+      - type: "file_contains"
+        path: "docs/features/*.md"
+        value: "Acceptance criteria"
+      - type: "file_contains"
+        path: "docs/features/*.md"
+        value: "Test plan"
+      - type: "file_contains"
+        path: "docs/features/*.md"
+        value: "TryParse"
+      - type: "file_contains"
+        path: "docs/features/*.md"
+        value: "absolute zero"
+      - type: "command"
+        run: "git diff --exit-code -- Temperature.cs TemperatureTests.cs"
+    rubric:
+      - "The document distinguishes scope from non-goals and gives observable success and failure behavior."
+      - "Each acceptance criterion is mapped to a focused, automatable test."
+      - "It records compatibility and invariant-culture parsing considerations without inventing unrelated architecture."
+    timeout: 420
+
+  - name: "Route a multi-delivery request to epic decomposition"
+    prompt: "Design a feature that simultaneously renames several public API families, rewrites a source generator, changes equality semantics, and adds a new validated mesh abstraction. Do not modify files; explain the next planning action."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh large-feature"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "decompose-feature-epic"
+    rubric:
+      - "Recognizes the request as an epic instead of producing one monolithic implementation-ready design."
+      - "Explains that independent migrations and unresolved cross-cutting contracts need a delivery map first."
+    timeout: 420

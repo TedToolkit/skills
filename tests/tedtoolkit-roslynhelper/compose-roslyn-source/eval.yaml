@@ -1,0 +1,30 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Compose a generator output when RoslynHelper is referenced"
+    prompt: "Review Generator.cs without modifying it. Draft the body of Generate that emits a public generated class with a public getter-only property derived from propertySymbol. Use the referenced code-generation library; do not use StringBuilder."
+    setup:
+      copy_test_files: true
+      commands: ["bash setup_fixture.sh with-reference"]
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "SourceComposer" }
+      - { type: "output_contains", value: "DataType.FromSymbol" }
+      - { type: "output_contains", value: "File()" }
+      - { type: "output_contains", value: "Generate(context" }
+    rubric:
+      - "Uses the RoslynHelper syntax model rather than StringBuilder or manually assembled source text."
+      - "Uses symbol conversion and generator-aware declaration factories where applicable."
+
+  - name: "Do not introduce RoslynHelper when it is not referenced"
+    prompt: "Review Generator.cs without modifying it. Explain which library APIs are available for generating source in this project. Do not introduce dependencies that are not referenced by Generator.csproj."
+    setup:
+      copy_test_files: true
+      commands: ["bash setup_fixture.sh without-reference"]
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_not_contains", value: "SourceComposer" }
+    rubric:
+      - "Does not recommend TedToolkit.RoslynHelper APIs when the active project has no reference to the library."

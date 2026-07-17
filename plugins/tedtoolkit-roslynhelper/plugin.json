@@ -1,0 +1,6 @@
+{
+  "name": "tedtoolkit-roslynhelper",
+  "version": "0.1.0",
+  "description": "Skill for composing generated C# with TedToolkit.RoslynHelper.",
+  "skills": ["./skills/"]
+}

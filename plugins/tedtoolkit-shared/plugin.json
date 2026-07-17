@@ -1,0 +1,6 @@
+{
+  "name": "tedtoolkit-shared",
+  "version": "0.1.0",
+  "description": "一些基本的技能。",
+  "skills": ["./skills/"]
+}

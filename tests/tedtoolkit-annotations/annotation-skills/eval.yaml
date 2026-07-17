@@ -1,0 +1,125 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Draft useful documentation for a type, property, and method"
+    prompt: "Review Sample.cs without modifying it. Draft clear XML documentation for Sample, MaxConcurrency, and Create, then propose contract annotations only where the referenced package supports them."
+    setup:
+      copy_test_files: true
+      commands: ["bash setup_fixture.sh Documentations"]
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "<summary>" }
+      - { type: "output_contains", value: "<returns>" }
+      - { type: "output_contains", value: "<value>" }
+    rubric:
+      - "Explains the type, property, and method contracts without narrating obvious syntax."
+      - "Does not propose annotations from packages absent from the fixture."
+
+  - name: "Document a tested exceptional behavior case"
+    prompt: "Review Sample.cs and SampleTests.cs without modifying them. The existing focused test Create_negative_count_throws_before_allocating passes and asserts ArgumentOutOfRangeException before any allocation. Draft the XML exception documentation and the exact Documentation annotations for BatchFactory.Create. Do not claim test coverage unless the existing test warrants it."
+    setup:
+      copy_test_files: true
+      commands: ["bash setup_fixture.sh Documentations behavior-case"]
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "BehaviorCase<ArgumentOutOfRangeException>" }
+      - { type: "output_contains", value: "hasUnitTest: true" }
+      - { type: "output_contains", value: "<exception" }
+      - { type: "output_contains", value: "ArgumentOutOfRangeException" }
+    rubric:
+      - "Uses a typed BehaviorCase for the negative-count branch and describes the observable exception outcome."
+      - "Treats hasUnitTest as a declaration justified by the supplied passing test, rather than as a substitute for a test."
+      - "Keeps the XML exception documentation, behavior case, and implementation behavior consistent."
+
+  - name: "Document blocking effects with standard categories"
+    prompt: "Review Sample.cs without modifying it. Draft the smallest set of Documentation annotations for SettingsRefresher.Refresh that tells callers it synchronously reads from the supplied stream, may wait for _gate, updates _current, and invokes the supplied callback. Use the library's standard enum categories whenever they apply."
+    setup:
+      copy_test_files: true
+      commands: ["bash setup_fixture.sh Documentations operational"]
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "MayBlock(MayBlockKind.INPUT_OUTPUT" }
+      - { type: "output_contains", value: "MayBlock(MayBlockKind.SYNCHRONIZATION" }
+      - { type: "output_contains", value: "SideEffect(SideEffectKind.INSTANCE_STATE_MUTATION" }
+      - { type: "output_contains", value: "SideEffect(SideEffectKind.CALLBACK_INVOCATION" }
+    rubric:
+      - "Selects four independent, observable operational contracts instead of a vague blanket annotation."
+      - "Names the concrete stream, lock, instance state, and callback boundary in the annotation descriptions."
+
+  - name: "Explain how to retain behavior-case metadata"
+    prompt: "The project already uses TedToolkit.Annotations.Documentations and has BehaviorCase attributes. We are adding reflection-based test discovery that must read those attributes from the compiled assembly. Show the smallest csproj change required, and explain whether this is needed merely for source analysis. Do not modify files."
+    setup:
+      copy_test_files: true
+      commands: ["bash setup_fixture.sh Documentations behavior-case"]
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "ANNOTATIONS_BEHAVIOR_CASE" }
+      - { type: "output_contains", value: "DefineConstants" }
+    rubric:
+      - "Explains that the symbol preserves BehaviorCase in compiled metadata for reflection or downstream tools."
+      - "Explains that source use and analyzer behavior do not require the symbol."
+
+  - name: "Draft an explicit boxing allocation"
+    prompt: "Review Sample.cs without modifying it. A value is intentionally boxed for an object-based cache. Draft the smallest code change that makes that allocation explicit."
+    setup:
+      copy_test_files: true
+      commands: ["bash setup_fixture.sh Boxing"]
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "Boxer.Box" }
+    rubric:
+      - "States that Boxer.Box makes boxing explicit rather than avoiding allocation."
+
+  - name: "Draft a const contract"
+    prompt: "Review Sample.cs without modifying it. Draft a non-mutation contract for a method that only reads the supplied object graph."
+    setup:
+      copy_test_files: true
+      commands: ["bash setup_fixture.sh Const"]
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "Const" }
+    rubric:
+      - "Selects a depth based on the actual mutation boundary rather than the method name."
+
+  - name: "Draft a maintenance annotation"
+    prompt: "Review Sample.cs without modifying it. Draft an annotation for a temporary linear scan that must be replaced above 1,000 items and is tracked by #123."
+    setup:
+      copy_test_files: true
+      commands: ["bash setup_fixture.sh Maintenance"]
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "TechnicalDebt" }
+      - { type: "output_contains", value: "#123" }
+    rubric:
+      - "Records the reason and removal condition instead of creating a bare TODO."
+
+  - name: "Draft an ownership contract"
+    prompt: "Review Sample.cs without modifying it. Draft documentation and an annotation for a method that returns a shared stream which the caller must not dispose."
+    setup:
+      copy_test_files: true
+      commands: ["bash setup_fixture.sh Ownership"]
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "Ownership" }
+      - { type: "output_contains", value: "UNCHANGED" }
+    rubric:
+      - "States clearly that the returned resource is borrowed and must not be disposed by the caller."
+
+  - name: "Keep Attribute text visible in Rider"
+    prompt: "Do not modify files. For TedToolkit.Annotations attributes, state the rules for a text argument that Rider must display readably on hover. Cover: when a source symbol is named, whether Chinese and full-width punctuation are allowed, which invisible Unicode characters to avoid, and whether XML documentation has the same restriction. Include the literal terms nameof, Chinese, U+2028, and XML documentation in your answer."
+    setup:
+      copy_test_files: true
+      commands: ["bash setup_fixture.sh Documentations"]
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "nameof" }
+      - { type: "output_contains", value: "Chinese" }
+      - { type: "output_contains", value: "U+2028" }
+      - { type: "output_contains", value: "XML documentation" }
+    rubric:
+      - "Requires nameof(...) rather than a handwritten string when an attribute argument identifies a C# source symbol."
+      - "Allows visible Unicode, including Chinese and ordinary full-width punctuation, in Attribute text."
+      - "Prohibits non-printing or invisible characters, including control or format characters, U+0085, U+2028/U+2029, and unpaired surrogates because Rider may escape them."
+      - "Allows XML documentation to use Unicode normally while requiring well-formed XML."

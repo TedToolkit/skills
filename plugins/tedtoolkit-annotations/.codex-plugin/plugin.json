@@ -1,0 +1,16 @@
+{
+  "name": "tedtoolkit-annotations",
+  "version": "0.1.0",
+  "description": "Skills for C# comments and annotations.",
+  "author": { "name": "TedToolkit" },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "TedToolkit Annotations",
+    "shortDescription": "C# annotation and comment workflows",
+    "longDescription": "Workflows for C# comments and TedToolkit annotations.",
+    "developerName": "TedToolkit",
+    "category": "Developer Tools",
+    "capabilities": ["Write"],
+    "defaultPrompt": ["Help me apply TedToolkit C# annotation conventions."]
+  }
+}

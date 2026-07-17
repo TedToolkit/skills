@@ -1,0 +1,4 @@
+interface:
+  display_name: "TedToolkit Project Scaffolding"
+  short_description: "Organize .NET projects and human-facing documentation boundaries."
+  default_prompt: "Create or reorganize this .NET repository using the TedToolkit project structure, including clear human-facing boundaries for active features, architecture, ADRs, migrations, and exceptional history."

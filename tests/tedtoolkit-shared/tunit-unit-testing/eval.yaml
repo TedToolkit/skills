@@ -1,0 +1,23 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Follow the repository's TUnit command"
+    prompt: "This repository uses TUnit. Please inspect the existing test project and its contributor documentation, keep the current test style, verify it with the documented command, and then tell me the final verification command you used."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh tunit-command-selection"
+    assertions:
+      - type: "exit_success"
+      - type: "file_contains"
+        path: ".command-log.txt"
+        value: "dotnet test"
+      - type: "output_contains"
+        value: "dotnet test"
+    rubric:
+      - "Recognizes that both TUnit command paths are valid and follows the repository's documented command."
+      - "Uses `dotnet test --configuration Release --project Geometry.Tests.csproj` as the verification command."
+      - "Keeps the explanation aligned with TUnit conventions, including its Microsoft.Testing.Platform runner."
+    timeout: 420

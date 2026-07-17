@@ -1,0 +1,5 @@
+{
+  "enabledPlugins": {
+    "sink-core@sink-agent-skills": true
+  }
+}

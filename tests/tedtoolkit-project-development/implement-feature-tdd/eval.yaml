@@ -1,0 +1,40 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Do not implement without an approved design"
+    prompt: "Implement the proposed TryParse API with TDD. The only feature document is still marked Draft, and I have not approved it. Inspect the repository and tell me what you need next. Do not modify files yet."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh unapproved-design"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "approval"
+    rubric:
+      - "Identifies that the design is not approved and does not begin Red-Green-Refactor."
+      - "Requests approval or a completed behavioral contract rather than inventing the implementation."
+    timeout: 420
+
+  - name: "Do not implement directly from an epic index"
+    prompt: "Implement the approved geometry-rebuild epic with TDD. The repository only contains the epic index, with several public migrations and no selected work package. Do not modify files yet."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh epic-index"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "decompose-feature-epic"
+    rubric:
+      - "Refuses to treat an epic index as an implementation contract."
+      - "Requests a selected, approved work package and does not begin Red-Green-Refactor."
+    timeout: 420
