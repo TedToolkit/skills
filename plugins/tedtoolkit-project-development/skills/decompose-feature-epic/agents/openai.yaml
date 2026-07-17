@@ -1,4 +1,0 @@
-interface:
-  display_name: "Decompose Feature Epic"
-  short_description: "Split an epic into dependency-ordered, implementable work packages."
-  default_prompt: "Use $decompose-feature-epic to turn this large feature into an epic map, decision gates, and reviewable work packages. Do not implement code."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Decompose Change Epic"
+  short_description: "Split an epic into dependency-ordered, implementable work packages."
+  default_prompt: "Use $decompose-change-epic to turn this large change into an epic map, decision gates, and reviewable work packages. Do not implement code."

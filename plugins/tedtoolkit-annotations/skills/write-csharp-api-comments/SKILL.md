@@ -37,9 +37,13 @@ Use the rules in this skill as the self-contained standard for drafting and revi
 - Keep attribute arguments plain: do not use Unicode escape literals such as `\uXXXX` or
   `\UXXXXXXXX`, non-printing or invisible Unicode, special symbols, emoji, or non-ASCII punctuation
   in attributes. Prefer `nameof(...)`, numeric values, enum values, and simple printable ASCII strings.
-- XML documentation comments may use literal Unicode normally, subject to well-formed XML. Use
-  Chinese, symbols, or emoji there when they make the generated API documentation clearer; prefer the
-  real character over `\u...` escape text in XML documentation.
+- XML documentation comments may use literal Unicode normally, subject to well-formed XML. Add a
+  familiar emoji or visible symbol proactively when it makes a caller-facing contract easier to scan:
+  for example, `⚠️` for a hazard or restriction, `💡` for a usage tip, `✅` for a guarantee, and `⏱️`
+  for timing or blocking behavior. Keep the explanatory text explicit; use a marker at the start of a
+  `<remarks>`, `<example>`, or multi-step note rather than replacing a summary, XML element, or prose
+  with an icon. Prefer the real character over `\u...` escape text in XML documentation, and avoid
+  invisible characters or decorative repetition.
 - Delete a comment that restates the identifier, syntax, or immediately visible control flow.
 
 ## Rules

@@ -33,15 +33,15 @@ obj/
 setup_fixture.sh
 EOF
 
-# A small typo in the README that the dirty edit will fix (开使 -> 开始).
+# A small typo in the README that the dirty edit will fix (Quik -> Quick).
 cat > README.md <<'EOF'
 # Demo
 
-一个用于演示的最小项目。
+A minimal project for demonstrations.
 
-## 快速开使
+## Quik start
 
-运行 `dotnet run` 即可。
+Run `dotnet run`.
 EOF
 
 mkdir -p src tests
@@ -55,11 +55,11 @@ public static class Calculator
 EOF
 
 git add -A
-git commit -q -m "🎉 chore: 初始化演示项目骨架
+git commit -q -m "🎉 chore: initialize demo project
 
-建立最小可运行的项目，作为后续开发的基础。
+Create a minimal runnable project as a baseline for later development.
 
-- 新增 README、Calculator 与 .gitignore"
+- Add README, Calculator, and .gitignore"
 git tag eval-base
 
 # ---- Dirty the tree with two unrelated concerns -------------------------------
@@ -82,15 +82,15 @@ public static class NotifierTests
 }
 EOF
 
-# 2) Unrelated docs typo fix (开使 -> 开始) — should be its own commit.
+# 2) Unrelated docs typo fix (Quik -> Quick) — should be its own commit.
 cat > README.md <<'EOF'
 # Demo
 
-一个用于演示的最小项目。
+A minimal project for demonstrations.
 
-## 快速开始
+## Quick start
 
-运行 `dotnet run` 即可。
+Run `dotnet run`.
 EOF
 
 rm -f "$root/setup_fixture.sh"   # gitignored anyway; remove so it's not stray

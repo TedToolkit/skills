@@ -175,7 +175,7 @@ git commit -F - <<'MSG'
 
 <Body: what changed upstream, why the merge was needed, and how any conflicts were reconciled.>
 
-- 关键点（按需要列出）
+- Key points (as needed)
 MSG
 ```
 

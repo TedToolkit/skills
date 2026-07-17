@@ -1,8 +1,8 @@
 ---
-name: review-feature-change
+name: review-change
 description: >-
-  Review a proposed feature change against its approved design, acceptance criteria, BehaviorCases,
-  ADRs, code, tests, and documentation. Use when asked to review a feature or epic work-package
+  Review a proposed change against its approved design, acceptance criteria, BehaviorCases,
+  ADRs, code, tests, and documentation. Use when asked to review a feature, fix, refactor, migration, or epic work-package
   implementation before merging; check whether code conforms to the design or specification; assess
   change readiness; trace requirements through implementation and tests; or recommend whether its
   human-facing documentation should be retained, extracted, deleted, or exceptionally archived.
@@ -10,7 +10,7 @@ description: >-
   pull request, or implement fixes.
 ---
 
-# Review Feature Change
+# Change Review
 
 Review a change by evidence, not by whether its code merely looks reasonable. The question is
 whether the approved behavior has been implemented, protected by appropriately expressed tests, and
@@ -18,14 +18,14 @@ documented without unrecorded design changes.
 
 ## Set the review boundary
 
-1. Read repository guidance, the feature design or work package, BehaviorCases, acceptance criteria,
+1. Read repository guidance, the change design or work package, BehaviorCases, acceptance criteria,
    applicable ADRs, the current diff, affected production and test code, and relevant documentation.
    For a work package, also read the parent epic index and its declared prerequisites.
 2. State the reviewed revision or diff range and the documents used as the baseline.
 3. If the supplied document is an epic index rather than one work package, say that an
    implementation-readiness conclusion is not possible until a work package is selected. Do not
    infer the work-package boundary from the diff.
-4. If there is no approved feature design, say that this is a general code review only. Review local
+4. If there is no approved change design, say that this is a general code review only. Review local
    correctness and repository conventions, but do not claim that the change satisfies unspecified
    requirements.
 5. Do not modify files, run builds, run tests, approve a pull request, or infer test results. Point
@@ -73,7 +73,7 @@ Follow the repository's existing testing conventions. If the project uses TUnit,
 
 ## Review documentation consistency
 
-Check whether the feature design, parent epic, ADR, README, migration, or rollout documentation
+Check whether the change design, parent epic, ADR, README, migration, or rollout documentation
 must be updated because of this change. A change that materially differs from an approved design is
 not resolved by editing code alone: it needs an explicit design update and approval.
 
@@ -94,7 +94,7 @@ Use this exact report structure. Give every finding a stable ID, its evidence lo
 recommended next action. Do not report style preferences as blockers.
 
 ```md
-# Feature Change Review
+# Change Review
 
 ## Conclusion
 Ready to merge | Ready with follow-ups | Not ready
@@ -136,6 +136,6 @@ Choose the conclusion from the findings:
 - **Ready to merge** only when the traceability map is complete, no material design deviation
   remains, and no blocking or important finding is open.
 
-Hand fixes to `implement-feature-tdd`; hand a material design decision or design deviation to
-`feature-design`. Hand an unbounded delivery to `decompose-feature-epic`. Keep the review
+Hand fixes to `implement-change-tdd`; hand a material design decision or design deviation to
+`change-design`. Hand an unbounded delivery to `decompose-change-epic`. Keep the review
 independent by not fixing the code in this skill.

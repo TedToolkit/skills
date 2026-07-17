@@ -1,6 +1,6 @@
 {
   "name": "tedtoolkit-project-development",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "TedToolkit project development workflows.",
   "author": { "name": "TedToolkit" },
   "skills": "./skills/",
@@ -11,6 +11,6 @@
     "developerName": "TedToolkit",
     "category": "Developer Tools",
     "capabilities": ["Write"],
-    "defaultPrompt": ["Help me design and implement a TedToolkit-style .NET feature."]
+    "defaultPrompt": ["Help me design and implement a TedToolkit-style .NET change."]
   }
 }

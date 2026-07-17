@@ -96,24 +96,24 @@ needs them.
 ## Documentation boundaries
 
 Use `README.md` for orientation and first-use instructions. Use `docs/` for records that remain
-useful after the implementing pull request closes: feature designs, ADRs, architecture explanations,
+useful after the implementing pull request closes: change designs, ADRs, architecture explanations,
 runbooks, and migration or rollout plans. Read [repository-layout.md](references/repository-layout.md)
 before adding a documentation subtree so the document has a clear owner and stable location.
 
-For the feature-development workflow, use `docs/features/` for approved feature designs and
-`docs/adr/` for durable technical decisions. Link a feature design to any related ADR; do not copy
+For the change-development workflow, use `docs/changes/` for approved change designs and
+`docs/adr/` for durable technical decisions. Link a change design to any related ADR; do not copy
 the decision rationale into both files. Keep the tree shallow until the repository has a real
 navigational need for another category.
 
-When a feature is an epic with multiple independently implementable deliveries, use
-`docs/features/<epic-slug>/README.md` as its index and put its work-package contracts in
-`docs/features/<epic-slug>/work-items/`. Use `decompose-feature-epic` to establish those boundaries
+When a change is an epic with multiple independently implementable deliveries, use
+`docs/changes/<epic-slug>/README.md` as its index and put its work-package contracts in
+`docs/changes/<epic-slug>/work-items/`. Use `decompose-change-epic` to establish those boundaries
 before creating the tree. Keep cross-cutting, long-lived semantics in a focused architecture record
 such as `docs/architecture/<topic>.md`; put difficult-to-reverse choices in `docs/adr/`. The epic
 index links to those records and tracks dependencies, while each work package owns its acceptance
 criteria and test plan. Do not create this hierarchy for one ordinary feature.
 
-`docs/features/` is for active work. At completion, a human review decides whether to retain a short
+`docs/changes/` is for active work. At completion, a human review decides whether to retain a short
 epic index, extract current rules to `docs/architecture/`, retain a decision in `docs/adr/`, keep an
 active migration guide, or delete a process-only design. Create `docs/history/` only when a
 superseded document has concrete audit, legal, or explanatory value that Git history cannot serve.

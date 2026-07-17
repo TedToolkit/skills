@@ -91,8 +91,8 @@ EOF
 esac
 
 git add -A
-git commit -q -m "🎉 chore: 初始化 tunit-unit-testing 夹具
+git commit -q -m "🎉 chore: initialize tunit-unit-testing fixture
 
-建立一个会暴露 TUnit 执行命令选择的最小项目，供技能评测验证。"
+Create a minimal project that exposes TUnit command selection for skill evaluation."
 rm -f "$root/setup_fixture.sh"
 echo "fixture ready: scenario=$scenario branch=$(git rev-parse --abbrev-ref HEAD)"

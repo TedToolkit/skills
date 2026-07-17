@@ -3,8 +3,8 @@ config:
   max_parallel_runs: 1
 
 scenarios:
-  - name: "Block a feature change that misses an approved behavior case"
-    prompt: "Review the current feature change against docs/features/temperature-parse.md. Do not modify files or run commands. Use the exact review report structure and determine whether it is Ready to merge, Ready with follow-ups, or Not ready."
+  - name: "Block a change that misses an approved behavior case"
+    prompt: "Review the current change against docs/changes/temperature-parse.md. Do not modify files or run commands. Use the exact review report structure and determine whether it is Ready to merge, Ready with follow-ups, or Not ready."
     setup:
       copy_test_files: true
       commands:
@@ -30,7 +30,7 @@ scenarios:
     timeout: 420
 
   - name: "Do not infer an implementation boundary from an epic index"
-    prompt: "Review the current change against docs/features/geometry-rebuild/README.md. Do not modify files or run commands."
+    prompt: "Review the current change against docs/changes/geometry-rebuild/README.md. Do not modify files or run commands."
     setup:
       copy_test_files: true
       commands:

@@ -8,8 +8,8 @@ git config user.email "fixture@example.com"
 
 case "$scenario" in
   missing-behavior-case)
-    mkdir -p docs/features
-    cat > docs/features/temperature-parse.md <<'EOF'
+    mkdir -p docs/changes
+    cat > docs/changes/temperature-parse.md <<'EOF'
 # Temperature parsing
 
 ## Status
@@ -57,8 +57,8 @@ internal sealed class TemperatureTests
 EOF
     ;;
   epic-index)
-    mkdir -p docs/features/geometry-rebuild
-    cat > docs/features/geometry-rebuild/README.md <<'EOF'
+    mkdir -p docs/changes/geometry-rebuild
+    cat > docs/changes/geometry-rebuild/README.md <<'EOF'
 # Geometry rebuild
 
 ## Status

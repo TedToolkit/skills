@@ -1,16 +1,16 @@
 ---
-name: feature-design
+name: change-design
 description: >-
-  Discover, specify, and design a new product or library feature before implementation. Use when a
-  user asks to add, plan, scope, design, or estimate a feature; turn an issue or request into
+  Discover, specify, and design a product or library change before implementation. Use when a
+  user asks to add, fix, refactor, migrate, plan, scope, design, or estimate a change; turn an issue or request into
   acceptance criteria; define APIs, behavior, migrations, risks, or a test strategy; or requests
-  a feature design document. Use it for one independently reviewable and implementable delivery;
-  when a request is an epic with multiple independent deliveries, invoke decompose-feature-epic
+  a change design document. Use it for one independently reviewable and implementable delivery;
+  when a request is an epic with multiple independent deliveries, invoke decompose-change-epic
   before designing its work items. Produce an approved implementation-ready design and do not
   implement production code in this skill.
 ---
 
-# Feature Design
+# Change Design
 
 Turn one delivery into a small, reviewable contract. A design is useful only when it tells an
 implementer what observable behavior to build and how to prove it. Do not use a document to make a
@@ -19,16 +19,16 @@ scale the detail to the risk and reversibility of the decision.
 
 ## Establish the planning level
 
-Before drafting, decide whether the request is a feature or an epic.
+Before drafting, decide whether the request is one change or an epic.
 
-- A **feature** has one coherent outcome, a bounded API or behavior surface, one reviewable test
+- A **change** has one coherent outcome, a bounded API or behavior surface, one reviewable test
   map, and can be implemented and rolled back without completing unrelated deliveries.
 - An **epic** contains multiple independently valuable or mergeable outcomes, multiple API families
   or migrations, cross-cutting infrastructure plus consumers, or decisions whose uncertainty would
   block several later changes.
 
-Do not disguise an epic as a feature merely by adding sections or a long implementation plan. When
-the request is an epic, invoke `decompose-feature-epic`. That skill creates the delivery map and
+Do not disguise an epic as one change merely by adding sections or a long implementation plan. When
+the request is an epic, invoke `decompose-change-epic`. That skill creates the delivery map and
 work packages; return here only to design a selected work package. Put an enduring architecture or
 technology decision in an ADR through `select-technology`, and link it instead of copying its
 rationale into every work package.
@@ -42,15 +42,15 @@ rationale into every work package.
    persistence, security, or rollout.
 3. Identify the status quo and the smallest credible alternatives. Preserve established conventions
    when they meet the need.
-4. Classify the change. A small, reversible internal feature may use a concise feature design.
+4. Classify the change. A small, reversible internal change may use a concise change design.
    A public, cross-cutting, stateful, security-sensitive, or difficult-to-reverse change needs a
    fuller design with migration and rollback.
 
 ## Write the design package
 
-Copy `assets/feature-design-template.md` to the repository's established documentation location.
-Use the nearest existing feature-design convention when one exists. Name the document consistently
-with its issue, ADR, or feature identifier; otherwise use `docs/features/<slug>.md`. For an epic
+Copy `assets/change-design-template.md` to the repository's established documentation location.
+Use the nearest existing change-design convention when one exists. Name the document consistently
+with its issue, ADR, or change identifier; otherwise use `docs/changes/<type>-<slug>.md`. For an epic
 work package, follow the parent epic's `work-items/` convention and include its work-package ID.
 Write in the user's requested language, or the nearest documentation language when none is
 specified.
@@ -64,7 +64,7 @@ Fill only sections that affect a decision or implementation. The document must c
 4. A behavior-first test plan that maps every acceptance criterion to one or more tests. Include
    test level, setup, observable assertion, and any required fixture or contract test.
 5. Risks, operational concerns, migration, and rollback only when the change introduces them.
-6. Open questions and decisions explicitly deferred from this feature.
+6. Open questions and decisions explicitly deferred from this change.
 
 For a work package, record the parent epic, prerequisite work packages, and linked ADRs or
 architecture records. A prerequisite that is not approved is a planning blocker, not an invitation
@@ -82,10 +82,10 @@ or operational guarantee.
 
 ## Handle technology decisions separately
 
-When the feature needs a new package, framework, service, vendor, architectural layer, or another
+When the change needs a new package, framework, service, vendor, architectural layer, or another
 enduring technical decision, stop treating it as an implementation detail. Invoke
 `select-technology` to create the appropriate evaluation record and ADR, then link its decision
-from the feature design. Do not select a technology on intuition alone.
+from the change design. Do not select a technology on intuition alone.
 
 ## Approval gate
 
@@ -97,6 +97,6 @@ present the design draft with:
 3. Proposed component/API changes and significant alternatives rejected.
 4. Risks, migration or rollback, and unresolved questions.
 
-Wait for explicit user approval. Approval makes the design an input to `implement-feature-tdd`; it
+Wait for explicit user approval. Approval makes the design an input to `implement-change-tdd`; it
 does not authorize unrelated changes. If implementation reveals a material mismatch, update the
 design and obtain approval again before proceeding.

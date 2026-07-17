@@ -4,7 +4,7 @@ config:
 
 scenarios:
   - name: "Do not implement without an approved design"
-    prompt: "Implement the proposed TryParse API with TDD. The only feature document is still marked Draft, and I have not approved it. Inspect the repository and tell me what you need next. Do not modify files yet."
+    prompt: "Implement the proposed TryParse API with TDD. The only change document is still marked Draft, and I have not approved it. Inspect the repository and tell me what you need next. Do not modify files yet."
     setup:
       copy_test_files: true
       commands:
@@ -33,7 +33,7 @@ scenarios:
         run: "git status --porcelain"
         stdout_empty: true
       - type: "output_contains"
-        value: "decompose-feature-epic"
+        value: "decompose-change-epic"
     rubric:
       - "Refuses to treat an epic index as an implementation contract."
       - "Requests a selected, approved work package and does not begin Red-Green-Refactor."

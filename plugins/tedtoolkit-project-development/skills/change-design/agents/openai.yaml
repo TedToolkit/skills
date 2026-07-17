@@ -1,0 +1,4 @@
+interface:
+  display_name: "Change Design"
+  short_description: "Turn one delivery into an approval-ready design."
+  default_prompt: "Use $change-design to write an implementation-ready change design with acceptance criteria and a TDD test plan."

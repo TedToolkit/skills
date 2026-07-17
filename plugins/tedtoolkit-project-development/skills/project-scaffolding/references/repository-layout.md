@@ -19,7 +19,7 @@ repo/
   playground/                    # optional manual developer experiments
   assets/                        # versioned test/input assets only
   docs/                          # optional durable documentation
-    features/                    # approved feature designs, when present
+    changes/                     # approved change designs, when present
     adr/                         # architecture decision records, when present
   Directory.Build.props
   Directory.Packages.props
@@ -51,8 +51,8 @@ point, not a second source of guidance.
 | `playground/` | Hosts manual, disposable developer experiments | A runnable example or investigation must be kept outside product and test boundaries | The example is a documented consumer scenario, a benchmark, or an automated test |
 | `assets/` | Versioned input fixtures and distributable assets | An asset is required to build, test, or publish | It is generated output, a cache, or a local download |
 | `docs/` | Durable design, decision, architecture, user, or operational documentation | Records must remain discoverable after the implementing work closes | A short README or colocated project README fully serves the reader |
-| `docs/features/` | Approved feature designs and their behavior/test plans | A feature has a design record that implementation and review must share | A transient issue comment is sufficient, or the repository uses another established location |
-| `docs/adr/` | Architecture Decision Records (ADRs) | A technology, architecture, dependency, or operational decision is enduring or difficult to reverse | The choice is small, reversible, and documented adequately in the feature design, issue, or pull request |
+| `docs/changes/` | Approved change designs and their behavior/test plans | A feature, fix, refactor, migration, or other change has a design record that implementation and review must share | A transient issue comment is sufficient, or the repository uses another established location |
+| `docs/adr/` | Architecture Decision Records (ADRs) | A technology, architecture, dependency, or operational decision is enduring or difficult to reverse | The choice is small, reversible, and documented adequately in the change design, issue, or pull request |
 | `docs/history/` | Exceptional superseded or rejected records with continuing audit or explanatory value | A human decides Git history alone is insufficient and every retained record links to its replacement | A document is merely complete, old, or potentially useful someday |
 
 ## Test layout and naming
@@ -132,9 +132,9 @@ reference concrete implementations only when composing them is part of its expli
 | A manual experiment needs a project | Put it in `playground/<Product>.Playground`; it is visible for discovery but excluded from the default solution build. Promote repeatable measurements to `benchmarks/` and automated assertions to `tests/`. |
 | SDK selection must be reproducible across developers and CI | Add `global.json`; otherwise omit it. |
 | The repository needs custom feeds, package-source mapping, or source policy | Add `nuget.config`; otherwise omit it. |
-| A feature needs an approved behavior contract, API sketch, or TDD test map | Add `docs/features/<feature-slug>.md` using the repository's feature-design convention. Link the issue or pull request; do not use the document as a changelog. |
-| A feature is an epic with several independent deliveries | Add `docs/features/<epic-slug>/README.md` for the outcome, decision gates, dependency order, and status; put one implementation contract per file in `docs/features/<epic-slug>/work-items/`. Use this only after `decompose-feature-epic` establishes that the deliveries are genuinely independent. |
-| A feature introduces a durable technical choice | Put the feature-specific behavior in `docs/features/` and the decision rationale in `docs/adr/`. Link the two records instead of duplicating their content. |
+| A change needs an approved behavior contract, API sketch, or TDD test map | Add `docs/changes/<type>-<slug>.md` using the repository's change-design convention. Link the issue or pull request; do not use the document as a changelog. |
+| A change is an epic with several independent deliveries | Add `docs/changes/<epic-slug>/README.md` for the outcome, decision gates, dependency order, and status; put one implementation contract per file in `docs/changes/<epic-slug>/work-items/`. Use this only after `decompose-change-epic` establishes that the deliveries are genuinely independent. |
+| A change introduces a durable technical choice | Put the change-specific behavior in `docs/changes/` and the decision rationale in `docs/adr/`. Link the two records instead of duplicating their content. |
 | The team needs a stable explanation of system boundaries or cross-cutting semantics | Add a focused document directly under `docs/` or an established `docs/architecture/` subtree. Link it from affected epics and work packages; do not copy its rationale into them or create a category directory for one short note. |
 | A completed design has exceptional historical value | Ask for a human decision during feature review. If retained, place it in `docs/history/`, mark it `Superseded` or `Rejected`, explain why Git history is insufficient, and link its current replacement. Do not create an archive for ordinary completed work. |
 | A deployed system needs operator instructions | Add a focused runbook under `docs/` or the repository's established operations location; keep executable deployment automation in `build/` or CI, not in prose. |
@@ -152,7 +152,7 @@ docs/
     <topic>.md                         # enduring cross-cutting semantics
   adr/
     ADR-<number>-<slug>.md             # difficult-to-reverse decisions
-  features/
+  changes/
     <epic-slug>/
       README.md                         # outcome, decision gates, dependency map
       work-items/
@@ -174,14 +174,14 @@ Use the smallest durable location that lets readers find a record from the repos
 | --- | --- | --- |
 | Repository purpose and first-use path | Root `README.md` | Project READMEs and relevant docs |
 | Package-specific consumer contract | README beside its `.csproj` | Root README when the package is public |
-| Feature scope, behavior cases, acceptance criteria, and test plan | `docs/features/<feature-slug>.md` | Issue or pull request, and ADR when relevant |
-| Epic outcome, delivery order, decision gates, and work-package status | `docs/features/<epic-slug>/README.md` | Root README or issue; each work package |
-| One epic work package's scope, acceptance criteria, and test plan | `docs/features/<epic-slug>/work-items/<ID>-<slug>.md` | Parent epic, implementation change, and review |
-| Enduring decision and trade-offs | `docs/adr/ADR-<number>-<slug>.md` | Related feature design and architecture documentation |
+| Change scope, behavior cases, acceptance criteria, and test plan | `docs/changes/<type>-<slug>.md` | Issue or pull request, and ADR when relevant |
+| Epic outcome, delivery order, decision gates, and work-package status | `docs/changes/<epic-slug>/README.md` | Root README or issue; each work package |
+| One epic work package's scope, acceptance criteria, and test plan | `docs/changes/<epic-slug>/work-items/<ID>-<slug>.md` | Parent epic, implementation change, and review |
+| Enduring decision and trade-offs | `docs/adr/ADR-<number>-<slug>.md` | Related change design and architecture documentation |
 | Architecture boundary or cross-cutting mechanism | `docs/` or `docs/architecture/` after the category earns its place | Root README, related ADR, and affected epics |
 | Exceptional superseded or rejected record | `docs/history/<slug>.md` | Only its replacement record; keep out of ordinary README navigation |
 | Operational procedure or migration guide | `docs/` or established operations location | Deployment/release instructions |
 
 Do not duplicate a document merely to make each folder self-contained. Link to the source of truth:
-feature designs describe the behavior being delivered; ADRs explain enduring choices; README files
+change designs describe the behavior being delivered; ADRs explain enduring choices; README files
 help a reader navigate and start.

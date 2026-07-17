@@ -19,7 +19,7 @@ Both marketplace manifests must declare the same plugins: `.codex-plugin/marketp
 - `plugins/<plugin>/hooks/hooks.json` + scripts — plugin-level hooks
 - `tests/` — custom Python eval harness (see Testing)
 
-The marketplace currently exposes three plugins: `tedtoolkit-shared`, `tedtoolkit-annotations`, and `tedtoolkit-roslynhelper`. `tedtoolkit-shared` contains five shared Git and .NET skills: `fix-csharp-diagnostics`, `generate-commit-message`, `merge-default-branch`, `run-fix`, and `tunit-unit-testing`.
+The marketplace exposes four plugins: `tedtoolkit-shared`, `tedtoolkit-annotations`, `tedtoolkit-roslynhelper`, and `tedtoolkit-project-development`. `tedtoolkit-shared` contains five shared Git and .NET skills: `fix-csharp-diagnostics`, `generate-commit-message`, `merge-default-branch`, `run-fix`, and `tunit-unit-testing`.
 
 ## SKILL.md conventions
 
@@ -34,9 +34,9 @@ Body is imperative and **gate-first**: read-only investigation → show the user
 
 ## Testing
 
-Bespoke headless harness (not pytest/jest): each scenario runs a skill via `claude -p ... --plugin-dir plugins/tedtoolkit-shared` inside a throwaway fixture, then checks deterministic assertions. Scenarios live in `tests/<plugin>/<skill>/eval.yaml` (+ `setup_fixture.sh`). The current git skills are fully offline (local bare-remote repos).
+Bespoke headless harness (not pytest/jest): each scenario runs a skill via `codex exec` inside a throwaway fixture, then checks deterministic assertions. Scenarios live in `tests/<plugin>/<skill>/eval.yaml` (+ `setup_fixture.sh`). The current git skills are fully offline (local bare-remote repos).
 
-Requires: Python 3.13+ with `pyyaml`, `claude`, `git`, `bash`, and .NET 10 SDK (for `merge-default-branch` Release-build gates).
+Requires: Python 3.13+ with `pyyaml`, Codex CLI, `git`, `bash`, and .NET 10 SDK (for `merge-default-branch` Release-build gates).
 
 ```powershell
 py -3.13 tests/run_evals.py                               # all scenarios
@@ -50,7 +50,7 @@ Each run costs real API spend and ~30s–3min per scenario; results archive to `
 
 ### Harness gotchas (Windows headless eval)
 
-- Don't pass `--bare` to `claude -p` — it makes the CLI report "Not logged in". Plain `claude -p` in a throwaway cwd is already clean.
-- Don't redirect `USERPROFILE`/`HOME` for the `claude` subprocess — it also breaks login.
+- Do not add an interactive Codex option to the headless `codex exec` invocation.
+- Do not redirect `USERPROFILE`/`HOME` for the Codex subprocess — it can break authentication.
 - `python` is the WindowsApps stub — use `py -3.13`. `bash` isn't on PATH; Git's is at `C:\Program Files\Git\bin\bash.exe` (the runner locates it).
 - Force UTF-8 on every subprocess + stdout when assertions inspect non-ASCII output. `grep -P` needs `LC_ALL=C.UTF-8` (Git bash leaves `LANG` empty).

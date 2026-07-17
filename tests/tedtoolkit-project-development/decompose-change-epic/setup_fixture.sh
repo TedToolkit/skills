@@ -8,8 +8,8 @@ git config user.email "fixture@example.com"
 
 case "$scenario" in
   geometry-epic)
-    mkdir -p docs/features src tests
-    cat > docs/features/geometry-rebuild.md <<'EOF'
+    mkdir -p docs/changes src tests
+    cat > docs/changes/geometry-rebuild.md <<'EOF'
 # Geometry rebuild
 
 ## Status

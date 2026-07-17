@@ -65,11 +65,11 @@ public class Arc2
 EOF
 
 git add -A
-git commit -q -m "🎉 chore: 初始化项目骨架
+git commit -q -m "🎉 chore: initialize project skeleton
 
-建立最小可构建的控制台项目，作为后续开发的基础。
+Create a minimal buildable console project as a baseline for later development.
 
-- 新增 App.csproj、Program.cs 与 Geometry.cs"
+- Add App.csproj, Program.cs, and Geometry.cs"
 git remote add origin "$origin"
 git push -q origin main
 git checkout -q -b feature
@@ -86,7 +86,7 @@ public static class FeatureOps
     public static int A() => 1;
 }
 EOF
-    commit "✨ feat(feature): 新增 FeatureOps.A"
+    commit "✨ feat(feature): add FeatureOps.A"
     git checkout -q main
     cat > Upstream.cs <<'EOF'
 namespace App;
@@ -96,7 +96,7 @@ public static class UpstreamOps
     public static int B() => 2;
 }
 EOF
-    commit "✨ feat(upstream): 新增 UpstreamOps.B"
+    commit "✨ feat(upstream): add UpstreamOps.B"
     git push -q origin main
     git checkout -q feature
     if [ "$scenario" = "dirty-then-merge" ]; then
@@ -130,7 +130,7 @@ public class Arc2
     public double Length() => 2 * System.Math.PI * Radius;
 }
 EOF
-    commit "✨ feat(geometry): 新增 Arc2.Length 求弧长"
+    commit "✨ feat(geometry): add Arc2.Length"
     git checkout -q main
     cat > Geometry.cs <<'EOF'
 namespace App;
@@ -143,7 +143,7 @@ public class Arc2
     public double Bounds() => Radius * Radius;
 }
 EOF
-    commit "✨ feat(geometry): 新增 Arc2.Bounds 求外接范围"
+    commit "✨ feat(geometry): add Arc2.Bounds"
     git push -q origin main
     git checkout -q feature
     ;;
@@ -159,7 +159,7 @@ public static class Util
     public static int FeatureArea() => 1;
 }
 EOF
-    commit "✨ feat(util): 新增 Util.FeatureArea"
+    commit "✨ feat(util): add Util.FeatureArea"
     git checkout -q main
     cat > MoreHelpers.cs <<'EOF'
 namespace App;
@@ -169,7 +169,7 @@ public static class Util
     public static int UpstreamArea() => 2;
 }
 EOF
-    commit "✨ feat(util): 新增 Util.UpstreamArea"
+    commit "✨ feat(util): add Util.UpstreamArea"
     git push -q origin main
     git checkout -q feature
     ;;

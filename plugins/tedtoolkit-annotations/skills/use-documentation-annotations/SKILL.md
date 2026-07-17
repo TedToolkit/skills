@@ -34,7 +34,11 @@ non-symbol value required by the attribute. Attribute text may use visible Unico
 and ordinary full-width punctuation. Do not use non-printing or invisible Unicode characters—control
 characters, format characters (for example, zero-width or bidirectional controls), U+0085,
 U+2028/U+2029, or unpaired surrogates—because Rider may display them as escape sequences such as
-`\u...`. XML documentation comments may use Unicode normally, subject to well-formed XML.
+`\u...`. XML documentation comments may use visible Unicode normally, subject to well-formed XML.
+When a contract needs visual emphasis, proactively use one familiar marker with explicit explanatory
+text—for example, `⚠️` for a restriction, `✅` for a guarantee, `💡` for a usage note, or `⏱️` for
+blocking or timing behavior. Put it in caller-facing XML prose such as `<remarks>` or `<example>`;
+do not use it as a substitute for an XML element, a symbol name, or the contract text itself.
 
 ## Choose the annotation family
 

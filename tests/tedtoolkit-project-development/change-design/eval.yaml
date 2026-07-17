@@ -3,8 +3,8 @@ config:
   max_parallel_runs: 1
 
 scenarios:
-  - name: "Create an implementation-ready feature design"
-    prompt: "Design a feature that adds a TryParse(string?, out Temperature) API to the existing Temperature value object. It must accept invariant-culture decimal Celsius input, reject null, whitespace, invalid text, and values below absolute zero. Write the design document only; do not change production code or tests."
+  - name: "Create an implementation-ready change design"
+    prompt: "Design a change that adds a TryParse(string?, out Temperature) API to the existing Temperature value object. It must accept invariant-culture decimal Celsius input, reject null, whitespace, invalid text, and values below absolute zero. Write the design document only; do not change production code or tests."
     setup:
       copy_test_files: true
       commands:
@@ -12,18 +12,18 @@ scenarios:
     assertions:
       - type: "exit_success"
       - type: "file_exists"
-        path: "docs/features/*.md"
+        path: "docs/changes/*.md"
       - type: "file_contains"
-        path: "docs/features/*.md"
+        path: "docs/changes/*.md"
         value: "Acceptance criteria"
       - type: "file_contains"
-        path: "docs/features/*.md"
+        path: "docs/changes/*.md"
         value: "Test plan"
       - type: "file_contains"
-        path: "docs/features/*.md"
+        path: "docs/changes/*.md"
         value: "TryParse"
       - type: "file_contains"
-        path: "docs/features/*.md"
+        path: "docs/changes/*.md"
         value: "absolute zero"
       - type: "command"
         run: "git diff --exit-code -- Temperature.cs TemperatureTests.cs"
@@ -45,7 +45,7 @@ scenarios:
         run: "git status --porcelain"
         stdout_empty: true
       - type: "output_contains"
-        value: "decompose-feature-epic"
+        value: "decompose-change-epic"
     rubric:
       - "Recognizes the request as an epic instead of producing one monolithic implementation-ready design."
       - "Explains that independent migrations and unresolved cross-cutting contracts need a delivery map first."

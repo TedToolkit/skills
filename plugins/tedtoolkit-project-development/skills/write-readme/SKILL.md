@@ -49,6 +49,12 @@ or local rules cannot be inferred from the name and files.
   commands, identifiers, package names, file names, URLs, and code unless local documentation
   convention translates an established technical term.
 - Start with a descriptive H1 and a one- or two-sentence purpose statement.
+- Use emoji and Unicode symbols deliberately to make a README easier to scan. Prefer familiar markers
+  such as `🚀` for a quick start, `💡` for a practical tip, `⚠️` for an important constraint, `✅` for
+  verification, and `🧭` for navigation. Use them in short headings, callouts, and compact lists when
+  they clarify the reader's next action; keep the accompanying text explicit, and do not put symbols
+  inside commands, identifiers, paths, links, or code. Match a repository's established visual tone
+  and avoid decorative clutter.
 - Put the reader's first successful action near the top, using commands verified against the repository.
 - Omit inapplicable sections rather than leaving template headings empty.
 - Link downward to detail and upward to context using relative links. Keep one source of truth for each

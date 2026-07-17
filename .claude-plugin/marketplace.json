@@ -7,7 +7,7 @@
     {
       "name": "tedtoolkit-shared",
       "source": "./plugins/tedtoolkit-shared",
-      "description": "通用的技能。"
+      "description": "Shared development skills for .NET projects."
     },
     {
       "name": "tedtoolkit-annotations",
@@ -22,7 +22,7 @@
     {
       "name": "tedtoolkit-project-development",
       "source": "./plugins/tedtoolkit-project-development",
-      "description": "Skills for repository structure, feature design and TDD implementation, README writing, and technical choices."
+      "description": "Skills for repository structure, change design and TDD implementation, README writing, and technical choices."
     }
   ]
 }

@@ -81,7 +81,7 @@ Include:
 
 Write rejected alternatives for future human maintainers: state why each option was not selected now
 and what changed evidence or constraint would justify reconsidering it. Keep this reasoning in the
-ADR rather than in a superseded feature document.
+ADR rather than in a superseded change document.
 
 Use `proposed` before review and `accepted`, `superseded`, or `rejected` afterwards. Do not rewrite
 an accepted ADR to conceal a changed decision; create a superseding ADR.

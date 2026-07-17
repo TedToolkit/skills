@@ -132,8 +132,8 @@ EOF
 esac
 
 git add -A
-git commit -q -m "🎉 chore: 初始化 run-fix 夹具
+git commit -q -m "🎉 chore: initialize run-fix fixture
 
-建立一个会以特定方式失败的最小项目，供 run-fix 技能定位、诊断并修复。"
+Create a minimal project that fails in a controlled way so the run-fix skill can locate, diagnose, and fix it."
 rm -f "$root/setup_fixture.sh"   # don't leave the helper as an untracked file
 echo "fixture ready: scenario=$scenario branch=$(git rev-parse --abbrev-ref HEAD)"

@@ -1,4 +1,4 @@
-# <Feature title>
+# <Change title>
 
 ## Status
 
@@ -6,12 +6,12 @@ Draft | Approved | Implemented | Superseded
 
 ## Delivery context
 
-- Parent epic and work-package ID: omit for a standalone feature.
+- Parent epic and work-package ID: omit for a standalone change.
 - Prerequisites and linked ADRs/architecture records: omit when none.
 
 ## Problem and outcome
 
-Describe the user problem and the observable result this feature must provide.
+Describe the user problem and the observable result this change must provide.
 
 ## Scope
 
@@ -22,7 +22,7 @@ Describe the user problem and the observable result this feature must provide.
 ## Constraints and existing behavior
 
 List compatibility, security, performance, operational, and repository constraints that materially
-affect this feature. Describe the status quo that will change.
+affect this change. Describe the status quo that will change.
 
 ## Acceptance criteria
 
@@ -33,7 +33,7 @@ affect this feature. Describe the status quo that will change.
 ## Proposed design
 
 Describe the affected components, responsibilities, data/control flow, public APIs, schemas, and
-compatibility behavior. Link a technology decision or ADR when the feature depends on one.
+compatibility behavior. Link a technology decision or ADR when the change depends on one.
 
 ## Alternatives considered
 

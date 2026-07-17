@@ -1,15 +1,15 @@
 ---
-name: decompose-feature-epic
+name: decompose-change-epic
 description: >-
-  Decompose a large approved-or-draft feature, epic, migration, or cross-cutting programme into
+  Decompose a large approved-or-draft change, epic, migration, or cross-cutting programme into
   independently reviewable delivery work packages, dependency order, and decision gates before
-  implementation. Use when a feature document combines multiple API families, breaking migrations,
+  implementation. Use when a change document combines multiple API families, breaking migrations,
   infrastructure and consumers, broad implementation batches, or cannot be safely implemented in
   one reviewable TDD change. Do not implement production code, tests, or infrastructure in this
   skill.
 ---
 
-# Decompose Feature Epic
+# Decompose Change Epic
 
 Turn an unbounded delivery request into a map of small, safe implementation contracts. The purpose
 is not to estimate by intuition or create a checklist of files: it is to make each later change
@@ -23,7 +23,7 @@ independently reviewable, testable, mergeable, and reversible where the product 
    remain open. Do not infer an undecided public behavior from the current implementation or tests.
 3. Confirm that decomposition is necessary. Use it when the input has multiple independently useful
    outcomes, API families, migration paths, architectural layers, or prerequisite decisions. Return
-   a single small feature to `feature-design` instead of adding ceremony.
+   a single small change to `change-design` instead of adding ceremony.
 4. Separate material into four owners:
    - enduring cross-cutting system semantics belong in an architecture record;
    - difficult-to-reverse technical choices belong in an ADR through `select-technology`;
@@ -51,10 +51,10 @@ their owner or next decision, and leave dependent packages blocked.
 
 ## Write the delivery map
 
-Use `assets/epic-index-template.md` for `docs/features/<epic-slug>/README.md` when the repository
+Use `assets/epic-index-template.md` for `docs/changes/<epic-slug>/README.md` when the repository
 has no established epic convention. Use `assets/work-item-template.md` for each
-`docs/features/<epic-slug>/work-items/<ID>-<slug>.md`. Keep standalone features at
-`docs/features/<slug>.md`; do not introduce an epic directory for a single delivery.
+`docs/changes/<epic-slug>/work-items/<ID>-<slug>.md`. Keep standalone changes at
+`docs/changes/<type>-<slug>.md`; do not introduce an epic directory for a single delivery.
 
 The epic index must contain:
 
@@ -81,5 +81,5 @@ present the proposed document tree, dependency order, decision gates, and each w
 outcome. Wait for explicit approval before writing the epic index or work-package documents.
 
 Approval of an epic map does not approve its work packages for implementation. A selected work
-package still needs an approved behavioral contract through `feature-design` before
-`implement-feature-tdd` begins.
+package still needs an approved behavioral contract through `change-design` before
+`implement-change-tdd` begins.

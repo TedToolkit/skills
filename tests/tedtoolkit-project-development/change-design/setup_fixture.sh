@@ -20,8 +20,8 @@ internal sealed class TemperatureTests;
 EOF
     ;;
   large-feature)
-    mkdir -p docs/features
-    cat > docs/features/request.md <<'EOF'
+    mkdir -p docs/changes
+    cat > docs/changes/request.md <<'EOF'
 # Large request
 
 Several public API families, generator output, equality semantics, and mesh validation must change.
