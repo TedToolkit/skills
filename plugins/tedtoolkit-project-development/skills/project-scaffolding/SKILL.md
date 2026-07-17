@@ -96,30 +96,44 @@ needs them.
 ## Documentation boundaries
 
 Use `README.md` for orientation and first-use instructions. Use `docs/` for records that remain
-useful after the implementing pull request closes: change designs, ADRs, architecture explanations,
-runbooks, and migration or rollout plans. Read [repository-layout.md](references/repository-layout.md)
-before adding a documentation subtree so the document has a clear owner and stable location.
+useful after the implementing pull request closes: design principles, change designs, ADRs,
+architecture explanations, runbooks, and migration or rollout plans. Read
+[repository-layout.md](references/repository-layout.md) before adding a documentation subtree so the
+document has a clear owner and stable location.
+Read [principles.md](references/principles.md) before creating or revising `docs/principles/`.
+
+The documentation layout recognizes four distinct categories: `docs/principles/` for enduring
+decision heuristics, `docs/changes/` for active approved change designs, `docs/adr/` for durable
+decisions, and `docs/architecture/` for current cross-cutting semantics. `principles/` is a
+first-class directory even when it initially contains only `README.md`; its rules are expected to
+grow by topic. Create the other directories only when their stated responsibility exists. Use the
+singular `architecture` directory name, not `architectures`.
 
 For the change-development workflow, use `docs/changes/` for approved change designs and
 `docs/adr/` for durable technical decisions. Link a change design to any related ADR; do not copy
-the decision rationale into both files. Keep the tree shallow until the repository has a real
-navigational need for another category.
+the decision rationale into both files. `docs/principles/README.md` states the repository's default
+trade-offs; link applicable principles from an ADR or change design rather than repeating them.
 
-When a change is an epic with multiple independently implementable deliveries, use
-`docs/changes/<epic-slug>/README.md` as its index and put its work-package contracts in
-`docs/changes/<epic-slug>/work-items/`. Use `decompose-change-epic` to establish those boundaries
-before creating the tree. Keep cross-cutting, long-lived semantics in a focused architecture record
-such as `docs/architecture/<topic>.md`; put difficult-to-reverse choices in `docs/adr/`. The epic
-index links to those records and tracks dependencies, while each work package owns its acceptance
-criteria and test plan. Do not create this hierarchy for one ordinary feature.
+Use `docs/changes/<P0-P3>-<change-slug>/README.md` as every change's index and put its work-package
+contracts in `docs/changes/<P0-P3>-<change-slug>/work-items/`. `change-design` establishes the
+boundaries; small changes
+have one work package. Keep cross-cutting, long-lived semantics in a focused architecture record
+such as `docs/architecture/<topic>.md`; put difficult-to-reverse choices in `docs/adr/`. The change
+index links to applicable principles, those records, and its dependencies, while each work package
+owns its acceptance criteria and test plan. Do not create this hierarchy for one ordinary feature.
+
+For a benchmark used only to justify one ADR, keep its project in that ADR's `benchmark/` directory
+and add or update the relative project path in `docs/adr/Benchmark.slnx`. This catalog is only for
+opening ADR benchmark projects: do not include it or its projects in the primary solution, default
+build, or default CI. A benchmark promoted to a maintained performance suite belongs under
+`benchmarks/` and may use a separate performance solution.
 
 `docs/changes/` is for active work. At completion, a human review decides whether to retain a short
-epic index, extract current rules to `docs/architecture/`, retain a decision in `docs/adr/`, keep an
-active migration guide, or delete a process-only design. Create `docs/history/` only when a
-superseded document has concrete audit, legal, or explanatory value that Git history cannot serve.
-Its README must say that it is not a current implementation or review source, and each historical
-record must be marked `Superseded` or `Rejected` and link to its current replacement. Do not move or
-delete documents automatically during scaffolding.
+change index, extract current semantics to `docs/architecture/`, retain a decision in `docs/adr/`,
+update `docs/principles/` only when a repository-wide decision heuristic changes, keep an active
+migration guide, or delete a process-only design. Use Git history for process and obsolete document
+recovery; do not create `docs/history/`. Do not move or delete documents automatically during
+scaffolding.
 
 ## Verification
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design Principles"
+  short_description: "Govern recurring design trade-offs."
+  default_prompt: "Use $design-principles to establish or revise this repository's design principles and exception routes."

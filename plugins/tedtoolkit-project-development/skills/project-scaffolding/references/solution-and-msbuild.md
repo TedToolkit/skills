@@ -177,6 +177,7 @@ repeat a project name. Use forward-slash paths relative to the repository root.
 | A repository-layout validator is implemented as a project | Put it in `/build/`, keep its tests in `/tests/`, and set `Build Project="false"` only on the validator project. |
 | A manual Playground project exists | Put it in `/playground/` and set `Build Project="false"`. |
 | A test console is useful locally but unsuitable for normal builds | Keep it under its actual directory and set an explicit build exclusion. |
-| A benchmark project is part of the repository | Put it in `/benchmarks/`; exclude it from default builds if its dependencies or runtime are unsuitable for normal CI. |
+| An ADR needs a one-off decision benchmark | Put its source in `docs/adr/ADR-<number>-<slug>/benchmark/`, list it in `docs/adr/Benchmark.slnx`, and exclude both from the main solution and default CI build. |
+| A benchmark project is a maintained performance suite | Put it in `/benchmarks/`; keep it outside the main solution and use a dedicated performance solution when needed. Exclude it from normal CI unless it is an intentional performance gate. |
 | A project consumes an analyzer DLL from another solution project | Add `BuildDependency` to ensure a clean build orders them correctly. |
 | A project path changes | Update the matching `.slnx` entry in the same change and verify all project references. |

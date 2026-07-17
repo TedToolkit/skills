@@ -60,10 +60,10 @@ or local rules cannot be inferred from the name and files.
 - Link downward to detail and upward to context using relative links. Keep one source of truth for each
   instruction: repository-wide rules at root, package contracts beside the `.csproj`, local rules in
   the directory.
-- For repository documentation navigation, link to current architecture records, active migrations,
-  and active epics when they help the reader's next task. Do not use a README as an archive index or
-  link to `docs/history/` unless historical context is explicitly needed to understand a current ADR
-  or migration.
+- For repository documentation navigation, link to applicable design principles, current architecture
+  records, active migrations, and active epics when they help the reader's next task. Do not use a
+  README as an archive index; link to a principle, ADR, architecture record, or active migration only
+  when it informs current work.
 - State material constraints only when evidenced by source or project metadata; never make
   unsupported marketing claims.
 

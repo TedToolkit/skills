@@ -8,8 +8,15 @@ git config user.email "fixture@example.com"
 
 case "$scenario" in
   missing-behavior-case)
-    mkdir -p docs/changes
-    cat > docs/changes/temperature-parse.md <<'EOF'
+    mkdir -p docs/changes/P1-temperature-parse/work-items
+    cat > docs/changes/P1-temperature-parse/README.md <<'EOF'
+# Temperature parsing change
+
+## Status
+
+Approved
+EOF
+    cat > docs/changes/P1-temperature-parse/work-items/TEMP-001-parse.md <<'EOF'
 # Temperature parsing
 
 ## Status
@@ -56,14 +63,14 @@ internal sealed class TemperatureTests
 }
 EOF
     ;;
-  epic-index)
-    mkdir -p docs/changes/geometry-rebuild
-    cat > docs/changes/geometry-rebuild/README.md <<'EOF'
+  change-index)
+    mkdir -p docs/changes/P2-geometry-rebuild
+    cat > docs/changes/P2-geometry-rebuild/README.md <<'EOF'
 # Geometry rebuild
 
 ## Status
 
-Approved for decomposition
+Approved
 
 | ID | Work package | Status |
 | --- | --- | --- |

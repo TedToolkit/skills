@@ -1,0 +1,38 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Create an approved principle set"
+    prompt: "I approve creation of repository design principles. Write in English and create docs/principles/README.md, architecture.md, and engineering.md for this .NET library. Establish dependency direction, compatibility, testability, and observability defaults; include owner, review triggers, strengths, and exception routes. Do not modify production code."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh"
+    assertions:
+      - type: "exit_success"
+      - type: "file_exists"
+        path: "docs/principles/README.md"
+      - type: "file_exists"
+        path: "docs/principles/architecture.md"
+      - type: "file_exists"
+        path: "docs/principles/engineering.md"
+      - type: "file_contains"
+        path: "docs/principles/README.md"
+        value: "exception"
+      - type: "file_contains"
+        path: "docs/principles/README.md"
+        value: "review"
+      - type: "file_contains"
+        path: "docs/principles/architecture.md"
+        value: "Required"
+      - type: "file_contains"
+        path: "docs/principles/engineering.md"
+        value: "Default"
+      - type: "command"
+        run: "git diff --exit-code -- Sample.cs"
+    rubric:
+      - "Distinguishes repository-wide principles from architecture records and ADRs."
+      - "Records strength, practical implications, review triggers, and an exception route instead of presenting principles as unqualified slogans."
+      - "Does not modify production code."
+    timeout: 420

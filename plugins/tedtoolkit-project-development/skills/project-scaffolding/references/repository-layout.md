@@ -1,7 +1,10 @@
 # Repository layout
 
 Choose folders by responsibility; do not require a particular tree. The following names are team
-conventions, not mandatory paths.
+conventions, not mandatory paths. The documentation entries show the recognized categories:
+`principles/` states enduring decision heuristics, `changes/` is active work, `adr/` is durable
+decisions, and `architecture/` is current cross-cutting semantics. Use Git history for obsolete
+document recovery.
 
 ```text
 repo/
@@ -19,8 +22,11 @@ repo/
   playground/                    # optional manual developer experiments
   assets/                        # versioned test/input assets only
   docs/                          # optional durable documentation
+    principles/                  # enduring decision heuristics, when repository-wide guidance exists
+      README.md                  # scope, precedence, exceptions, and principle index
     changes/                     # approved change designs, when present
     adr/                         # architecture decision records, when present
+    architecture/                # current cross-cutting semantics, when navigation warrants it
   Directory.Build.props
   Directory.Packages.props
   global.json                    # optional SDK pin
@@ -51,9 +57,9 @@ point, not a second source of guidance.
 | `playground/` | Hosts manual, disposable developer experiments | A runnable example or investigation must be kept outside product and test boundaries | The example is a documented consumer scenario, a benchmark, or an automated test |
 | `assets/` | Versioned input fixtures and distributable assets | An asset is required to build, test, or publish | It is generated output, a cache, or a local download |
 | `docs/` | Durable design, decision, architecture, user, or operational documentation | Records must remain discoverable after the implementing work closes | A short README or colocated project README fully serves the reader |
+| `docs/principles/` | Enduring design heuristics that guide future trade-offs | The repository has cross-cutting defaults that cannot be fully captured by individual ADRs or code conventions | The content is only a local implementation choice, one accepted decision, or an executable code-style rule |
 | `docs/changes/` | Approved change designs and their behavior/test plans | A feature, fix, refactor, migration, or other change has a design record that implementation and review must share | A transient issue comment is sufficient, or the repository uses another established location |
 | `docs/adr/` | Architecture Decision Records (ADRs) | A technology, architecture, dependency, or operational decision is enduring or difficult to reverse | The choice is small, reversible, and documented adequately in the change design, issue, or pull request |
-| `docs/history/` | Exceptional superseded or rejected records with continuing audit or explanatory value | A human decides Git history alone is insufficient and every retained record links to its replacement | A document is merely complete, old, or potentially useful someday |
 
 ## Test layout and naming
 
@@ -132,11 +138,11 @@ reference concrete implementations only when composing them is part of its expli
 | A manual experiment needs a project | Put it in `playground/<Product>.Playground`; it is visible for discovery but excluded from the default solution build. Promote repeatable measurements to `benchmarks/` and automated assertions to `tests/`. |
 | SDK selection must be reproducible across developers and CI | Add `global.json`; otherwise omit it. |
 | The repository needs custom feeds, package-source mapping, or source policy | Add `nuget.config`; otherwise omit it. |
-| A change needs an approved behavior contract, API sketch, or TDD test map | Add `docs/changes/<type>-<slug>.md` using the repository's change-design convention. Link the issue or pull request; do not use the document as a changelog. |
-| A change is an epic with several independent deliveries | Add `docs/changes/<epic-slug>/README.md` for the outcome, decision gates, dependency order, and status; put one implementation contract per file in `docs/changes/<epic-slug>/work-items/`. Use this only after `decompose-change-epic` establishes that the deliveries are genuinely independent. |
+| A change needs an approved behavior contract, API sketch, or TDD test map | Add `docs/changes/<P0-P3>-<change-slug>/README.md` for the outcome, planned approach, plan blockers, delivery order, and status; put one implementation contract per file in `docs/changes/<P0-P3>-<change-slug>/work-items/`. Use the same structure for a small change with one work package. Link the issue or pull request; do not use the document as a changelog. |
 | A change introduces a durable technical choice | Put the change-specific behavior in `docs/changes/` and the decision rationale in `docs/adr/`. Link the two records instead of duplicating their content. |
-| The team needs a stable explanation of system boundaries or cross-cutting semantics | Add a focused document directly under `docs/` or an established `docs/architecture/` subtree. Link it from affected epics and work packages; do not copy its rationale into them or create a category directory for one short note. |
-| A completed design has exceptional historical value | Ask for a human decision during feature review. If retained, place it in `docs/history/`, mark it `Superseded` or `Rejected`, explain why Git history is insufficient, and link its current replacement. Do not create an archive for ordinary completed work. |
+| The team needs stable defaults for recurring design trade-offs | Add `docs/principles/README.md`, then split independent topics into focused files only when they improve navigation. A principle states the default, its rationale, implications, and exception route; it does not record one decision's alternatives. |
+| The team needs a stable explanation of system boundaries or cross-cutting semantics | Add a focused document directly under `docs/` or an established `docs/architecture/` subtree. Link it from affected changes and work packages; do not copy its rationale into them or create a category directory for one short note. |
+| A completed design no longer guides implementation or review | Delete it after merge. Preserve durable decisions as ADRs, current rules as architecture records, and active operational procedures as migration guides; use Git history for everything else. |
 | A deployed system needs operator instructions | Add a focused runbook under `docs/` or the repository's established operations location; keep executable deployment automation in `build/` or CI, not in prose. |
 
 Do not make a project for a namespace alone. Create one when it has an independently meaningful
@@ -144,29 +150,38 @@ dependency, package, target framework, runtime asset, build behavior, or test ex
 
 ## Documentation ownership and links
 
-For a genuinely multi-delivery epic, the documentation layout is:
+For a change with one or more work packages, the documentation layout is:
 
 ```text
 docs/
+  principles/
+    README.md                           # scope, precedence, exception route, principle index
+    <topic>.md                          # an independent enduring decision heuristic, when needed
   architecture/
     <topic>.md                         # enduring cross-cutting semantics
   adr/
-    ADR-<number>-<slug>.md             # difficult-to-reverse decisions
+    Benchmark.slnx                    # ADR-benchmark navigation catalog; never main CI/build input
+    ADR-<number>-<slug>.md             # ordinary difficult-to-reverse decision
+    ADR-<number>-<slug>/                # only when durable evidence needs a home
+      README.md                         # ADR
+      benchmark/                        # ADR-specific benchmark source; cataloged by Benchmark.slnx
+      evidence/
+        README.md                       # evidence inventory and provenance
+        benchmark/                      # BenchmarkDotNet manifest and reports, when applicable
+        api-analysis.md                 # API/TFM compatibility evidence, when applicable
+        ecosystem-analysis.md           # ecosystem evidence, when applicable
+        poc/                            # PoC manifest and durable output, when applicable
   changes/
-    <epic-slug>/
-      README.md                         # outcome, decision gates, dependency map
+    <P0-P3>-<change-slug>/
+      README.md                         # outcome, planned approach, blockers, delivery map
       work-items/
         <ID>-<slug>.md                  # one implementation contract
 ```
 
-The epic index links to architecture records and ADRs rather than repeating their rationale. Each
-work item links back to its epic and prerequisites, and owns only its own acceptance criteria and
-test plan. Do not use this layout for a single ordinary feature.
-
-If `docs/history/` is justified, keep it out of normal navigation and add a short `README.md` that
-states it is not a source of current implementation or review behavior. Every retained document
-must have a status and a relative link to the ADR, architecture record, active migration, or other
-current source that replaced it.
+The change index links to applicable principles, architecture records, and ADRs rather than repeating
+their rationale. Each work item links back to its change and prerequisites, and owns only its own
+behavior cases, implementation contract, and verification plan. Do not use this layout for a single
+ordinary feature.
 
 Use the smallest durable location that lets readers find a record from the repository root:
 
@@ -174,14 +189,15 @@ Use the smallest durable location that lets readers find a record from the repos
 | --- | --- | --- |
 | Repository purpose and first-use path | Root `README.md` | Project READMEs and relevant docs |
 | Package-specific consumer contract | README beside its `.csproj` | Root README when the package is public |
-| Change scope, behavior cases, acceptance criteria, and test plan | `docs/changes/<type>-<slug>.md` | Issue or pull request, and ADR when relevant |
-| Epic outcome, delivery order, decision gates, and work-package status | `docs/changes/<epic-slug>/README.md` | Root README or issue; each work package |
-| One epic work package's scope, acceptance criteria, and test plan | `docs/changes/<epic-slug>/work-items/<ID>-<slug>.md` | Parent epic, implementation change, and review |
-| Enduring decision and trade-offs | `docs/adr/ADR-<number>-<slug>.md` | Related change design and architecture documentation |
-| Architecture boundary or cross-cutting mechanism | `docs/` or `docs/architecture/` after the category earns its place | Root README, related ADR, and affected epics |
-| Exceptional superseded or rejected record | `docs/history/<slug>.md` | Only its replacement record; keep out of ordinary README navigation |
+| Repository-wide decision defaults and their rationale | `docs/principles/README.md` and focused topic files when navigation needs them | Root README, related ADRs, architecture records, and change designs |
+| Change outcome, planned approach, delivery order, and work-package status | `docs/changes/<P0-P3>-<change-slug>/README.md` | Root README or issue; each work package |
+| One work package's scope, behavior cases, implementation contract, and verification plan | `docs/changes/<P0-P3>-<change-slug>/work-items/<ID>-<slug>.md` | Parent change, implementation change, and review |
+| Enduring decision and trade-offs | `docs/adr/ADR-<number>-<slug>.md`, or `docs/adr/ADR-<number>-<slug>/README.md` when it owns durable evidence | Related change design and architecture documentation |
+| ADR-specific benchmark source | `docs/adr/ADR-<number>-<slug>/benchmark/`, listed by `docs/adr/Benchmark.slnx` | Its ADR and evidence index; never the main solution or default CI |
+| Architecture boundary or cross-cutting mechanism | `docs/` or `docs/architecture/` after the category earns its place | Root README, related ADR, and affected changes |
 | Operational procedure or migration guide | `docs/` or established operations location | Deployment/release instructions |
 
 Do not duplicate a document merely to make each folder self-contained. Link to the source of truth:
-change designs describe the behavior being delivered; ADRs explain enduring choices; README files
-help a reader navigate and start.
+principles set default trade-offs; change designs describe the behavior being delivered; ADRs explain
+enduring choices; architecture records explain current semantics; README files help a reader navigate
+and start.

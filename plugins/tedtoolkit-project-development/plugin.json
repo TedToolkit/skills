@@ -1,6 +1,6 @@
 {
   "name": "tedtoolkit-project-development",
   "version": "0.2.0",
-  "description": "TedToolkit-style change design, epic decomposition, TDD implementation, project scaffolding, README writing, and traceable technology selection skills.",
+  "description": "TedToolkit-style change design, design-principle governance, TDD implementation, project scaffolding, README writing, and traceable architecture decisions.",
   "skills": ["./skills/"]
 }

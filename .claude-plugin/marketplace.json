@@ -22,7 +22,7 @@
     {
       "name": "tedtoolkit-project-development",
       "source": "./plugins/tedtoolkit-project-development",
-      "description": "Skills for repository structure, change design and TDD implementation, README writing, and technical choices."
+      "description": "Skills for repository structure, change design and TDD implementation, README writing, and architecture decisions."
     }
   ]
 }

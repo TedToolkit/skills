@@ -1,4 +1,0 @@
-interface:
-  display_name: "Select Technology"
-  short_description: "Create human-readable, traceable technology decisions and ADRs."
-  default_prompt: "Use $select-technology to compare options and create a benchmark plan, evaluation matrix, and ADR that records rejected alternatives and reconsideration triggers."

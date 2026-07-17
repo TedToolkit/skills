@@ -20,11 +20,19 @@ internal sealed class TemperatureTests;
 EOF
     ;;
   large-feature)
-    mkdir -p docs/changes
-    cat > docs/changes/request.md <<'EOF'
+    mkdir -p docs/requests
+    cat > docs/requests/large-request.md <<'EOF'
 # Large request
 
 Several public API families, generator output, equality semantics, and mesh validation must change.
+EOF
+    ;;
+  dependent-change)
+    mkdir -p docs/changes/P2-settings-store
+    cat > docs/changes/P2-settings-store/README.md <<'EOF'
+# Settings store change
+
+This planned change introduces the persistent settings store required by future consumers.
 EOF
     ;;
   *) echo "unknown scenario: $scenario" >&2; exit 1 ;;

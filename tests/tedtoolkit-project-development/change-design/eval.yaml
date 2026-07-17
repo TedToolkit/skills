@@ -4,7 +4,7 @@ config:
 
 scenarios:
   - name: "Create an implementation-ready change design"
-    prompt: "Design a change that adds a TryParse(string?, out Temperature) API to the existing Temperature value object. It must accept invariant-culture decimal Celsius input, reject null, whitespace, invalid text, and values below absolute zero. Write the design document only; do not change production code or tests."
+    prompt: "Design a P1 change that adds a TryParse(string?, out Temperature) API to the existing Temperature value object. It must accept invariant-culture decimal Celsius input, reject null, whitespace, invalid text, and values below absolute zero. Write the change and its work package only; do not change production code or tests."
     setup:
       copy_test_files: true
       commands:
@@ -12,29 +12,58 @@ scenarios:
     assertions:
       - type: "exit_success"
       - type: "file_exists"
-        path: "docs/changes/*.md"
+        path: "docs/changes/P1-*/README.md"
       - type: "file_contains"
-        path: "docs/changes/*.md"
-        value: "Acceptance criteria"
+        path: "docs/changes/P1-*/README.md"
+        value: "Planned approach"
       - type: "file_contains"
-        path: "docs/changes/*.md"
-        value: "Test plan"
+        path: "docs/changes/P1-*/README.md"
+        value: "Workload estimate"
       - type: "file_contains"
-        path: "docs/changes/*.md"
+        path: "docs/changes/P1-*/README.md"
+        value: "Governing principles and decisions"
+      - type: "file_contains"
+        path: "docs/changes/P1-*/README.md"
+        value: "Re-estimation trigger"
+      - type: "file_contains"
+        path: "docs/changes/P1-*/work-items/*.md"
+        value: "Behavior cases"
+      - type: "file_contains"
+        path: "docs/changes/P1-*/work-items/*.md"
+        value: "Explicit governing constraints"
+      - type: "file_contains"
+        path: "docs/changes/P1-*/work-items/*.md"
+        value: "Workload estimate"
+      - type: "file_contains"
+        path: "docs/changes/P1-*/work-items/*.md"
+        value: "Verification plan"
+      - type: "file_contains"
+        path: "docs/changes/P1-*/work-items/*.md"
+        value: "Implementation contract"
+      - type: "file_contains"
+        path: "docs/changes/P1-*/work-items/*.md"
+        value: "Delivery priority"
+      - type: "file_contains"
+        path: "docs/changes/P1-*/work-items/*.md"
         value: "TryParse"
       - type: "file_contains"
-        path: "docs/changes/*.md"
+        path: "docs/changes/P1-*/work-items/*.md"
         value: "absolute zero"
       - type: "command"
         run: "git diff --exit-code -- Temperature.cs TemperatureTests.cs"
     rubric:
       - "The document distinguishes scope from non-goals and gives observable success and failure behavior."
-      - "Each acceptance criterion is mapped to a focused, automatable test."
+      - "The change index describes the intended outcome and planned approach without narrating the request's origin."
+      - "Each behavior case is mapped to a focused, automatable verification command and assertion."
+      - "The design assigns a P0–P3 delivery priority and explains it without treating priority as a substitute for prerequisites."
+      - "The change and work package record range-based person-month estimates, assumptions or exclusions, and confidence without presenting them as a delivery promise."
+      - "It identifies governing principles and architecture decisions, pins their approved baseline when present, and puts implementation-facing constraints in the work package."
+      - "It does not present a standalone change as blocked by another planned or in-progress change."
       - "It records compatibility and invariant-culture parsing considerations without inventing unrelated architecture."
     timeout: 420
 
-  - name: "Route a multi-delivery request to epic decomposition"
-    prompt: "Design a feature that simultaneously renames several public API families, rewrites a source generator, changes equality semantics, and adds a new validated mesh abstraction. Do not modify files; explain the next planning action."
+  - name: "Design a multi-work-package change"
+    prompt: "Design a feature that simultaneously renames several public API families, rewrites a source generator, changes equality semantics, and adds a new validated mesh abstraction. Do not modify files; explain the change delivery map you would create."
     setup:
       copy_test_files: true
       commands:
@@ -45,8 +74,43 @@ scenarios:
         run: "git status --porcelain"
         stdout_empty: true
       - type: "output_contains"
-        value: "decompose-change-epic"
+        value: "work package"
     rubric:
-      - "Recognizes the request as an epic instead of producing one monolithic implementation-ready design."
-      - "Explains that independent migrations and unresolved cross-cutting contracts need a delivery map first."
+      - "Creates a delivery map instead of treating the request as one monolithic implementation unit."
+      - "Explains independent work packages, their ordering, and unresolved cross-cutting plan blockers."
+    timeout: 420
+
+  - name: "Keep planned dependencies inside one change"
+    prompt: "Design a change that adds a preferences screen. It requires the planned settings-store change in docs/changes/P2-settings-store/README.md, which has not been implemented. Do not modify files; explain the next planning action."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh dependent-change"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "change"
+    rubric:
+      - "Explains that the settings store and preferences screen belong in one change delivery map, rather than separate dependent changes."
+    timeout: 420
+
+  - name: "Ask for an unknown change priority before writing"
+    prompt: "Design a change that adds display-density preferences. I have not given any urgency, deadline, user impact, or risk information. Do not modify files; explain what you need next."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh temperature-design"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "priority"
+    rubric:
+      - "Requests the human to assign the change priority rather than inventing a P0–P3 prefix."
+      - "Does not create a change directory before the priority is known."
     timeout: 420

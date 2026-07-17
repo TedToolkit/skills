@@ -1,0 +1,59 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Create an architecture record and traceable ADR"
+    prompt: "Design the configuration-store architecture and create an ADR for the accepted decision to use SQLite for embedded configuration. The service requires local persistence without operating a server. Record the status, decision owner as Platform Team, the alternatives PostgreSQL and JSON files, their relevant trade-offs, current architecture boundary, implementation handoff, and review triggers. Do not modify production code or packages."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh"
+    assertions:
+      - type: "exit_success"
+      - type: "file_exists"
+        path: "docs/adr/ADR-*.md"
+      - type: "file_exists"
+        path: "docs/architecture/*.md"
+      - type: "file_contains"
+        path: "docs/adr/ADR-*.md"
+        value: "Decision at a glance"
+      - type: "file_contains"
+        path: "docs/adr/ADR-*.md"
+        value: "Why this decision now"
+      - type: "file_contains"
+        path: "docs/adr/ADR-*.md"
+        value: "SQLite"
+      - type: "file_contains"
+        path: "docs/adr/ADR-*.md"
+        value: "PostgreSQL"
+      - type: "command"
+        run: "git diff --exit-code -- README.md"
+    rubric:
+      - "The architecture record states the current configuration-store boundary and the ADR makes the accepted decision, governing scope, and owner clear at a glance."
+      - "It ties the decision to the no-managed-server constraint and explains the trade-offs of each alternative."
+      - "It states implementation implications and objective review triggers without implementing the decision."
+    timeout: 420
+
+  - name: "Keep ADR benchmark source and catalog outside the primary solution"
+    prompt: "I approve the architecture design and an ADR-specific BenchmarkDotNet experiment to decide between two serialization libraries. Create the ADR evidence structure, the benchmark project in its ADR benchmark directory, and docs/adr/Benchmark.slnx. Do not modify Sample.slnx, production code, or CI."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_benchmark_fixture.sh"
+    assertions:
+      - type: "exit_success"
+      - type: "file_exists"
+        path: "docs/adr/Benchmark.slnx"
+      - type: "file_exists"
+        path: "docs/adr/ADR-*/benchmark/*.csproj"
+      - type: "file_contains"
+        path: "docs/adr/Benchmark.slnx"
+        value: "benchmark"
+      - type: "command"
+        run: "git diff --exit-code -- Sample.slnx"
+    rubric:
+      - "Keeps ADR-specific executable benchmark source beside its ADR and uses Benchmark.slnx only as a navigation catalog."
+      - "Does not add the experiment to the primary solution, default build, CI, or product source tree."
+      - "Records reproducible evidence without committing generated BenchmarkDotNet build artifacts."
+    timeout: 420

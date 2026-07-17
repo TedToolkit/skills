@@ -7,7 +7,7 @@
   "interface": {
     "displayName": "TedToolkit Project Development",
     "shortDescription": "Design and implement .NET projects",
-    "longDescription": "TedToolkit workflows for epic decomposition, project design, scaffolding, TDD, and documentation.",
+    "longDescription": "TedToolkit workflows for design principles, architecture design, change design, TDD, review, scaffolding, and documentation.",
     "developerName": "TedToolkit",
     "category": "Developer Tools",
     "capabilities": ["Write"],

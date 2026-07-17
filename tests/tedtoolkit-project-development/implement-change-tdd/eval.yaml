@@ -21,20 +21,20 @@ scenarios:
       - "Requests approval or a completed behavioral contract rather than inventing the implementation."
     timeout: 420
 
-  - name: "Do not implement directly from an epic index"
-    prompt: "Implement the approved geometry-rebuild epic with TDD. The repository only contains the epic index, with several public migrations and no selected work package. Do not modify files yet."
+  - name: "Do not implement directly from a change index"
+    prompt: "Implement the approved geometry-rebuild change with TDD. The repository only contains the change index, with several public migrations and no selected work package. Do not modify files yet."
     setup:
       copy_test_files: true
       commands:
-        - "bash setup_fixture.sh epic-index"
+        - "bash setup_fixture.sh change-index"
     assertions:
       - type: "exit_success"
       - type: "command"
         run: "git status --porcelain"
         stdout_empty: true
       - type: "output_contains"
-        value: "decompose-change-epic"
+        value: "change-design"
     rubric:
-      - "Refuses to treat an epic index as an implementation contract."
+      - "Refuses to treat a change index as an implementation contract."
       - "Requests a selected, approved work package and does not begin Red-Green-Refactor."
     timeout: 420

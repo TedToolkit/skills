@@ -1,0 +1,4 @@
+interface:
+  display_name: "Architecture Design"
+  short_description: "Design boundaries and record durable decisions."
+  default_prompt: "Use $architecture-design to update architecture records and create any required ADRs with evidence."

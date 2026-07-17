@@ -8,8 +8,8 @@ git config user.email "fixture@example.com"
 
 case "$scenario" in
   unapproved-design)
-    mkdir -p docs/changes
-    cat > docs/changes/temperature-parse.md <<'EOF'
+    mkdir -p docs/changes/P2-temperature-parse
+    cat > docs/changes/P2-temperature-parse/README.md <<'EOF'
 # Temperature parsing
 
 ## Status
@@ -26,14 +26,14 @@ namespace Weather;
 public readonly record struct Temperature(decimal Celsius);
 EOF
     ;;
-  epic-index)
-    mkdir -p docs/changes/geometry-rebuild
-    cat > docs/changes/geometry-rebuild/README.md <<'EOF'
+  change-index)
+    mkdir -p docs/changes/P2-geometry-rebuild
+    cat > docs/changes/P2-geometry-rebuild/README.md <<'EOF'
 # Geometry rebuild
 
 ## Status
 
-Approved for decomposition
+Approved
 
 | ID | Work package | Status |
 | --- | --- | --- |

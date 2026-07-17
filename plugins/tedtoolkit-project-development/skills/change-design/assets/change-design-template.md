@@ -1,68 +1,81 @@
 # <Change title>
 
-## Status
+## 📌 Status
 
-Draft | Approved | Implemented | Superseded
+Draft | Approved | In progress | Completed | Superseded
 
-## Delivery context
+- Change owner:
+- Approval owner:
 
-- Parent epic and work-package ID: omit for a standalone change.
-- Prerequisites and linked ADRs/architecture records: omit when none.
+## 🚦 Change priority
 
-## Problem and outcome
+- Priority: P0 | P1 | P2 | P3
+- Rationale: state the user, deadline, risk, or delivery impact that justifies this priority.
+- Directory: `docs/changes/<Priority>-<change-slug>/`; the prefix must match this priority.
 
-Describe the user problem and the observable result this change must provide.
+## 🎯 Intended outcome and scope
 
-## Scope
+Describe the intended outcome, scope, explicit non-goals, and compatibility expectations. Do not
+describe how the change request originated. Link applicable principles, architecture records, and
+ADRs rather than duplicating their rationale.
 
-### In scope
+## 🧾 Source intent and hard constraints
 
-### Non-goals
+- Source request, issue, or brief:
+- User or business outcome:
+- External hard constraints: compliance, deadline, budget, or None.
 
-## Constraints and existing behavior
+## 🧩 Governing principles and decisions
 
-List compatibility, security, performance, operational, and repository constraints that materially
-affect this change. Describe the status quo that will change.
+- Applicable principles and revision: `docs/principles/<topic>.md@<full Git commit SHA>`, or none.
+- Related ADRs and status: `docs/adr/ADR-<number>-<slug>.md`, or none.
+- Related architecture records and revision: `docs/architecture/<topic>.md@<full Git commit SHA>`, or none.
+- Reapproval trigger: a governing record changes before this change completes.
 
-## Acceptance criteria
+List the resulting implementation constraints in each work package. Links provide traceability;
+they do not substitute for an implementation constraint.
 
-| ID | Scenario | Expected observable behavior |
-| --- | --- | --- |
-| AC-1 |  |  |
+## 🧭 Planned approach
 
-## Proposed design
+Describe how the change will achieve the outcome: affected boundaries, the intended component or data
+flow changes, compatibility strategy, and how work packages fit together. Keep detailed API and
+test contracts in the work items.
 
-Describe the affected components, responsibilities, data/control flow, public APIs, schemas, and
-compatibility behavior. Link a technology decision or ADR when the change depends on one.
+## ✅ Completion criteria
 
-## Alternatives considered
+State the observable conditions under which every work package is complete and the change can close.
 
-| Option | Decision | Reason |
-| --- | --- | --- |
-| Status quo | Rejected/retained |  |
+## ⏱️ Workload estimate
 
-## Test plan
+- Person-month basis: state the team's capacity definition; do not assume one.
+- Work-package range total: <lower>–<upper> person-months.
+- Coordination, verification, migration, and rollout: <lower>–<upper> person-months.
+- Contingency: <lower>–<upper> person-months, with risk rationale.
+- Total planning range: <lower>–<upper> person-months.
+- Confidence: Low | Medium | High.
+- Assumptions and excluded work:
+- Re-estimation trigger and approval threshold:
 
-| Acceptance criterion | Test level | Setup and action | Observable assertion |
-| --- | --- | --- | --- |
-| AC-1 | Unit/integration/contract |  |  |
+## 🚧 Plan blockers
 
-## Expected documentation disposition
+| ID | Blocking item | Blocks | Next action | Status |
+| --- | --- | --- | --- | --- |
+| PB-01 |  |  |  | Open |
 
-Record only material outcomes for human maintainers. This is reviewed after implementation; it does
-not authorize document deletion or movement.
+List only unresolved items that prevent work from starting. Link an ADR or issue when applicable;
+do not record alternatives or decision rationale here.
 
-| Content | Expected source of truth after implementation | Keep this design? |
-| --- | --- | --- |
-|  | Code documentation/tests, architecture record, ADR, or migration guide | Yes / No / Decide at review |
+## 🗺️ Delivery map
 
-## Rollout and rollback
+Keep all planned dependencies inside this change. Order rows by executable priority: unmet
+prerequisites first, then `P0` through `P3`.
 
-Include only when deployment, state migration, configuration, or a public compatibility change
-requires it.
+| ID | Work package | Outcome | Priority and rationale | Estimate | Prerequisites | Status | Document |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| <PREFIX>-001 |  |  | P1 —  | <lower>–<upper> person-months |  | Planned | `work-items/<PREFIX>-001-<slug>.md` |
 
-## Risks and open questions
+## ⚠️ Risks and coordination
 
-| Item | Impact | Owner or next decision |
+| Item | Impact | Next action |
 | --- | --- | --- |
 |  |  |  |

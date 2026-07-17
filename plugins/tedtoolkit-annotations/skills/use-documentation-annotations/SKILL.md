@@ -63,6 +63,26 @@ documentation. Put `Precondition` on the narrowest applicable method, constructo
 put `Postcondition` on a method, constructor, parameter, or return value; put `Invariant` on a
 type or property.
 
+### One attribute, one independent rule
+
+Write each independently meaningful `Precondition`, `Postcondition`, or `Invariant` as its own
+attribute. Do not combine several rules into one compound sentence or predicate, even when they
+apply to the same symbol and exception type. Separate attributes make each contractual obligation
+individually visible, traceable, reviewable, and independently maintainable; a future change can
+remove, relax, or test one rule without accidentally changing another.
+
+For example, “`amount` must not be zero” and “`amount` must not be one” are two requirements, not
+one “`amount` must be neither zero nor one” requirement:
+
+```csharp
+[Precondition<ArgumentOutOfRangeException>("amount must not be zero.")]
+[Precondition<ArgumentOutOfRangeException>("amount must not be one.")]
+public void SetAmount(int amount) { /* ... */ }
+```
+
+Apply the same rule to `Invariant` and `Postcondition`. Only keep facts together when they form one
+indivisible condition whose meaning cannot be preserved if split; state that condition precisely.
+
 ```csharp
 /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="amount"/> is not positive.</exception>
 [Precondition<ArgumentOutOfRangeException>("amount must be positive.")]

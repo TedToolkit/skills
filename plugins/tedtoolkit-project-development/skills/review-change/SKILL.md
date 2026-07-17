@@ -1,8 +1,9 @@
 ---
 name: review-change
 description: >-
-  Review a proposed change against its approved design, acceptance criteria, BehaviorCases,
-  ADRs, code, tests, and documentation. Use when asked to review a feature, fix, refactor, migration, or epic work-package
+  Review a proposed implementation against its approved change, acceptance criteria, BehaviorCases,
+  code, tests, and directly affected documentation. Use when asked to review a feature,
+  fix, refactor, migration, or change work-package
   implementation before merging; check whether code conforms to the design or specification; assess
   change readiness; trace requirements through implementation and tests; or recommend whether its
   human-facing documentation should be retained, extracted, deleted, or exceptionally archived.
@@ -12,17 +13,18 @@ description: >-
 
 # Change Review
 
-Review a change by evidence, not by whether its code merely looks reasonable. The question is
-whether the approved behavior has been implemented, protected by appropriately expressed tests, and
-documented without unrecorded design changes.
+Review implementation by evidence, not by whether its code merely looks reasonable. The question is
+whether the approved change has been implemented, protected by appropriately expressed tests, and
+documented without unrecorded design changes. Principles and architecture are reviewed when the
+architecture or change design is approved; do not reopen them during final implementation review.
 
 ## Set the review boundary
 
-1. Read repository guidance, the change design or work package, BehaviorCases, acceptance criteria,
-   applicable ADRs, the current diff, affected production and test code, and relevant documentation.
-   For a work package, also read the parent epic index and its declared prerequisites.
+1. Read repository guidance, the approved change index and selected work package, BehaviorCases,
+   acceptance criteria, the current diff, affected production and test code, and directly affected
+   documentation. For a work package, also read its parent change index and declared prerequisites.
 2. State the reviewed revision or diff range and the documents used as the baseline.
-3. If the supplied document is an epic index rather than one work package, say that an
+3. If the supplied document is a change index rather than one work package, say that an
    implementation-readiness conclusion is not possible until a work package is selected. Do not
    infer the work-package boundary from the diff.
 4. If there is no approved change design, say that this is a general code review only. Review local
@@ -51,11 +53,14 @@ For every mapped item, inspect whether the code:
 
 1. Delivers the stated acceptance behavior, including specified failure and boundary behavior.
 2. Uses the approved domain terminology, state meanings, and API/data-model contracts consistently.
-3. Preserves documented compatibility, dependency direction, security, migration, and rollout
-   constraints where they apply.
+3. Preserves the compatibility, dependency direction, security, migration, and rollout constraints
+   made explicit in the approved change.
 4. Avoids unapproved behavior, hidden side effects, unrelated refactors, and new enduring technical
    decisions that should have an ADR or a design update.
-5. Does not bypass an incomplete prerequisite or silently change the parent epic's dependency order.
+5. Does not bypass an incomplete prerequisite or silently change the parent change's dependency order.
+6. Leaves the work package's completion evidence with actual effort and any material estimate
+   variance. Treat missing evidence as a planning follow-up, not proof that the implementation is
+   behaviorally incorrect.
 
 When the implementation makes a materially different but potentially valid choice, report a design
 deviation. Do not silently reinterpret the design to match code.
@@ -73,20 +78,20 @@ Follow the repository's existing testing conventions. If the project uses TUnit,
 
 ## Review documentation consistency
 
-Check whether the change design, parent epic, ADR, README, migration, or rollout documentation
-must be updated because of this change. A change that materially differs from an approved design is
-not resolved by editing code alone: it needs an explicit design update and approval.
+Check whether the change design, parent change, README, migration, or rollout documentation must be
+updated because of this change. A change that materially differs from an approved design is not
+resolved by editing code alone: it needs an explicit change-design update and approval. When the
+approved change itself lacks a necessary constraint, hand it to `change-design`; do not infer the
+missing principle or architecture rule from the implementation.
 
 Perform a documentation-disposition review after tracing the implementation. For each material
-document or content block, recommend one of: retain, extract to an architecture record, retain in an
-ADR, retain as an active migration guide, delete after merge, or preserve as a superseded historical
-record. Base the recommendation on what a future human maintainer needs to know, not on preserving
-the implementation process for an AI.
+document or content block, recommend one of: retain, retain in an ADR, retain as an active migration
+guide, or delete after merge. Base the recommendation on what a future human maintainer needs to
+know, not on preserving the implementation process for an AI.
 
-Never edit, delete, move, or archive a document in this review. A recommendation to delete or
-archive is not authorization: the user must decide, and the approved follow-up should be a separate,
-small documentation change. Historical preservation is exceptional. `docs/history/` is not a source
-of current behavior and every retained historical record must link to its replacement.
+Never edit, delete, or move a document in this review. A recommendation to delete is not
+authorization: the user must decide, and the approved follow-up should be a separate, small
+documentation change. Use Git history for documents that no longer guide current behavior.
 
 ## Report findings
 
@@ -118,7 +123,7 @@ Ready to merge | Ready with follow-ups | Not ready
 ## Documentation disposition
 | Document or content | Recommendation | Reason | Required follow-up |
 | --- | --- | --- | --- |
-|  | Retain / extract / ADR / migration / delete / history |  | Human decision or separate change |
+|  | Retain / ADR / migration / delete |  | Human decision or separate change |
 
 ## Review scope and limits
 - Reviewed: <diff/revision and documents>.
@@ -137,5 +142,5 @@ Choose the conclusion from the findings:
   remains, and no blocking or important finding is open.
 
 Hand fixes to `implement-change-tdd`; hand a material design decision or design deviation to
-`change-design`. Hand an unbounded delivery to `decompose-change-epic`. Keep the review
+`change-design`, which establishes its change delivery map. Keep the review
 independent by not fixing the code in this skill.

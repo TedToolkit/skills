@@ -4,7 +4,7 @@ config:
 
 scenarios:
   - name: "Block a change that misses an approved behavior case"
-    prompt: "Review the current change against docs/changes/temperature-parse.md. Do not modify files or run commands. Use the exact review report structure and determine whether it is Ready to merge, Ready with follow-ups, or Not ready."
+    prompt: "Review the current change against docs/changes/P1-temperature-parse/work-items/TEMP-001-parse.md. Do not modify files or run commands. Use the exact review report structure and determine whether it is Ready to merge, Ready with follow-ups, or Not ready."
     setup:
       copy_test_files: true
       commands:
@@ -29,12 +29,12 @@ scenarios:
       - "Separates a documentation-disposition recommendation from authorization to delete or archive documents."
     timeout: 420
 
-  - name: "Do not infer an implementation boundary from an epic index"
-    prompt: "Review the current change against docs/changes/geometry-rebuild/README.md. Do not modify files or run commands."
+  - name: "Do not infer an implementation boundary from a change index"
+    prompt: "Review the current change against docs/changes/P2-geometry-rebuild/README.md. Do not modify files or run commands."
     setup:
       copy_test_files: true
       commands:
-        - "bash setup_fixture.sh epic-index"
+        - "bash setup_fixture.sh change-index"
     assertions:
       - type: "exit_success"
       - type: "command"

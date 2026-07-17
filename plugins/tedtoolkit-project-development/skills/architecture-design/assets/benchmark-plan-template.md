@@ -7,10 +7,18 @@
 - Date:
 - Owner:
 - Related ADR:
+- Affected consumer TFMs and selected benchmark TFMs:
+- Benchmark project path:
 
 ## Decision and hypothesis
 
 ## Candidates and versions
+
+## API, ecosystem, and compatibility comparison
+
+List only non-performance factors that can change the decision: public API and integration model,
+TFM compatibility, dependencies, license, maintenance, security, documentation, support,
+operability, migration, and exit path. Link the supporting evidence.
 
 ## Scope and exclusions
 

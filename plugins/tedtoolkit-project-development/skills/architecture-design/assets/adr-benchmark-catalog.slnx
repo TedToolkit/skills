@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/ADR benchmarks/">
+    <Project Path="ADR-<number>-<slug>/benchmark/<Product>.<Area>.Benchmarks.csproj" />
+  </Folder>
+</Solution>
