@@ -4,10 +4,10 @@ description: >-
   Implement an approved change using test-driven development: map approved behavior cases to
   tests, iterate Red-Green-Refactor in small behavior slices, and verify the affected system. Use
   when the user asks to implement, build, code, or complete a feature, fix, refactor, migration, or other change under TDD, especially when a
-  change design, work package, specification, issue acceptance criteria, or test plan already
-  exists. Do not begin production implementation without an approved behavioral contract; invoke
-  change-design when one is missing or materially incomplete. Select one approved change work package
-  before implementation.
+  change design, work item, specification, issue acceptance criteria, or test plan already exists.
+  Do not begin production implementation without an approved behavioral contract and work item;
+  invoke change-design when behavior is missing and plan-work-items when delivery planning is
+  missing. Select one approved work item before implementation.
 ---
 
 # Implement Change with TDD
@@ -16,27 +16,36 @@ Implement one observable behavior at a time. TDD is not writing all tests before
 short feedback loop that protects design decisions while code is shaped. Prefer the smallest change
 that makes an approved behavior true, then improve the design while the tests preserve it.
 
+This skill owns implementation and verification of one approved work package. It must not reinterpret
+or revise product intent, principles, architecture, ADRs, or the parent change. Hand a material
+behavioral or constraint mismatch back to `change-design`; hand a missing or incomplete work-item
+delivery contract to `plan-work-items`.
+
 ## Establish the implementation contract
 
 1. Read repository guidance, the approved change index and selected work package, relevant
    production code, adjacent tests, build configuration, and public API compatibility rules. The
    approved change is the sole design contract for implementation; do not reopen principles or
    architecture records to reinterpret it.
-2. Map every behavior case to a concrete test. Identify the test level, test project, input setup,
+2. Confirm the work package contains dependency-ordered executable implementation steps. Each step
+   must identify its prerequisite, exact artifact or command, bounded action, and required observable
+   check. Stop and invoke `plan-work-items` when a step depends on an implied file, setup action, or
+   expected result.
+3. Map every behavior case to a concrete test. Identify the test level, test project, input setup,
    observable assertion, and command. A behavior case without a test is either unverified or not yet
    sufficiently specified.
-3. Confirm that the document names one independently implementable delivery. If it is a change index
+4. Confirm that the document names one independently implementable delivery. If it is a change index
    or mixes several independent migrations, implementations, or API families, stop and invoke
-   `change-design`; select one approved work package before writing code.
-4. For a work package, confirm its parent change and prerequisite work packages are approved and
+   `plan-work-items`; select one approved work item before writing code.
+5. For a work package, confirm its parent change and prerequisite work packages are approved and
    complete. A missing prerequisite is a blocker, not a reason to silently expand the current change.
-5. Confirm that the work package states every material governing constraint explicitly. If it only
-   links principles, architecture records, or ADRs, stop and invoke `change-design`; do not retrieve
+6. Confirm that the work package states every material governing constraint explicitly. If it only
+   links principles, architecture records, or ADRs, stop and invoke `plan-work-items`; do not retrieve
    and reinterpret those documents during implementation.
-6. If no approved design exists, behavior cases are ambiguous, or the implementation requires
-   a material design change, stop and invoke `change-design`. Do not invent behavior merely to keep
-   coding.
-7. Present the ordered behavior slices, anticipated files, verification commands, and any remaining
+7. If no approved design exists, behavior cases are ambiguous, or the implementation requires
+   a material design change, stop and invoke `change-design`. If approved behavior lacks execution
+   detail, stop and invoke `plan-work-items`. Do not invent behavior merely to keep coding.
+8. Present the ordered behavior slices, anticipated files, verification commands, and any remaining
    risk. Wait for explicit approval before modifying code or tests.
 
 ## Execute Red-Green-Refactor
@@ -78,5 +87,5 @@ design, including invalid input and boundary cases when they are part of the con
    estimate variance; do not silently rewrite the parent change or approved intent.
 4. Report changed behavior, tests run and their results, files changed, and any remaining manual
    verification or rollout action. Flag any likely documentation extraction, retention, deletion, or
-   archival question for `review-change`; do not move or delete documentation as an implicit
+   archival question for `review-implementation`; do not move or delete documentation as an implicit
    completion step.

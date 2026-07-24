@@ -16,16 +16,29 @@ direction, cross-cutting behavior, and quality attributes. Use an ADR only for a
 or difficult-to-reverse choice; do not create one for an abandoned sketch or local implementation
 detail.
 
+This skill owns current technical boundaries and enduring technical decisions. It consumes approved
+product intent and principles; it does not redefine them. Hand a changed audience, problem, value,
+or non-goal to `library-product-intent`, a recurring technical default to `design-principles`, and
+delivery behavior to `change-design` and executable verification planning to `plan-work-items`.
+
 ## Inspect the architecture
 
 1. State the architecture scope, governed system boundary, and time horizon in one sentence.
-2. Inspect repository conventions, applicable design principles, current architecture, dependencies,
-   deployment and operational constraints, relevant ADRs, and the status quo.
-3. Separate hard constraints from preferences and list credible alternatives, including the status
+2. Inspect repository conventions, approved product intent when it exists, applicable design
+   principles, current architecture, dependencies, deployment and operational constraints, relevant
+   ADRs, and the status quo.
+3. Copy the applicable architecture-record or ADR template immediately, mark it `Draft` or
+   `Proposed`, and fill it with the evidence already known. The draft is editable during discovery;
+   it is not an accepted architecture decision.
+4. Separate hard constraints from preferences and list credible alternatives, including the status
    quo. Do not reject an option without recording the constraint or evidence that rules it out.
-4. Ask for a missing constraint, decision owner, or success criterion when it could change the
-   decision. Do not invent product workload, risk tolerance, or operational ownership.
-5. Show how the proposed architecture conforms to each applicable principle, or identify the
+5. Run the clarification loop for every missing constraint, decision owner, or success criterion
+   that could change the decision: ask only the highest-impact unanswered question, say why it
+   matters, and recommend an answer with its main trade-off. On each user answer, immediately
+   update the Draft's **Clarification and decision log** and every affected section, then ask the
+   next question. Continue until no material ambiguity remains; do not invent product workload,
+   risk tolerance, or operational ownership.
+6. Show how the proposed architecture conforms to each applicable principle, or identify the
    deliberate exception and its required ADR status.
 
 ## Write the architecture record
@@ -123,6 +136,8 @@ Before changing code, packages, infrastructure, or project structure, show:
 4. Consequences: affected change designs, implementation constraints, migration, tests,
    documentation, operational ownership, and rollback where applicable.
 
-Wait for explicit approval before changing architecture records, ADRs, benchmark projects, code,
-packages, or infrastructure. Record the approved architecture in `docs/architecture/` and any
-approved enduring decision in the repository's ADR format.
+Create and revise `Draft` architecture records and `Proposed` ADRs during the clarification loop.
+Wait for explicit approval before changing their status to `Active` or `Accepted`, creating
+benchmark projects, or changing code, packages, infrastructure, or project structure. Record the
+approved architecture in `docs/architecture/` and any approved enduring decision in the repository's
+ADR format.

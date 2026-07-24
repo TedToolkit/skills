@@ -20,7 +20,7 @@ After installing or updating a plugin, start a new task so Codex loads its curre
 | [`tedtoolkit-shared`](plugins/tedtoolkit-shared/) | .NET diagnosis, Release build/test recovery, TUnit tests, atomic gitmoji commits, and safely merging the remote default branch. |
 | [`tedtoolkit-annotations`](plugins/tedtoolkit-annotations/) | C# XML comments and explicit contracts using TedToolkit annotations for boxing, constness, documentation, maintenance, and ownership. |
 | [`tedtoolkit-roslynhelper`](plugins/tedtoolkit-roslynhelper/) | Generating C# source with `TedToolkit.RoslynHelper`. |
-| [`tedtoolkit-project-development`](plugins/tedtoolkit-project-development/) | Change design, design-principle governance, ADRs, TDD implementation, design reviews, project scaffolding, and README writing. |
+| [`tedtoolkit-project-development`](plugins/tedtoolkit-project-development/) | Change design, work-item planning, design-principle governance, ADRs, TDD implementation, design reviews, project scaffolding, and README writing. |
 
 `tedtoolkit-project-development` replaces the former `tedtoolkit-project-scaffolding` plugin. Install the new plugin name if you previously used the old one.
 
@@ -28,28 +28,47 @@ Skills are matched from natural-language intent, and can also be invoked explici
 
 ## Project-development workflow
 
-`tedtoolkit-project-development` uses a one-way refinement flow: each layer makes the previous
+`tedtoolkit-project-development` uses a refinement and review flow: each layer makes the previous
 layer concrete without reinterpreting it.
 
 ```mermaid
 flowchart LR
-  P["Principles\nDefault trade-offs"] --> A["architecture-design\nCurrent boundaries and ADRs"]
-  A --> D["Change design\nApproved change and work packages"]
-  D --> I["Implementation\nCode and tests"]
-  I --> R["Final review\nImplementation against change"]
+  P["Principles\nDefault trade-offs"] --> A["architecture-design\nCurrent boundaries"]
+  A --> D["Change design\nDraft behavioral contract"]
+  D -->|"durable decision"| ADR["ADR\nAccepted rationale and trade-offs"]
+  D -->|"no durable decision"| Q["Design review\nContract completeness"]
+  ADR --> Q
+  Q --> V["Human approval\nApproved behavioral contract"]
+  V --> W["Work-item planning\nApproved sequential work items"]
+  W --> I["Implementation\nCode and tests"]
+  I --> R["Implementation review\nImplementation against change"]
   R -. "design gap" .-> D
 ```
 
 `docs/principles/` is the highest-level source of default trade-offs. Architecture design must
 follow it, recording current boundaries in `docs/architecture/` and durable choices or approved
 exceptions in `docs/adr/`. Change design must follow both `docs/principles/` and
-`docs/architecture/`, making their applicable constraints explicit in `docs/changes/`. Implementation
-uses the approved change index and selected work package as its sole design contract.
+`docs/architecture/`, making their applicable constraints explicit in `docs/changes/`. Work-item
+planning turns the approved change into small, sequential, verifiable work items. Implementation
+uses the approved change index and selected work item as its sole design contract.
 
 The source request and external hard constraints enter the change design as product inputs; they do
-not override principles silently. Every change and work package records a range-based person-month
-estimate, assumptions, confidence, and exclusions. The change total separately includes work-package
-effort, coordination, verification, migration or rollout, and contingency.
+not override principles silently. Every change and work item records a range-based person-month
+estimate, assumptions, confidence, and exclusions. Work-item planning refines the approved change
+range into item effort, coordination, verification, migration or rollout, and contingency.
+
+## Documentation ownership and lifecycle
+
+| Document | Owns | Completion handling |
+| --- | --- | --- |
+| `docs/changes/` | One delivery's behavior contract and work items | Delete after merge by default. |
+| `docs/adr/` | Enduring, material decision rationale and trade-offs | Retain; supersede with a new ADR when the decision changes. |
+| `docs/architecture/` | Current system boundaries and cross-cutting semantics | Update when the current system changes. |
+| `docs/principles/` | Default rules for recurring design trade-offs | Maintain as durable guidance. |
+
+`review-implementation` asks whether to delete a completed change only after durable decisions are
+captured in ADRs, current semantics are captured in architecture records, and any active migration
+or operational procedure is retained elsewhere.
 
 ## Development
 

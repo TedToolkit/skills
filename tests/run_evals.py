@@ -9,9 +9,9 @@ For each scenario in every ``eval.yaml`` under ``tests/`` this:
      and the model's printed output,
   5. prints a pass/fail report and writes results.json / results.md.
 
-Only the standard library + PyYAML are required. ``npx`` (for Codex CLI), ``git`` and a
-``bash`` (Git Bash on Windows is fine) must be available; the runner locates
-bash itself if it isn't on PATH.
+Only the standard library + PyYAML are required. A local ``codex`` CLI (or ``CODEX_BIN`` pointing
+to one), ``git``, and a ``bash`` (Git Bash on Windows is fine) must be available; the runner locates
+bash itself if it isn't on PATH. The runner never downloads Codex through npm.
 
 Usage:
     py -3.13 tests/run_evals.py [skill ...] [--plugin PLUGIN] [--filter SUBSTR] [--keep] [--judge]
@@ -67,13 +67,13 @@ def git_bin_dirs(bash_path: str) -> list[str]:
 
 
 BASH = find_bash()
-NPX = shutil.which("npx")
+CODEX = os.environ.get("CODEX_BIN") or shutil.which("codex")
 
 
 def preflight(plugin_dir: Path) -> None:
     problems = []
-    if not NPX:
-        problems.append("`npx` not found on PATH; it is required to launch Codex CLI.")
+    if not CODEX:
+        problems.append("`codex` not found on PATH; install Codex CLI or set CODEX_BIN to its executable.")
     if not shutil.which("git"):
         problems.append("`git` not found on PATH.")
     if not BASH:
@@ -88,7 +88,7 @@ def preflight(plugin_dir: Path) -> None:
 
 
 def codex_command(*args: str) -> list[str]:
-    return [NPX, "--yes", "@openai/codex", *args]
+    return [CODEX, *args]
 
 
 def install_eval_plugin(plugin_dir: Path) -> tuple[Path, str]:
@@ -120,7 +120,7 @@ def install_eval_plugin(plugin_dir: Path) -> tuple[Path, str]:
 
 
 def cleanup_eval_plugin(plugin: str, marketplace: str, root: Path) -> None:
-    if NPX:
+    if CODEX:
         for command in (codex_command("plugin", "remove", f"{plugin}@{marketplace}"),
                         codex_command("plugin", "marketplace", "remove", marketplace)):
             subprocess.run(command, capture_output=True, text=True, encoding="utf-8", errors="replace")

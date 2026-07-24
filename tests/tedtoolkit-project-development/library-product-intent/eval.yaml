@@ -1,0 +1,37 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Create an approved library product-intent record"
+    prompt: "I approve creating a product-intent record in English for this reusable .NET library. It serves maintainers of high-throughput services who need predictable, low-allocation JSON streaming and useful parsing errors. It deliberately does not provide object mapping, schema validation, or a mutable JSON DOM. Create docs/product/README.md only; do not modify production code or the root README."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh"
+    assertions:
+      - type: "exit_success"
+      - type: "file_exists"
+        path: "docs/product/README.md"
+      - type: "file_contains"
+        path: "docs/product/README.md"
+        value: "Positioning"
+      - type: "file_contains"
+        path: "docs/product/README.md"
+        value: "Target"
+      - type: "file_contains"
+        path: "docs/product/README.md"
+        value: "non-goals"
+      - type: "file_contains"
+        path: "docs/product/README.md"
+        value: "JSON"
+      - type: "file_contains"
+        path: "docs/product/README.md"
+        value: "object mapping"
+      - type: "command"
+        run: "git diff --exit-code -- Sample.cs README.md"
+    rubric:
+      - "States the target consumer, concrete problem, intended value, deliberate non-goals, and reviewable success evidence."
+      - "Keeps product intent distinct from API documentation, architecture, and technical principles."
+      - "Does not invent unsupported performance guarantees or modify production code."
+    timeout: 420

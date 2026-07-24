@@ -29,6 +29,9 @@ scenarios:
       - type: "file_contains"
         path: "docs/principles/engineering.md"
         value: "Default"
+      - type: "file_not_contains"
+        path: "docs/principles/*.md"
+        value: "pending commit"
       - type: "command"
         run: "git diff --exit-code -- Sample.cs"
     rubric:

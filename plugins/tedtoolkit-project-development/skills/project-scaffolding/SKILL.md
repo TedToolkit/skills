@@ -15,6 +15,11 @@ improves a real responsibility, ownership boundary, or solution view. `docs` own
 decision, architecture, and operational records; a README remains the short entry point for its
 directory.
 
+This skill owns repository and project structure only. It may create an approved documentation
+location, but must not invent library purpose, technical principles, architecture decisions, change
+contracts, or README claims. Hand those concerns to `library-product-intent`, `design-principles`,
+`architecture-design`, `change-design`, `plan-work-items`, and `write-readme` respectively.
+
 ## Inspect before changing
 
 1. Read the root `README.md`, `CLAUDE.md`, and `AGENTS.md`, solution file, root MSBuild files, and
@@ -102,12 +107,14 @@ architecture explanations, runbooks, and migration or rollout plans. Read
 document has a clear owner and stable location.
 Read [principles.md](references/principles.md) before creating or revising `docs/principles/`.
 
-The documentation layout recognizes four distinct categories: `docs/principles/` for enduring
-decision heuristics, `docs/changes/` for active approved change designs, `docs/adr/` for durable
-decisions, and `docs/architecture/` for current cross-cutting semantics. `principles/` is a
-first-class directory even when it initially contains only `README.md`; its rules are expected to
-grow by topic. Create the other directories only when their stated responsibility exists. Use the
-singular `architecture` directory name, not `architectures`.
+The documentation layout recognizes five distinct categories: `docs/product/` for durable library
+purpose and boundaries, `docs/principles/` for enduring decision heuristics, `docs/changes/` for
+active approved change designs, `docs/adr/` for durable decisions, and `docs/architecture/` for
+current cross-cutting semantics. Create `docs/product/README.md` only after the maintainer approves
+the library's product intent; use `library-product-intent` rather than inventing it during
+scaffolding. `principles/` is a first-class directory even when it initially contains only
+`README.md`; its rules are expected to grow by topic. Create the other directories only when their
+stated responsibility exists. Use the singular `architecture` directory name, not `architectures`.
 
 For the change-development workflow, use `docs/changes/` for approved change designs and
 `docs/adr/` for durable technical decisions. Link a change design to any related ADR; do not copy
@@ -116,11 +123,13 @@ trade-offs; link applicable principles from an ADR or change design rather than 
 
 Use `docs/changes/<P0-P3>-<change-slug>/README.md` as every change's index and put its work-package
 contracts in `docs/changes/<P0-P3>-<change-slug>/work-items/`. `change-design` establishes the
-boundaries; small changes
-have one work package. Keep cross-cutting, long-lived semantics in a focused architecture record
+behavioral boundaries; `plan-work-items` creates the delivery plan and work items. Keep cross-cutting,
+long-lived semantics in a focused architecture record
 such as `docs/architecture/<topic>.md`; put difficult-to-reverse choices in `docs/adr/`. The change
-index links to applicable principles, those records, and its dependencies, while each work package
-owns its acceptance criteria and test plan. Do not create this hierarchy for one ordinary feature.
+index links to applicable principles and those records, while each work item owns its acceptance
+criteria and test plan. Use this hierarchy for every change that needs an approved behavior contract,
+delivery plan, or TDD implementation, including a small change with one work item. Skip it only for
+a local maintenance edit that does not enter the change-development workflow.
 
 For a benchmark used only to justify one ADR, keep its project in that ADR's `benchmark/` directory
 and add or update the relative project path in `docs/adr/Benchmark.slnx`. This catalog is only for

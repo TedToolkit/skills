@@ -5,9 +5,19 @@
 - Status: Draft | Active | Superseded
 - Owner:
 - Scope and system boundary:
+- Applicable product intent: `docs/product/README.md@<full Git commit SHA>` or None
 - Governing principles: `docs/principles/<topic>.md@<full Git commit SHA>` or None
 - Related ADRs:
 - Last approved revision: <full Git commit SHA>
+
+## 📝 Clarification and decision log
+
+While the record is `Draft`, record each material user answer immediately and update the affected
+sections. Retain only entries that explain a consequential boundary, constraint, or decision.
+
+| ID | Question and why it mattered | Recommended answer | User decision and source | Affected sections | Status |
+| --- | --- | --- | --- | --- | --- |
+| AD-01 |  |  |  |  | Resolved |
 
 ## Current architecture
 

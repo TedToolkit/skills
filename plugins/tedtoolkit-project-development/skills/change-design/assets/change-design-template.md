@@ -7,17 +7,39 @@ Draft | Approved | In progress | Completed | Superseded
 - Change owner:
 - Approval owner:
 
+## 📝 Clarification and decision log
+
+Record each material user answer as it arrives while this document is `Draft`. Replace unknowns in
+the affected sections immediately; retain this short trace only when it explains a consequential
+scope, behavior, constraint, or estimate decision.
+
+| ID | Question and why it mattered | Recommended answer | User decision and source | Affected sections | Status |
+| --- | --- | --- | --- | --- | --- |
+| CD-01 |  |  |  |  | Resolved |
+
 ## 🚦 Change priority
 
-- Priority: P0 | P1 | P2 | P3
+- Priority: Unknown | P0 | P1 | P2 | P3
 - Rationale: state the user, deadline, risk, or delivery impact that justifies this priority.
-- Directory: `docs/changes/<Priority>-<change-slug>/`; the prefix must match this priority.
+- Directory: `docs/changes/<Priority>-<change-slug>/`; use `Draft` while priority is unknown, then
+  rename to `P0`–`P3` immediately after the user decides.
+
+## 🎯 Change goal
+
+State exactly one result-oriented goal. It must describe the observable value created for a user or
+system, not an API, file, or implementation task.
+
+> When this change is complete, `<user or system>` can `<observable result>`, proven by
+> `<measurable condition or observable behavior>`.
+
+This goal is unchanged unless the change is revised and approved again. Every behavior case,
+completion criterion, and later work item must contribute to it.
 
 ## 🎯 Intended outcome and scope
 
 Describe the intended outcome, scope, explicit non-goals, and compatibility expectations. Do not
 describe how the change request originated. Link applicable principles, architecture records, and
-ADRs rather than duplicating their rationale.
+ADRs rather than duplicating their rationale. Do not introduce a second goal here.
 
 ## 🧾 Source intent and hard constraints
 
@@ -27,6 +49,7 @@ ADRs rather than duplicating their rationale.
 
 ## 🧩 Governing principles and decisions
 
+- Applicable product intent and revision: `docs/product/README.md@<full Git commit SHA>`, or none.
 - Applicable principles and revision: `docs/principles/<topic>.md@<full Git commit SHA>`, or none.
 - Related ADRs and status: `docs/adr/ADR-<number>-<slug>.md`, or none.
 - Related architecture records and revision: `docs/architecture/<topic>.md@<full Git commit SHA>`, or none.
@@ -37,42 +60,44 @@ they do not substitute for an implementation constraint.
 
 ## 🧭 Planned approach
 
-Describe how the change will achieve the outcome: affected boundaries, the intended component or data
-flow changes, compatibility strategy, and how work packages fit together. Keep detailed API and
-test contracts in the work items.
+Describe how the change will achieve the outcome: affected boundaries, intended component or data
+flow changes, compatibility strategy, and material alternatives rejected. Do not include work
+packages, implementation steps, file lists, or verification commands; those belong to
+`plan-work-items` after this design is approved.
+
+## 🧪 Behavior cases
+
+State the observable success, failure, and boundary behavior the completed change must provide.
+Do not specify work-item sequence, implementation files, or test commands here.
+
+| ID | Preconditions and input | Action | Expected observable behavior |
+| --- | --- | --- | --- |
+| BC-01 |  |  |  |
 
 ## ✅ Completion criteria
 
-State the observable conditions under which every work package is complete and the change can close.
+State the observable conditions proving the one change goal is achieved and the change can close.
 
 ## ⏱️ Workload estimate
 
 - Person-month basis: state the team's capacity definition; do not assume one.
-- Work-package range total: <lower>–<upper> person-months.
-- Coordination, verification, migration, and rollout: <lower>–<upper> person-months.
+- Change delivery range: <lower>–<upper> person-months.
+- Coordination, verification, migration, and rollout allowance: <lower>–<upper> person-months.
 - Contingency: <lower>–<upper> person-months, with risk rationale.
 - Total planning range: <lower>–<upper> person-months.
 - Confidence: Low | Medium | High.
 - Assumptions and excluded work:
 - Re-estimation trigger and approval threshold:
 
-## 🚧 Plan blockers
+## 🚧 Design blockers
 
 | ID | Blocking item | Blocks | Next action | Status |
 | --- | --- | --- | --- | --- |
 | PB-01 |  |  |  | Open |
 
-List only unresolved items that prevent work from starting. Link an ADR or issue when applicable;
-do not record alternatives or decision rationale here.
-
-## 🗺️ Delivery map
-
-Keep all planned dependencies inside this change. Order rows by executable priority: unmet
-prerequisites first, then `P0` through `P3`.
-
-| ID | Work package | Outcome | Priority and rationale | Estimate | Prerequisites | Status | Document |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| <PREFIX>-001 |  |  | P1 —  | <lower>–<upper> person-months |  | Planned | `work-items/<PREFIX>-001-<slug>.md` |
+List only unresolved items that prevent design approval. Link an ADR or issue when applicable; do
+not record alternatives or decision rationale here. After approval, `plan-work-items` records any
+delivery blockers and the delivery map.
 
 ## ⚠️ Risks and coordination
 

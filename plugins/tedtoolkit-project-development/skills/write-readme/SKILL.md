@@ -12,10 +12,17 @@ description: >-
 Treat each README as the entry point for its directory's audience. Keep the scope narrow: a child
 README adds information that its parent cannot express clearly, rather than retelling it.
 
+This skill owns reader-facing orientation and first-use guidance. It may summarize approved product
+intent but must not redefine the audience, problem, value, or non-goals; hand those changes to
+`library-product-intent`. Hand recurring technical rules, architecture decisions, and delivery
+requirements to `design-principles`, `architecture-design`, and `change-design` rather than storing
+competing copies in a README.
+
 ## Inspect before drafting
 
-1. Read the target directory, its nearest parent README files, root README, `CLAUDE.md`, `AGENTS.md`, and, for
-   a project README, the `.csproj`, public API, package metadata, tests, samples, and consumer-facing
+1. Read the target directory, its nearest parent README files, root README, `CLAUDE.md`, `AGENTS.md`,
+   and, for a library README, `docs/product/README.md` when it exists. For a project README, also
+   read the `.csproj`, public API, package metadata, tests, samples, and consumer-facing
    configuration. For a library, inventory the public capabilities before choosing README sections;
    do not infer a feature solely from a project or folder name.
 2. Identify the intended reader and their first task. Base every claim on repository evidence; flag
@@ -66,6 +73,8 @@ or local rules cannot be inferred from the name and files.
   when it informs current work.
 - State material constraints only when evidenced by source or project metadata; never make
   unsupported marketing claims.
+- When approved product intent exists, summarize its positioning statement and link to
+  `docs/product/README.md`; do not duplicate its audience, problem, value, and non-goals sections.
 
 ## Review
 

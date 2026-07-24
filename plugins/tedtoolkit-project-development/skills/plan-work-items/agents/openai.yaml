@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plan Work Items"
+  short_description: "Turn an approved change into small executable work items."
+  default_prompt: "Use $plan-work-items to split this approved change into sequential, independently verifiable work items."

@@ -1,0 +1,69 @@
+# Change-design-review evals
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Block an incomplete change design before planning"
+    prompt: "Review docs/changes/P1-temperature-parse/README.md as a change design. Do not modify files, create work items, or inspect implementation."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh incomplete-design"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "Needs revision"
+      - type: "output_contains"
+        value: "BehaviorCases"
+      - type: "output_not_contains"
+        value: "Ready to merge"
+    rubric:
+      - "Identifies that an API-shaped goal and missing observable BehaviorCases make the design unready."
+      - "Does not create a work item, review implementation, or claim to approve the design."
+    timeout: 420
+
+  - name: "Mark a complete design ready for human approval"
+    prompt: "Review docs/changes/P1-temperature-parse/README.md as a change design. Do not modify files or create work items."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh approval-ready-design"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "Ready for approval"
+      - type: "output_contains"
+        value: "Not reviewed: implementation"
+    rubric:
+      - "Separates readiness for human approval from granting approval."
+      - "Keeps implementation and documentation-disposition decisions outside this review."
+    timeout: 420
+
+  - name: "Block a durable decision without an accepted ADR"
+    prompt: "Review docs/changes/P1-temperature-parse/README.md as a change design. Do not modify files or create work items."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh missing-accepted-adr"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "Needs revision"
+      - type: "output_contains"
+        value: "ADR"
+      - type: "output_contains"
+        value: "architecture-design"
+    rubric:
+      - "Treats an unlinked, library-wide parsing policy as a blocking durable decision."
+      - "Routes ADR creation and approval to architecture-design before change approval."
+    timeout: 420

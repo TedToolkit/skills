@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review Implementation"
+  short_description: "Check one work package against its approved design."
+  default_prompt: "Use $review-implementation to review this work package against its approved design and BehaviorCases. Include documentation disposition for human maintainers; do not modify files or run anything."

@@ -1,0 +1,97 @@
+# Implementation-review evals
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Block a change that misses an approved behavior case"
+    prompt: "Review the current change against docs/changes/P1-temperature-parse/work-items/TEMP-001-parse.md. Do not modify files or run commands. Use the exact review report structure and determine whether it is Ready to merge, Ready with follow-ups, or Not ready."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh missing-behavior-case"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "Not ready"
+      - type: "output_contains"
+        value: "BC-02"
+      - type: "output_contains"
+        value: "Blocking"
+      - type: "output_contains"
+        value: "Documentation disposition"
+    rubric:
+      - "Builds a traceability map from the approved BehaviorCases to the changed production and test code."
+      - "Identifies that BC-02 is missing from both implementation and tests, and treats it as a blocking finding."
+      - "States that it did not run builds or tests and does not modify any file."
+      - "Separates a documentation-disposition recommendation from authorization to delete or archive documents."
+      - "Does not ask for a change-closure deletion decision when the review is Not ready."
+      - "Treats a missing material verification mapping, objective definition of done, prerequisite evidence, or execution sequence as a blocking delivery-contract defect."
+      - "For every finding, recommends the smallest concrete modification, names the responsible skill, and states how the change should be verified."
+    timeout: 420
+
+  - name: "Do not infer an implementation boundary from a change index"
+    prompt: "Review the current change against docs/changes/P2-geometry-rebuild/README.md. Do not modify files or run commands."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh change-index"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "work package"
+    rubric:
+      - "Explains that an implementation-readiness conclusion requires one selected work package."
+      - "Does not infer the work-package boundary from the diff or run tests."
+    timeout: 420
+
+  - name: "Ask once for disposition after a complete ready change"
+    prompt: "Review the current change against docs/changes/P1-temperature-parse/work-items/TEMP-001-parse.md. Do not modify files or run commands. Use the exact review report structure."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh ready-final-change"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "Ready to merge"
+      - type: "output_contains"
+        value: "Change closure decision"
+      - type: "output_contains"
+        value: "deleted after merge"
+    rubric:
+      - "Recommends a documentation disposition for the completed parent change."
+      - "Asks exactly one human change-closure question after finding the complete parent change Ready to merge."
+      - "Does not delete or modify the change documents."
+    timeout: 420
+
+  - name: "Require durable documentation before recommending deletion"
+    prompt: "Review the current change against docs/changes/P1-temperature-parse/work-items/TEMP-001-parse.md. Do not modify files or run commands. Use the exact review report structure."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh ready-final-change-missing-extraction"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "Documentation extraction"
+      - type: "output_contains"
+        value: "ADR"
+      - type: "output_not_contains"
+        value: "Change closure decision"
+    rubric:
+      - "Finds the unrecorded library-wide parsing policy as durable knowledge that requires an ADR."
+      - "Does not recommend deletion or ask a closure question while documentation extraction is missing."
+    timeout: 420

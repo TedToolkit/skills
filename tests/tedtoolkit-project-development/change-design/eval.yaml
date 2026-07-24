@@ -3,8 +3,8 @@ config:
   max_parallel_runs: 1
 
 scenarios:
-  - name: "Create an implementation-ready change design"
-    prompt: "Design a P1 change that adds a TryParse(string?, out Temperature) API to the existing Temperature value object. It must accept invariant-culture decimal Celsius input, reject null, whitespace, invalid text, and values below absolute zero. Write the change and its work package only; do not change production code or tests."
+  - name: "Create an approval-ready change design"
+    prompt: "Design a P1 change that adds a TryParse(string?, out Temperature) API to the existing Temperature value object. It must accept invariant-culture decimal Celsius input, reject null, whitespace, invalid text, and values below absolute zero. Write the change design only; do not create work items, production code, or tests."
     setup:
       copy_test_files: true
       commands:
@@ -18,6 +18,9 @@ scenarios:
         value: "Planned approach"
       - type: "file_contains"
         path: "docs/changes/P1-*/README.md"
+        value: "Change goal"
+      - type: "file_contains"
+        path: "docs/changes/P1-*/README.md"
         value: "Workload estimate"
       - type: "file_contains"
         path: "docs/changes/P1-*/README.md"
@@ -26,38 +29,24 @@ scenarios:
         path: "docs/changes/P1-*/README.md"
         value: "Re-estimation trigger"
       - type: "file_contains"
-        path: "docs/changes/P1-*/work-items/*.md"
+        path: "docs/changes/P1-*/README.md"
         value: "Behavior cases"
       - type: "file_contains"
-        path: "docs/changes/P1-*/work-items/*.md"
-        value: "Explicit governing constraints"
-      - type: "file_contains"
-        path: "docs/changes/P1-*/work-items/*.md"
-        value: "Workload estimate"
-      - type: "file_contains"
-        path: "docs/changes/P1-*/work-items/*.md"
-        value: "Verification plan"
-      - type: "file_contains"
-        path: "docs/changes/P1-*/work-items/*.md"
-        value: "Implementation contract"
-      - type: "file_contains"
-        path: "docs/changes/P1-*/work-items/*.md"
-        value: "Delivery priority"
-      - type: "file_contains"
-        path: "docs/changes/P1-*/work-items/*.md"
+        path: "docs/changes/P1-*/README.md"
         value: "TryParse"
       - type: "file_contains"
-        path: "docs/changes/P1-*/work-items/*.md"
+        path: "docs/changes/P1-*/README.md"
         value: "absolute zero"
       - type: "command"
         run: "git diff --exit-code -- Temperature.cs TemperatureTests.cs"
     rubric:
       - "The document distinguishes scope from non-goals and gives observable success and failure behavior."
+      - "Defines exactly one result-oriented change goal rather than naming an API, file, or implementation task."
       - "The change index describes the intended outcome and planned approach without narrating the request's origin."
-      - "Each behavior case is mapped to a focused, automatable verification command and assertion."
+      - "States observable success, failure, and boundary behavior without creating work items, implementation steps, or test commands."
       - "The design assigns a P0–P3 delivery priority and explains it without treating priority as a substitute for prerequisites."
       - "The change and work package record range-based person-month estimates, assumptions or exclusions, and confidence without presenting them as a delivery promise."
-      - "It identifies governing principles and architecture decisions, pins their approved baseline when present, and puts implementation-facing constraints in the work package."
+      - "It identifies governing principles and architecture decisions and pins their approved baseline when present."
       - "It does not present a standalone change as blocked by another planned or in-progress change."
       - "It records compatibility and invariant-culture parsing considerations without inventing unrelated architecture."
     timeout: 420
@@ -76,8 +65,7 @@ scenarios:
       - type: "output_contains"
         value: "work package"
     rubric:
-      - "Creates a delivery map instead of treating the request as one monolithic implementation unit."
-      - "Explains independent work packages, their ordering, and unresolved cross-cutting plan blockers."
+      - "Defines the behavioral scope and states that approved delivery planning must be handed to plan-work-items."
     timeout: 420
 
   - name: "Keep planned dependencies inside one change"
@@ -97,20 +85,22 @@ scenarios:
       - "Explains that the settings store and preferences screen belong in one change delivery map, rather than separate dependent changes."
     timeout: 420
 
-  - name: "Ask for an unknown change priority before writing"
-    prompt: "Design a change that adds display-density preferences. I have not given any urgency, deadline, user impact, or risk information. Do not modify files; explain what you need next."
+  - name: "Draft and clarify an unknown change priority"
+    prompt: "Start designing a change that adds display-density preferences. I have not given any urgency, deadline, user impact, or risk information."
     setup:
       copy_test_files: true
       commands:
         - "bash setup_fixture.sh temperature-design"
     assertions:
       - type: "exit_success"
-      - type: "command"
-        run: "git status --porcelain"
-        stdout_empty: true
+      - type: "file_exists"
+        path: "docs/changes/Draft-*/README.md"
+      - type: "file_contains"
+        path: "docs/changes/Draft-*/README.md"
+        value: "Clarification and decision log"
       - type: "output_contains"
         value: "priority"
     rubric:
-      - "Requests the human to assign the change priority rather than inventing a P0–P3 prefix."
-      - "Does not create a change directory before the priority is known."
+      - "Creates a Draft change record from the template before asking the priority question."
+      - "Requests the human to decide priority with a concrete recommended priority and rationale rather than silently assigning a P0–P3 prefix."
     timeout: 420

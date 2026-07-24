@@ -7,11 +7,21 @@
 - Date:
 - Decision owner:
 - Decision scope: what system boundary, capability, or time horizon this governs.
+- Applicable product intent: relative link to `docs/product/README.md`, or None.
 - Applicable principles: relative links to `docs/principles/`, or None. State any deliberate
   exception and why it is justified.
 - Related change or work packages:
 - Supersedes: ADR-<number> or None
 - Superseded by: ADR-<number> or None
+
+## 📝 Clarification and decision log
+
+While this ADR is `Proposed`, record each material user answer immediately and update the affected
+sections. Retain only entries that explain a consequential driver, constraint, or selected option.
+
+| ID | Question and why it mattered | Recommended answer | User decision and source | Affected sections | Status |
+| --- | --- | --- | --- | --- | --- |
+| ADR-C-01 |  |  |  |  | Resolved |
 
 ## 📌 Decision at a glance
 

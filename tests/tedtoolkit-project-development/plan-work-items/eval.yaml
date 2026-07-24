@@ -1,0 +1,32 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Plan small sequential work items from an approved change"
+    prompt: "Use the approved temperature parsing change to create its work-item delivery plan. Do not modify production code or tests."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh"
+    assertions:
+      - type: "exit_success"
+      - type: "file_exists"
+        path: "docs/changes/P1-temperature-parse/work-items/*.md"
+      - type: "file_contains"
+        path: "docs/changes/P1-temperature-parse/README.md"
+        value: "Delivery map"
+      - type: "file_contains"
+        path: "docs/changes/P1-temperature-parse/work-items/*.md"
+        value: "Definition of done"
+      - type: "file_contains"
+        path: "docs/changes/P1-temperature-parse/work-items/*.md"
+        value: "Verification plan"
+      - type: "command"
+        run: "git diff --exit-code -- Temperature.cs TemperatureTests.cs"
+    rubric:
+      - "Creates only small work items with one independently observable outcome each."
+      - "Records logical prerequisites separately from one recommended serial sequence."
+      - "Maps each behavior case to focused verification and gives every item an objective definition of done."
+      - "Does not change the approved behavior contract or implement production code."
+    timeout: 420

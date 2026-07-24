@@ -1,0 +1,4 @@
+interface:
+  display_name: "Library Product Intent"
+  short_description: "Define the problem a library exists to solve."
+  default_prompt: "Use $library-product-intent to define this library's audience, problem, value, boundaries, and success criteria."

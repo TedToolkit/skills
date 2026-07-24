@@ -1,13 +1,13 @@
 {
   "name": "tedtoolkit-project-development",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "TedToolkit project development workflows.",
   "author": { "name": "TedToolkit" },
   "skills": "./skills/",
   "interface": {
     "displayName": "TedToolkit Project Development",
     "shortDescription": "Design and implement .NET projects",
-    "longDescription": "TedToolkit workflows for design principles, architecture design, change design, TDD, review, scaffolding, and documentation.",
+    "longDescription": "TedToolkit workflows for library product intent, design principles, architecture design, change design, TDD, review, scaffolding, and documentation.",
     "developerName": "TedToolkit",
     "category": "Developer Tools",
     "capabilities": ["Write"],

@@ -11,7 +11,10 @@ winget install -e --id Python.Python.3.13
 py -3.13 -m pip install --upgrade pip pyyaml
 ```
 
-`npx`, `git`, and a `bash` (Git for Windows is fine — the runner finds it even if `bash` isn't on PATH) must be installed. The merge evals also need the **.NET 10 SDK** for their Release-build gate.
+The installed `codex` CLI is used directly. Set `CODEX_BIN` when it is not on `PATH`; the runner
+never downloads Codex through npm. `git` and a `bash` (Git for Windows is fine — the runner finds it
+even if `bash` isn't on PATH) must be installed. The merge evals also need the **.NET 10 SDK** for
+their Release-build gate.
 
 ## Running
 
@@ -36,7 +39,7 @@ For each scenario the runner:
 1. makes a temp work dir and copies the eval's sibling files (the `setup_fixture.sh`, stubs) into it;
 2. runs `setup.commands` there via bash to build the fixture;
 3. prepends `<workdir>/.binstub` and Git's tool dirs to `PATH`, and applies `setup.env`;
-4. runs `claude -p "<prompt>" --plugin-dir plugins/tedtoolkit-shared --permission-mode bypassPermissions --output-format json` from the work dir (no `--bare` — it suppresses login);
+4. runs `codex exec` with the selected locally installed marketplace plugin from the work dir;
 5. checks the scenario's assertions and records the result;
 6. cleans up the work dir and any `cleanup_globs` (paths the fixture had to create outside it).
 

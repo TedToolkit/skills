@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review Change Design"
+  short_description: "Check a change document before approval and planning."
+  default_prompt: "Use $review-change-design to review this change document for approval readiness. Do not modify files, create work items, or inspect implementation readiness."
