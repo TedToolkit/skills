@@ -1,4 +1,4 @@
 interface:
   display_name: "Use Ownership Annotations"
   short_description: "Document disposable-resource ownership contracts."
-  default_prompt: "Review resource ownership in this C# project."
+  default_prompt: "Use $use-ownership-annotations to trace and document resource ownership and callback lifetimes."

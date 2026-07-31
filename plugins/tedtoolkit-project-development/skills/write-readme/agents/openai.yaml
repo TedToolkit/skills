@@ -1,4 +1,4 @@
 interface:
   display_name: "Write README"
   short_description: "Create focused README files that navigate current repository documentation."
-  default_prompt: "Write or improve the README files in this repository, linking readers to current architecture, active migrations, and active work without turning the README into an archive index."
+  default_prompt: "Use $write-readme to create an evidence-based entry point for this repository or project."

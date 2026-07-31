@@ -4,7 +4,7 @@ config:
 
 scenarios:
   - name: "Create an architecture record and traceable ADR"
-    prompt: "Design the configuration-store architecture and create an ADR for the accepted decision to use SQLite for embedded configuration. The service requires local persistence without operating a server. Record the status, decision owner as Platform Team, the alternatives PostgreSQL and JSON files, their relevant trade-offs, current architecture boundary, implementation handoff, and review triggers. Do not modify production code or packages."
+    prompt: "Design the configuration-store architecture and create an ADR for the accepted decision to use SQLite for embedded configuration. The service requires local persistence without operating a server. Record the status, decision owner as Platform Team, the alternatives PostgreSQL and JSON files, their relevant trade-offs, current architecture boundary, downstream delivery constraints, and review triggers. Do not modify production code or packages."
     setup:
       copy_test_files: true
       commands:
@@ -27,12 +27,25 @@ scenarios:
       - type: "file_contains"
         path: "docs/adr/ADR-*.md"
         value: "PostgreSQL"
+      - type: "file_not_contains"
+        path: "docs/adr/ADR-*.md"
+        value: "docs/changes"
+      - type: "file_not_contains"
+        path: "docs/adr/ADR-*.md"
+        value: "TRANSIENT-CONFIG-CHANGE"
+      - type: "file_not_contains"
+        path: "docs/architecture/*.md"
+        value: "docs/changes"
+      - type: "file_not_contains"
+        path: "docs/architecture/*.md"
+        value: "TRANSIENT-CONFIG-CHANGE"
       - type: "command"
         run: "git diff --exit-code -- README.md"
     rubric:
       - "The architecture record states the current configuration-store boundary and the ADR makes the accepted decision, governing scope, and owner clear at a glance."
       - "It ties the decision to the no-managed-server constraint and explains the trade-offs of each alternative."
-      - "It states implementation implications and objective review triggers without implementing the decision."
+      - "It states only downstream delivery constraints and objective review triggers; it does not claim the decision has been implemented or prescribe source edits, work packages, or delivery procedures."
+      - "The durable architecture record and ADR do not reference or depend on the temporary docs/changes artifact."
     timeout: 420
 
   - name: "Keep ADR benchmark source and catalog outside the primary solution"

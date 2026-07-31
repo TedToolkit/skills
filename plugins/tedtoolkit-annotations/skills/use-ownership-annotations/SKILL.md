@@ -1,34 +1,29 @@
 ---
 name: use-ownership-annotations
 description: >-
-  Use TedToolkit.Annotations.Ownership to document disposable-resource ownership transfer and callback
-  lifetime in C#. Trigger only when the current project directly references TedToolkit.Annotations.Ownership
-  (including a transitive project reference that exposes it); do not use this skill for projects that do not reference the package.
+  Specify disposable-resource ownership transfer and callback lifetime with
+  TedToolkit.Annotations.Ownership. Use when a project that references the package exposes borrowed,
+  transferred, stored, deferred, or subscription-lifetime values across a C# API boundary.
 ---
 
 # Use TedToolkit.Annotations.Ownership
 
-Confirm the package reference before suggesting these attributes. Pair every material ownership
-annotation with XML documentation that tells callers who disposes the resource.
+Make responsibility and lifetime explicit at the API boundary. Read
+[attribute-arguments.md](../../references/attribute-arguments.md) before drafting annotation text.
+Invoke `use-const-annotations` for an independent non-mutation contract,
+`use-documentation-annotations` for operational behavior, and `write-csharp-api-comments` for
+caller-facing XML. This skill retains ownership and lifetime semantics.
 
-## Workflow
+## Steps
 
-1. Trace each `IDisposable` or `IAsyncDisposable` value across the API boundary. Establish whether the
-   caller retains responsibility, transfers it, or receives a borrowed value; inspect disposal paths.
-2. Draft the smallest matching `Ownership` or `CallbackLifetime` annotation and corresponding XML
+1. Confirm that the active project references `TedToolkit.Annotations.Ownership`; otherwise report
+   the failed package gate.
+2. Trace every in-scope disposable and callback through normal return, exception, cancellation,
+   replacement, and disposal paths. Complete when each path names the responsible owner and lifetime.
+3. Draft the smallest matching `Ownership` or `CallbackLifetime` annotation with equivalent XML
    text. Show it and wait for explicit approval before editing.
-3. After approval, run the bundled analyzer or project tests. Do not use an attribute to conceal a
-   double-dispose, leak, or unclear lifetime.
-
-## Attribute argument rule
-
-When an attribute argument identifies a C# source symbol, write it with `nameof(...)` instead of a
-handwritten string. Use literal strings only where the attribute requires a non-symbol value.
-Attribute text may use visible Unicode, including Chinese and ordinary full-width punctuation. Do
-not use non-printing or invisible Unicode characters: control or format characters (such as
-zero-width or bidirectional controls), U+0085, U+2028/U+2029, or unpaired surrogates. Rider may
-display them as escape sequences such as `\u...`. XML documentation comments may use Unicode
-normally, subject to well-formed XML.
+4. After approval, run the analyzer and affected tests. Complete when every path has exactly one
+   disposal responsibility, callback escape is represented, and no leak or double-dispose is hidden.
 
 ## Usage
 
@@ -57,7 +52,5 @@ outlive the call; use `DEFERRED` or `SUBSCRIPTION` when the delegate can escape.
 
 ## Verify ownership documentation
 
-Trace normal, exceptional, cancellation, replacement, and disposal paths. The XML comment must state
-who disposes each resource in plain language, and the attribute must match that statement. Run the
-bundled analyzer after approval; do not silence lifetime diagnostics by changing annotations unless the
-actual ownership contract has changed.
+The XML comment states who disposes each resource in plain language and matches the annotation.
+Change an annotation only when the actual ownership contract changes.

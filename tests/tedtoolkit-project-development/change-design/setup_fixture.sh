@@ -29,7 +29,7 @@ EOF
     ;;
   dependent-change)
     mkdir -p docs/changes/P2-settings-store
-    cat > docs/changes/P2-settings-store/README.md <<'EOF'
+    cat > docs/changes/P2-settings-store/change.md <<'EOF'
 # Settings store change
 
 This planned change introduces the persistent settings store required by future consumers.

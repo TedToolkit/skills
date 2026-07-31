@@ -1,25 +1,29 @@
 ---
 name: architecture-design
 description: >-
-  Create, review, or revise current architecture records and Architecture Decision Records (ADRs)
-  for enduring architecture, technology, dependency, security, operational, or cross-cutting product
-  decisions. Use when designing system boundaries, dependency direction, cross-cutting behavior, or
-  quality attributes; when a decision needs durable rationale, alternatives, consequences, and an
-  owner; or when technology selection or benchmark evidence informs architecture.
+  Decide and record current architecture or an enduring technical choice. Use when system
+  boundaries, dependency direction, cross-cutting behavior, quality attributes, technology
+  selection, or an ADR needs durable rationale, alternatives, consequences, evidence, and ownership.
 ---
 
 # Architecture Design
 
-Architecture design turns applicable principles into the current system boundary and constraints that
+Make architecture **durable**: turn applicable principles into the current system boundary and constraints that
 later change designs must refine. Use `docs/architecture/` for current boundaries, dependency
 direction, cross-cutting behavior, and quality attributes. Use an ADR only for a material, enduring,
 or difficult-to-reverse choice; do not create one for an abandoned sketch or local implementation
 detail.
 
-This skill owns current technical boundaries and enduring technical decisions. It consumes approved
-product intent and principles; it does not redefine them. Hand a changed audience, problem, value,
-or non-goal to `library-product-intent`, a recurring technical default to `design-principles`, and
-delivery behavior to `change-design` and executable verification planning to `plan-work-items`.
+An ADR records why a significant decision is made and the intended direction; it is not a delivery
+record and does not claim that any code, data, deployment, or migration already conforms to the
+decision. An `Accepted` status means the decision is approved, not implemented. Delivery status
+belongs to delivery records, release or migration records, and repository evidence.
+
+This skill owns current technical boundaries and enduring technical decisions. Before drafting or
+handing a decision to delivery, read
+[change-development-workflow.md](../../references/change-development-workflow.md) for its governing
+dependency direction and shared terms. Re-establish every enduring claim from durable evidence,
+then invoke `change-design` to translate accepted constraints into a delivery contract.
 
 ## Inspect the architecture
 
@@ -91,19 +95,34 @@ Include:
    trade-offs.
 4. The selected direction, why it is justified now, and evidence or conditions that require
    reconsideration.
-5. Consequences, accepted costs, implementation constraints, API compatibility, ecosystem and
-   operational implications, and rollout, rollback, or exit path when material.
+5. Consequences, accepted costs, downstream delivery constraints, API compatibility, ecosystem and
+   operational implications, and exit requirements when material. These are decision-level
+   obligations, not a delivery design: do not name files, classes, modules to edit, implementation
+   steps, work items, test plans, schedules, or a concrete rollout or rollback procedure.
 6. Evidence links, follow-up ownership, and objective review triggers.
 
 Distinguish measured evidence, documented claims, and assumptions. Link raw results, proof-of-
-concept work, evaluation matrices, source documentation, related architecture records, and change
-designs rather than duplicating them. Do not call an option "best" or "simpler" without the driver
-and evidence that make it so.
+concept work, evaluation matrices, source documentation, and related architecture records rather
+than duplicating them. Never use a change artifact as evidence or a link target. Do not call an
+option "best" or "simpler" without the driver and evidence that make it so.
 
 Use `Proposed` before approval and `Accepted`, `Rejected`, or `Superseded` afterwards. Do not rewrite
 an accepted ADR to conceal a new choice: create a superseding ADR, link both records, and state the
 changed evidence, constraint, or product need. Keep superseded ADRs in `docs/adr/`; use Git history
 for obsolete process documents.
+
+## Hand decisions to delivery
+
+An ADR may be initiated by a user outcome, a known constraint, or temporary delivery material that
+identifies an unresolved enduring decision. Independently verify and restate the durable decision
+question and constraints; do not link or cite the temporary material.
+
+An ADR must not name future work items. After the ADR is `Accepted` and committed,
+`change-design` creates or resumes the delivery design, pins that ADR revision, and turns its
+downstream constraints into the delivery's behavioral requirements. `plan-work-items` then decides
+locations, steps, sequencing, and verification. If delivery discovers that the accepted decision no
+longer meets its drivers, return to this skill for a new or superseding ADR; do not silently
+reinterpret the accepted record.
 
 ## Benchmark source and evidence
 
@@ -133,11 +152,16 @@ Before changing code, packages, infrastructure, or project structure, show:
 1. Scope, governing principles, current architecture baseline, and non-negotiable constraints.
 2. Proposed architecture record changes: boundaries, dependency direction, and quality constraints.
 3. Any ADR alternatives, evidence confidence, and conditions that invalidate the decision.
-4. Consequences: affected change designs, implementation constraints, migration, tests,
-   documentation, operational ownership, and rollback where applicable.
+4. Consequences: downstream constraints, operational ownership, and exit requirements where
+   applicable. Do not present or link source edits, change designs, work items, test plans, or
+   delivery procedures as ADR content.
 
 Create and revise `Draft` architecture records and `Proposed` ADRs during the clarification loop.
 Wait for explicit approval before changing their status to `Active` or `Accepted`, creating
 benchmark projects, or changing code, packages, infrastructure, or project structure. Record the
 approved architecture in `docs/architecture/` and any approved enduring decision in the repository's
 ADR format.
+
+Complete when every decision driver and alternative has evidence, durable records depend only on
+durable sources, consequences and review triggers are explicit, and the user has approved the
+status transition or received the unresolved decision list.

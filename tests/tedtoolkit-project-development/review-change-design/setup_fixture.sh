@@ -9,7 +9,7 @@ mkdir -p docs/changes/P1-temperature-parse
 
 case "$scenario" in
   incomplete-design)
-    cat > docs/changes/P1-temperature-parse/README.md <<'EOF'
+    cat > docs/changes/P1-temperature-parse/change.md <<'EOF'
 # Temperature parsing
 
 ## Change goal
@@ -22,7 +22,7 @@ Add parsing support.
 EOF
     ;;
   approval-ready-design)
-    cat > docs/changes/P1-temperature-parse/README.md <<'EOF'
+    cat > docs/changes/P1-temperature-parse/change.md <<'EOF'
 # Temperature parsing
 
 ## Status
@@ -70,7 +70,7 @@ Both BehaviorCases have focused observable tests.
 EOF
     ;;
   missing-accepted-adr)
-    cat > docs/changes/P1-temperature-parse/README.md <<'EOF'
+    cat > docs/changes/P1-temperature-parse/change.md <<'EOF'
 # Temperature parsing
 
 ## Change goal

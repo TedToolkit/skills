@@ -1,4 +1,4 @@
 interface:
   display_name: "Use Boxing Annotations"
   short_description: "Guide intentional C# boxing allocations."
-  default_prompt: "Review intentional boxing in this C# project."
+  default_prompt: "Use $use-boxing-annotations to review and make intentional boxing explicit in this C# project."

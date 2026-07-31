@@ -17,7 +17,7 @@ exception route.
 - Product intent: `docs/product/README.md`, or None. Product intent defines the library's purpose
   and boundaries; principles define recurring technical defaults that support it.
 - Precedence: approved product intent guides principles; principles guide architecture design;
-  approved architecture constrains change design; approved work packages constrain implementation.
+  approved architecture constrains change design; approved work items constrain implementation.
 
 ## Principle index
 
@@ -31,8 +31,8 @@ stage (for example, "pending commit"); an approved, in-force principle is `Activ
 ## Exception route
 
 State how to propose, approve, and record a deviation. A `Required` exception needs an accepted
-ADR before implementation. A `Default` exception is explained in the change design and needs an
-ADR when it is enduring or difficult to reverse.
+ADR before implementation. A `Default` exception is recorded with its delivery and needs an ADR
+when it is enduring or difficult to reverse. Link only durable exception records from this index.
 
 ## Maintenance
 

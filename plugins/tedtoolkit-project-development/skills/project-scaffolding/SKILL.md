@@ -1,24 +1,23 @@
 ---
 name: project-scaffolding
 description: >-
-  Create or reorganize team .NET repositories, solutions, and project files using conventions for
-  file responsibilities, dependencies, MSBuild, and .slnx layout. Use when creating a .NET library
-  or solution, adding a project, selecting repository folders, or reviewing Directory.Build.props,
-  Directory.Packages.props, and .slnx files.
+  Scaffold or reorganize .NET repositories, solutions, projects, dependency boundaries, MSBuild
+  controls, and slnx views. Use when creating a library or solution, adding or splitting a project,
+  selecting folders, reviewing shared build controls, or supplying an approved location needed by
+  another project-development skill.
 ---
 
 # TedToolkit Project Scaffolding
 
-Use this skill to establish a coherent .NET repository, not to impose a fixed directory tree.
+Build the smallest **coherent boundary**, guided by responsibility rather than a fixed directory tree.
 `src`, `tests`, `benchmarks`, `build`, `playground`, and `docs` are optional groupings; introduce each only when it
 improves a real responsibility, ownership boundary, or solution view. `docs` owns durable design,
-decision, architecture, and operational records; a README remains the short entry point for its
-directory.
+decision, architecture, and operational records; add a README entry point only when that directory
+needs reader orientation, and never under `docs/changes/`.
 
-This skill owns repository and project structure only. It may create an approved documentation
-location, but must not invent library purpose, technical principles, architecture decisions, change
-contracts, or README claims. Hand those concerns to `library-product-intent`, `design-principles`,
-`architecture-design`, `change-design`, `plan-work-items`, and `write-readme` respectively.
+This skill owns repository and project structure only. Invoke `write-readme` when a new location
+needs reader orientation, `architecture-design` for architecture records, and `change-design` for
+delivery contracts.
 
 ## Inspect before changing
 
@@ -36,6 +35,11 @@ boundaries. Read [solution-and-msbuild.md](references/solution-and-msbuild.md) b
 editing `.slnx`, `Directory.Build.props`, `Directory.Packages.props`, or shared `.props` files. Read
 [project-files-and-boundaries.md](references/project-files-and-boundaries.md) before naming or
 splitting a `.csproj`, adding project-root files, or changing project dependencies.
+## Approval gate
+
+Present the proposed responsibility boundaries, paths, project and package dependencies, MSBuild
+controls, solution membership, migrations or public-path moves, and verification commands. Wait for
+explicit approval before creating, moving, or editing repository structure.
 
 ## Choose the smallest suitable structure
 
@@ -43,7 +47,11 @@ Use the scenario table in [repository-layout.md](references/repository-layout.md
 folders. When a multi-project layout is appropriate, create or reorganize it in dependency order:
 
 1. Root controls: only the controls the repository uses, such as `global.json`, `.editorconfig`,
-   `Directory.Build.props`, `Directory.Packages.props`, `nuget.config`, README, and agent guidance.
+   `Directory.Build.props`, `Directory.Build.targets`, `Directory.Packages.props`, `nuget.config`,
+   README, and agent guidance.
+   Keep a short, stable, repository-wide build entry point at the root when discoverability matters;
+   put supporting scripts and multi-step implementation under `build/`. Add neither when the normal
+   `dotnet` command already expresses the workflow.
    When adding or normalizing agent guidance, `CLAUDE.md` must explicitly state the project's
    implementation language(s) and the human language for README and code-comment prose. Create
    `AGENTS.md` as a single direct `CLAUDE.md` reference; do not duplicate the guidance in both files.
@@ -83,11 +91,15 @@ production library and test-only support; production projects must never referen
 
 ## File responsibilities
 
-Keep repository-wide compiler behavior in `Directory.Build.props`; keep centrally managed package
-versions in `Directory.Packages.props`. Read [solution-and-msbuild.md](references/solution-and-msbuild.md)
-before adding an explicit `.props` import or a nested `Directory.Build.props`. Keep project files
-focused on identity, target frameworks, project-specific dependencies, and project-specific assets
-or packing rules.
+Keep repository-wide early compiler behavior in the root `Directory.Build.props`, late build
+behavior in the root `Directory.Build.targets`, and centrally managed package versions in the root
+`Directory.Packages.props`. Put responsibility-specific explicit imports shared across unrelated
+project groups under root `props/`; keep a group-only props file in that physical group, and keep a
+one-project setting in its `.csproj`. A nested `Directory.Build.props`, `Directory.Build.targets`,
+or `Directory.Packages.props` is an exception for a real inherited configuration boundary, not a
+convenience, and must deliberately preserve any required parent behavior. Read
+[solution-and-msbuild.md](references/solution-and-msbuild.md) before adding an explicit import,
+dedicated props directory, or nested automatic control file.
 
 For every repository with a `.slnx` solution, the root `Directory.Packages.props` must enable
 central package management; it must contain
@@ -100,54 +112,18 @@ needs them.
 
 ## Documentation boundaries
 
-Use `README.md` for orientation and first-use instructions. Use `docs/` for records that remain
-useful after the implementing pull request closes: design principles, change designs, ADRs,
-architecture explanations, runbooks, and migration or rollout plans. Read
-[repository-layout.md](references/repository-layout.md) before adding a documentation subtree so the
-document has a clear owner and stable location.
-Read [principles.md](references/principles.md) before creating or revising `docs/principles/`.
-
-The documentation layout recognizes five distinct categories: `docs/product/` for durable library
-purpose and boundaries, `docs/principles/` for enduring decision heuristics, `docs/changes/` for
-active approved change designs, `docs/adr/` for durable decisions, and `docs/architecture/` for
-current cross-cutting semantics. Create `docs/product/README.md` only after the maintainer approves
-the library's product intent; use `library-product-intent` rather than inventing it during
-scaffolding. `principles/` is a first-class directory even when it initially contains only
-`README.md`; its rules are expected to grow by topic. Create the other directories only when their
-stated responsibility exists. Use the singular `architecture` directory name, not `architectures`.
-
-For the change-development workflow, use `docs/changes/` for approved change designs and
-`docs/adr/` for durable technical decisions. Link a change design to any related ADR; do not copy
-the decision rationale into both files. `docs/principles/README.md` states the repository's default
-trade-offs; link applicable principles from an ADR or change design rather than repeating them.
-
-Use `docs/changes/<P0-P3>-<change-slug>/README.md` as every change's index and put its work-package
-contracts in `docs/changes/<P0-P3>-<change-slug>/work-items/`. `change-design` establishes the
-behavioral boundaries; `plan-work-items` creates the delivery plan and work items. Keep cross-cutting,
-long-lived semantics in a focused architecture record
-such as `docs/architecture/<topic>.md`; put difficult-to-reverse choices in `docs/adr/`. The change
-index links to applicable principles and those records, while each work item owns its acceptance
-criteria and test plan. Use this hierarchy for every change that needs an approved behavior contract,
-delivery plan, or TDD implementation, including a small change with one work item. Skip it only for
-a local maintenance edit that does not enter the change-development workflow.
-
-For a benchmark used only to justify one ADR, keep its project in that ADR's `benchmark/` directory
-and add or update the relative project path in `docs/adr/Benchmark.slnx`. This catalog is only for
-opening ADR benchmark projects: do not include it or its projects in the primary solution, default
-build, or default CI. A benchmark promoted to a maintained performance suite belongs under
-`benchmarks/` and may use a separate performance solution.
-
-`docs/changes/` is for active work. At completion, a human review decides whether to retain a short
-change index, extract current semantics to `docs/architecture/`, retain a decision in `docs/adr/`,
-update `docs/principles/` only when a repository-wide decision heuristic changes, keep an active
-migration guide, or delete a process-only design. Use Git history for process and obsolete document
-recovery; do not create `docs/history/`. Do not move or delete documents automatically during
-scaffolding.
+Read the **Documentation ownership and links** section of
+[repository-layout.md](references/repository-layout.md) before adding or moving documentation, and
+read [principles.md](references/principles.md) before creating or revising `docs/principles/`.
+Create only locations whose owning record already exists or has been approved by its owning skill.
+Scaffolding supplies the location; `library-product-intent`, `design-principles`,
+`architecture-design`, `change-design`, `plan-work-items`, and `write-readme` supply the content.
 
 ## Verification
 
 After structural changes, confirm every `.slnx` path resolves, project references are acyclic, and
-the solution restores/builds with the repository's pinned SDK. Run the smallest relevant test
+every maintained directory-scoped MSBuild control file is listed in the matching `.slnx` folder.
+The solution must restore/build with the repository's pinned SDK. Run the smallest relevant test
 project, then the full build when the change affects shared props, packages, analyzers, or solution
 composition.
 
@@ -157,3 +133,7 @@ tests under `tests/`, and version the rules it enforces with the repository. Run
 structural changes and from CI. Treat `build/` orchestration or validation projects and
 developer-only `playground/` projects as visible-but-not-default-build projects in `.slnx`; do not
 exclude ordinary test projects from the default build.
+
+Complete when every created path has one responsibility, every project and MSBuild dependency is
+acyclic and intentional, every solution path resolves, the pinned-SDK restore/build passes, and all
+applicable focused tests and structure checks pass.

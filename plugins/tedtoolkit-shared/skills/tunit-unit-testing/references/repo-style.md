@@ -1,22 +1,34 @@
 # Repository Test Style
 
-Use this file when you need local conventions rather than generic TUnit advice.
+## Contents
+
+- [Naming conventions](#naming-conventions)
+- [Comment rules](#comment-rules)
+- [Unit-test data-driven style](#unit-test-data-driven-style)
+- [Custom generator pattern](#custom-generator-pattern)
+- [Example local shapes](#example-local-shapes)
 
 ## Naming Conventions
 
-Observed patterns from the local TedToolkit and KitchenSink test repositories:
+Required layout for TedToolkit and KitchenSink test repositories:
 
-- Test file names end with `Tests.cs`.
-- Test class names end with `Tests`.
+- Place the tests for production class `ClassName` in a `ClassNameTests` directory.
+- Within that directory, place each tested method in `MethodNameTests.cs`.
+- Name the single test class in that file `MethodNameTests`.
+- Keep overloads of the same method in the same test class.
+- When a focused behavior has no single corresponding method, replace `MethodName` with a concrete
+  behavior name such as `Constructor`, `AdditionOperator`, or `RoundTrip`.
 - Classes are usually `internal sealed class`.
-- One file usually focuses on one API, operator, property, or behavior family.
 - Test method names usually follow a `Should_xxx_when_xxx` scenario style.
 
-Examples:
+Example for production class `Angle`:
 
-- `AdditionOperatorTests`
-- `AngleNormalizePositiveTests`
-- `LoopCurveDomainFromDomainTests`
+```text
+AngleTests/
+├── ConstructorTests.cs       // internal sealed class ConstructorTests
+├── NormalizePositiveTests.cs // internal sealed class NormalizePositiveTests
+└── AdditionOperatorTests.cs  // internal sealed class AdditionOperatorTests
+```
 
 ## Comment Rules
 
@@ -42,8 +54,6 @@ Good examples:
 
 ## Unit-Test Data-Driven Style
 
-Observed local patterns:
-
 - Simple scalar coverage often uses `[Arguments(...)]`.
 - Geometry and domain-object tests often use `[CombinedDataSources]`.
 - Reusable generators are commonly implemented as custom parameter attributes inheriting from
@@ -58,7 +68,7 @@ Prefer the following order in this codebase:
 4. `Arguments`
 5. `MethodDataSource`
 
-This order applies to deterministic unit behavior. Integration tests should prioritize an explicit
+This order applies to deterministic unit behavior. Integration tests prioritize an explicit
 resource boundary, setup, cleanup, and parallel-safety over parameterized input coverage.
 
 ## Custom Generator Pattern
@@ -135,14 +145,4 @@ public async Task Should_return_wrapped_domain_when_shifted_domain_is_within_one
 {
     ...
 }
-```
-
-## Execution Reminder
-
-For TUnit, use the repository's documented or CI command. Both commands are valid:
-
-```sh
-dotnet test --configuration Release
-# or
-dotnet run --configuration Release
 ```

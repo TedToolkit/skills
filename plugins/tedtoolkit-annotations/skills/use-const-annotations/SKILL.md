@@ -1,34 +1,29 @@
 ---
 name: use-const-annotations
 description: >-
-  Use TedToolkit.Annotations.Const to document and verify C# object-graph non-mutation contracts.
-  Trigger only when the current project directly references TedToolkit.Annotations.Const (including a
-  transitive project reference that exposes it); do not use this skill for projects that do not reference the package.
+  Specify C# object-graph non-mutation contracts with TedToolkit.Annotations.Const. Use when a
+  project that references the package needs a verifiable read-only boundary for a parameter,
+  instance or static method, or local alias.
 ---
 
 # Use TedToolkit.Annotations.Const
 
-Confirm that the active project references `TedToolkit.Annotations.Const`. Otherwise, do not suggest
-`[Const]`, `ConstDepth`, or `AsConst`.
+Make the real mutation boundary explicit. Read
+[attribute-arguments.md](../../references/attribute-arguments.md) before drafting annotation text.
+Invoke `use-ownership-annotations` for resource ownership or callback lifetime,
+`use-documentation-annotations` for operational behavior, and `write-csharp-api-comments` for
+caller-facing XML. This skill retains the non-mutation contract.
 
-## Workflow
+## Steps
 
-1. Inspect writes and invoked members to establish the real mutation boundary; do not infer
-   immutability from a method name alone.
-2. Draft the narrowest accurate contract, present it with corresponding XML documentation, and wait
+1. Confirm that the active project references `TedToolkit.Annotations.Const`; otherwise report the
+   failed package gate.
+2. Trace assignments, aliases, property access, and invoked members for every in-scope contract.
+   Complete when the deepest protected graph edge and every possible write are accounted for.
+3. Draft the narrowest accurate depth with equivalent XML documentation. Show the draft and wait
    for explicit approval before editing source.
-3. Build or run the analyzer after approval. Correct the contract or mutation; never weaken a true
-   contract without explaining the behavioral change.
-
-## Attribute argument rule
-
-Use `nameof(...)` instead of a handwritten string whenever an attribute argument identifies a C#
-source symbol. Literal strings remain appropriate only for non-symbol values required by the
-attribute. Attribute text may use visible Unicode, including Chinese and ordinary full-width
-punctuation. Do not use non-printing or invisible Unicode characters: control or format characters
-(such as zero-width or bidirectional controls), U+0085, U+2028/U+2029, or unpaired surrogates.
-Rider may display them as escape sequences such as `\u...`. XML documentation comments may use
-Unicode normally, subject to well-formed XML.
+4. After approval, build with the analyzer. Complete when the selected depth is proved, overrides
+   and interface implementations compose correctly, and every remaining diagnostic is explained.
 
 ## Usage
 
@@ -46,14 +41,11 @@ whole reachable graph is truly non-mutating. Do not apply `[Const]` to an `out` 
 
 ## Apply the contract deliberately
 
-Use a parameter contract when the caller-owned object must not be mutated, a method contract when
-the method must not mutate its own instance or static state, and `AsConst.Local` for a local alias
-that must remain read-only within a scope. Before choosing a depth, trace assignments through fields,
-properties, helper calls, and aliases. Document the observable non-mutation guarantee in XML when it
-is material to callers; do not label a method `Const` merely because it usually reads state today.
+Use a parameter contract for caller-owned objects, a method contract for instance or static state,
+and `AsConst.Local` for a scoped read-only alias. Apply a contract only when all reachable behavior
+at the selected depth satisfies it.
 
 ## Verify the result
 
-Compile with the bundled analyzer and inspect diagnostics at the selected depth. Check overrides and
-interface implementations because their contracts compose. Treat an analyzer warning about an external
-call as a request to confirm behavior, not as proof that the external API is safe.
+Treat a diagnostic on an external call as an unresolved proof obligation until that API's behavior
+is established.

@@ -22,5 +22,5 @@ List the expected effects on compatibility, testability, observability, operatio
 
 ### Exception route
 
-State the required ADR or change-design record for a deviation, and link an accepted exception when
-one exists.
+State whether a deviation requires an accepted ADR or may be recorded only with its delivery.
+Link only accepted ADRs or other durable governance records from this principle.

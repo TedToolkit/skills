@@ -3,8 +3,8 @@ config:
   max_parallel_runs: 1
 
 scenarios:
-  - name: "Plan small sequential work items from an approved change"
-    prompt: "Use the approved temperature parsing change to create its work-item delivery plan. Do not modify production code or tests."
+  - name: "Plan bounded work items from an approved change"
+    prompt: "Use the approved temperature parsing change to create its work-item delivery plan. A reserved empty work-item file exists at docs/changes/P1-temperature-parse/work-items/TEMP-001-parse.md; populate that file rather than choosing another filename. Do not modify production code or tests."
     setup:
       copy_test_files: true
       commands:
@@ -12,21 +12,49 @@ scenarios:
     assertions:
       - type: "exit_success"
       - type: "file_exists"
-        path: "docs/changes/P1-temperature-parse/work-items/*.md"
+        path: "docs/changes/P1-temperature-parse/work-items/TEMP-001-parse.md"
       - type: "file_contains"
-        path: "docs/changes/P1-temperature-parse/README.md"
+        path: "docs/changes/P1-temperature-parse/change.md"
         value: "Delivery map"
       - type: "file_contains"
-        path: "docs/changes/P1-temperature-parse/work-items/*.md"
+        path: "docs/changes/P1-temperature-parse/work-items/TEMP-001-parse.md"
         value: "Definition of done"
       - type: "file_contains"
-        path: "docs/changes/P1-temperature-parse/work-items/*.md"
+        path: "docs/changes/P1-temperature-parse/work-items/TEMP-001-parse.md"
         value: "Verification plan"
+      - type: "file_contains"
+        path: "docs/changes/P1-temperature-parse/work-items/TEMP-001-parse.md"
+        value: "Delivery constraints"
+      - type: "file_contains"
+        path: "docs/changes/P1-temperature-parse/work-items/TEMP-001-parse.md"
+        value: "Start conditions and blockers"
+      - type: "file_not_contains"
+        path: "docs/changes/P1-temperature-parse/work-items/TEMP-001-parse.md"
+        value: "Executable implementation steps"
       - type: "command"
         run: "git diff --exit-code -- Temperature.cs TemperatureTests.cs"
     rubric:
       - "Creates only small work items with one independently observable outcome each."
-      - "Records logical prerequisites separately from one recommended serial sequence."
-      - "Maps each behavior case to focused verification and gives every item an objective definition of done."
+      - "Creates work items only for bounded repository modifications; it keeps research, design review, approval, coordination, and external operations out of the delivery map."
+      - "Records only real logical prerequisites and does not invent a total serial order for independent work items."
+      - "Names the expected affected delivery area and makes public contracts exact without treating internal files or private symbols as an exhaustive authorization list."
+      - "Maps each behavior case to a proof intent, appropriate test level, and observable assertion; stable commands are included when known, but private test organization is left to implementation."
+      - "Gives every item start conditions, delivery constraints, an objective definition of done, and completion evidence that can unlock dependent work."
+      - "Does not prescribe executable edit steps, private type structure, algorithms, or method decomposition."
       - "Does not change the approved behavior contract or implement production code."
     timeout: 420
+
+  - name: "Reject an unapproved or incomplete change instead of inventing work items"
+    prompt: "Create a work-item delivery plan for the incomplete change. Do not modify production code or tests."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh incomplete"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "test ! -d docs/changes/P1-incomplete-change/work-items"
+    rubric:
+      - "Stops because the parent change is not approved and does not invent missing behavior, artifacts, prerequisites, or verification."
+      - "Returns the change to change-design rather than creating delivery work items."
+    timeout: 240

@@ -1,4 +1,4 @@
 interface:
   display_name: "Use Const Annotations"
   short_description: "Use TedToolkit const annotations when the package is referenced."
-  default_prompt: "Review const contracts in this C# project."
+  default_prompt: "Use $use-const-annotations to review and specify object-graph non-mutation contracts in this C# project."

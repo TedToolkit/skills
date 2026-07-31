@@ -1,4 +1,4 @@
 interface:
   display_name: "Write C# API Comments"
   short_description: "Write clear documentation for C# types and members."
-  default_prompt: "Review C# types and members and draft accurate XML documentation."
+  default_prompt: "Use $write-csharp-api-comments to review these C# types and draft accurate XML documentation."

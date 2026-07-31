@@ -1,7 +1,5 @@
 # TUnit Capabilities
 
-Use this file when you need TUnit-specific mechanics while writing or reviewing tests.
-
 ## Execution
 
 - Follow the repository's test command. Both `dotnet run` and `dotnet test` support TUnit.
@@ -13,7 +11,7 @@ Use this file when you need TUnit-specific mechanics while writing or reviewing 
 
 - TUnit test classes are instantiated per test method.
 - Tests run in parallel by default.
-- Shared mutable instance state is unsafe by default.
+- Keep mutable state owned by one test instance.
 - TUnit assertions are asynchronous and must be awaited.
 
 For integration tests, isolate external resources per test whenever possible. Use
@@ -76,7 +74,7 @@ Use it when:
 - a later test proves a second step that only makes sense after a first step succeeds
 - a multi-step scenario must stay split for readability, but the dependency is real and explicit
 
-Do not use it when:
+Use a fixture, hook, or helper instead when:
 
 - you merely want a convenient order
 - setup should instead be a helper, fixture, or hook
@@ -92,22 +90,5 @@ If `[DependsOn]` is used, document the prerequisite in the test method's XML `su
 - `await Assert.That(action).Throws<SomeException>();`
 - `using (Assert.Multiple())` when several related assertions should report together
 
-## Official Docs Read During Skill Authoring
-
-These sections informed this skill:
-
-- Intro
-- Installing TUnit
-- Writing your first test
-- Running your tests
-- Things to know
-- Assertions getting started
-- Data-driven overview
-- Arguments
-- Class data source
-- Test lifecycle overview
-- Hooks
-- Tips and pitfalls
-
-If you need deeper detail than this reference covers, consult the corresponding page on
+For mechanics beyond this reference, consult the matching current page on
 `https://tunit.dev/docs/`.

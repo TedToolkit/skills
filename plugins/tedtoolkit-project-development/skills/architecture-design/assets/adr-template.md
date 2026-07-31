@@ -10,7 +10,6 @@
 - Applicable product intent: relative link to `docs/product/README.md`, or None.
 - Applicable principles: relative links to `docs/principles/`, or None. State any deliberate
   exception and why it is justified.
-- Related change or work packages:
 - Supersedes: ADR-<number> or None
 - Superseded by: ADR-<number> or None
 
@@ -31,7 +30,8 @@ reading the rest of the record.
 ## 🧭 Context and decision question
 
 Describe the current situation and the concrete question this ADR resolves. Include only context
-that changes the decision; link detailed change plans instead of copying them.
+that changes the decision and support it with durable sources. This record decides an intended
+direction; do not state or imply that the selected direction has already been delivered.
 
 ## 🎯 Decision drivers and constraints
 
@@ -83,15 +83,21 @@ State the positive outcomes, costs, limitations, and obligations that follow fro
 Include compatibility, security, operations, licensing, vendor lock-in, and maintenance only when
 material.
 
-## 🛠️ Implementation handoff
+## 🛠️ Downstream delivery constraints
 
-Link the affected change and work packages. State only the implementation constraints imposed
-by this decision; do not duplicate their designs or test plans.
+State only the invariants, compatibility requirements, and other constraints that a later change
+must satisfy.
 
-## 🔄 Rollout, rollback, and exit
+Do not list source files, classes, modules, implementation steps, work items, test plans,
+schedules, or a concrete migration, rollout, or rollback procedure. Those belong to the change and
+its delivery plan. The selected decision remains an intended direction even after this ADR is
+accepted; delivery status belongs outside this record.
 
-Include only when the decision changes deployment, state, public compatibility, or introduces a
-service or dependency that needs an exit path.
+## 🔄 Exit requirements
+
+Include only the decision-level conditions required to leave, replace, or abandon the chosen
+direction, such as exportability, reversibility, or an interoperability boundary. Do not describe
+the execution procedure; delivery planning defines migration, rollout, and rollback when needed.
 
 ## 📅 Follow-ups and review triggers
 

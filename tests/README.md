@@ -101,4 +101,4 @@ tests/
 - **generate-commit-message** — hermetic git fixture; baseline is tagged `eval-base` so assertions count new commits with `git rev-list --count eval-base..HEAD`. Covers the atomic split and the "message-only, don't commit" intent.
 - **merge-default-branch** — hermetic git fixture with a bare `origin` and a diverged default branch; asserts the merge happened, conflicts resolved keeping both sides, and a green Release build.
 - **run-fix** — hermetic project fixture that exercises the diagnose-fix-verify loop against a local failing .NET target.
-- **tunit-unit-testing** — hermetic TUnit-style fixture with a stubbed `dotnet` that records the command the agent chose, so the eval can catch accidental `dotnet test` usage without depending on NuGet or real test execution.
+- **tunit-unit-testing** — hermetic TUnit-style fixture with a stubbed `dotnet` that records the command the agent chose, so the eval can confirm the documented repository command is preserved without depending on NuGet or real test execution.

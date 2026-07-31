@@ -58,10 +58,20 @@ dotnet test --configuration Release --project Geometry.Tests.csproj
 ```
 EOF
 
-    cat > VectorLengthTests.cs <<'EOF'
+    cat > Vector.cs <<'EOF'
+namespace Geometry;
+
+internal readonly record struct Vector(double X, double Y)
+{
+    public double Length() => System.Math.Sqrt((X * X) + (Y * Y));
+}
+EOF
+
+    mkdir -p VectorTests
+    cat > VectorTests/LengthTests.cs <<'EOF'
 namespace Geometry.Tests;
 
-internal sealed class VectorLengthTests
+internal sealed class LengthTests
 {
     /// <summary>
     /// Verifies that the vector length is preserved for an already normalized input.
@@ -76,11 +86,60 @@ internal sealed class VectorLengthTests
         await Assert.That(result).IsEqualTo(1d);
     }
 }
+EOF
+    ;;
 
-internal readonly record struct Vector(double X, double Y)
+  tunit-mocks)
+    cat > Pricing.Tests.csproj <<'EOF'
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>14</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <NoWarn>$(NoWarn);RCS1046</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="TUnit" Version="0.0.0-eval" />
+  </ItemGroup>
+</Project>
+EOF
+
+    cat > CONTRIBUTING.md <<'EOF'
+# Testing
+
+Run the focused test project with:
+
+```sh
+dotnet test --configuration Release --project Pricing.Tests.csproj
+```
+
+Put each production class's tests in a `ClassNameTests` directory. Inside it, use one
+`MethodNameTests.cs` file and `MethodNameTests` class per tested method. Test methods use
+`Should_xxx_when_xxx` and include an XML `summary`.
+EOF
+
+    cat > PricingService.cs <<'EOF'
+namespace Pricing;
+
+internal interface IPriceSource
 {
-    public double Length() => System.Math.Sqrt((X * X) + (Y * Y));
+    decimal GetPrice(string sku);
 }
+
+internal sealed class PricingService(IPriceSource priceSource)
+{
+    public decimal GetTotal(string sku, int quantity) => priceSource.GetPrice(sku) * quantity;
+}
+EOF
+
+    mkdir -p PricingServiceTests
+    cat > PricingServiceTests/GetTotalTests.cs <<'EOF'
+namespace Pricing.Tests;
+
+// Add focused PricingService.GetTotal coverage here.
 EOF
     ;;
 

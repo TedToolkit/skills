@@ -1,4 +1,4 @@
 interface:
-  display_name: "Implement Feature with TDD"
-  short_description: "Implement one approved feature or work package with TDD."
+  display_name: "Implement Change with TDD"
+  short_description: "Implement one approved work item with TDD."
   default_prompt: "Use $implement-change-tdd to implement this approved change in small Red-Green-Refactor cycles."

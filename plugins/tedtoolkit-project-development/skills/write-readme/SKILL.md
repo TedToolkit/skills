@@ -1,22 +1,24 @@
 ---
 name: write-readme
 description: >-
-  Write, review, or restructure README.md files in .NET repositories. Use when creating or improving
-  a repository-root README, a README beside a .csproj project, or a README in an ordinary directory;
-  when explaining installation, package usage, project architecture, or a focused subsystem without
-  duplicating information owned by a parent README.
+  Orient readers with evidence-based README files in .NET repositories. Use for a repository entry
+  point, package consumer guide beside a csproj, or directory map that must explain first use,
+  capabilities, responsibilities, or navigation, including orientation requested by another
+  project-development skill.
 ---
 
 # Write README
 
-Treat each README as the entry point for its directory's audience. Keep the scope narrow: a child
+Make each README an **entry point** for its directory's audience. Keep the scope narrow: a child
 README adds information that its parent cannot express clearly, rather than retelling it.
 
-This skill owns reader-facing orientation and first-use guidance. It may summarize approved product
-intent but must not redefine the audience, problem, value, or non-goals; hand those changes to
-`library-product-intent`. Hand recurring technical rules, architecture decisions, and delivery
-requirements to `design-principles`, `architecture-design`, and `change-design` rather than storing
-competing copies in a README.
+This skill owns reader-facing orientation and first-use guidance. Read the governing dependency
+direction in [change-development-workflow.md](../../references/change-development-workflow.md)
+before summarizing product, architecture, principle, or delivery content. Link the owning record;
+invoke `library-product-intent`, `architecture-design`, `design-principles`, or `change-design`
+when that source content is missing.
+
+Keep `docs/changes/` on its explicit `change.md` and focused work-item files; place no README there.
 
 ## Inspect before drafting
 
@@ -81,3 +83,7 @@ or local rules cannot be inferred from the name and files.
 Before proposing the final change, verify links and commands, ensure headings follow a logical
 outline, and remove duplicated or stale content. Re-read each README from its intended reader's
 starting point: it should answer why this scope exists, what to do next, and where to find detail.
+
+Complete when every claim has repository evidence, every command and link is verified, each fact
+has one owning location, empty template sections are absent, and the intended reader can complete
+their first task from the documented path.

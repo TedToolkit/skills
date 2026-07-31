@@ -66,4 +66,5 @@ this area changes.>
 
 Do not restate repository installation, NuGet consumption, or generic coding rules. Do not document
 every class or mirror the file tree; let the source and names carry ordinary detail. Do not add a
-directory README merely because a directory exists.
+directory README merely because a directory exists. Never add one under `docs/changes/`; use the
+workflow's explicitly named `change.md` and work-item files.

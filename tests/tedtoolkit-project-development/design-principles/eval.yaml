@@ -32,10 +32,17 @@ scenarios:
       - type: "file_not_contains"
         path: "docs/principles/*.md"
         value: "pending commit"
+      - type: "file_not_contains"
+        path: "docs/principles/*.md"
+        value: "docs/changes"
+      - type: "file_not_contains"
+        path: "docs/principles/*.md"
+        value: "TRANSIENT-PRINCIPLES-CHANGE"
       - type: "command"
         run: "git diff --exit-code -- Sample.cs"
     rubric:
       - "Distinguishes repository-wide principles from architecture records and ADRs."
       - "Records strength, practical implications, review triggers, and an exception route instead of presenting principles as unqualified slogans."
+      - "The durable principle set does not reference or depend on the temporary docs/changes artifact."
       - "Does not modify production code."
     timeout: 420

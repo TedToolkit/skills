@@ -4,8 +4,7 @@
 
 Draft | Approved | In progress | Completed | Superseded
 
-- Change owner:
-- Approval owner:
+- Approval evidence: user confirmation, issue comment, or other approval source.
 
 ## 📝 Clarification and decision log
 
@@ -51,19 +50,36 @@ ADRs rather than duplicating their rationale. Do not introduce a second goal her
 
 - Applicable product intent and revision: `docs/product/README.md@<full Git commit SHA>`, or none.
 - Applicable principles and revision: `docs/principles/<topic>.md@<full Git commit SHA>`, or none.
-- Related ADRs and status: `docs/adr/ADR-<number>-<slug>.md`, or none.
+- Related accepted ADRs and revision: `docs/adr/ADR-<number>-<slug>.md@<full Git commit SHA>`, or none.
 - Related architecture records and revision: `docs/architecture/<topic>.md@<full Git commit SHA>`, or none.
 - Reapproval trigger: a governing record changes before this change completes.
 
-List the resulting implementation constraints in each work package. Links provide traceability;
-they do not substitute for an implementation constraint.
+State the resulting downstream delivery constraints here. Later work items must copy them into
+their explicit governing constraints. Links provide traceability; they do not substitute for a
+constraint.
 
 ## 🧭 Planned approach
 
 Describe how the change will achieve the outcome: affected boundaries, intended component or data
 flow changes, compatibility strategy, and material alternatives rejected. Do not include work
-packages, implementation steps, file lists, or verification commands; those belong to
-`plan-work-items` after this design is approved.
+packages, private implementation steps, file lists, or focused verification commands. Work-item
+boundaries and proof standards belong to `plan-work-items`; private code and test organization
+belong to `implement-change-tdd`. Resolve research, design review, and decisions here. State the
+target delivery artifact categories that must change; workflow control records (this change design,
+work items, review reports, and status evidence) do not count. If the conclusion is that no target
+delivery artifact changes, state that evidence and do not create work items.
+
+## 🔀 Delivery disposition and operational handoffs
+
+- Target delivery artifacts: code | tests | configuration | build automation | documentation | None.
+- No-delivery-change evidence and closure criterion: required when target delivery artifacts are None.
+
+| External operational handoff | Owner | Completion evidence | Required before change closure? |
+| --- | --- | --- | --- |
+| None, or describe a release, deployment, access request, manual configuration, or communication |  |  | Yes / No |
+
+Operational handoffs are tracked outside the work-item flow. They may block change closure, but they
+are never delivery-map rows or work items.
 
 ## 🧪 Behavior cases
 

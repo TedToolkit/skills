@@ -1,30 +1,28 @@
 ---
 name: design-principles
 description: >-
-  Create, review, revise, or retire repository design principles that govern recurring architecture
-  and engineering trade-offs. Use when a team needs to establish `docs/principles/`, define the
-  rationale and exception path for a cross-cutting design rule, resolve a conflict between an
-  approved change and an existing principle, or decide whether a recurring choice belongs in a
-  principle, an architecture record, or an ADR. Do not use for a one-off technology or architecture
-  choice; use architecture-design for that design and its ADR when warranted.
+  Govern recurring architecture and engineering trade-offs with repository design principles. Use
+  when a stable default, rationale, strength, scope, review trigger, or exception route must be
+  created, revised, retired, or distinguished from a one-off architecture decision.
 ---
 
 # Design Principles
 
-Keep principles few, durable, and useful in a real design review. Principles are the highest-level
+Keep principles **few** and durable enough to decide a real recurring trade-off. Principles are the highest-level
 technical governance source: they must conform to approved product intent, architecture design must
 follow them, and later layers may only make them more concrete. A principle is a default for a
 recurring trade-off, not a retrospective description of code and not a substitute for an ADR.
 
-This skill owns recurring technical defaults, not the library's market or user purpose. When that
-purpose is missing or disputed, invoke `library-product-intent`; when a specific technical choice
-is enduring or difficult to reverse, hand it to `architecture-design`; when the choice is specific
-to one delivery, hand it to `change-design`.
+This skill owns recurring technical defaults. Read
+[change-development-workflow.md](../../references/change-development-workflow.md) before
+classifying another concern. Its governing dependency direction is authoritative; re-establish
+every principle from durable evidence. Invoke `architecture-design` for a one-off enduring
+technical decision and `change-design` for a bounded delivery contract.
 
 ## Inspect and classify
 
 1. Read repository guidance, `docs/product/README.md` when it exists, `docs/principles/`, applicable
-   architecture records, related ADRs, representative current code, and active change designs.
+   architecture records, related ADRs, representative current code, and durable repository evidence.
 2. Copy the principle templates immediately, leave their status as `Draft`, and record the known
    evidence and unknowns. These Drafts support discussion only; they do not activate a principle.
 3. State the recurring decision, governed scope, owner, and the long-term cost the principle should
@@ -37,7 +35,8 @@ to one delivery, hand it to `change-design`.
    - A recurring default with a stable rationale belongs in `docs/principles/`.
    - Current component boundaries or cross-cutting behavior belong in `docs/architecture/`.
    - A material, durable, or difficult-to-reverse choice and any approved exception belongs in an ADR.
-   - A change-specific implementation contract belongs in `docs/changes/`.
+   - A change-specific behavioral contract or delivery boundary belongs in `docs/changes/`; private
+     implementation design does not.
 5. Do not create a principle for a one-off preference, an executable formatting rule, or an
    unexamined generalization from one change.
 
@@ -73,8 +72,9 @@ whether its documentation has been committed is outside the principle documents.
 
 External hard constraints and security or compliance obligations take precedence. An accepted ADR
 may define a narrower exception; it does not silently rewrite the principle. Architecture design
-must link the principles it follows or intentionally overrides. Link the ADR, change, and
-architecture record rather than copying their rationale.
+must link the principles it follows or intentionally overrides. Link durable ADRs and architecture
+records rather than copying their rationale. Never link a change or delivery artifact from a
+principle document.
 
 ## Govern changes and exceptions
 
@@ -93,6 +93,10 @@ Treat a proposed deviation as a design question, not a rule violation to hide:
 ## Approval gate
 
 Present the proposed principle or revision with its scope, alternatives, strength, practical effect
-on current changes, and exception route. Draft principle files may be created and revised during the
+on delivery work, and exception route. Draft principle files may be created and revised during the
 clarification loop; wait for explicit approval before changing any principle to `Active`, creating
 an architecture record or ADR, or changing production code.
+
+Complete when each principle governs a recurring choice, has one rationale and exception route,
+depends only on durable evidence, and is either explicitly activated by the user or remains a Draft
+with its unresolved decisions recorded.

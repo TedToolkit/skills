@@ -15,14 +15,14 @@ scenarios:
         run: "git status --porcelain"
         stdout_empty: true
       - type: "output_contains"
-        value: "approval"
+        value: "approved"
     rubric:
       - "Identifies that the design is not approved and does not begin Red-Green-Refactor."
       - "Requests approval or a completed behavioral contract rather than inventing the implementation."
     timeout: 420
 
-  - name: "Do not implement directly from a change index"
-    prompt: "Implement the approved geometry-rebuild change with TDD. The repository only contains the change index, with several public migrations and no selected work package. Do not modify files yet."
+  - name: "Do not implement directly from a change record"
+    prompt: "Implement the approved geometry-rebuild change with TDD. The repository only contains the change record, with several public migrations and no selected work package. Do not modify files yet."
     setup:
       copy_test_files: true
       commands:
@@ -33,8 +33,28 @@ scenarios:
         run: "git status --porcelain"
         stdout_empty: true
       - type: "output_contains"
-        value: "change-design"
+        value: "work-item"
     rubric:
-      - "Refuses to treat a change index as an implementation contract."
+      - "Refuses to treat a change record as an implementation contract."
       - "Requests a selected, approved work package and does not begin Red-Green-Refactor."
     timeout: 420
+
+  - name: "Choose private implementation from an approved delivery boundary"
+    prompt: "Prepare to implement TEMP-001 with TDD. Inspect the approved change, work item, and code, then present the local behavior slices, anticipated files, and focused verification commands. Do not modify files yet."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh implementation-freedom"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "Temperature.cs"
+    rubric:
+      - "Accepts the approved outcome, delivery constraints, prerequisites, and verification standard without demanding a prewritten private-file list or implementation steps."
+      - "Inspects the repository and chooses concrete tests, anticipated files, and behavior slices as a local implementation plan."
+      - "Treats the local plan as revisable within the approved behavior, public contract, scope, and governing constraints."
+      - "Does not modify files before the implementation approval gate."
+    timeout: 600

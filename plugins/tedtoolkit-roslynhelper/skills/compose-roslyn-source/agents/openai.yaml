@@ -1,4 +1,4 @@
 interface:
   display_name: "Compose Roslyn Source"
   short_description: "Generate C# with TedToolkit.RoslynHelper."
-  default_prompt: "Generate this source with TedToolkit.RoslynHelper."
+  default_prompt: "Use $compose-roslyn-source to generate this C# source structurally with TedToolkit.RoslynHelper."

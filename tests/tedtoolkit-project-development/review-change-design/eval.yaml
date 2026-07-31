@@ -5,7 +5,7 @@ config:
 
 scenarios:
   - name: "Block an incomplete change design before planning"
-    prompt: "Review docs/changes/P1-temperature-parse/README.md as a change design. Do not modify files, create work items, or inspect implementation."
+    prompt: "Review docs/changes/P1-temperature-parse/change.md as a change design. Do not modify files, create work items, or inspect implementation."
     setup:
       copy_test_files: true
       commands:
@@ -27,7 +27,7 @@ scenarios:
     timeout: 420
 
   - name: "Mark a complete design ready for human approval"
-    prompt: "Review docs/changes/P1-temperature-parse/README.md as a change design. Do not modify files or create work items."
+    prompt: "Review docs/changes/P1-temperature-parse/change.md as a change design. Do not modify files or create work items."
     setup:
       copy_test_files: true
       commands:
@@ -47,7 +47,7 @@ scenarios:
     timeout: 420
 
   - name: "Block a durable decision without an accepted ADR"
-    prompt: "Review docs/changes/P1-temperature-parse/README.md as a change design. Do not modify files or create work items."
+    prompt: "Review docs/changes/P1-temperature-parse/change.md as a change design. Do not modify files or create work items."
     setup:
       copy_test_files: true
       commands:

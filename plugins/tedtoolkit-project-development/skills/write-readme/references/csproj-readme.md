@@ -1,5 +1,13 @@
 # `.csproj` README: NuGet façade
 
+## Contents
+
+- [Build a complete capability inventory first](#build-a-complete-capability-inventory-first)
+- [Template](#template)
+- [Writing points](#writing-points)
+- [Publish gate](#publish-gate)
+- [Exclude](#exclude)
+
 Write for a consumer who has reached one project or NuGet package and needs to decide whether and how
 to use it. Give them both a complete map of its public capabilities and a working first path. This
 README may be shown on NuGet only when packaging includes it; verify `PackageReadmeFile`, packing

@@ -1,26 +1,31 @@
 ---
 name: compose-roslyn-source
 description: >-
-  Compose generated C# source with TedToolkit.RoslynHelper instead of System.Text.StringBuilder.
-  Trigger only when the active C# project directly references TedToolkit.RoslynHelper through a
-  PackageReference or ProjectReference (or a transitive project reference exposes its public API),
-  and the task creates or changes generated source, a Roslyn source generator, analyzer output, or
-  another code-generation pipeline. Do not trigger for projects where TedToolkit.RoslynHelper is unavailable.
+  Compose structurally generated C# with TedToolkit.RoslynHelper. Use when a project that references
+  the library creates or changes a Roslyn source generator, analyzer output, or another C# code-
+  generation pipeline.
 ---
 
 # Compose Roslyn Source
 
-First inspect the active `.csproj`, `Directory.Packages.props`, and project-reference graph. Continue
-only if `TedToolkit.RoslynHelper` is available to the active project. Otherwise, do not recommend or
-use this skill's APIs.
+Keep generated syntax **structural** until one final emission.
 
-When generating C# source, do not use `System.Text.StringBuilder`, interpolated source fragments, or
-manual indentation. Model the generated syntax with this library and emit it through `ToCode()` or
-`SourceFile.Generate(...)`. Use `Custom` only for syntax the library cannot model.
+Keep this skill as the owner of source composition. When available, let
+`write-csharp-api-comments` own caller-facing XML contract prose, `tunit-unit-testing` own TUnit
+generator-test mechanics, and `fix-csharp-diagnostics` own a diagnostics-only cleanup phase.
 
-For every implementation, read [the usage patterns](references/usage-patterns.md). Select the smallest
-pattern that represents the required generated syntax; do not reimplement formatting, type rendering,
-or symbol conversion by hand.
+1. Inspect the active project, central package file, and reference graph. Continue only when
+   `TedToolkit.RoslynHelper` is available; otherwise report the failed package gate.
+2. Read [usage-patterns.md](references/usage-patterns.md) and map every required declaration,
+   member, statement, expression, symbol conversion, and preprocessor construct to a public syntax
+   object. Complete when only genuinely unsupported fragments remain custom.
+3. Present the syntax-object map, proposed target files, custom fragments, and verification command.
+   Wait for explicit approval before editing generator code.
+4. Compose the file, namespace, declarations, members, and statements with syntax objects. Emit once
+   through `ToCode()` or `SourceFile.Generate(...)`.
+5. Build the affected project and run generator or snapshot tests. Complete when generated source
+   compiles and preserves qualification, nullability, attributes, generic constraints, and
+   conditional compilation.
 
 ## Compose a source file
 
@@ -60,5 +65,5 @@ with its factories, such as `Class`, `Method`, `Property`, and `Field`. They add
 `SourceComposer.Attribute`, `SourceComposer.TypeParameter`, and `DataType.FromSymbol` rather than
 rendering symbol display strings manually.
 
-Keep the generated code structurally represented until the final `ToCode()` or `Generate()` call, then
-build the affected project or generator tests after editing.
+Use `Custom` only after the reference confirms that no public syntax object represents the required
+construct; keep that fragment minimal.

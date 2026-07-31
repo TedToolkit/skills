@@ -1,19 +1,20 @@
 ---
 name: review-change-design
 description: >-
-  Review a draft or approved change-design document before delivery planning or implementation. Use
-  when asked whether a change design, change proposal, BehaviorCases, scope, constraints, risks,
-  completion criteria, or estimate is correct, complete, internally consistent, and ready for human
-  approval; or when a change document needs an independent read-only review. Do not review code,
-  tests, work items, or implementation readiness; use review-implementation after delivery.
+  Trace a draft or approved change design for completeness and internal consistency before delivery
+  planning. Use when its goal, scope, BehaviorCases, constraints, risks, ADR coverage, completion
+  criteria, estimate, or readiness for human approval needs an independent read-only review.
 ---
 
 # Change-Design Review
 
-Review the behavioral contract before it becomes the basis for delivery planning. This skill reviews
+Trace every material contract item before it becomes the basis for delivery planning. This skill reviews
 the change document, not the implementation that may later satisfy it. It is independent and
 read-only: do not edit the draft, create work items, run commands, approve the change, or begin
 implementation.
+
+Read [change-development-workflow.md](../../references/change-development-workflow.md) to distinguish
+the behavioral contract, target delivery artifacts, workflow control records, and operational handoffs.
 
 ## Set the boundary
 
@@ -43,12 +44,16 @@ Check the following against the cited evidence:
    questions are proportionate to the change's reversibility and impact.
 5. Completion criteria are observable, and the planning estimate states its range, assumptions,
    exclusions, confidence, and re-estimation trigger.
-6. The document contains no delivery sequencing, work-item contracts, or implementation steps.
-   Route these to `plan-work-items` after the design is approved.
+6. The document contains no delivery dependencies, work-item briefs, or private implementation
+   steps. Route delivery dependencies and work-item boundaries to `plan-work-items` after approval;
+   leave private implementation decisions to `implement-change-tdd`.
 7. Every material, enduring, or difficult-to-reverse technical choice has an accepted ADR linked
    from the change. A proposed or missing ADR is a blocking finding: route it to
    `architecture-design` now, then revise the change with the accepted ADR's constraints. Do not
    approve a change first and defer its ADR to implementation review.
+8. The delivery disposition is explicit: target delivery artifacts are named, a no-delivery-change
+   conclusion has evidence and completion criteria, and every required operational handoff has an
+   owner and closure evidence. Operational handoffs must not be disguised as proposed work items.
 
 Treat a missing behavioral constraint, ambiguous outcome, conflicting governing record, missing
 material risk, or required ADR as a blocking design finding. Do not fix it in this skill; route the
@@ -92,3 +97,7 @@ Choose `Needs revision` when a Blocking finding exists. Choose `Ready for approv
 contract is complete and internally consistent with its governing records. The latter is a request
 for human approval, not approval itself. After explicit approval, hand delivery planning to
 `plan-work-items`; after implementation, hand conformance review to `review-implementation`.
+
+Complete when every material contract item has a traceability status, every finding has evidence,
+impact, smallest revision, owner, and verification, and the conclusion follows mechanically from
+the blocking set.

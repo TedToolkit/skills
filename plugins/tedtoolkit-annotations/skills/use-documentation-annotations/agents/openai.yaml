@@ -1,4 +1,4 @@
 interface:
   display_name: "Use Documentation Annotations"
   short_description: "Document C# API contracts and behavior."
-  default_prompt: "Review API contracts in this C# project."
+  default_prompt: "Use $use-documentation-annotations to review and specify observable API contracts in this C# project."

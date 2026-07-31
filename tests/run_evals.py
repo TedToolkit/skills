@@ -296,6 +296,7 @@ def parse_stream_file(path: Path) -> tuple[str, float | None]:
 def run_scenario(skill: str, eval_dir: Path, scen: dict, args, plugin_dir: Path) -> dict:
     name = scen.get("name", "<unnamed>")
     workdir = Path(tempfile.mkdtemp(prefix=f"eval-{skill}-"))
+    result_path: Path | None = None
     setup = scen.get("setup", {}) or {}
     real_home = Path(os.environ.get("USERPROFILE") or os.path.expanduser("~"))
 
@@ -347,7 +348,7 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args, plugin_dir: Path)
 
         # 4. Invoke the selected marketplace plugin through Codex. Capture the
         # final response in a file so assertions do not depend on event schema.
-        result_path = workdir / "codex.last-message.txt"
+        result_path = workdir.parent / f"{workdir.name}-codex-{uuid.uuid4().hex}.last-message.txt"
         cmd = codex_command("exec", "--ephemeral", "--skip-git-repo-check",
                             "--sandbox", "workspace-write", "--output-last-message",
                             str(result_path), prompt_text)
@@ -431,6 +432,8 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args, plugin_dir: Path)
                     shutil.rmtree(target, ignore_errors=True)
                 else:
                     target.unlink(missing_ok=True)
+        if result_path is not None:
+            result_path.unlink(missing_ok=True)
         if args.keep:
             record["kept"] = str(workdir)
         else:

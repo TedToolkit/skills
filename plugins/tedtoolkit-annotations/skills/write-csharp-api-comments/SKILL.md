@@ -1,29 +1,33 @@
 ---
 name: write-csharp-api-comments
 description: >-
-  Write, review, or revise C# XML documentation and adjacent comments for types and API members:
-  classes, structs, records, interfaces, enums, delegates, constructors, methods, functions,
-  properties, indexers, events, fields, and constants. Use when improving human-readable API
-  documentation, explaining non-obvious constraints, or reviewing whether comments match behavior.
+  Document C# APIs with accurate XML documentation and focused adjacent comments. Use when writing
+  or reviewing caller-visible contracts, examples, exceptions, lifecycle, ownership, concurrency,
+  or non-obvious implementation rationale, including prose required by an annotation skill.
 ---
 
 # Write C# API Comments
 
-Use the rules in this skill as the self-contained standard for drafting and reviewing C# API comments.
+Write caller contracts that remain true when the implementation is read line by line.
 
-## Workflow
+When a referenced TedToolkit package can represent part of the contract, invoke
+`use-boxing-annotations`, `use-const-annotations`, `use-documentation-annotations`,
+`use-maintenance-annotations`, or `use-ownership-annotations` for its machine-readable semantics.
+This skill retains the prose.
 
-1. Read root `CLAUDE.md` and `AGENTS.md` before inspecting the target. Use the human language for
-   README and code-comment prose declared in `CLAUDE.md`; `AGENTS.md` is only a direct reference to
-   that source of truth. A language explicitly requested by the user takes precedence. If neither
-   source explicitly states the language, ask the user before drafting or editing comments; do not
-   infer it from existing comments, identifiers, or the C# implementation language.
-2. Inspect the type or member declaration, implementation, and existing documentation. Identify only
-   facts a caller cannot safely infer from the code.
-3. Draft the XML documentation and any needed annotations. Show the proposed change and wait for
-   explicit approval before modifying source files.
-4. After approval, update documentation and annotations in the same change. Re-read the edited member
-   to ensure every XML element agrees with the signature and behavior.
+## Steps
+
+1. Read repository guidance and resolve the prose language from the user's request or `CLAUDE.md`.
+   Use the nearest established documentation language only when guidance is silent; ask when it
+   remains ambiguous.
+2. Inspect every in-scope declaration, implementation, caller-visible path, and existing comment.
+   Complete when each public, protected, and internal member is classified as accurate, missing,
+   stale, or redundant.
+3. Draft only facts a caller cannot safely infer. Show the complete proposal and wait for explicit
+   approval before modifying source.
+4. After approval, update comments and applicable annotations together. Complete when every XML tag
+   maps to the current signature, every contract matches behavior, and every example is usable in
+   the documented consumer context.
 
 ## Choose the right form
 
@@ -32,11 +36,8 @@ Use the rules in this skill as the self-contained standard for drafting and revi
   benchmark-backed limit, race avoidance, or compatibility workaround.
 - Use an attribute only when a referenced annotation package represents the contract precisely. Do not
   introduce a package merely to decorate a comment.
-- When an attribute argument names a C# source symbol, use `nameof(...)` instead of a handwritten
-  string. Retain literal strings only for human-readable or otherwise non-symbol annotation values.
-- Keep attribute arguments plain: do not use Unicode escape literals such as `\uXXXX` or
-  `\UXXXXXXXX`, non-printing or invisible Unicode, special symbols, emoji, or non-ASCII punctuation
-  in attributes. Prefer `nameof(...)`, numeric values, enum values, and simple printable ASCII strings.
+- When an existing TedToolkit annotation package represents the contract, apply the selected skill
+  and [attribute-arguments.md](../../references/attribute-arguments.md).
 - XML documentation comments may use literal Unicode normally, subject to well-formed XML. Add a
   familiar emoji or visible symbol proactively when it makes a caller-facing contract easier to scan:
   for example, `⚠️` for a hazard or restriction, `💡` for a usage tip, `✅` for a guarantee, and `⏱️`
@@ -44,7 +45,7 @@ Use the rules in this skill as the self-contained standard for drafting and revi
   `<remarks>`, `<example>`, or multi-step note rather than replacing a summary, XML element, or prose
   with an icon. Prefer the real character over `\u...` escape text in XML documentation, and avoid
   invisible characters or decorative repetition.
-- Delete a comment that restates the identifier, syntax, or immediately visible control flow.
+- Remove comments that restate identifiers, syntax, or immediately visible control flow.
 
 ## Rules
 
@@ -78,8 +79,8 @@ Use the rules in this skill as the self-contained standard for drafting and revi
   adds a precondition, exception, side effect, example, or other restriction.
 - Put `//` comments immediately beside the relevant code and explain why: an external protocol,
   measured performance boundary, race avoidance, compatibility constraint, or unrepresentable assumption.
-- Never leave bare `TODO`, `FIXME`, or `HACK`. Use a maintenance annotation with an actionable removal
-  condition or issue reference.
+- Represent maintenance work with an actionable removal condition or issue reference; use the
+  maintenance annotation skill when its package is available.
 
 ## Examples
 
@@ -99,18 +100,9 @@ Use the rules in this skill as the self-contained standard for drafting and revi
   base member that owns the contract. Add a local `<example>` only when the implementation adds behavior
   that callers must understand.
 
-## Contract checklist
-
-For each method or function, determine whether callers need to know its input requirements, result
-including `null` or empty cases, exception conditions, cancellation behavior, observable state or I/O,
-threading or blocking constraints, disposable-resource ownership, and at least one realistic example.
-Use a TedToolkit annotation package only when that package is already referenced by the project;
-annotations complement rather than replace XML documentation.
-
 ## Review before proposing changes
 
-Check that every XML tag maps to a real signature element, every parameter name is current, every
-exception matches an observable throw path, every `cref` resolves to the intended symbol, and every
-example can actually be compiled or executed in the documented API's expected consumer context. Prefer a
-smaller accurate contract over speculative detail. If source behavior is ambiguous, ask for the intended
-contract instead of inventing one.
+For every method or function, account for inputs, null and empty results, exceptions, cancellation,
+observable state or I/O, threading or blocking, resource ownership, and a realistic example when
+applicable. Prefer a smaller proven contract over speculative detail; ask for the intended contract
+when behavior remains ambiguous.

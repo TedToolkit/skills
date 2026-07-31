@@ -1,33 +1,29 @@
 ---
 name: use-maintenance-annotations
 description: >-
-  Use TedToolkit.Annotations.Maintenance to record deliberate C# workarounds, temporary
-  implementations, technical debt, and cleanup work. Trigger only when the current project directly
-  references TedToolkit.Annotations.Maintenance (including a transitive project reference that exposes it);
-  do not use this skill for projects that do not reference the package.
+  Record actionable C# workarounds, temporary implementations, technical debt, and cleanup triggers
+  with TedToolkit.Annotations.Maintenance. Use when a project that references the package contains
+  a deliberate compromise with a concrete cause and removal condition.
 ---
 
 # Use TedToolkit.Annotations.Maintenance
 
-Confirm the package reference first. If absent, do not suggest maintenance attributes from this package.
+Turn a deliberate compromise into a removable maintenance record. Read
+[attribute-arguments.md](../../references/attribute-arguments.md) before drafting its text.
+Invoke `use-documentation-annotations` for an independent API contract and
+`write-csharp-api-comments` for its caller-facing explanation. This skill retains the maintenance
+record.
 
-## Workflow
+## Steps
 
-1. Verify that the workaround or debt is real and identify its cause, affected behavior, and removal
-   condition or tracking issue.
-2. Choose the most specific annotation, draft the reason as an actionable complete sentence, and show
-   it for approval before modifying source.
-3. After approval, keep it on the affected code and remove it in the same change that removes its cause.
-
-## Attribute argument rule
-
-Use `nameof(...)` rather than a handwritten string when an attribute argument identifies a C# source
-symbol. Keep literal strings for the actionable maintenance rationale and other non-symbol values.
-Attribute text may use visible Unicode, including Chinese and ordinary full-width punctuation. Do
-not use non-printing or invisible Unicode characters: control or format characters (such as
-zero-width or bidirectional controls), U+0085, U+2028/U+2029, or unpaired surrogates. Rider may
-display them as escape sequences such as `\u...`. XML documentation comments may use Unicode
-normally, subject to well-formed XML.
+1. Confirm that the active project references `TedToolkit.Annotations.Maintenance`; otherwise
+   report the failed package gate.
+2. Establish the compromise's external cause or trade-off, affected behavior or cost, owner, and
+   objective removal trigger. Complete when all four are explicit.
+3. Choose the narrowest declaration and most specific annotation. Show the complete proposed record
+   and wait for explicit approval before editing.
+4. After approval, build with the analyzer. Complete when the annotation remains beside its cause
+   and the trigger is specific enough to decide whether removal is due.
 
 ## Selection guide
 
@@ -41,18 +37,15 @@ normally, subject to well-formed XML.
     "Replace the linear scan when the collection exceeds 1,000 items; tracked by #123.")]
 ```
 
-Do not replace this with an ownerless `TODO`, `FIXME`, or `HACK`. Define `ANNOTATIONS_MAINTENANCE`
-only when the attributes must be retained in compiled metadata for reflection or downstream tools.
+Use the annotation instead of an ownerless `TODO`, `FIXME`, or `HACK`. Define
+`ANNOTATIONS_MAINTENANCE` only when reflection or downstream tooling needs compiled metadata.
 
 ## Write actionable maintenance records
 
-State the external cause or intentional trade-off, the affected behavior or cost, and the event that
-allows removal. Prefer a version, measurable threshold, migration milestone, or issue identifier over
-an indefinite promise. Put the annotation on the narrowest affected declaration; do not mark a whole
-type for a single method-level workaround.
+Prefer a version, measurable threshold, migration milestone, or issue identifier over an indefinite
+promise.
 
 ## Review and removal
 
-During review, reject vague reasons such as "temporary" or "fix later". When the removal condition is
-met, remove both the workaround and its annotation in the same change. Retain metadata conditionally
-only when reflection or downstream tooling needs to inspect it after compilation.
+When the removal condition is met, remove the cause and annotation in the same change. Treat vague
+reasons such as "temporary" or "fix later" as incomplete records.

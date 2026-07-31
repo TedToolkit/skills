@@ -21,3 +21,48 @@ scenarios:
       - "Uses `dotnet test --configuration Release --project Geometry.Tests.csproj` as the verification command."
       - "Keeps the explanation aligned with TUnit conventions, including its Microsoft.Testing.Platform runner."
     timeout: 420
+
+  - name: "Write a focused TUnit.Mocks test"
+    prompt: "Add a focused TUnit test for PricingService.GetTotal. Isolate IPriceSource with the official TUnit mocking library, update the test project dependencies as needed, follow the repository's test style, run the documented Release command, and report the result."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh tunit-mocks"
+    assertions:
+      - type: "exit_success"
+      - type: "file_contains"
+        path: "Pricing.Tests.csproj"
+        value: "TUnit.Mocks"
+      - type: "file_exists"
+        path: "PricingServiceTests/GetTotalTests.cs"
+      - type: "file_contains"
+        path: "PricingServiceTests/GetTotalTests.cs"
+        value: "class GetTotalTests"
+      - type: "file_contains"
+        path: "PricingServiceTests/GetTotalTests.cs"
+        value: "IPriceSource.Mock("
+      - type: "file_contains"
+        path: "PricingServiceTests/GetTotalTests.cs"
+        value: "MockBehavior.Strict"
+      - type: "file_contains"
+        path: "PricingServiceTests/GetTotalTests.cs"
+        value: "WasCalled(Times.Once)"
+      - type: "file_contains"
+        path: "PricingServiceTests/GetTotalTests.cs"
+        value: "await Assert.That"
+      - type: "file_not_contains"
+        path: "*.cs"
+        value: "Moq"
+      - type: "file_not_contains"
+        path: "*.cs"
+        value: "NSubstitute"
+      - type: "file_contains"
+        path: ".command-log.txt"
+        value: "dotnet test"
+    rubric:
+      - "Uses TUnit.Mocks rather than introducing a second mocking framework."
+      - "Configures only the price-source behavior needed by the scenario and asserts the observable total."
+      - "Verifies the contractually meaningful collaborator call with awaited TUnit assertion integration."
+      - "Places GetTotalTests.cs and GetTotalTests under the PricingServiceTests directory."
+      - "Preserves the repository's XML summary, naming, and documented Release command conventions."
+    timeout: 420

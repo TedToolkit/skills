@@ -4,8 +4,29 @@ config:
   max_parallel_runs: 1
 
 scenarios:
+  - name: "Block behavior-changing code without a design"
+    prompt: "Review the current implementation diff. No change design was created. You may use read-only commands to inspect files and the diff. Do not modify files or run builds or tests. Use the exact review report structure."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh undocumented-behavior-change"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_contains: "Temperature.cs"
+      - type: "output_contains"
+        value: "Not ready"
+      - type: "output_contains"
+        value: "change-design"
+    rubric:
+      - "Recognizes the new Fahrenheit conversion API as a behavior-changing production-code modification."
+      - "Reports the missing approved design as a blocking finding instead of treating local correctness as sufficient."
+      - "Does not modify files or run builds or tests."
+    timeout: 420
+
   - name: "Block a change that misses an approved behavior case"
-    prompt: "Review the current change against docs/changes/P1-temperature-parse/work-items/TEMP-001-parse.md. Do not modify files or run commands. Use the exact review report structure and determine whether it is Ready to merge, Ready with follow-ups, or Not ready."
+    prompt: "Review the current change against docs/changes/P1-temperature-parse/work-items/TEMP-001-parse.md. You may use read-only commands to inspect files and the diff. Do not modify files or run builds or tests. Use the exact review report structure and determine whether it is Ready to merge, Ready with follow-ups, or Not ready."
     setup:
       copy_test_files: true
       commands:
@@ -29,12 +50,12 @@ scenarios:
       - "States that it did not run builds or tests and does not modify any file."
       - "Separates a documentation-disposition recommendation from authorization to delete or archive documents."
       - "Does not ask for a change-closure deletion decision when the review is Not ready."
-      - "Treats a missing material verification mapping, objective definition of done, prerequisite evidence, or execution sequence as a blocking delivery-contract defect."
+      - "Treats a missing material verification mapping, objective definition of done, or real prerequisite evidence as a blocking delivery-boundary defect; it does not require an invented execution sequence."
       - "For every finding, recommends the smallest concrete modification, names the responsible skill, and states how the change should be verified."
     timeout: 420
 
-  - name: "Do not infer an implementation boundary from a change index"
-    prompt: "Review the current change against docs/changes/P2-geometry-rebuild/README.md. Do not modify files or run commands."
+  - name: "Do not infer an implementation boundary from a change record"
+    prompt: "Review the current change against docs/changes/P2-geometry-rebuild/change.md. You may use read-only commands to inspect files and the diff. Do not modify files or run builds or tests."
     setup:
       copy_test_files: true
       commands:
@@ -52,7 +73,7 @@ scenarios:
     timeout: 420
 
   - name: "Ask once for disposition after a complete ready change"
-    prompt: "Review the current change against docs/changes/P1-temperature-parse/work-items/TEMP-001-parse.md. Do not modify files or run commands. Use the exact review report structure."
+    prompt: "Review the current change against docs/changes/P1-temperature-parse/work-items/TEMP-001-parse.md. You may use read-only commands to inspect files and the diff. Do not modify files or run builds or tests. Use the exact review report structure."
     setup:
       copy_test_files: true
       commands:
@@ -72,10 +93,10 @@ scenarios:
       - "Recommends a documentation disposition for the completed parent change."
       - "Asks exactly one human change-closure question after finding the complete parent change Ready to merge."
       - "Does not delete or modify the change documents."
-    timeout: 420
+    timeout: 600
 
   - name: "Require durable documentation before recommending deletion"
-    prompt: "Review the current change against docs/changes/P1-temperature-parse/work-items/TEMP-001-parse.md. Do not modify files or run commands. Use the exact review report structure."
+    prompt: "Review the current change against docs/changes/P1-temperature-parse/work-items/TEMP-001-parse.md. You may use read-only commands to inspect files and the diff. Do not modify files or run builds or tests. Use the exact review report structure."
     setup:
       copy_test_files: true
       commands:
@@ -94,4 +115,4 @@ scenarios:
     rubric:
       - "Finds the unrecorded library-wide parsing policy as durable knowledge that requires an ADR."
       - "Does not recommend deletion or ask a closure question while documentation extraction is missing."
-    timeout: 420
+    timeout: 600

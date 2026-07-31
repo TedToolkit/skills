@@ -1,50 +1,56 @@
 ---
 name: review-implementation
 description: >-
-  Review a proposed implementation against its approved change, acceptance criteria, BehaviorCases,
-  code, tests, and directly affected documentation. Use when asked to review an implementation,
-  feature, fix, refactor, migration, or change work-package before merging; check whether code
-  conforms to an approved design or specification; assess implementation readiness; trace
-  requirements through implementation and tests; or recommend whether its human-facing
-  documentation should be retained, extracted, deleted, or exceptionally archived.
-  This is a read-only design-consistency review: do not modify files, run builds or tests, approve a
-  pull request, or implement fixes.
+  Trace an implementation against its approved work item, behavior cases, code, tests, completion
+  evidence, and affected documentation. Use for an independent read-only conformance and merge-
+  readiness review, including documentation extraction and disposition.
 ---
 
 # Implementation Review
 
-Review implementation by evidence, not by whether its code merely looks reasonable. The question is
+Build **traceability** from approved behavior to evidence. The question is
 whether the approved change has been implemented, protected by appropriately expressed tests, and
 documented without unrecorded design changes. Principles and architecture are reviewed when the
 architecture or change design is approved; do not reopen them during final implementation review.
 
-This skill owns read-only conformance review. It consumes the approved work item and its declared
-governing records; it does not reinterpret product intent, principles, architecture, or ADRs. Route
-a missing or changed product-intent constraint to `library-product-intent` through `change-design`,
-and route a delivery-plan defect to `plan-work-items` or an implementation fix to
-`implement-change-tdd`.
+This skill owns read-only conformance review. Read
+[change-development-workflow.md](../../references/change-development-workflow.md) before setting the
+boundary; its terms, governing direction, and documentation lifecycle are authoritative.
 
 ## Set the review boundary
 
-1. Read repository guidance, the approved change index and selected work package, BehaviorCases,
+1. Read repository guidance, the approved change record and selected work item, BehaviorCases,
    acceptance criteria, the current diff, affected production and test code, and directly affected
-   documentation. For a work package, also read its parent change index and declared prerequisites.
+   documentation. For a work item, also read its parent change record and declared prerequisites.
 2. State the reviewed revision or diff range and the documents used as the baseline.
-3. If the supplied document is a change index rather than one work package, say that an
-   implementation-readiness conclusion is not possible until a work package is selected. Do not
-   infer the work-package boundary from the diff.
-4. If there is no approved change design, say that this is a general code review only. Review local
-   correctness and repository conventions, but do not claim that the change satisfies unspecified
-   requirements.
+3. If the supplied document is a change record rather than one work item, say that an
+   implementation-readiness conclusion is not possible until a work item is selected. Keep the
+   work-item boundary anchored in its approved record rather than inferring it from the diff.
+4. If there is no approved change design, inspect the diff only enough to classify it. Report a
+   Blocking finding and route to `change-design` when production code changes observable behavior;
+   do not treat local correctness as a substitute for a design. If the evidence shows purely
+   mechanical, no-behavior maintenance, say that the change-design workflow is not required and
+   limit the conclusion to local correctness and repository conventions. When uncertain, report the
+   missing design as Blocking.
 5. Do not modify files, run builds, run tests, approve a pull request, or infer test results. Point
    to existing test code as evidence of intent, not proof that it currently passes.
 
-Before reviewing code, check the selected work item's delivery contract. Report a blocking
+Before reviewing code, check the selected work item's delivery brief. Report a blocking
 finding when it has more than one independently observable outcome, lacks an objective definition
 of done, omits a verification mapping for a material BehaviorCase, or cannot identify its logical
-prerequisites and recommended execution sequence. Report a blocking finding when completion evidence
-for an earlier prerequisite is absent but the reviewed implementation has begun. Do not reconstruct
-the missing contract from the diff.
+prerequisites. Do not require a recommended order when the items are independent. Report a blocking
+finding when completion evidence for a real prerequisite is absent but the reviewed implementation
+has begun. Do not reconstruct the missing delivery boundary from the diff.
+
+Report a blocking delivery-plan finding when a work item does not name an observable outcome and
+bounded target-delivery area, or exists only for research, review, approval, coordination, or
+external operations. The expected internal area may be non-exhaustive; do not require exact private
+files or symbols. Route design activities to `change-design` and external actions to their
+operational owner; do not treat either as implementation evidence.
+
+For a change-closure conclusion, verify that every required operational handoff named by the parent
+change has recorded completion evidence. Do not review the external action itself as code, and do
+not convert it into a work item because it blocks closure.
 
 Also check that the parent change names exactly one result-oriented change goal and that every
 BehaviorCase and selected work-item outcome contributes to it. Report a blocking finding when the
@@ -55,7 +61,7 @@ such defects to `change-design`; do not invent or rename the goal during review.
 
 Create one row for every acceptance criterion or BehaviorCase in the selected delivery. Map it to
 the implementation and test that express it. Mark a row `covered`, `missing`, `partial`, or
-`deviates` and explain the evidence. Treat implementation belonging to another work package as a
+`deviates` and explain the evidence. Treat implementation belonging to another work item as a
 design deviation even if it appears locally correct.
 
 | Design item | Expected observable behavior | Implementation evidence | Test evidence | Status |
@@ -75,14 +81,21 @@ For every mapped item, inspect whether the code:
    made explicit in the approved change.
 4. Avoids unapproved behavior, hidden side effects, unrelated refactors, and new enduring technical
    decisions that should have an ADR or a design update.
-5. Does not bypass an incomplete prerequisite or silently change the parent change's dependency order.
+5. Does not bypass an incomplete prerequisite.
 6. Satisfies every objective definition-of-done criterion, including recorded passing verification
    evidence, required documentation or migration state, actual effort, and any material estimate
    variance. Treat missing effort or variance alone as a planning follow-up; treat missing required
    verification or delivery evidence as blocking because it cannot unlock the next package.
 
-When the implementation makes a materially different but potentially valid choice, report a design
-deviation. Do not silently reinterpret the design to match code.
+Treat different internal files, private symbols, algorithms, test organization, and edit order as
+ordinary implementation choices when the observable outcome, public contracts, scope, and governing
+constraints remain intact. Report a design deviation only when the implementation materially changes
+one of those approved boundaries; do not silently reinterpret the design to match code.
+
+Report a Blocking finding when a behavior-changing production-code diff is not covered by the
+approved design, even if the resulting code appears locally correct. Route an expanded or changed
+behavioral contract to `change-design` for revision and renewed approval; do not repair the missing
+design in this review.
 
 ## Review test expression without running it
 
@@ -92,46 +105,29 @@ Review negative and boundary cases when the design names them. Flag a mismatched
 needs real infrastructure but is presented as a unit test, or when a slow higher-level test is the
 only protection for deterministic domain behavior.
 
-Follow the repository's existing testing conventions. If the project uses TUnit, apply the
-`tunit-unit-testing` conventions while reviewing its test code, but still do not run `dotnet run`.
+Follow the repository's existing testing conventions while reviewing its test code, but do not run
+the test command.
 
 ## Review documentation consistency
 
-Check whether the change design, parent change, README, migration, rollout documentation, or a
-declared product-intent record must be updated because of this change. A change that materially
-differs from an approved design is not resolved by editing code alone: it needs an explicit
-change-design update and approval. When the approved change itself lacks a necessary constraint,
-hand it to `change-design`; do not infer the missing product, principle, or architecture rule from
-the implementation.
-
-Perform a documentation-disposition review after tracing the implementation. For each material
-document or content block, recommend one of: retain, retain in an ADR, retain as an active migration
-guide, or delete after merge. Base the recommendation on what a future human maintainer needs to
-know, not on preserving the implementation process for an AI.
-
-Before recommending deletion of a completed change, perform a documentation-extraction check.
-Identify every durable decision introduced or changed by the delivery, every current cross-cutting
-semantic that a future maintainer needs, and every still-active migration or operational procedure.
-Verify respectively that it is captured in an accepted ADR, a current architecture record, or an
-active migration guide or runbook. Mark each category `not needed`, `captured`, or `missing` with
-evidence. Do not use an ADR as an archive for the change; capture only a durable decision and its
-rationale. A missing extraction is an Important finding and requires `architecture-design` or the
-appropriate documentation owner before change deletion can be recommended.
+Apply the reference's documentation lifecycle to every material document or content block. Mark
+durable decisions, current cross-cutting semantics, and active migration or operational procedures
+as `not needed`, `captured`, or `missing`, with evidence. A missing extraction is an Important
+finding owned by `architecture-design` or the applicable documentation skill.
 
 Ask for a change-closure decision only when all of the following are true: the conclusion is
-`Ready to merge`; the selected work package completes the parent change; and completion evidence
-exists for every other planned work package; and every documentation-extraction category is `not
+`Ready to merge`; the selected work item completes the parent change; and completion evidence
+exists for every other planned work item; and every documentation-extraction category is `not
 needed` or `captured`. Ask once, at the end of the report, whether the parent
 `docs/changes/<change>/` directory should be deleted after merge, retained, or first distilled into
 an ADR, architecture record, or active migration guide. Recommend deletion by default when nothing
-needs retaining. Do not ask this question for a partial work package, `Ready with follow-ups`, or
+needs retaining. Do not ask this question for a partial work item, `Ready with follow-ups`, or
 `Not ready` review. Do not infer completion merely from a clean-looking diff. A user decision to
 delete is approval for a separate, small documentation cleanup after merge; it is never permission
 to delete during this read-only review.
 
-Never edit, delete, or move a document in this review. A recommendation to delete is not
-authorization: the user must decide, and the approved follow-up should be a separate, small
-documentation change. Use Git history for documents that no longer guide current behavior.
+Keep this review read-only. A human deletion decision authorizes a separate documentation change
+after merge.
 
 ## Report findings
 
@@ -164,7 +160,7 @@ Ready to merge | Ready with follow-ups | Not ready
   Owner: <skill or human>. Verify: <inspection, test, or command>.
 
 ## Design deviations
-- <approved design differs from implementation, cross-work-package scope expansion, or none found>
+- <approved behavior, public contract, governing constraint, or work-item scope differs from implementation; cross-work-item scope expansion; or none found>
 
 ## Documentation extraction
 | Required knowledge | Durable location | Evidence | Status |
@@ -191,7 +187,8 @@ Choose the conclusion from the findings:
 
 - **Not ready** when a Blocking finding exists: an acceptance criterion is unmet, a material
   BehaviorCase lacks protection, compatibility or a stated constraint is broken, a prerequisite is
-  bypassed, or the code materially deviates from approved design.
+  bypassed, or the code materially deviates from approved behavior or delivery boundaries. A
+  different conforming private implementation is not a deviation.
 - **Ready with follow-ups** when no blocker exists but Important findings require ownership before
   or soon after merge.
 - **Ready to merge** only when the traceability map is complete, no material design deviation
@@ -200,3 +197,7 @@ Choose the conclusion from the findings:
 Hand implementation fixes to `implement-change-tdd`, delivery-plan defects to `plan-work-items`,
 and material design decisions or deviations to `change-design`. Keep the review independent by not
 fixing the code in this skill.
+
+Complete when every selected-work-item contract row has a status, every finding has evidence and an
+owner, documentation disposition accounts for every durable record, and the conclusion follows from
+the open Blocking and Important findings.

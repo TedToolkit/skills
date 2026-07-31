@@ -1,11 +1,21 @@
 # Solution and MSBuild conventions
 
+## Contents
+
+- [Root controls](#root-controls)
+- [Props organization](#props-organization)
+- [Project-file boundary](#project-file-boundary)
+- [.slnx follows the filesystem](#slnx-follows-the-filesystem)
+- [Contents and synchronization](#contents-and-synchronization)
+- [Common .slnx decisions](#common-slnx-decisions)
+
 ## Root controls
 
 Keep root policy central only when it truly applies across projects. All of these files are optional:
 
 - `global.json`: add it only to pin SDK selection across local development and CI.
 - `Directory.Build.props`: shared language/compiler defaults and repository-wide analyzers.
+- `Directory.Build.targets`: repository-wide targets and items evaluated after project contents.
 - `Directory.Packages.props`: central package management and shared package versions.
 - `nuget.config`: repository-specific package sources, package-source mapping, or source policy.
 - `.editorconfig`: formatting and analyzer behavior.
@@ -41,15 +51,23 @@ repo/
 
 | Scope | Location | Import rule |
 | --- | --- | --- |
-| All projects | Root `Directory.Build.props` | MSBuild discovers it automatically. |
+| All projects, early properties | Root `Directory.Build.props` | MSBuild discovers it automatically. |
+| All projects, late properties, items, or targets | Root `Directory.Build.targets` | MSBuild discovers it automatically. |
+| Central package versions | Root `Directory.Packages.props` | NuGet discovers it automatically. |
 | Multiple unrelated physical groups | Root `props/<responsibility>.props` | Each applicable project imports it explicitly. |
 | One physical project group | That group's `<group>.props` | Only projects in that group import it explicitly. |
+| Several explicit imports for one physical group | `<group>/props/<responsibility>.props` | Create the directory only when several files make navigation clearer; import each explicitly. |
 | One project | Its `.csproj` | Keep the setting in the project; do not extract a props file. |
 
 Never create `Common.props`, `Shared.props`, or a catch-all props file. A file such as
 `packaging.props` contains only package metadata and packing behavior; `analyzers.props` contains
 only analyzer wiring. Use `.targets`, not `.props`, for build targets, after-build actions, or item
 changes that must occur after project evaluation.
+
+Do not make every directory a configuration scope. Repository-wide automatic policy belongs in the
+root `Directory.*` files. Root `props/` is only for explicit imports shared across unrelated physical
+groups; a group-local file stays with that group. Do not create a dedicated `props/` directory to
+hold one file, and do not centralize a group-only rule merely to keep all props files together.
 
 Set a stable root path once in the root `Directory.Build.props`:
 
@@ -66,7 +84,7 @@ Then use it for explicit imports instead of fragile relative paths:
 <Import Project="$(RepositoryRoot)tests/tests.props" />
 ```
 
-### Nested Directory.Build.props
+### Nested automatic control files
 
 MSBuild discovers only the nearest `Directory.Build.props`; it does not automatically merge parent
 files. Prefer the root file plus explicit imports. When a directory-level automatic rule is genuinely
@@ -85,6 +103,13 @@ needed, its `Directory.Build.props` must import the parent before declaring loca
 Do not add a nested `Directory.Build.props` merely to avoid two explicit imports. Verify that the
 parent import resolves and that the nested rules do not unintentionally apply to unrelated child
 projects.
+
+Apply the same scope discipline to `Directory.Build.targets`: add a nested file only when the
+subtree needs automatic late build behavior, explicitly import required parent targets, and verify
+the chosen import order. Keep `Directory.Packages.props` at the root by default. NuGet evaluates
+only the nearest file for a project, so a nested package file is appropriate only for a deliberately
+independent package-policy subtree and must manually import the parent when parent versions or
+settings remain required.
 
 ## Project-file boundary
 
@@ -114,14 +139,22 @@ directory that contains no solution-relevant project or file.
   <Folder Name="/SolutionItems/">
     <File Path=".editorconfig" />
     <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
     <File Path="Directory.Packages.props" />
     <File Path="README.md" />
   </Folder>
+  <Folder Name="/props/">
+    <File Path="props/analyzers.props" />
+    <File Path="props/packaging.props" />
+  </Folder>
   <Folder Name="/src/">
+    <File Path="src/Directory.Build.props" />
     <Project Path="src/Example/Example.csproj" />
     <Project Path="src/Example.Analyzer/Example.Analyzer.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <File Path="tests/Directory.Build.targets" />
+    <File Path="tests/tests.props" />
     <Project Path="tests/Example.Tests/Example.Tests.csproj" />
   </Folder>
   <Folder Name="/benchmarks/">
@@ -147,16 +180,26 @@ Nest folders only when the physical directory is a meaningful grouping. For exam
 `src/Compiler/Example.Generators` may use `/src/Compiler/`; do not add an extra folder solely to
 repeat a project name. Use forward-slash paths relative to the repository root.
 
+Listing an MSBuild file in `.slnx` makes it discoverable in the solution view; it does not import the
+file or change MSBuild evaluation. For every physical directory represented by a `.slnx` folder,
+list each maintained directory-scoped MSBuild control file that exists there, including
+`Directory.Build.props`, `Directory.Build.targets`, and `Directory.Packages.props`. Put root-level
+controls in `/SolutionItems/`; put nested controls in the matching physical folder. Apply the same
+rule to other maintained `.props` or `.targets` files that govern that directory's listed projects.
+Mirror a dedicated physical props directory as its own `.slnx` folder, such as root `props/` as
+`/props/` or `tests/props/` as `/tests/props/`. Do not flatten those files into `/SolutionItems/` or
+create one merely to populate the solution view.
+
 ## Contents and synchronization
 
 - Include every maintained `.csproj` that contributors need to build, test, benchmark, or develop.
   Exclude only generated, vendored, experimental, or intentionally standalone projects; document an
   exclusion when it is not obvious.
-- Add root-level contributor files to `/SolutionItems/`. Add a group-specific `.props` file beside
-  the projects it controls. Do not list generated output, local settings, external checkouts, `bin`,
-  or `obj`.
+- Add root-level contributor and MSBuild control files to `/SolutionItems/`. Add every maintained
+  group-specific `.props` or `.targets` file to the matching folder beside the projects it controls.
+  Do not list generated output, local settings, external checkouts, `bin`, or `obj`.
 - Add, move, rename, or delete the matching `.slnx` entry in the same change as a `.csproj` path
-  change. Never leave stale paths or empty logical folders.
+  or directory-scoped MSBuild control-file change. Never leave stale paths or empty logical folders.
 - Keep sibling entries in deterministic lexical order by path, except place a shared `.props` file
   before the projects it controls.
 - Use `BuildDependency` only for a real build-order edge not represented by `ProjectReference`, such
@@ -172,7 +215,9 @@ repeat a project name. Use forward-slash paths relative to the repository root.
 | Situation | Solution |
 | --- | --- |
 | A file is important to all contributors | Add it under `/SolutionItems/`. |
-| A props file applies to one physical group | Add it to that group's matching folder, not `/SolutionItems/`. |
+| A root `Directory.Build.props`, `Directory.Build.targets`, or `Directory.Packages.props` exists | Add it under `/SolutionItems/`; this is solution-view inclusion, not an MSBuild import. |
+| A directory-scoped `.props` or `.targets` file applies to one physical group | Add it to that group's matching folder, not `/SolutionItems/`. |
+| A dedicated physical `props/` directory contains maintained explicit imports | Mirror it as `/props/` or its matching nested `.slnx` folder and list its files there. |
 | A project exists only to orchestrate builds | Put it in `/build/` and set `Build Project="false"` if it must not build by default. |
 | A repository-layout validator is implemented as a project | Put it in `/build/`, keep its tests in `/tests/`, and set `Build Project="false"` only on the validator project. |
 | A manual Playground project exists | Put it in `/playground/` and set `Build Project="false"`. |

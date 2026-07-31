@@ -1,24 +1,22 @@
 ---
 name: library-product-intent
 description: >-
-  Establish, review, or revise the durable product intent of a reusable software library. Use when
-  creating a library, its purpose, target consumers, problem, value, or deliberate non-goals are
-  unclear; when a proposed public API, audience, or scope may reposition a library; or when a team
-  needs a product-intent record that informs design principles, architecture, and change designs.
-  Do not use for a one-off feature, technical implementation choice, or README-only edit.
+  Define the durable product intent of a reusable software library. Use when its target consumers,
+  problem, value, or non-goals are unclear or changing, or when principles, architecture, and
+  change design need an approved product baseline.
 ---
 
 # Library Product Intent
 
-Make the reason a library exists explicit before technical governance turns it into constraints.
+Anchor technical governance in the durable reason a library exists.
 Product intent answers who has which problem, what value the library provides, and what it will not
 try to solve. It is a durable input to design principles, architecture records, and changes; it is
 not a marketing plan, API reference, or feature backlog.
 
-This skill owns only the library's purpose, consumers, value, and boundaries. Record downstream
-implications, but hand recurring technical defaults to `design-principles`, enduring technical
-choices to `architecture-design`, delivery behavior to `change-design`, and usage guidance to
-`write-readme`.
+This skill owns only the library's purpose, consumers, value, and boundaries. Read
+[change-development-workflow.md](../../references/change-development-workflow.md) for its governing
+dependency direction. Invoke `design-principles` for recurring technical defaults,
+`architecture-design` for enduring technical decisions, and `change-design` for a bounded delivery.
 
 ## Inspect and classify
 
@@ -87,7 +85,7 @@ not revise it merely to justify one feature.
 - `architecture-design` derives boundaries and quality attributes from it.
 - `change-design` reads it when a change affects public positioning, scope, target users, or a
   stated boundary. Pin the approved revision and restate its implementation-facing constraint in
-  the work package; ordinary internal fixes need not cite it.
+  the work item; ordinary internal fixes need not cite it.
 - `write-readme` may summarize the positioning statement and link to this record, but must not keep
   a competing full copy.
 
@@ -98,3 +96,7 @@ evidence, resulting downstream implications, and unresolved assumptions. The `Dr
 `docs/product/README.md` may be created and revised during clarification; wait for explicit approval
 before marking it `Approved`, creating or revising design principles, architecture records, ADRs,
 or production code.
+
+Complete when every material claim is evidence or an owned assumption, the six required record
+elements are present, no downstream technical decision is embedded in product intent, and the user
+has either approved the baseline or received the unresolved decision list.
