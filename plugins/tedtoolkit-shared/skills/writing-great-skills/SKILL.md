@@ -1,7 +1,6 @@
 ---
 name: writing-great-skills
 description: Reference for writing and editing skills well — the vocabulary and principles that make a skill predictable.
-disable-model-invocation: true
 ---
 
 A skill exists to wrangle determinism out of a stochastic system. **Predictability** — the agent taking the same _process_ every run, not producing the same output — is the root virtue; every lever below serves it.
@@ -12,12 +11,18 @@ A skill exists to wrangle determinism out of a stochastic system. **Predictabili
 
 Two choices, trading different costs:
 
-- A **model-invoked** skill keeps a **description**, so the agent can fire it autonomously _and_ other skills can reach it (you can still type its name too). It contributes to **context load** — the description sits in the window every turn. Mechanics: omit `disable-model-invocation`, and write a model-facing description with rich trigger phrasing ("Use when the user wants…, mentions…").
-- A **user-invoked** skill strips the description from the agent's reach: only you, typing its name, can invoke it — and no other skill can. Zero context load, but it spends **cognitive load**: _you_ are the index that must remember it exists. Mechanics: set `disable-model-invocation: true`; the `description` becomes human-facing — a one-line summary, trigger lists stripped.
+- A **model-invoked** skill uses the default `agents/openai.yaml` policy (or
+  `allow_implicit_invocation: true`), so its **description** is available for autonomous matching.
+  You can still invoke it explicitly. Its description contributes to **context load**, so write a
+  model-facing trigger with only the branches that earn that load.
+- A **user-invoked** skill keeps the required `name` and `description`, but sets
+  `policy.allow_implicit_invocation: false` in `agents/openai.yaml`. It remains available through an
+  explicit `$skill-name` invocation without being injected for autonomous matching. This reduces
+  context load but spends **cognitive load**: the caller must know when to select it.
 
 Pick model-invocation only when the agent must reach the skill on its own, or another skill must. If it only ever fires by hand, make it user-invoked and pay no context load.
 
-When user-invoked skills multiply past what you can remember, that piled-up cognitive load is cured by a **router skill**: one user-invoked skill that names the others and when to reach for each.
+When user-invoked skills multiply past what you can remember, that piled-up cognitive load is cured by a **router skill**: one entry point that explicitly names the others and when to reach each one.
 
 ## Writing the description
 
@@ -47,7 +52,9 @@ Where the ladder decides _how far down_ a piece sits, **co-location** decides _w
 
 **Granularity** is how finely you divide skills, and each cut spends one of the two loads, so split only when the cut earns it. Two cuts:
 
-- **By invocation** — split off a **model-invoked** skill when you have a distinct **leading word** that should trigger it on its own, or another skill must reach it. You pay **context load** for the new always-loaded **description**, so that independent reach has to be worth it.
+- **By invocation** — split off a **model-invoked** skill when a distinct **leading word** should
+  trigger it autonomously. A workflow may explicitly hand off to an explicit-only skill by name, so
+  cross-skill reach alone does not justify implicit context load.
 - **By sequence** — split a run of **steps** when the steps still ahead (a step's **post-completion steps**) tempt the agent to rush the one in front of it (**premature completion**). Keeping them out of view encourages the agent to do more **legwork** on the current task.
 
 ## Pruning
