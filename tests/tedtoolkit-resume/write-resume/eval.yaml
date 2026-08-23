@@ -1,0 +1,109 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Write an approved conversational resume artifact"
+    prompt: >-
+      Turn these notes into the finished Markdown resume now; this exact conversational artifact is
+      approved. Name: Lin Chen. Target: backend engineer. Experience: built a C# inventory API,
+      maintained its SQL schema, and supported the internal warehouse team. No metrics were supplied.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "# Lin Chen" }
+      - { type: "output_contains", value: "inventory API" }
+      - { type: "output_contains", value: "C#" }
+      - { type: "output_not_contains", value: "# Resume Strategy" }
+      - { type: "output_not_contains", value: "50%" }
+    rubric:
+      - "Routes the natural final-copy request to write-resume and produces the approved artifact without a redundant strategy gate."
+      - "Uses only the supplied scope and does not invent scale, impact, or metrics."
+    timeout: 360
+
+  - name: "Keep truthful ongoing evidence and reject an unsupported metric"
+    prompt: >-
+      Propose a resume strategy only. My open-source parser is ongoing: I published a working
+      prototype and wrote 'improved performance', but I have no users, production use, measurement,
+      or adoption metric. Do not draft the final resume yet.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "# Resume Strategy" }
+      - { type: "output_contains", value: "working prototype" }
+      - { type: "output_contains", value: "ongoing" }
+      - { type: "output_not_contains", value: "50%" }
+    rubric:
+      - "Keeps the candidate-asserted prototype/current state available without implying adoption or production success."
+      - "Rejects the unsupported performance claim without blocking the rest of the strategy or suggesting a number."
+    timeout: 300
+
+  - name: "Route feedback-only work to resume review"
+    prompt: >-
+      Tell me what is weak in this excerpt and prioritize fixes, but do not rewrite it: 'Rockstar
+      engineer responsible for everything.' I have no job description.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "# Resume Review" }
+      - { type: "output_not_contains", value: "# Resume Strategy" }
+    rubric:
+      - "Routes feedback without rewritten copy to review-resume."
+    timeout: 300
+
+  - name: "Route comparison-only work to job matching"
+    prompt: >-
+      Compare my background with this job requirement by requirement, but do not draft or revise a
+      resume. Background: C# and SQL. Job: C#, SQL, and Kubernetes.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "# Job Match" }
+      - { type: "output_contains", value: "Not demonstrated" }
+      - { type: "output_not_contains", value: "# Resume Strategy" }
+    rubric:
+      - "Routes comparison without a draft to match-job-description."
+    timeout: 300
+
+  - name: "Keep an approved conversational resume out of the filesystem"
+    prompt: >-
+      Read candidate-notes.md and return the finished Markdown resume in this conversation. This
+      conversational artifact is approved, but do not create or change any file. Keep unresolved
+      questions and revision notes outside the resume.
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh"
+    assertions:
+      - { type: "exit_success" }
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - { type: "command", run: "test ! -e resume.md" }
+      - { type: "output_contains", value: "# Lin Chen" }
+      - { type: "output_not_contains", value: "## Notes" }
+      - { type: "output_not_contains", value: "50%" }
+    rubric:
+      - "Produces conversational final copy without treating approval of that response as authorization to write a file."
+      - "Keeps unsupported dates, title, employer, contact details, and metrics out of the resume artifact."
+    timeout: 360
+
+  - name: "Write only the exact approved resume destination"
+    prompt: >-
+      Read candidate-notes.md and write the finished resume to resume.md. I approve that exact
+      artifact and destination. Do not create any companion file; report unresolved questions after
+      the artifact in your response, not inside resume.md.
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_exists", path: "resume.md" }
+      - { type: "file_contains", path: "resume.md", value: "# Lin Chen" }
+      - { type: "file_contains", path: "resume.md", value: "inventory API" }
+      - { type: "file_not_contains", path: "resume.md", value: "## Notes" }
+      - { type: "file_not_contains", path: "resume.md", value: "50%" }
+      - type: "command"
+        run: "test $(git status --porcelain | wc -l) -eq 1 && git status --porcelain | grep -Fq '?? resume.md'"
+    rubric:
+      - "Writes only resume.md because the user approved that exact artifact and destination."
+      - "Keeps unresolved questions and revision notes outside the saved resume artifact."
+      - "Uses candidate-asserted evidence without inventing absent metrics, dates, title, employer, or contact details."
+    timeout: 360

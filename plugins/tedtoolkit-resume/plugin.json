@@ -1,0 +1,6 @@
+{
+  "name": "tedtoolkit-resume",
+  "version": "0.2.3",
+  "description": "Factual resume creation, revision, review, job matching, and interview-question workflows.",
+  "skills": ["./skills/"]
+}

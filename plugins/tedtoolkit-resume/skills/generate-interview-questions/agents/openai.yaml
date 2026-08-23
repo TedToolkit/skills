@@ -1,0 +1,4 @@
+interface:
+  display_name: "Generate Interview Questions"
+  short_description: "Create interviewer or candidate-practice packs"
+  default_prompt: "Use $generate-interview-questions in Interviewer or Candidate practice mode and create the finished pack from the sources I supply."

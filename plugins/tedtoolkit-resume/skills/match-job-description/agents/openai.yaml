@@ -1,0 +1,4 @@
+interface:
+  display_name: "Match Job Description"
+  short_description: "Compare candidate evidence with a target role"
+  default_prompt: "Use $match-job-description to compare this supplied candidate evidence with this supplied job description without rewriting the resume."

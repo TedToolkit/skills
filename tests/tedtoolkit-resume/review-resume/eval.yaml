@@ -1,0 +1,83 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Review naturally without rewriting"
+    prompt: >-
+      Please critique this resume excerpt and prioritize the issues; I only want feedback, not edited
+      copy: 'Expert engineer responsible for many high-performance systems.' The target is backend
+      engineer.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "# Resume Review" }
+      - { type: "output_contains", value: "## Factual or credibility risks" }
+      - { type: "output_contains", value: "Expert" }
+      - { type: "output_contains", value: "high-performance" }
+      - { type: "output_not_contains", value: "guaranteed" }
+      - { type: "output_not_contains", value: "# Job Match" }
+    rubric:
+      - "Identifies that the candidate-asserted expertise, ownership, and performance labels lack visible support in the excerpt and gives a focused correction direction without calling them false or rewriting the full resume."
+    timeout: 300
+
+  - name: "Limit a review when no job description is supplied"
+    prompt: >-
+      Audit my resume's clarity and ATS readability. I have not chosen a job or supplied a job
+      description, so do not pretend to assess role fit and do not rewrite anything. Excerpt:
+      'Software engineer. Built internal services.'
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "# Resume Review" }
+      - { type: "output_contains", value: "Not assessed" }
+      - { type: "output_not_contains", value: "match score" }
+    rubric:
+      - "Performs an intrinsic review and explicitly marks role fit not assessed."
+    timeout: 300
+
+  - name: "Route requirement comparison to job matching"
+    prompt: >-
+      Compare this candidate with the job requirement by requirement; do not rewrite the resume.
+      Candidate: C# APIs and SQL migrations. Job: C#, SQL, Kubernetes.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "# Job Match" }
+      - { type: "output_contains", value: "Not demonstrated" }
+      - { type: "output_not_contains", value: "# Resume Review" }
+    rubric:
+      - "Routes requirement-by-requirement fit analysis to match-job-description rather than the holistic review lane."
+    timeout: 300
+
+  - name: "Route approved final copy to resume writing"
+    prompt: >-
+      Rewrite this into a finished Markdown resume now; the exact conversational artifact is
+      approved, and I do not want a critique report. Name: Mei Chen. Experience: built and maintained
+      a C# order API used by the support team. Target: backend engineer.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "# Mei Chen" }
+      - { type: "output_not_contains", value: "# Resume Review" }
+    rubric:
+      - "Routes a final-copy request to write-resume and does not substitute a review report."
+    timeout: 360
+
+  - name: "Review a file without mutating it or repeating private contact values"
+    prompt: >-
+      Review candidate-resume.md for credibility, clarity, and contact-field presentation. Return
+      findings only, do not edit the file, and mask private contact values in the report.
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh"
+    assertions:
+      - { type: "exit_success" }
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - { type: "output_contains", value: "# Resume Review" }
+      - { type: "output_contains", value: "[redacted]" }
+      - { type: "output_not_contains", value: "+86 138-1234-5678" }
+      - { type: "output_not_contains", value: "priya.private@example.com" }
+    rubric:
+      - "Leaves the supplied resume unchanged and returns findings only."
+      - "Treats the self-description as candidate-asserted rather than independently corroborated and masks private contact values."
+    timeout: 300

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Write Resume"
+  short_description: "Create or revise a factual Markdown resume"
+  default_prompt: "Use $write-resume when I want final created or revised resume copy in Markdown."

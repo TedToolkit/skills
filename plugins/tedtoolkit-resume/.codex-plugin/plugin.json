@@ -1,0 +1,22 @@
+{
+  "name": "tedtoolkit-resume",
+  "version": "0.2.3",
+  "description": "Resume creation, revision, review, job matching, and interview-question workflows.",
+  "author": {
+    "name": "TedToolkit"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "TedToolkit Resume",
+    "shortDescription": "Create, tailor, review, and evaluate resumes",
+    "longDescription": "Factual, evidence-led workflows for creating and revising resumes, matching them to job descriptions, and generating structured interview questions.",
+    "developerName": "TedToolkit",
+    "category": "Productivity",
+    "capabilities": ["Interactive", "Write"],
+    "defaultPrompt": [
+      "Write or revise resume copy only when I ask for a resume artifact; use review-resume for feedback without rewriting.",
+      "Use match-job-description only for a requirement-by-requirement comparison when both candidate evidence and a job description are supplied.",
+      "For interview questions, select Interviewer or Candidate practice mode and produce a directly requested finished pack with stated defaults instead of adding another approval gate."
+    ]
+  }
+}
