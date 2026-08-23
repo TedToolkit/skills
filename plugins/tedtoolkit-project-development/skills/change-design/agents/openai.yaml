@@ -1,4 +1,6 @@
 interface:
-  display_name: "Change Design"
-  short_description: "Turn one delivery into an approval-ready behavioral design."
-  default_prompt: "Use $change-design to create an approval-ready change with scope, behavior cases, constraints, and completion criteria."
+  display_name: "Change Design (Deprecated)"
+  short_description: "Compatibility alias; use design-change"
+  default_prompt: "Use $change-design only to route this legacy invocation to $design-change."
+policy:
+  allow_implicit_invocation: false

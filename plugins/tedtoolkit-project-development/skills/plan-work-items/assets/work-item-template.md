@@ -1,120 +1,71 @@
-# <Work-item ID>: <Title>
+# <Work-item ID>: <Outcome-oriented title>
 
-## 📌 Status
+<!-- work-item-format: 2 -->
+<!-- work-item-id: <PREFIX>-001 -->
 
-Draft | Approved | Implementing | Implemented | Superseded
+<!-- approval-source: none -->
 
-## 🚦 Delivery priority
+## Outcome
 
-- Priority: P0 | P1 | P2 | P3
-- Rationale:
-
-## 🔗 Delivery context
-
-- Parent change: `<path or ID>`
-- Logical prerequisites:
-- Recommended order, when coordination benefits from one:
-- Applicable product intent, principles, ADRs, and architecture records:
-
-## 🧩 Explicit governing constraints
-
-State the implementation-facing constraints inherited from the approved change. Do not use links
-alone.
+State one independently verifiable result and how it contributes to the parent change goal.
 
 <!-- work-item: scope -->
-## 🎯 Outcome, scope, and non-goals
+## Scope and non-goals
 
-Describe one independently observable outcome. Split independently verifiable outcomes rather than
-combining them. This is a delivery outcome that contributes to the parent change goal; do not define
-or rename the change goal here. The outcome must modify one or more version-controlled delivery
-artifacts (code, tests, configuration, build automation, or documentation); it is never research,
-review, discussion, approval, or an external operational action.
-
-Name the expected delivery area and any exact public contract. Internal files and private symbols
-are non-binding evidence unless they are themselves part of an approved public or persistence
-contract. The parent change, this work-item document, status fields, review reports, and completion
-evidence are workflow control records; none can be the sole artifact that justifies this work item.
-
-| Expected affected area or exact public contract | Authorized outcome | Explicit non-goal |
-| --- | --- | --- |
-|  |  |  |
-
-## 🔍 Current behavior and impact boundary
-
-Link evidence for current observable behavior, affected consumers, and adjacent behavior that must
-remain unchanged. Known internal files may illustrate the likely area; they do not prescribe the
-implementation.
+- Target delivery area or exact public/persisted contract:
+- In scope:
+- Non-goals:
+- Likely touchpoints (non-binding):
 
 <!-- work-item: start-conditions -->
-## 🚧 Start conditions and blockers
+## Start conditions
 
-State only a completed prerequisite output, repository state, external decision, or other real
-condition needed to begin. Do not turn a preferred implementation order into a prerequisite. A
-future work item may consume this item's result, but cannot provide the only proof of this item's
-core outcome.
-
-| Start condition or blocker | Evidence or owner | Effect if unmet |
+| Prerequisite or blocker | Concrete input or guarantee | Evidence |
 | --- | --- | --- |
-|  |  |  |
+| None | Ready from the approved parent baseline |  |
 
-<!-- work-item: behavior-cases -->
-## 🧪 Behavior cases
+<!-- work-item: contract-coverage -->
+## Contract responsibility
 
-| ID | Preconditions and input | Action | Expected observable behavior |
-| --- | --- | --- | --- |
-| BC-01 |  |  |  |
+| Parent contract | Responsibility | Verified input or primary-proof intent |
+| --- | --- | --- |
+| AC-01, INV-01, STR-01, or EXP-01 | Owns / Supports |  |
 
 <!-- work-item: delivery-constraints -->
-## 🛡️ Delivery constraints
+## Constraints
 
-State only constraints the implementation must preserve: public contracts, compatibility,
-security, migration, governing rules, and explicitly unchanged observable behavior. Do not prescribe
-private types, algorithms, method decomposition, exact internal files, or an edit sequence.
+- Public, persisted, compatibility, security, migration, governing, or preserved behavior:
+- Private choices deliberately left to the implementer:
 
-| Observable boundary or governing constraint | Required result | Compatibility or invariant |
-| --- | --- | --- |
-|  |  |  |
+<!-- work-item: proof-plan -->
+## Proof
 
-<!-- work-item: verification-plan -->
-## ✅ Verification plan
+<!-- primary-proof: AC-01 purpose=acceptance shape=unit -->
+| Contract or gate | Role | Proof purpose | Execution shape | Observable assertion | Command or bounded procedure |
+| --- | --- | --- | --- | --- | --- |
+| AC-01, INV-01, STR-01, or EXP-01 | Primary | Acceptance / regression / boundary / structural / journey / decision | Unit / Component / Contract / Integration / End-to-end / Benchmark / Manual |  |  |
 
-Every behavior case needs a proof intent and observable assertion. Record a stable repository
-command when known. The implementer selects exact test files, fixture organization, and focused
-commands when those depend on the private implementation. A broad final build alone is insufficient.
-
-| Behavior case | Proof intent and appropriate level | Observable assertion | Stable command or bounded manual procedure, if known |
-| --- | --- | --- | --- |
-| BC-01 | Unit/integration/contract/manual |  |  |
+Replace the marker with the owned contract and actual lowercase purpose and shape. Add exactly one
+primary marker and row for each owned contract. Keep `Primary` as the stable Role value and provide
+a non-empty observable assertion plus command or bounded procedure. Add conditional proof only when
+actual boundary or risk requires it.
 
 <!-- work-item: definition-of-done -->
-## 🏁 Definition of done
+## Done
 
-| Criterion | Required evidence |
-| --- | --- |
-|  |  |
-
-## ⏱️ Workload estimate
-
-- Planning range:
-- Confidence:
-- Assumptions and excluded work:
+- The owned contract has passing primary proof.
+- Required conditional proof, documentation, migration, and supplied prerequisite outputs are complete.
 
 <!-- work-item: completion-evidence -->
-## 📋 Completion evidence
+## Verification result requirements
 
-Record actual commands or manual procedure results, required migration or documentation state,
-status update, actual effort, and material variance. Include the starting Git SHA, actual changed
-artifacts, and evidence for each behavior case. This evidence unlocks the next delivery row.
+Require the implementation handoff to record candidate revision, actual changed artifacts, contract
+IDs, proof purpose, execution shape, command or procedure, observable assertion, result/counts,
+resource prerequisites, migration or documentation state, and output supplied to dependents. Keep
+mutable runtime status and candidate results in coordinator-owned orchestration state; do not turn
+this approved contract into a second status source.
 
-| Evidence | Required record |
-| --- | --- |
-| Delivery-boundary check | Starting SHA and actual changed artifacts; explain scope expansion or constraint deviation. |
-| Behavior-case proof | Test/manual procedure, command, result, and assertion for every BC. |
-| Migration and documentation | Completed state, or explicit not-applicable rationale. |
-| Dependent-item unlock | Prerequisite output or verification result made available to dependent items, or None. |
+## Risks and implementation notes
 
-## ⚠️ Risks and open questions
-
-| Item | Impact | Owner or next decision |
-| --- | --- | --- |
-|  |  |  |
+Keep only material risks or repository facts that help a human implementer. Remove this section
+when none apply. Remove all template instructions and empty content before approval.

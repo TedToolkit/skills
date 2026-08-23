@@ -1,203 +1,202 @@
 ---
 name: review-implementation
 description: >-
-  Trace an implementation against its approved work item, behavior cases, code, tests, completion
-  evidence, and affected documentation. Use for an independent read-only conformance and merge-
-  readiness review, including documentation extraction and disposition.
+  Plan, coordinate, and synthesize a risk-scaled implementation review for an approved Fast plan,
+  Standard or Controlled delivery, selected work item, or integrated multi-item change. Use exact
+  candidate-bound code, test, and verification lanes; establish reviewer independence when risk
+  requires it; resolve contradictions from primary artifacts; and issue the only final merge-
+  readiness conclusion without modifying the implementation.
 ---
 
 # Implementation Review
 
-Build **traceability** from approved behavior to evidence. The question is
-whether the approved change has been implemented, protected by appropriately expressed tests, and
-documented without unrecorded design changes. Principles and architecture are reviewed when the
-architecture or change design is approved; do not reopen them during final implementation review.
+Own the review plan and final conclusion. Use `review-code`, `review-tests`, and
+`verify-implementation` as distinct professional lanes; do not collapse implementation correctness,
+test adequacy, and successful execution into one vague claim.
 
-This skill owns read-only conformance review. Read
-[change-development-workflow.md](../../references/change-development-workflow.md) before setting the
-boundary; its terms, governing direction, and documentation lifecycle are authoritative.
+Read [change-development-workflow.md](../../references/change-development-workflow.md),
+[testing-strategy.md](../../references/testing-strategy.md), and
+[agent-orchestration.md](../../references/agent-orchestration.md).
 
-## Set the review boundary
+The coordinator remains non-writing: do not modify implementation/test artifacts, fix findings,
+approve a pull request, merge, or update delivery status. Specialist review lanes remain read-only.
+`verify-implementation` may create ordinary build/test output but must not change source or delivery
+records.
 
-1. Read repository guidance, the approved change record and selected work item, BehaviorCases,
-   acceptance criteria, the current diff, affected production and test code, and directly affected
-   documentation. For a work item, also read its parent change record and declared prerequisites.
-2. State the reviewed revision or diff range and the documents used as the baseline.
-3. If the supplied document is a change record rather than one work item, say that an
-   implementation-readiness conclusion is not possible until a work item is selected. Keep the
-   work-item boundary anchored in its approved record rather than inferring it from the diff.
-4. If there is no approved change design, inspect the diff only enough to classify it. Report a
-   Blocking finding and route to `change-design` when production code changes observable behavior;
-   do not treat local correctness as a substitute for a design. If the evidence shows purely
-   mechanical, no-behavior maintenance, say that the change-design workflow is not required and
-   limit the conclusion to local correctness and repository conventions. When uncertain, report the
-   missing design as Blocking.
-5. Do not modify files, run builds, run tests, approve a pull request, or infer test results. Point
-   to existing test code as evidence of intent, not proof that it currently passes.
+## Select the mode and bind the review
 
-Before reviewing code, check the selected work item's delivery brief. Report a blocking
-finding when it has more than one independently observable outcome, lacks an objective definition
-of done, omits a verification mapping for a material BehaviorCase, or cannot identify its logical
-prerequisites. Do not require a recommended order when the items are independent. Report a blocking
-finding when completion evidence for a real prerequisite is absent but the reviewed implementation
-has begun. Do not reconstruct the missing delivery boundary from the diff.
+Select exactly one mode:
 
-Report a blocking delivery-plan finding when a work item does not name an observable outcome and
-bounded target-delivery area, or exists only for research, review, approval, coordination, or
-external operations. The expected internal area may be non-exhaustive; do not require exact private
-files or symbols. Route design activities to `change-design` and external actions to their
-operational owner; do not treat either as implementation evidence.
+- `delivery-candidate`: one Fast plan, Standard/single-delivery Controlled change, or selected work
+  item against an exact baseline-to-candidate range; or
+- `integrated-change`: one multi-item Controlled parent, every non-superseded item, authoritative
+  integration SHA, combined verification, operational handoffs, and documentation disposition.
 
-For a change-closure conclusion, verify that every required operational handoff named by the parent
-change has recorded completion evidence. Do not review the external action itself as code, and do
-not convert it into a work item because it blocks closure.
+Require the approval source, repository guidance, affected artifacts, and one immutable candidate
+identity. Prefer a committed full candidate SHA. When a candidate commit was not authorized, an
+independent final review may instead bind to `HEAD` plus a cryptographic digest of the complete
+tracked diff and every in-scope untracked blob, provided every lane receives that exact frozen bundle
+and the coordinator detects any candidate-input change as stale. Record the approved contract path
+and human approval source as authorization context, as well as the reviewed range or bundle. Any
+candidate, baseline, or approved-contract change makes the
+aggregate conclusion and affected specialist lanes `stale`.
 
-Also check that the parent change names exactly one result-oriented change goal and that every
-BehaviorCase and selected work-item outcome contributes to it. Report a blocking finding when the
-goal is missing, is merely an implementation task, or the package serves an unrelated result. Hand
-such defects to `change-design`; do not invent or rename the goal during review.
+Do not infer a missing behavior contract from the diff. Route behavior-changing code without an
+approved boundary to `design-change`. In `delivery-candidate`, require one selected work item when a
+Controlled change has a delivery map. In `integrated-change`, require every non-superseded item to be
+`Verified` on the authoritative integration SHA; `Implemented` remains Blocking.
 
-## Build the traceability map
+## Choose compact or independent review
 
-Create one row for every acceptance criterion or BehaviorCase in the selected delivery. Map it to
-the implementation and test that express it. Mark a row `covered`, `missing`, `partial`, or
-`deviates` and explain the evidence. Treat implementation belonging to another work item as a
-design deviation even if it appears locally correct.
+Record one aggregate independence level:
 
-| Design item | Expected observable behavior | Implementation evidence | Test evidence | Status |
+- `independent`: every required judgment lane uses a fresh context that did not implement the
+  candidate, receives the exact candidate and raw governing artifacts, has no write task, and does
+  not see sibling conclusions before returning its own;
+- `compact`: the delivery coordinator performs the necessary checks for a bounded low-risk change
+  and does not claim independence; or
+- `not-established`: reviewer separation, exact candidate, read-only ownership, or identity is
+  insufficient.
+
+Require `independent` for public or persisted contracts, security, migration, shared cross-item
+boundaries, concurrency, difficult reversal, or another material Controlled risk. When independent
+review is required but fresh agents are unavailable, return `Not ready`; do not simulate multiple
+reviewers in one context and label them independent.
+
+Use SubAgents only when their independence or context separation has material review value:
+
+1. Keep one user-facing coordinator and reserve its context for contract selection and synthesis.
+2. Dispatch `review-code` and `review-tests` as fresh read-only SubAgents when both lanes are material;
+   run `verify-implementation` in a separate executor context when independent execution matters.
+3. Send each lane only the objective, exact baseline/candidate, approved contract and IDs, governing
+   paths, allowed read scope, required handoff, and stop conditions.
+4. Do not send an implementer transcript, sibling findings, suspected answer, or proposed fix; those
+   inputs anchor the review and defeat contextual independence.
+5. Use a compact coordinator review when only one bounded low-risk lane is useful or SubAgent setup
+   costs more than the risk reduction.
+
+## Collect the professional lanes
+
+### Code correctness
+
+Invoke `review-code` for production/configuration changes. It attempts to disprove correctness and
+returns contract/risk coverage plus cited findings. It does not judge test adequacy or merge status.
+
+### Test adequacy
+
+Invoke `review-tests` whenever behavior, regression, invariants, or changed tests contribute to the
+delivery claim. It returns material behavior partitions, observable oracle strength, refactor
+tolerance, isolation/flakiness, and result-traceability findings. It does not execute tests.
+
+### Verification result
+
+Use `verify-implementation` or equivalent trusted CI output for the exact candidate when command
+execution is required. A passing command proves only that the selected command succeeded on that
+candidate; it cannot overrule a missing behavior partition or weak assertion. A failed command,
+zero intended tests, unexplained skips, candidate mismatch, or stale result is Blocking when that
+gate is required.
+
+For low-risk compact review, perform the same lane questions serially and label them compact. Do not
+manufacture separate reports merely to mimic independent agents.
+
+## Synthesize traceability
+
+Create the single authoritative traceability table; specialist lanes contribute facts but do not
+each own a competing final table.
+
+| Contract | Implementation | Test/procedure and adequacy | Candidate-bound verification | Status |
 | --- | --- | --- | --- | --- |
-| BC-01 |  |  |  | covered / missing / partial / deviates |
+| AC-01, INV-01, STR-01, or EXP-01 |  |  |  | covered / weak / missing / partial / deviates / unverified |
 
-Do not accept a test merely because its name resembles a requirement. Read its setup, action, and
-assertion to determine whether it proves the intended observable behavior.
+In `delivery-candidate`, include every owned contract and promised supporting input. In
+`integrated-change`, trace every parent contract through its owning item to the integrated
+implementation and combined verification. Read primary artifacts behind every specialist citation;
+a matching test name or worker success message is not proof.
 
-## Review implementation against design
+## Resolve contradictions without voting
 
-For every mapped item, inspect whether the code:
+Do not count reviewer votes or average confidence scores.
 
-1. Delivers the stated acceptance behavior, including specified failure and boundary behavior.
-2. Uses the approved domain terminology, state meanings, and API/data-model contracts consistently.
-3. Preserves the compatibility, dependency direction, security, migration, and rollout constraints
-   made explicit in the approved change.
-4. Avoids unapproved behavior, hidden side effects, unrelated refactors, and new enduring technical
-   decisions that should have an ADR or a design update.
-5. Does not bypass an incomplete prerequisite.
-6. Satisfies every objective definition-of-done criterion, including recorded passing verification
-   evidence, required documentation or migration state, actual effort, and any material estimate
-   variance. Treat missing effort or variance alone as a planning follow-up; treat missing required
-   verification or delivery evidence as blocking because it cannot unlock the next package.
+- Command failure is an observed fact and cannot be overruled by a positive code review.
+- Command success cannot overrule a credible test-adequacy or contract-implementation gap.
+- Resolve a factual conflict by reopening the cited contract, code, test, and raw result, then state
+  the decisive source.
+- If the coordinator implemented the candidate or cannot resolve a material dispute without making
+  a new specialist judgment, dispatch one fresh narrowly scoped adjudication SubAgent. Do not show it
+  sibling conclusions; give it the disputed claim and primary artifacts.
+- If the contract itself is ambiguous, route to `design-change`; reviewers do not invent behavior.
 
-Treat different internal files, private symbols, algorithms, test organization, and edit order as
-ordinary implementation choices when the observable outcome, public contracts, scope, and governing
-constraints remain intact. Report a design deviation only when the implementation materially changes
-one of those approved boundaries; do not silently reinterpret the design to match code.
+Any code, test, configuration, contract, or candidate revision change after a lane returns invalidates
+the affected lane. Re-verify and re-review the changed surface before reusing the conclusion.
 
-Report a Blocking finding when a behavior-changing production-code diff is not covered by the
-approved design, even if the resulting code appears locally correct. Route an expanded or changed
-behavioral contract to `change-design` for revision and renewed approval; do not repair the missing
-design in this review.
+## Check delivery and documentation
 
-## Review test expression without running it
+Confirm scope, non-goals, prerequisites, compatibility, dependency direction, security, migration,
+rollout, operational handoffs, done criteria, and absence of unrelated changes. Route changed
+behavior or governing contracts to `design-change`, changed item boundaries or proof standards to
+`plan-work-items`, and conforming implementation/test defects to `implement-change`.
 
-Inspect test code only; do not execute it. Check that each material BehaviorCase has an appropriate
-test and that the test asserts observable behavior rather than private implementation details.
-Review negative and boundary cases when the design names them. Flag a mismatched level when a test
-needs real infrastructure but is presented as a unit test, or when a slow higher-level test is the
-only protection for deterministic domain behavior.
+Mark enduring decisions, cross-cutting current semantics, and active migration/operations procedures
+as `not needed`, `captured`, or `missing`. Missing durable extraction is Important and belongs to
+`architecture-design` or the applicable documentation owner. Apply repository retention only after
+the complete parent is ready, operational handoffs and extraction are complete, and deletion was
+separately authorized when required.
 
-Follow the repository's existing testing conventions while reviewing its test code, but do not run
-the test command.
+## Report
 
-## Review documentation consistency
-
-Apply the reference's documentation lifecycle to every material document or content block. Mark
-durable decisions, current cross-cutting semantics, and active migration or operational procedures
-as `not needed`, `captured`, or `missing`, with evidence. A missing extraction is an Important
-finding owned by `architecture-design` or the applicable documentation skill.
-
-Ask for a change-closure decision only when all of the following are true: the conclusion is
-`Ready to merge`; the selected work item completes the parent change; and completion evidence
-exists for every other planned work item; and every documentation-extraction category is `not
-needed` or `captured`. Ask once, at the end of the report, whether the parent
-`docs/changes/<change>/` directory should be deleted after merge, retained, or first distilled into
-an ADR, architecture record, or active migration guide. Recommend deletion by default when nothing
-needs retaining. Do not ask this question for a partial work item, `Ready with follow-ups`, or
-`Not ready` review. Do not infer completion merely from a clean-looking diff. A user decision to
-delete is approval for a separate, small documentation cleanup after merge; it is never permission
-to delete during this read-only review.
-
-Keep this review read-only. A human deletion decision authorizes a separate documentation change
-after merge.
-
-## Report findings
-
-Use this exact report structure. Give every finding a stable ID, evidence location, impact, and a
-concrete modification recommendation. Explain the smallest change that resolves the finding, the
-owner skill (`change-design`, `plan-work-items`, or `implement-change-tdd`), and the verification
-that proves the recommendation worked. Do not report style preferences as blockers or prescribe an
-unapproved redesign.
+Preserve each specialist finding's observed fact, inference/impact, confidence basis, smallest
+correction, owner, and verification method. Do not flatten a cited fact and an uncertain inference
+into one authoritative sentence.
 
 ```md
 # Implementation Review
 
 ## Conclusion
-Ready to merge | Ready with follow-ups | Not ready
+Ready to merge | Ready with follow-ups | Not ready | Stale
+
+## Review mode and independence
+- Mode: delivery-candidate | integrated-change
+- Independence: independent | compact | not-established
+- Baseline:
+- Candidate identity: committed SHA | HEAD + tracked-diff digest + untracked-blob digests
+- Contract source/digest:
+- Implementer context:
+- Code reviewer:
+- Test reviewer:
+- Verification executor/source:
 
 ## Traceability
-| Design item | Implementation | Test | Status |
-| --- | --- | --- | --- |
+| Contract | Implementation | Test/procedure and adequacy | Verification result | Status |
+| --- | --- | --- | --- | --- |
+
+## Professional lane conclusions
+- Code:
+- Tests:
+- Verification:
+- Contradictions and resolution:
 
 ## Blocking findings
-- [B1] <finding> — Evidence: <file or design item>. Impact: <impact>. Suggested change: <smallest
-  acceptable modification>. Owner: <skill>. Verify: <inspection, test, or command>.
-
 ## Important findings
-- [I1] <finding> — Evidence: <file or design item>. Impact: <impact>. Suggested change: <smallest
-  acceptable modification>. Owner: <skill>. Verify: <inspection, test, or command>.
-
 ## Suggestions
-- [S1] <finding> — Evidence: <file or design item>. Suggested change: <optional improvement>.
-  Owner: <skill or human>. Verify: <inspection, test, or command>.
 
 ## Design deviations
-- <approved behavior, public contract, governing constraint, or work-item scope differs from implementation; cross-work-item scope expansion; or none found>
+- <material contract or scope difference, or none>
 
-## Documentation extraction
-| Required knowledge | Durable location | Evidence | Status |
-| --- | --- | --- | --- |
-| Decision / current semantic / active procedure | ADR / architecture / migration guide |  | not needed / captured / missing |
-
-## Documentation disposition
-| Document or content | Recommendation | Reason | Required follow-up |
-| --- | --- | --- | --- |
-|  | Retain / ADR / migration / delete |  | Human decision or separate change |
+## Documentation extraction and disposition
+| Knowledge or record | Durable location or recommendation | Status / follow-up |
+| --- | --- | --- |
 
 ## Change closure decision
-<Include only for a complete parent change that is Ready to merge and has no missing extraction:
-should `docs/changes/<change>/` be deleted after merge? Recommend deletion unless the disposition
-identifies an active record to retain, then wait for the user's decision.>
+<Only for a complete Ready-to-merge parent with extraction complete.>
 
 ## Review scope and limits
-- Reviewed: <diff/revision and documents>.
-- Not run: builds or tests.
-- Not reviewed: <out-of-scope area, if any>.
+- Reviewed:
+- Executed by verification lane:
+- Not reviewed or verified:
 ```
 
-Choose the conclusion from the findings:
-
-- **Not ready** when a Blocking finding exists: an acceptance criterion is unmet, a material
-  BehaviorCase lacks protection, compatibility or a stated constraint is broken, a prerequisite is
-  bypassed, or the code materially deviates from approved behavior or delivery boundaries. A
-  different conforming private implementation is not a deviation.
-- **Ready with follow-ups** when no blocker exists but Important findings require ownership before
-  or soon after merge.
-- **Ready to merge** only when the traceability map is complete, no material design deviation
-  remains, and no blocking or important finding is open.
-
-Hand implementation fixes to `implement-change-tdd`, delivery-plan defects to `plan-work-items`,
-and material design decisions or deviations to `change-design`. Keep the review independent by not
-fixing the code in this skill.
-
-Complete when every selected-work-item contract row has a status, every finding has evidence and an
-owner, documentation disposition accounts for every durable record, and the conclusion follows from
-the open Blocking and Important findings.
+Choose `Not ready` for Blocking findings or missing required independence, `Ready with follow-ups`
+when only Important findings remain, `Ready to merge` only with complete traceability, required
+independence, passing candidate-bound verification, and no material deviation, and `Stale` whenever
+the bound candidate or contract changed. Return the exact reviewed range to the delivery owner; only
+that owner may advance lifecycle state.

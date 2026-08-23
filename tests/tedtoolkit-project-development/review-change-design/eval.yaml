@@ -18,16 +18,16 @@ scenarios:
       - type: "output_contains"
         value: "Needs revision"
       - type: "output_contains"
-        value: "BehaviorCases"
+        value: "Acceptance specification"
       - type: "output_not_contains"
         value: "Ready to merge"
     rubric:
-      - "Identifies that an API-shaped goal and missing observable BehaviorCases make the design unready."
+      - "Identifies that an API-shaped goal and missing observable Acceptance specification make the design unready."
       - "Does not create a work item, review implementation, or claim to approve the design."
     timeout: 420
 
   - name: "Mark a complete design ready for human approval"
-    prompt: "Review docs/changes/P1-temperature-parse/change.md as a change design. Do not modify files or create work items."
+    prompt: "Act as a fresh read-only reviewer of the exact Draft at docs/changes/P1-temperature-parse/change.md. Review it without modifying files or creating work items."
     setup:
       copy_test_files: true
       commands:
@@ -66,4 +66,48 @@ scenarios:
     rubric:
       - "Treats an unlinked, library-wide parsing policy as a blocking durable decision."
       - "Routes ADR creation and approval to architecture-design before change approval."
+    timeout: 420
+
+  - name: "Block a contract whose material rationale is missing"
+    prompt: "Review docs/changes/P1-temperature-parse/change.md as a change design. Do not modify files or create work items. Route material rationale gaps to design-change."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh missing-rationale"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "Needs revision"
+      - type: "output_contains"
+        value: "why"
+      - type: "output_contains"
+        value: "design-change"
+    rubric:
+      - "Treats a technically complete-looking contract without problem, value, why-now, or claim provenance as blocking."
+      - "Routes the missing rationale to design-change and does not invent business intent from the proposed API."
+    timeout: 420
+
+  - name: "Block a user answer that was never persisted"
+    prompt: "During clarification I answered that existing callers must remain source- and binary-compatible, but docs/changes/P1-temperature-parse/change.md does not record that answer or its source. Review the design without modifying files or creating work items, and route the gap to design-change."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh approval-ready-design"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "Needs revision"
+      - type: "output_contains"
+        value: "compatib"
+      - type: "output_contains"
+        value: "design-change"
+    rubric:
+      - "Treats a material compatibility answer supplied in conversation but absent from the change's current truth as blocking."
+      - "Does not require an agent log in the human document and does not substitute reviewer memory for persisted current truth."
     timeout: 420

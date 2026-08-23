@@ -4,7 +4,7 @@ config:
 
 scenarios:
   - name: "Create an approved principle set"
-    prompt: "I approve creation of repository design principles. Write in English and create docs/principles/README.md, architecture.md, and engineering.md for this .NET library. Establish dependency direction, compatibility, testability, and observability defaults; include owner, review triggers, strengths, and exception routes. Do not modify production code."
+    prompt: "I approve creation of a compact repository design-principle set in English. Establish dependency direction, compatibility, testability, and observability defaults with owners, review triggers, strengths, and exception routes. The repository is small and all principles have the same owner and revision cadence. Do not modify production code."
     setup:
       copy_test_files: true
       commands:
@@ -13,10 +13,6 @@ scenarios:
       - type: "exit_success"
       - type: "file_exists"
         path: "docs/principles/README.md"
-      - type: "file_exists"
-        path: "docs/principles/architecture.md"
-      - type: "file_exists"
-        path: "docs/principles/engineering.md"
       - type: "file_contains"
         path: "docs/principles/README.md"
         value: "exception"
@@ -24,11 +20,13 @@ scenarios:
         path: "docs/principles/README.md"
         value: "review"
       - type: "file_contains"
-        path: "docs/principles/architecture.md"
+        path: "docs/principles/README.md"
         value: "Required"
       - type: "file_contains"
-        path: "docs/principles/engineering.md"
+        path: "docs/principles/README.md"
         value: "Default"
+      - type: "command"
+        run: "test \"$(find docs/principles -maxdepth 1 -type f -name '*.md' | wc -l | tr -d ' ')\" = 1"
       - type: "file_not_contains"
         path: "docs/principles/*.md"
         value: "pending commit"
@@ -42,7 +40,7 @@ scenarios:
         run: "git diff --exit-code -- Sample.cs"
     rubric:
       - "Distinguishes repository-wide principles from architecture records and ADRs."
-      - "Records strength, practical implications, review triggers, and an exception route instead of presenting principles as unqualified slogans."
+      - "Keeps the small same-owner principle set in one README while recording strength, practical implications, review triggers, and exception routes."
       - "The durable principle set does not reference or depend on the temporary docs/changes artifact."
       - "Does not modify production code."
     timeout: 420

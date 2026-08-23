@@ -1,0 +1,51 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Reject weak assertions and a missing failure partition"
+    prompt: "Use $review-tests as a fresh read-only reviewer for eval-base..HEAD against docs/changes/parse/change.md. Audit test adequacy without modifying or executing tests and do not issue the final merge conclusion."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "AC-01"
+      - type: "output_contains"
+        value: "AC-02"
+      - type: "output_contains"
+        value: "weak"
+      - type: "output_contains"
+        value: "missing"
+      - type: "output_regex"
+        pattern: '(?mi)^## Lane conclusion[ \t]*\r?\n(?:[ \t]*\r?\n)?findings[ \t]*$'
+      - type: "output_not_contains"
+        value: "Ready to merge"
+    rubric:
+      - "Finds AC-01 weak because asserting only non-null cannot distinguish the approved parsed value from an incorrect value."
+      - "Finds the material invalid-input partition AC-02 missing even though one test file exists."
+      - "Does not use line coverage, a matching test name, or successful compilation as proof of adequacy."
+      - "Does not run tests, modify files, or issue merge readiness."
+    timeout: 360
+
+  - name: "Pass adequate tests without manufacturing a missing partition"
+    prompt: "Use $review-tests as a fresh read-only test-only reviewer for eval-base..HEAD against docs/changes/parse/change.md. Audit adequacy without modifying or executing tests and do not issue the final merge conclusion."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh clean"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "command", run: "git status --porcelain", stdout_empty: true }
+      - { type: "output_regex", pattern: '(?mi)^## Lane conclusion[ \t]*\r?\n(?:[ \t]*\r?\n)?pass[ \t]*$' }
+      - { type: "output_not_contains", value: "Ready to merge" }
+      - { type: "output_not_contains", value: "AC-02 missing" }
+    rubric:
+      - "Recognizes exact-value success and invalid-input failure as adequate for the two approved partitions."
+      - "Does not invent unrelated edge cases or turn a specialist pass into merge readiness."
+    timeout: 360

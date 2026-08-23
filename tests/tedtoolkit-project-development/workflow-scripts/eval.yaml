@@ -1,0 +1,19 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Validate workflow scripts offline"
+    mode: "static"
+    setup:
+      copy_test_files: true
+      env:
+        TEDTOOLKIT_REPO_ROOT: "${REPO_ROOT}"
+        LC_ALL: "C.UTF-8"
+      commands:
+        - "timeout 220s bash -lc 'export PATH=\"/usr/bin:/bin:$PATH\"; bash run.sh'"
+    assertions:
+      - type: "exit_success"
+      - type: "output_contains"
+        value: "OK: workflow script regressions passed"
+    timeout: 230

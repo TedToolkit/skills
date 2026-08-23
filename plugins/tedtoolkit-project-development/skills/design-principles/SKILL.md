@@ -17,20 +17,21 @@ This skill owns recurring technical defaults. Read
 [change-development-workflow.md](../../references/change-development-workflow.md) before
 classifying another concern. Its governing dependency direction is authoritative; re-establish
 every principle from durable evidence. Invoke `architecture-design` for a one-off enduring
-technical decision and `change-design` for a bounded delivery contract.
+technical decision and `design-change` for a bounded delivery contract.
 
 ## Inspect and classify
 
 1. Read repository guidance, `docs/product/README.md` when it exists, `docs/principles/`, applicable
    architecture records, related ADRs, representative current code, and durable repository evidence.
-2. Copy the principle templates immediately, leave their status as `Draft`, and record the known
-   evidence and unknowns. These Drafts support discussion only; they do not activate a principle.
+2. Draft the known evidence and unknowns in the conversation. Create or update repository Drafts
+   during discovery only when the user explicitly requested them or approved their creation; a
+   Draft does not activate a principle.
 3. State the recurring decision, governed scope, owner, and the long-term cost the principle should
    protect against. For each missing point that could change the rule, ask one highest-impact
    question with why it matters and a recommended answer plus its main trade-off. When the user
-   answers, immediately update the Draft's **Clarification and decision log** and affected
-   principle fields, then continue with the next question. Repeat until no material ambiguity
-   remains.
+   answers, update the affected current-truth fields, then continue with the next question. Do not
+   retain the question-and-answer transcript in the durable principle set. Repeat until no material
+   ambiguity remains.
 4. Classify the record before writing it:
    - A recurring default with a stable rationale belongs in `docs/principles/`.
    - Current component boundaries or cross-cutting behavior belong in `docs/architecture/`.
@@ -42,21 +43,23 @@ technical decision and `change-design` for a bounded delivery contract.
 
 ## Write the principle set
 
-Complete the following three Draft files created from the provided assets. The index states scope,
-precedence, principle index, owner or review trigger, and the exception route; the two topic files
-hold the principles themselves:
+Start with one Draft created from [principles-readme-template.md](assets/principles-readme-template.md).
+It states scope, precedence, principles, owners or review triggers, and the exception route:
 
 ```text
 docs/principles/
-  README.md          # scope, precedence, exception route, index
-  architecture.md    # boundaries, dependency direction, evolution
-  engineering.md     # testability, compatibility, observability, operations
+  README.md          # default source of truth for a small principle set
+  architecture.md    # optional: distinct architecture audience/owner/revision cadence
+  engineering.md     # optional: distinct engineering audience/owner/revision cadence
 ```
 
-Use [principles-readme-template.md](assets/principles-readme-template.md),
-[architecture-principles-template.md](assets/architecture-principles-template.md), and
-[engineering-principles-template.md](assets/engineering-principles-template.md). Remove a blank
-principle block rather than leaving a placeholder in an approved document.
+Split topic files only when evidence identifies a genuinely different audience, owner, or revision
+cadence. The presence of both architecture and engineering principles, the number of principles, or
+the availability of topic templates is not sufficient. When no distinct boundary is evidenced,
+keep every principle inline in `README.md` and do not create `architecture.md` or `engineering.md`.
+When splitting is justified, move the same principle-block structure into the topic file, keep
+`README.md` as the index, and remove moved inline blocks. Do not pre-create topic files. Remove a
+blank principle block rather than leaving a placeholder in an approved document.
 
 For each principle, record a stable ID, status (`Draft`, `Active`, or `Retired`), strength, default
 direction, rationale, practical implications, and exception route. The status is the principle's
@@ -93,9 +96,9 @@ Treat a proposed deviation as a design question, not a rule violation to hide:
 ## Approval gate
 
 Present the proposed principle or revision with its scope, alternatives, strength, practical effect
-on delivery work, and exception route. Draft principle files may be created and revised during the
-clarification loop; wait for explicit approval before changing any principle to `Active`, creating
-an architecture record or ADR, or changing production code.
+on delivery work, and exception route. An explicit request to create or update principle files
+authorizes their Draft write; wait for explicit approval before changing any principle to `Active`,
+creating downstream architecture records or ADRs, or changing production code.
 
 Complete when each principle governs a recurring choice, has one rationale and exception route,
 depends only on durable evidence, and is either explicitly activated by the user or remains a Draft

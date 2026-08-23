@@ -16,14 +16,14 @@ decision, architecture, and operational records; add a README entry point only w
 needs reader orientation, and never under `docs/changes/`.
 
 This skill owns repository and project structure only. Invoke `write-readme` when a new location
-needs reader orientation, `architecture-design` for architecture records, and `change-design` for
+needs reader orientation, `architecture-design` for architecture records, and `design-change` for
 delivery contracts.
 
 ## Inspect before changing
 
-1. Read the root `README.md`, `CLAUDE.md`, and `AGENTS.md`, solution file, root MSBuild files, and
-   every existing `.csproj`. Treat `CLAUDE.md` as the source of truth for contributor guidance;
-   `AGENTS.md` must contain only a direct `CLAUDE.md` reference, as in this repository.
+1. Read the root `README.md`, applicable agent-guidance files, solution file, root MSBuild files, and
+   every existing `.csproj`. Preserve the repository's declared guidance precedence. Do not impose
+   this marketplace's `CLAUDE.md`/`AGENTS.md` relationship on another repository.
 2. Identify the public package boundary, dependency direction, tooling, test categories, and
    build/release requirements. Also identify the project's implementation language(s) and the
    human language required for README and code-comment prose.
@@ -35,6 +35,8 @@ boundaries. Read [solution-and-msbuild.md](references/solution-and-msbuild.md) b
 editing `.slnx`, `Directory.Build.props`, `Directory.Packages.props`, or shared `.props` files. Read
 [project-files-and-boundaries.md](references/project-files-and-boundaries.md) before naming or
 splitting a `.csproj`, adding project-root files, or changing project dependencies.
+Read [testing-strategy.md](../../references/testing-strategy.md) before mapping proof purposes
+and execution shapes to physical test projects.
 ## Approval gate
 
 Present the proposed responsibility boundaries, paths, project and package dependencies, MSBuild
@@ -52,9 +54,10 @@ folders. When a multi-project layout is appropriate, create or reorganize it in 
    Keep a short, stable, repository-wide build entry point at the root when discoverability matters;
    put supporting scripts and multi-step implementation under `build/`. Add neither when the normal
    `dotnet` command already expresses the workflow.
-   When adding or normalizing agent guidance, `CLAUDE.md` must explicitly state the project's
-   implementation language(s) and the human language for README and code-comment prose. Create
-   `AGENTS.md` as a single direct `CLAUDE.md` reference; do not duplicate the guidance in both files.
+   When the approved scope includes agent guidance, state the project's implementation language(s)
+   and the human language for README and code-comment prose in its existing source of truth. In a
+   repository that explicitly follows this marketplace convention, keep `AGENTS.md` as a direct
+   `CLAUDE.md` reference; otherwise preserve the repository's own convention.
    Add `docs/` when durable records need a discoverable home; do not create an empty documentation
    tree merely because a layout diagram includes one.
 2. Contracts and reusable code before their consumers.
@@ -71,23 +74,37 @@ file is nearby; give it a build, package, runtime, or test purpose.
 Place test projects under `tests/` when the repository uses that grouping. For a production library
 `src/<Library>/`, the default focused test project is `tests/<Library>.Tests/`: for example,
 `src/MyProduct.Core/` is covered first by `tests/MyProduct.Core.Tests/`. Treat that project as the
-home for fast, deterministic unit tests unless the repository already uses a different convention.
+home for fast, deterministic unit tests and any automated Acceptance evidence with the same
+execution profile unless the repository already uses a different convention.
 
-Do not pre-create `Unit`, `Integration`, `Contract`, and `EndToEnd` directories or projects. Split a
-test project only when its execution environment, dependencies, runtime, speed, isolation, or
-ownership differs materially:
+Use one naming grammar:
 
-- Use `<Product>.IntegrationTests` for real persistence, serialization, DI, filesystem, network, or
-  multi-component boundary verification.
-- Use `<Product>.ContractTests` for public APIs, events, or external protocols that need a stable
-  compatibility contract.
-- Use `<Product>.EndToEndTests` for a small number of critical user journeys that require the
-  deployed-system path.
-- Use `<Product>.Tests.Shared` only after fixtures, generators, or helpers are genuinely shared by
+```text
+<TestProject> = <Subject>.Tests[.<Profile>]
+<TestSupport> = <Subject>.TestKit
+```
+
+`<Subject>` is the production project or product boundary under test. Omit the profile for the
+default project; do not append `.Unit`. Add a profile only after its
+execution environment, dependencies, runtime, speed, isolation, cadence, or ownership differs
+materially:
+
+- Use `<Subject>.Tests.Integration` for real persistence, serialization, DI, filesystem, network, or
+  multi-component boundary verification that needs a separate project.
+- Use `<Subject>.Tests.Acceptance` for approved observable outcomes that need a distinct outer-loop
+  execution profile.
+- Use `<Subject>.Tests.Contract` or `<Subject>.Tests.E2E` only when the compatibility boundary or
+  deployed journey itself earns a separate execution profile. Contract and End-to-end are
+  execution shapes; Acceptance may be the proof purpose they serve.
+- Use `<Subject>.TestKit` only after fixtures, generators, or helpers are genuinely shared by
   more than one test project.
 
-Choose the lowest reliable test level for each behavior case. A test project may reference its
-production library and test-only support; production projects must never reference a test project.
+Do not pre-create a project or directory for each proof purpose or execution shape. Project size and test count alone do
+not justify a split: a small repository normally starts with one `<Subject>.Tests`, and a large
+repository keeps that default until a distinct execution profile earns another project. When
+approved acceptance cases exist, ensure each owned case has Acceptance evidence without requiring a
+separate Acceptance project. A test project may reference its production library and test-only
+support; production projects must never reference a test project.
 
 ## File responsibilities
 
@@ -101,10 +118,11 @@ convenience, and must deliberately preserve any required parent behavior. Read
 [solution-and-msbuild.md](references/solution-and-msbuild.md) before adding an explicit import,
 dedicated props directory, or nested automatic control file.
 
-For every repository with a `.slnx` solution, the root `Directory.Packages.props` must enable
-central package management; it must contain
-`<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>` in a `PropertyGroup`.
-This is an MSBuild property, so do not put it in the `.slnx` file itself.
+Enable central package management in root `Directory.Packages.props` when the repository already
+uses it or when the approved multi-project package boundary benefits from one version source. Do not
+introduce it merely because a `.slnx` exists. When enabled, place
+`<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>` in a `PropertyGroup`, never
+in the `.slnx` file.
 
 Use the file-responsibility rules and common solutions in both reference files. Keep generated
 output, local configuration, and tool caches out of source control unless the repository explicitly
@@ -117,7 +135,7 @@ Read the **Documentation ownership and links** section of
 read [principles.md](references/principles.md) before creating or revising `docs/principles/`.
 Create only locations whose owning record already exists or has been approved by its owning skill.
 Scaffolding supplies the location; `library-product-intent`, `design-principles`,
-`architecture-design`, `change-design`, `plan-work-items`, and `write-readme` supply the content.
+`architecture-design`, `design-change`, `plan-work-items`, and `write-readme` supply the content.
 
 ## Verification
 

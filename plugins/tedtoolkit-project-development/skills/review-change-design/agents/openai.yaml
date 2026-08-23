@@ -1,4 +1,4 @@
 interface:
   display_name: "Review Change Design"
-  short_description: "Check a change document before approval and planning."
-  default_prompt: "Use $review-change-design to review this change document for approval readiness. Do not modify files, create work items, or inspect implementation readiness."
+  short_description: "Check a human change handoff before approval."
+  default_prompt: "Use $review-change-design to check this Controlled change's profile, rationale, contract, proof, brevity, and five-minute human handoff before approval. Do not modify files or create work items."

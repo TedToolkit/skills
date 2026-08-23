@@ -1,116 +1,114 @@
 ---
 name: plan-work-items
 description: >-
-  Slice one approved change design into independently verifiable work items. Use when an approved
-  behavioral contract needs delivery boundaries, logical prerequisites, verification plans,
-  definitions of done, estimates, or a delivery map while preserving private implementation freedom.
+  Slice one approved Controlled change into two or more independently verifiable human work items.
+  Use only when one embedded delivery brief cannot honestly implement and prove the approved goal,
+  or when a multi-item dependency map is required. Decide this from the approved contract rather
+  than asking the user whether the change is simple or complex. Do not use for Fast or Standard
+  work or manufacture a one-row delivery map.
 ---
 
 # Plan Work Items
 
-Create the smallest set of **slices** that can each deliver and prove one outcome. This skill
-owns work-item outcomes, logical prerequisites, authorized delivery boundaries, verification
-criteria, estimates, and definitions of done. It does not redefine the change or design the private
-implementation.
+Create the smallest multi-item delivery map that lets human developers implement the approved
+Controlled change without reading the originating conversation. This skill owns item outcomes,
+real prerequisites, delivery boundaries, primary proof, conditional proof, and done criteria. It
+does not change the approved behavioral contract or prescribe private implementation.
 
-Read [change-development-workflow.md](../../references/change-development-workflow.md) before
-classifying target delivery artifacts, work items, or operational handoffs. Its terms and lifecycle
-are authoritative; this skill adds only the concrete planning steps below.
+Read [change-development-workflow.md](../../references/change-development-workflow.md) for profile,
+human-handoff, and approval rules. Read [testing-strategy.md](../../references/testing-strategy.md)
+for proof purpose and execution shape.
 
-## Establish the planning boundary
+## Confirm planning is justified
 
-1. Read repository guidance, the approved `change.md`, governing records pinned by it, affected
-   code, callers, tests, documentation, dependencies, and adjacent changes.
-2. Require an approved change with one explicit change goal, observable behavior cases, and
-   completion criteria. If it is Draft, incomplete, ambiguous, or names multiple goals, return it
-   to `change-design`; do not infer missing behavior.
-3. Record a material conflict between repository evidence and the approved contract as a change
-   design deviation. Stop for a revised approval before writing work items.
-4. For each candidate item, make a planning-boundary inventory before drafting prose: affected
-   observable behavior or public contracts, expected delivery area, current-behavior evidence,
-   repository consumers or generated outputs, explicit non-goals, and known unknowns. Make a public
-   API, protocol, persistence format, or other externally visible contract exact when the approved
-   change requires it. Treat an expected internal file or private symbol as non-binding evidence,
-   not an exhaustive authorization list.
-5. Establish whether the candidate can start from completed prerequisites and finish with its own
-   evidence. Its essential behavior must not wait for a later item to be implemented or verified.
-   Split the candidate or return an unresolved design dependency to `change-design` when this is
-   not possible.
-6. Inspect code only far enough to validate the boundary, feasibility, dependency, and verification
-   strategy. Do not solve local algorithms, private type structure, method decomposition, or exact
-   edit sequence during planning. An unknown that changes observable behavior, a public contract,
-   or the ability to verify the outcome is a blocker; an internal implementation choice is not.
+Require an approved Controlled format-3 change whose approved delivery shape is `multi-item`, with
+one goal and a complete contract. Do not ask the user to choose a complexity label.
 
-## Split into minimal work items
+- If the record is Fast or Standard, keep its one delivery in the embedded delivery brief and stop.
+- If one bounded delivery can implement and prove the complete change, stop and return the delivery
+  shape to `design-change` for revision and renewed approval; do not edit the approved contract or
+  create a one-row map here.
+- If the change kind is `experiment`, return it to `design-change`; experiments are single-delivery
+  evidence changes and do not use work-item maps.
+- If the request contains another independently valuable goal, return it to `scope-changes`; do not
+  hide it as an item.
+- If behavior, public contracts, migration semantics, security, or architecture remains undecided,
+  return to the owning design skill.
 
-Use the smallest number of work items that keeps independently deliverable outcomes separate. Each
-item has exactly one independently observable outcome and must be small enough for one implementer
-to start after its stated prerequisites, make the bounded change, run its verification, and decide
-complete or incomplete without starting another item. A work item is not independent merely because
-its files are separate: it needs a bounded delivery area, explicit expected behavior, and evidence
-that proves its own outcome.
+Planning is justified only when at least two deliveries have distinct independently verifiable
+outcomes, real dependency inputs, separate reversibility, or materially different proof/ownership
+boundaries.
 
-Do not create an item whose only outcome is investigation, review, coordination, approval, or a
-decision. Resolve that uncertainty before planning. Do not create an item for an unchanged artifact:
-when the approved design proves that no target delivery artifact modification is required, record
-that conclusion in the change design and create no delivery plan.
+## Split by outcome, not repository shape
 
-Split an item if it contains more than one independently deliverable outcome, separately reversible
-change, foundation beyond its smallest proving consumer, later design choice, or separate
-verification strategy. Do not split merely by behavior-case row, source directory, class, or person.
-Put the smallest proving consumer with a foundation when that is required to verify the foundation;
-do not create a foundation item whose only proof is deferred to a later item.
+Each item must let one human developer:
 
-## Create the delivery brief
+1. identify one bounded outcome and why it contributes to the parent goal;
+2. start from completed real prerequisites;
+3. change a bounded target-delivery area;
+4. prove its own outcome without a later item; and
+5. supply any declared output that unlocks a dependent item.
 
-Create `work-items/<ID>-<slug>.md` from `assets/work-item-template.md` under the parent change.
-Append the delivery map from `assets/delivery-map-template.md` to the parent `change.md`. For every item:
+Do not split by class, directory, team, acceptance-case row, or estimated size alone. Keep a
+foundation with its smallest proving consumer instead of creating an item whose proof is deferred.
+Research, review, coordination, approval, release, permission, and manual external operations are
+not work items.
 
-1. Copy the approved change goal, applicable behavior cases, and governing constraints without
-   changing them.
-2. State one bounded outcome, scope, non-goals, expected affected delivery area, and any exact public
-   contract authorized by the approved change. An item outcome contributes to the parent goal; do
-   not label it a goal. Do not require an exhaustive internal file or private-symbol inventory.
-3. Record only logical prerequisites that supply a concrete input or guarantee. Use a recommended
-   order only when it helps coordination; do not invent a total serial order for independent items.
-   A later item may consume an earlier result, but may not be needed to prove that earlier outcome.
-4. State delivery constraints: observable behavior, compatibility, security, migration, governing
-   rules, and adjacent behavior that must remain unchanged. Do not prescribe an algorithm, private
-   type structure, method decomposition, or line-by-line edit sequence.
-5. Map every applicable behavior case to its proof intent, observable assertion, and appropriate
-   test level or bounded manual procedure. Name a stable repository command when known, but leave
-   the exact test file, fixture organization, and focused command to implementation when they depend
-   on the chosen code structure. A broad final build alone is insufficient, and a later item cannot
-   be the only verification for this item.
-6. Define done with objectively checkable behavior, passing evidence, required documentation or
-   migration state, and any prerequisite output supplied to dependent items. Completion evidence
-   records the actual changed artifacts; a difference from a non-binding expected area is not a
-   deviation unless it expands scope or violates a stated constraint.
-7. Give each item a range estimate, confidence, assumptions, exclusions, migration or rollback when
-   material, and material risks with an owner or next decision.
+## Write concise human handoffs
 
-Do not use placeholders such as "update implementation", unknown expected behavior, generic links
-that replace item-specific constraints, or verification delegated to a later item. Record a
-behavioral, public-contract, dependency, or verification unknown as a blocker. Leave ordinary
-private implementation choices for `implement-change-tdd`. Preserve every
-`<!-- work-item: ... -->` and `<!-- delivery-map -->` marker from the templates unchanged; they are
-language-independent inputs to the delivery-boundary validator, not user-facing prose.
+Create `work-items/<ID>-<slug>.md` from [work-item-template.md](assets/work-item-template.md) and
+create the parent change's authoritative `work-items.md` from
+[delivery-map-template.md](assets/delivery-map-template.md).
+Remove all inapplicable optional content.
 
-## Approval gate
+Every item states:
 
-Before presenting the plan, run
-`bash "${CLAUDE_PLUGIN_ROOT}"/scripts/validate-work-items.sh <parent-change-directory>`. Resolve
-every reported error by clarifying, splitting, correcting dependencies, or returning the missing decision to
-`change-design`; do not waive an error because a reader could infer the answer from another file.
+- one outcome, scope, and explicit non-goals;
+- concrete inputs supplied by real prerequisites;
+- exact public or persisted contracts and implementation-facing constraints;
+- evidence-backed likely components or files as non-binding touchpoints;
+- parent `AC-<number>`, `INV-<number>`, or `STR-<number>` responsibility without copying the contract;
+- one primary proof with proof purpose, execution shape, assertion, and known command;
+- only the conditional boundary, migration, structural, or broader regression evidence justified by
+  actual risk; and
+- objective done and completion-evidence requirements.
 
-Before implementation, present the delivery map and every work item with its outcome, prerequisites,
-verification, definition of done, estimate, and blockers. Wait for explicit approval.
-Approval authorizes `implement-change-tdd` to implement one selected work item only. A material
-change to the approved behavioral contract returns to `change-design`; a material change to an
-item's outcome, scope, real prerequisite, public contract, verification standard, definition of
-done, estimate, or migration requires renewed work-plan approval. A different internal file, private
-symbol, algorithm, test organization, or edit sequence within the approved boundary does not.
+Do not include agent history, coordination state, executable edit steps, exhaustive private file
+lists, algorithms, method decomposition, or repeated parent rationale. Store only material planning
+decisions in separate control state when recovery needs them; update the work item with the
+resulting current truth.
 
-Complete when the validator passes, every approved behavior case maps to proof in at least one
-independently completable slice, each item proves its own outcome, and the user has approved the
-delivery map or received the exact blockers.
+## Map proof and ownership
+
+Every parent contract row has exactly one owning item. Other items may support it only by naming a
+verified input. An owning item must have a credible primary proof; it need not create a distinct
+Acceptance test when a Unit, Component, Contract, Integration, End-to-end, or bounded manual shape
+is the narrowest reliable observation.
+
+Require Integration only for a changed real boundary. Require Unit only when deterministic logic
+benefits from focused protection. Require End-to-end only for a material deployed journey that
+narrower proof cannot establish. One test may serve Acceptance and regression purposes.
+
+## Validate and approve
+
+Run `bash "${CLAUDE_PLUGIN_ROOT}"/scripts/validate-work-items.sh <parent-change-directory>` and
+resolve structural, ownership, dependency, and proof errors. Then apply the five-minute handoff
+test to the parent and every item.
+
+Treat `work-items.md` as the only mutable item-status source. Approved item documents are stable
+delivery contracts; workers and reviewers do not maintain a second status field inside them.
+
+Present the map with each item's outcome, prerequisites, primary proof, conditional proof, done
+criteria, and material collision risks. Wait for explicit approval of the complete enumerated map
+and item set, record the human approval source, then set its rows to `Approved` and rerun the validator. The
+approval authorizes the included item boundaries and their implementation; an ordinary worker
+preflight is informative unless it discloses a material escalation trigger.
+
+Return behavioral or public-contract change to `design-change`; return a changed item outcome, real
+prerequisite, boundary, proof standard, or migration delivery to this skill for renewed plan
+approval. Private files, symbols, algorithms, test organization, collision order, and edit sequence
+do not require replanning when they remain inside the approved boundary.
+
+Complete when the validator passes, the map has at least two necessary items, each item passes the
+five-minute handoff test, every contract row has exactly one owner and credible primary proof, and
+the user has approved the map or received the exact blocker.

@@ -1,12 +1,23 @@
 <!-- delivery-map -->
-## 🗺️ Delivery map
+## Delivery map
 
-Added by `plan-work-items` after the parent change is approved. Record logical prerequisites as facts,
-and add a recommended order only when it materially helps coordination. Independent rows may be
-implemented in any order. The verification gate proves each item before a dependent item starts.
-Each row must represent a bounded modification to version-controlled delivery artifacts; design and
-operational activities do not belong in this map.
+This map exists only for a Controlled change with at least two necessary delivery
+items. Independent rows may run in any order; prerequisites name concrete supplied inputs rather
+than preferred sequencing. This file is the only mutable work-item status source.
 
-| ID | Work item | Outcome | Priority and rationale | Estimate | Logical prerequisites and supplied input | Item-owned verification gate | Status | Document |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| <PREFIX>-001 |  |  | P1 —  | <lower>–<upper> person-months | None, or `<item>: <output or guarantee supplied>` | <observable assertion and stable command/procedure when known> | Planned | `work-items/<PREFIX>-001-<slug>.md` |
+<!-- approval-source: none -->
+
+| ID | Outcome | Contract ownership | Real prerequisites and supplied input | Primary proof | Status | Document |
+| --- | --- | --- | --- | --- | --- | --- |
+| <PREFIX>-001 |  | Owns AC-01 / Supports INV-01 / None | None, or `<item>: <input or guarantee>` | <purpose and execution shape> | Draft | `work-items/<PREFIX>-001-<slug>.md` |
+
+Repeat `Owns` or `Supports` before every contract ID; do not use an unlabeled comma-separated list.
+Keep every Outcome, prerequisites, Primary proof, Status, and Document cell non-empty.
+
+Keep only material plan decisions in separate control state when recovery requires them. The human
+map shows current delivery truth. Remove these instructions before approval.
+
+Status meanings: `Implemented` is an item candidate that passed item-level proof and required
+review; only `Verified` means it is present on the authoritative integration revision and may
+satisfy another item's prerequisite. `Superseded` never satisfies a prerequisite without a named
+verified replacement.

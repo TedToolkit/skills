@@ -1,69 +1,104 @@
 ---
 name: review-change-design
 description: >-
-  Trace a draft or approved change design for completeness and internal consistency before delivery
-  planning. Use when its goal, scope, BehaviorCases, constraints, risks, ADR coverage, completion
-  criteria, estimate, or readiness for human approval needs an independent read-only review.
+  Independently review a Standard or Controlled change for correct profile, one coherent goal,
+  human handoff quality, behavioral or invariant completeness, scalable proof, constraints, risks,
+  ADR coverage, and readiness for approval. Use before approving Controlled changes and whenever a
+  draft may be over- or under-designed. Remain read-only.
 ---
 
 # Change-Design Review
 
-Trace every material contract item before it becomes the basis for delivery planning. This skill reviews
-the change document, not the implementation that may later satisfy it. It is independent and
-read-only: do not edit the draft, create work items, run commands, approve the change, or begin
-implementation.
+Review whether the shortest safe contract is complete and usable by a human developer. Do not edit
+the draft, create work items, approve it, run tests, or begin implementation.
 
-Read [change-development-workflow.md](../../references/change-development-workflow.md) to distinguish
-the behavioral contract, target delivery artifacts, workflow control records, and operational handoffs.
+Read [change-development-workflow.md](../../references/change-development-workflow.md),
+[testing-strategy.md](../../references/testing-strategy.md), and
+[agent-orchestration.md](../../references/agent-orchestration.md).
 
 ## Set the boundary
 
-1. Read repository guidance, the submitted change design, its cited product-intent record,
-   principles, architecture records, ADRs, and directly affected current documentation.
-2. State the reviewed document revision and governing-record revisions. Do not infer an unstated
-   product requirement from code, a diff, or a later work item.
-3. If no change design exists, say that a design review cannot proceed and route drafting to
-   `change-design`.
-4. Do not inspect implementation code or tests as evidence that the proposal is delivered. Existing
-   code may be read only to test the document's stated status quo and compatibility claims.
+Read repository guidance, the submitted change, directly affected current documentation and code
+needed to check status quo, and only the governing records actually cited. State the reviewed path
+and review context. If orchestration references a preparation, inspect only the relevant approved
+partition rows and evidence IDs; do not load sibling drafts or agent transcripts without a named
+contradiction.
+
+Do not use proposed implementation or tests as evidence that the future delivery is complete.
+
+State review independence as `independent`, `compact`, or `not-established` using the shared
+definitions. Controlled approval requires a fresh read-only reviewer that did not author the exact
+Draft and is bound to its digest. If that cannot be established, report a Blocking finding. A
+requested Standard quality check may be `compact`, but must not claim independence.
+
+A legacy format-2 record that was already approved may complete under its existing contract. A
+format-2 Draft is not eligible for a new approval under the profile-aware workflow: route it to
+`design-change` for the smallest format-3 migration before declaring it ready.
+
+## Review profile and kind
+
+Verify that evidence supports the selected profile and kind:
+
+- Fast should not have manufactured a change record.
+- Standard has one goal, one delivery, bounded reversibility, and no Controlled trigger.
+- Controlled covers public/persisted contracts, security, migration, difficult reversal,
+  architecture, cross-cutting delivery, or multiple work items proportionately.
+
+Treat preparation and parallel execution as routing or runtime choices, not workflow profiles. A
+multi-goal request should have been partitioned before this review; a multi-item Controlled change
+may decide sequential versus parallel execution only after readiness and collision evidence exists.
+
+An understated material risk is Blocking. Unnecessary ceremony is Important: recommend the smaller
+profile or removal of redundant artifacts before approval.
+
+## Apply the five-minute handoff test
+
+A developer without conversation context must be able to identify goal/rationale, current and
+expected behavior or invariants, scope/non-goals, constraints/risks, prerequisites, primary and
+conditional proof, and open private implementation choices.
+
+Check that the main document contains current truth rather than clarification logs, writer leases,
+receipts, transaction state, repeated rationale, empty headings, or an exhaustive private edit plan.
+Likely touchpoints should orient the developer while remaining explicitly non-binding.
 
 ## Review the contract
 
-Check that the document has exactly one result-oriented change goal. It must state the user-visible
-outcome, not an API name, file change, or implementation task. Verify that every scope item,
-BehaviorCase, completion criterion, and stated approach contributes to that one goal. Recommend
-separate changes for independently releasable outcomes.
+Check:
 
-Check the following against the cited evidence:
+1. exactly one result-oriented goal with evidenced problem/value/why-now rationale;
+2. explicit scope, non-goals, compatibility, current state, and deliberately preserved behavior;
+3. behavior-change, bug-fix, and migration cases have stable observable `AC-<number>` results;
+4. behavior-preserving refactors use `INV-<number>` invariants rather than invented deltas;
+5. maintenance uses `STR-<number>` target structural outcomes rather than mislabeling changed state as a preserved invariant;
+6. every material contract claim has an evidence, governing constraint, or current user decision;
+7. required enduring decisions have accepted ADRs before approval;
+8. risks, migration/recovery, operational handoffs, and completion are proportional;
+9. a Standard or single-delivery Controlled record contains a usable embedded delivery brief;
+10. a multi-delivery Controlled record routes planning to `plan-work-items` without prescribing the
+   future map; and
+11. machine markers remain stable and visible prose may be translated.
 
-1. Scope, non-goals, compatibility, and status quo are explicit and do not conflict.
-2. BehaviorCases cover material success, failure, and boundary behavior with observable outcomes.
-3. Governing records are pinned and their resulting constraints are restated rather than merely
-   linked.
-4. The proposed approach, alternatives, risks, migration or rollback treatment, and unresolved
-   questions are proportionate to the change's reversibility and impact.
-5. Completion criteria are observable, and the planning estimate states its range, assumptions,
-   exclusions, confidence, and re-estimation trigger.
-6. The document contains no delivery dependencies, work-item briefs, or private implementation
-   steps. Route delivery dependencies and work-item boundaries to `plan-work-items` after approval;
-   leave private implementation decisions to `implement-change-tdd`.
-7. Every material, enduring, or difficult-to-reverse technical choice has an accepted ADR linked
-   from the change. A proposed or missing ADR is a blocking finding: route it to
-   `architecture-design` now, then revise the change with the accepted ADR's constraints. Do not
-   approve a change first and defer its ADR to implementation review.
-8. The delivery disposition is explicit: target delivery artifacts are named, a no-delivery-change
-   conclusion has evidence and completion criteria, and every required operational handoff has an
-   owner and closure evidence. Operational handoffs must not be disguised as proposed work items.
+Also verify that material clarification is complete: no unanswered question may still change the
+goal, observable contract, scope, compatibility, security, migration/recovery, architecture,
+delivery shape, or primary proof. Do not block approval for private implementation choices.
 
-Treat a missing behavioral constraint, ambiguous outcome, conflicting governing record, missing
-material risk, or required ADR as a blocking design finding. Do not fix it in this skill; route the
-smallest revision to `change-design` or `architecture-design`. A human, not this review, approves a
-design after blocking findings are closed.
+Do not require a full clarification history in the human document. When a conversation answer
+changes current truth, require that truth and its authority to be reflected; detailed history may
+live in separate control state or Git history.
+
+## Review proof proportionately
+
+Every contract row needs exactly one credible primary proof with an explicit `primary-proof`
+marker, proof purpose, execution shape, observable assertion, and known command or bounded
+procedure. Acceptance is a purpose, not a
+mandatory test project.
+
+Report a blocker when a named real boundary, migration, compatibility, security, or critical
+journey lacks justified evidence. Do not require Unit, Integration, and Acceptance rows merely to
+fill layers, and do not require an artificial Red for a behavior-preserving refactor or mechanical
+maintenance.
 
 ## Report
-
-Use this exact structure. Give each finding a stable ID, evidence, impact, smallest revision, and
-owner. Do not report implementation preferences or ask about documentation deletion.
 
 ```md
 # Change-Design Review
@@ -71,33 +106,34 @@ owner. Do not report implementation preferences or ask about documentation delet
 ## Conclusion
 Ready for approval | Needs revision
 
-## Contract traceability
-| Contract item | Evidence | Status |
+## Profile and handoff
+- Selected profile and kind:
+- Independence:
+- Reviewed Draft path and review context:
+- Five-minute handoff: Pass | Fail
+- Over- or under-designed:
+
+## Contract and proof
+| Contract item | Evidence or primary proof | Status |
 | --- | --- | --- |
-| Change goal |  | covered / missing / partial / conflicts |
 
 ## Blocking findings
-- [B1] <finding> — Evidence: <document section or governing record>. Impact: <impact>. Suggested
-  revision: <smallest change>. Owner: change-design / architecture-design. Verify: <inspection or
-  approval check>.
+- [B1] <finding> — Evidence: <location>. Impact: <impact>. Smallest revision: <change>.
+  Owner: design-change / architecture-design. Verify: <check>.
 
 ## Important findings
-- [I1] <finding> — Evidence: <document section or governing record>. Impact: <impact>. Suggested
-  revision: <smallest change>. Owner: change-design. Verify: <inspection or approval check>.
-
-## Design boundary
-- Not reviewed: implementation, tests, work items, builds, and merge readiness.
+- [I1] <finding> — Evidence: <location>. Impact: <impact>. Smallest revision: <change>.
+  Owner: design-change. Verify: <check>.
 
 ## Review scope and limits
-- Reviewed: <change design and governing records>.
-- Not run: commands, builds, or tests.
+- Reviewed:
+- Not reviewed: implementation and delivery completion.
+- Not run: builds or tests.
 ```
 
 Choose `Needs revision` when a Blocking finding exists. Choose `Ready for approval` only when the
-contract is complete and internally consistent with its governing records. The latter is a request
-for human approval, not approval itself. After explicit approval, hand delivery planning to
-`plan-work-items`; after implementation, hand conformance review to `review-implementation`.
+profile is safe, the human handoff is actionable, all material contract rows and primary proof are
+covered, and no contradiction or required ADR remains. Readiness is not approval.
 
-Complete when every material contract item has a traceability status, every finding has evidence,
-impact, smallest revision, owner, and verification, and the conclusion follows mechanically from
-the blocking set.
+Complete when every material contract and handoff question has a status, findings name evidence and
+the smallest owner-specific revision, and the conclusion follows from the blocking set.

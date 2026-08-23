@@ -32,12 +32,14 @@ also be the assembly name, root namespace, and NuGet package ID; document any in
 | Command-line application | `<Product>.Cli` |
 | Build orchestration | `<Product>.Build` |
 | Roslyn analyzer, source generator, or code fix | `<Product>.Analyzers`, `.Generators`, or `.CodeFixes` |
-| Test suite | `<Project>.Tests`, `.Tests.Integration`, or `.Tests.Regression` |
+| Test suite | `<Subject>.Tests[.<Profile>]`; omit `.Unit`, and add a profile only for a distinct test execution boundary |
+| Shared test support | `<Subject>.TestKit`; create it only for support used by more than one test project |
 | Performance measurement | `<Project>.Benchmarks` |
 
 Choose either `.Abstractions` or `.Contracts` for the entire repository; do not use both for the
 same concept. Avoid `.Common`, `.Shared`, and `.Core` unless the project has a concrete, documented
-dependency boundary. `Tests.Shared` is acceptable only for test-only support.
+dependency boundary. Use `.TestKit`, not `.Tests.Shared`, for shared test-only support so it cannot
+be mistaken for an executable test suite.
 
 ## Split-project decision
 

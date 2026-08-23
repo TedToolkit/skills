@@ -1,16 +1,16 @@
 {
   "name": "tedtoolkit-project-development",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "TedToolkit project development workflows.",
   "author": { "name": "TedToolkit" },
   "skills": "./skills/",
   "interface": {
     "displayName": "TedToolkit Project Development",
     "shortDescription": "Design and implement .NET projects",
-    "longDescription": "TedToolkit workflows for library product intent, design principles, architecture design, change design, TDD, review, scaffolding, and documentation.",
+    "longDescription": "TedToolkit workflows for request scoping, risk-scaled change design and implementation, optional work-item orchestration, independent review, architecture, scaffolding, and concise human delivery records.",
     "developerName": "TedToolkit",
     "category": "Developer Tools",
     "capabilities": ["Write"],
-    "defaultPrompt": ["Help me design and implement a TedToolkit-style .NET change."]
+    "defaultPrompt": ["Route this .NET request through the lightest safe TedToolkit workflow; scope it first only when its change boundary is unclear."]
   }
 }

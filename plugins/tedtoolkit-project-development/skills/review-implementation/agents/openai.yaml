@@ -1,4 +1,4 @@
 interface:
   display_name: "Review Implementation"
-  short_description: "Check one work package against its approved design."
-  default_prompt: "Use $review-implementation to review this work package against its approved design and BehaviorCases. Include documentation disposition for human maintainers; do not modify files or run anything."
+  short_description: "Coordinate independent code, test, and verification review"
+  default_prompt: "Use $review-implementation to plan and synthesize a risk-scaled review of this exact candidate, using fresh specialist SubAgents only when independence or context separation materially improves confidence."

@@ -1,0 +1,173 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Schedule only dependency-ready work items"
+    prompt: "Use the approved FLOW change to audit orchestration readiness and report the next dependency wave. Stop before creating branches or worktrees, dispatching writing workers, or modifying files. Explain which item remains blocked and why."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh dependency-wave"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "FLOW-002"
+      - type: "output_contains"
+        value: "FLOW-003"
+      - type: "output_contains"
+        value: "FLOW-004"
+    rubric:
+      - "Treats FLOW-002 and FLOW-003 as the next eligible dependency wave because FLOW-001 is Verified on the authoritative integration revision."
+      - "Keeps FLOW-004 blocked until both FLOW-002 and FLOW-003 are integrated and recorded Verified."
+      - "Distinguishes dependency eligibility from permission to execute concurrently."
+      - "Does not create branches or worktrees, dispatch writing workers, or modify repository files."
+    timeout: 420
+
+  - name: "Serialize runtime collisions without inventing dependencies"
+    prompt: "Perform a read-only audit of the approved REG change's next orchestration wave. Both items are dependency-ready; derive a provisional collision graph from the delivery briefs and repository evidence, then report whether they may execute concurrently. Do not dispatch any agents, create branches or worktrees, or modify files."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh runtime-collision"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "REG-001"
+      - type: "output_contains"
+        value: "REG-002"
+      - type: "output_contains"
+        value: "SharedRegistry.cs"
+    rubric:
+      - "Finds both items logically ready but serializes them because both anticipate writing SharedRegistry.cs and its shared registration contract."
+      - "Records a runtime collision edge rather than changing the approved delivery map or inventing a logical prerequisite."
+      - "Uses a deterministic order for the serialized items."
+      - "Labels the audit provisional because no TDD worker confirmed the write set, and does not dispatch agents or modify repository files."
+    timeout: 420
+
+  - name: "Reject a circular delivery map before dispatch"
+    prompt: "Prepare the approved LOOP change for full work-item orchestration. Do not modify files."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh circular-dependency"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "plan-work-items"
+    rubric:
+      - "Runs the delivery-boundary validation before dispatch and identifies the circular prerequisite."
+      - "Does not create workers, branches, worktrees, or implementation changes around the invalid graph."
+      - "Returns the dependency defect to plan-work-items."
+    timeout: 300
+
+  - name: "Reject a partial cycle even when another item is verified"
+    prompt: "Audit the approved PART change before dispatch. PART-001 is already Verified, while PART-002 and PART-003 depend on one another. Stop without creating workers, branches, worktrees, or modifying files, and route the graph defect to its owner."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh partial-cycle"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "cycle"
+      - type: "output_contains"
+        value: "plan-work-items"
+    rubric:
+      - "Rejects the complete graph even though one independent item is already Verified and would make a shallow readiness check succeed."
+      - "Does not dispatch work around the PART-002/PART-003 cycle and routes correction to plan-work-items."
+    timeout: 300
+
+  - name: "Execute, integrate, and verify two independent items"
+    prompt: "Fully implement the approved independent-flags Controlled change. FLAG-001 and FLAG-002 are both ready and have disjoint write sets, so use isolated workers when available, preserve one coordinator, run each item proof, serialize integration, run bash verify-all.sh on the combined authoritative revision, mark items Verified only after combined proof passes, and perform the final integrated-change review. Branch and worktree creation for these approved items is authorized; do not delete worktrees or branches."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh execute-independent-items"
+      cleanup_commands:
+        - >-
+          current=$(pwd -P); git worktree list --porcelain |
+          awk '/^worktree / { sub(/^worktree /, ""); print }' |
+          while IFS= read -r path; do resolved=$(cd "$path" 2>/dev/null && pwd -P || true);
+          test -z "$resolved" || test "$resolved" = "$current" || git worktree remove --force "$path";
+          done; git worktree prune
+    assertions:
+      - type: "exit_success"
+      - type: "file_contains"
+        path: "Alpha.cs"
+        value: "Enabled = true"
+      - type: "file_contains"
+        path: "Beta.cs"
+        value: "Enabled = true"
+      - type: "command"
+        run: "test \"$(grep -c '| Verified |' docs/changes/independent-flags/work-items.md)\" = 2"
+      - type: "command"
+        run: "bash verify-all.sh"
+      - type: "command"
+        run: >-
+          alpha=$(git log --all --format=%H -n 1 -- Alpha.cs) &&
+          beta=$(git log --all --format=%H -n 1 -- Beta.cs) &&
+          test -n "$alpha" && test -n "$beta" && test "$alpha" != "$beta" &&
+          git merge-base --is-ancestor "$alpha" HEAD && git merge-base --is-ancestor "$beta" HEAD &&
+          git diff-tree --no-commit-id --name-only -r "$alpha" | grep -Fxq Alpha.cs &&
+          ! git diff-tree --no-commit-id --name-only -r "$alpha" | grep -Fxq Beta.cs &&
+          git diff-tree --no-commit-id --name-only -r "$beta" | grep -Fxq Beta.cs &&
+          ! git diff-tree --no-commit-id --name-only -r "$beta" | grep -Fxq Alpha.cs
+      - type: "file_contains"
+        path: "docs/changes/independent-flags/change.md"
+        value: "<!-- change-status: completed -->"
+      - type: "output_contains"
+        value: "integrated-change"
+    rubric:
+      - "Runs FLAG-001 and FLAG-002 from the same verified baseline with isolated ownership and does not invent a dependency between their disjoint outcomes."
+      - "Preserves identifiable item integration units, runs item proof and combined proof, and marks each item Verified only on the authoritative integrated revision."
+      - "Reviews the complete parent contract in integrated-change mode and records the parent Completed only after the ready final review."
+    timeout: 1200
+
+  - name: "Coordinate a sequential dependency chain through verified integration"
+    prompt: "Fully implement the approved dependent-chain Controlled change. Only CHAIN-001 is initially ready; keep one orchestration coordinator, run that wave serially, integrate and mark CHAIN-001 Verified before starting CHAIN-002, then integrate CHAIN-002, run bash verify-all.sh on the authoritative revision, and perform the final integrated-change review. Do not bypass central work-items.md status or delete temporary branches/worktrees."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh execute-dependent-items"
+      cleanup_commands:
+        - >-
+          current=$(pwd -P); git worktree list --porcelain |
+          awk '/^worktree / { sub(/^worktree /, ""); print }' |
+          while IFS= read -r path; do resolved=$(cd "$path" 2>/dev/null && pwd -P || true);
+          test -z "$resolved" || test "$resolved" = "$current" || git worktree remove --force "$path";
+          done; git worktree prune
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_contains", path: "Registry.cs", value: "Alpha = \"ready\"" }
+      - { type: "file_contains", path: "Consumer.cs", value: "Read() => Registry.Alpha" }
+      - { type: "command", run: "bash verify-all.sh" }
+      - { type: "command", run: "grep -Eq '^\\| CHAIN-001 .*\\| Verified \\|' docs/changes/dependent-chain/work-items.md && grep -Eq '^\\| CHAIN-002 .*\\| Verified \\|' docs/changes/dependent-chain/work-items.md" }
+      - type: "command"
+        run: >-
+          registry=$(git log --all --format=%H -n 1 -- Registry.cs) &&
+          consumer=$(git log --all --format=%H -n 1 -- Consumer.cs) &&
+          test -n "$registry" && test -n "$consumer" && test "$registry" != "$consumer" &&
+          git merge-base --is-ancestor "$registry" "$consumer" &&
+          git merge-base --is-ancestor "$consumer" HEAD &&
+          git show "$registry:Registry.cs" | grep -Fq 'Alpha = "ready"' &&
+          git show "$registry:Consumer.cs" | grep -Fq 'Read() => "pending"' &&
+          git diff-tree --no-commit-id --name-only -r "$consumer" | grep -Fxq Consumer.cs
+      - { type: "output_contains", value: "integrated-change" }
+    rubric:
+      - "Keeps one coordinator for the whole multi-item map even though each wave has only one ready item."
+      - "Does not start CHAIN-002 until CHAIN-001 is present and Verified on the authoritative integration revision."
+      - "Preserves identifiable item integration units and bases final readiness on the combined candidate."
+    timeout: 1200

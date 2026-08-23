@@ -1,4 +1,6 @@
 interface:
-  display_name: "Implement Change with TDD"
-  short_description: "Implement one approved work item with TDD."
-  default_prompt: "Use $implement-change-tdd to implement this approved change in small Red-Green-Refactor cycles."
+  display_name: "Implement Change with TDD (Deprecated)"
+  short_description: "Compatibility alias; use implement-change"
+  default_prompt: "Use $implement-change-tdd only to route this legacy invocation to $implement-change."
+policy:
+  allow_implicit_invocation: false

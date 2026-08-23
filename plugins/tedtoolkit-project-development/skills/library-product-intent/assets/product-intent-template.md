@@ -8,16 +8,6 @@ Draft | Approved | Superseded
 - Approval owner:
 - Last reviewed:
 
-## 📝 Clarification and decision log
-
-While this record is `Draft`, record each material user answer immediately and update the affected
-sections. Retain only entries that explain a consequential positioning, boundary, or success
-decision.
-
-| ID | Question and why it mattered | Recommended answer | User decision and source | Affected sections | Status |
-| --- | --- | --- | --- | --- | --- |
-| PI-01 |  |  |  |  | Resolved |
-
 ## 🎯 Positioning
 
 State in one or two sentences who the library serves, which problem it solves, and the value it

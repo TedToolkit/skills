@@ -1,0 +1,4 @@
+interface:
+  display_name: "Scope Changes"
+  short_description: "Partition an ambiguous request into coherent changes."
+  default_prompt: "Use $scope-changes when this request is ambiguous or may contain several independently valuable outcomes. Ask only boundary-changing questions and route each candidate to $design-change without creating ceremony for a single bounded change."

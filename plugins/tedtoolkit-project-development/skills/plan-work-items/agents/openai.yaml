@@ -1,4 +1,4 @@
 interface:
   display_name: "Plan Work Items"
-  short_description: "Define bounded work items without predesigning private code."
-  default_prompt: "Use $plan-work-items to split this approved change into independently verifiable delivery briefs with real dependencies, constraints, and proof standards."
+  short_description: "Plan two or more necessary Controlled deliveries."
+  default_prompt: "Use $plan-work-items only when this approved Controlled change needs at least two independently verifiable delivery briefs with real dependencies and proportionate proof."

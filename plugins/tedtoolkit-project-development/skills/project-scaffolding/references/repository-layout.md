@@ -29,9 +29,9 @@ repo/
   tests/                         # optional grouping for automated tests
     <Product>.Core.Tests/        # default unit tests for <Product>.Core
     <Product>.StructureCheck.Tests/ # focused tests for the layout validator
-    <Product>.IntegrationTests/  # only when real-boundary tests are needed
-    <Product>.ContractTests/     # only when a public contract needs protection
-    <Product>.EndToEndTests/     # only for critical deployed-system paths
+    <Product>.Tests.Integration/ # optional distinct real-boundary execution profile
+    <Product>.Tests.Acceptance/  # optional distinct outer-loop execution profile
+    <Product>.TestKit/           # optional support shared by multiple test projects
   benchmarks/                    # optional repeatable performance measurements
   playground/                    # optional manual developer experiments
   assets/                        # versioned test/input assets only
@@ -100,30 +100,39 @@ the same canonical entry point or implementation.
 
 ## Test layout and naming
 
-Mirror meaningful production-library boundaries before separating tests by level. The default test
-project for `src/<Library>/` is `tests/<Library>.Tests/`; for example:
+Mirror meaningful production-library boundaries before separating tests by execution profile. The
+default test project for `src/<Library>/` is `tests/<Library>.Tests/`; for example:
 
 ```text
 src/MyProduct.Core/                 # domain behavior
 tests/MyProduct.Core.Tests/          # fast deterministic tests of that behavior
 ```
 
-`<Library>.Tests` is normally the unit-test home. Do not append `.Unit` unless the repository has
-already established that convention; the `Tests` suffix is sufficient when the project contains only
-fast, isolated tests. Add a separately named project only when it differs in more than the test
-author's preference:
+`<Library>.Tests` is normally the unit-test home and may also contain automated Acceptance evidence
+with the same execution characteristics. Use one naming grammar:
+
+```text
+<TestProject> = <Subject>.Tests[.<Profile>]
+<TestSupport> = <Subject>.TestKit
+```
+
+`<Subject>` is the production project or product boundary under test. Omit the profile for the
+default project; do not append `.Unit`. Add a separately named project only when it differs in more
+than the test author's preference:
 
 | Test need | Project name | Use when | Do not create it when |
 | --- | --- | --- | --- |
 | Focused unit behavior | `<Library>.Tests` | The library has observable deterministic behavior | The library is intentionally trivial or fully covered through a higher-level boundary |
-| Real component boundary | `<Product>.IntegrationTests` | Verification needs persistence, DI, serialization, filesystem, network, or multiple real components | A unit test can prove the behavior without those dependencies |
-| Public/external compatibility | `<Product>.ContractTests` | A public API, event, or external protocol has a contract worth protecting | The only consumer is internal and ordinary integration coverage is enough |
-| Critical user journey | `<Product>.EndToEndTests` | The deployed-system path has failure modes lower layers cannot expose | A lower, faster test reliably proves the behavior |
-| Shared test-only helpers | `<Product>.Tests.Shared` | More than one test project shares meaningful fixtures, builders, or generators | A helper is used once or duplication is still minor |
+| Real component boundary | `<Subject>.Tests.Integration` | Verification needs persistence, DI, serialization, filesystem, network, or multiple real components in a distinct execution profile | The existing project can prove the boundary reliably |
+| Approved observable result | `<Subject>.Tests.Acceptance` | Outer-loop acceptance needs a distinct environment, cadence, isolation, or ownership boundary | The existing project can express the Acceptance evidence clearly and reliably |
+| Compatibility specialization | `<Subject>.Tests.Contract` | Compatibility assets, consumers, dependencies, or ownership form a distinct Integration or Acceptance profile | Compatibility can stay in its owning Integration or Acceptance project |
+| Deployed-journey specialization | `<Subject>.Tests.E2E` | A deployed journey requires distinct infrastructure, credentials, cadence, or ownership | The journey can stay in its owning Acceptance project |
+| Shared test-only helpers | `<Subject>.TestKit` | More than one test project shares meaningful fixtures, builders, or generators | A helper is used once or duplication is still minor |
 
-Do not create physical `Unit/`, `Integration/`, `Contract/`, or `EndToEnd/` folders merely to group
-one project each. Let the project names and solution folders express the boundary; add an additional
-directory only after it improves navigation for several related projects.
+Contract and E2E are execution profiles, while Acceptance is a proof purpose. Do not create
+physical `Unit/`, `Integration/`, or `Acceptance/` folders merely to mirror classifications. Let project names and
+solution folders express earned execution boundaries; add another grouping directory only after it
+improves navigation for several related projects.
 
 ## Project boundaries and dependency direction
 
@@ -147,9 +156,9 @@ reference concrete implementations only when composing them is part of its expli
 | Native interop source | product code | `<Product>.<Implementation>.Cpp` |
 | Generator/analyzer/code fix | tooling group | `<Product>.<Purpose>` |
 | Default unit tests for a library | test group | `<Library>.Tests` |
-| Reusable test support | test group | `<Product>.Tests.Shared` |
-| Integration, contract, or end-to-end boundary tests | test group | `<Product>.IntegrationTests`, `<Product>.ContractTests`, or `<Product>.EndToEndTests` |
-| Focused regression or interop tests | test group | `<Product>.Tests.<Purpose>` when a named suite has distinct execution or ownership |
+| Reusable test support | test group | `<Subject>.TestKit` |
+| Integration or acceptance boundary tests | test group | `<Subject>.Tests.Integration` or `<Subject>.Tests.Acceptance` |
+| Focused regression or interop tests | test group | `<Subject>.Tests.<Purpose>` when a named suite has distinct execution or ownership |
 | Repository-layout validator | build group | `<Product>.StructureCheck`, with tests in `<Product>.StructureCheck.Tests` |
 | Manual developer experiment | playground group | `<Product>.Playground` |
 
@@ -160,11 +169,12 @@ reference concrete implementations only when composing them is part of its expli
 | One library and one test project | Keep both at the root or use `src/` and `tests/`; choose the view the team already uses. Do not add artificial subgroups. |
 | Several libraries with different consumers | Separate by package/API boundary; use project references from consumers to reusable libraries. |
 | Multiple implementations of one contract | Put the contract in a reusable project and give each implementation its own project. Never reverse the dependency. |
-| Shared fixtures or custom test data sources | Create a test-only shared project after duplication becomes meaningful. |
-| A library needs its first behavior tests | Create `<Library>.Tests` beside its source boundary under `tests/`; begin with the behavior cases that are cheapest to prove deterministically. |
-| Tests need a database, filesystem, DI container, real serialization, or multiple components | Create or extend `<Product>.IntegrationTests`; do not place slow environment-dependent tests in the default unit-test project. |
-| A public API, event, or external protocol must remain compatible | Create `<Product>.ContractTests` only if ordinary integration tests do not make the contract explicit and stable enough. |
-| A critical user journey crosses the deployed-system boundary | Add a small `<Product>.EndToEndTests` suite; keep its cases few and reserve it for failures lower layers cannot reveal. |
+| Shared fixtures or custom test data sources | Create `<Subject>.TestKit` only after more than one test project genuinely shares them. |
+| A library needs its first behavior tests | Create `<Library>.Tests` beside its source boundary under `tests/`; begin with the deterministic behaviors that are cheapest to prove. When approved acceptance cases exist, record their Acceptance evidence without requiring another project. |
+| A test suite grows large | Keep one project while its execution profile remains coherent; organize by behavior or feature, and do not split only to reduce file count. |
+| Tests need a database, filesystem, DI container, real serialization, or multiple components | Create or extend `<Subject>.Tests.Integration` only when those dependencies need a distinct execution profile; keep fast deterministic behavior in the default project. |
+| A public API, event, or external protocol must remain compatible | Keep the proof in its owning Integration or Acceptance project; create `<Subject>.Tests.Contract` only when compatibility assets, consumers, cadence, or ownership form a distinct profile. |
+| A critical user journey crosses the deployed-system boundary | Keep it in the owning Acceptance project; create `<Subject>.Tests.E2E` only when deployment infrastructure, credentials, cadence, or ownership require an independent profile. |
 | A hot path needs repeatable measurement | Create `<Product>.Benchmarks` under `benchmarks/`, keep benchmarks separate from correctness tests, and record a stable baseline before using results as a gate. |
 | A single slow run needs investigation | Profile it first; do not create a benchmark project unless the scenario is expected to recur. |
 | Regression for a fixed defect | Add it to a dedicated regression suite or tag/category only when that distinction helps execution and ownership. |
@@ -181,7 +191,8 @@ reference concrete implementations only when composing them is part of its expli
 | A manual experiment needs a project | Put it in `playground/<Product>.Playground`; it is visible for discovery but excluded from the default solution build. Promote repeatable measurements to `benchmarks/` and automated assertions to `tests/`. |
 | SDK selection must be reproducible across developers and CI | Add `global.json`; otherwise omit it. |
 | The repository needs custom feeds, package-source mapping, or source policy | Add `nuget.config`; otherwise omit it. |
-| A change needs an approved behavior contract, API sketch, or TDD test map | Add `docs/changes/<P0-P3>-<change-slug>/change.md` for the outcome, planned approach, delivery disposition, design blockers, and status; after approval, let `plan-work-items` add the dependency map and put one bounded target-delivery brief per file in `docs/changes/<P0-P3>-<change-slug>/work-items/`. A brief states the outcome, constraints, real prerequisites, and proof without prescribing private files, symbols, algorithms, or edit steps. Never add a `README.md` under `docs/changes/`; the explicitly named change record already provides the context. The change and work-item documents themselves are workflow control records, not target delivery artifacts. Do not create work items for research, review, approval, or external operations. Link the issue or pull request; do not use the document as a changelog. |
+| A Standard or Controlled change needs a human implementation handoff | Add `docs/changes/<stable-slug>/change.md` for current approved truth: goal and rationale, scope, observable behavior or preserved invariants, constraints, one delivery disposition, proportionate proof, and completion. Keep one delivery brief inline. Only a Controlled change with two or more necessary deliveries adds `work-items.md` plus `work-items/<ID>-<slug>.md`. Never add a `README.md` below one change, create a one-row delivery map, use priority in the directory name, or store agent logs and receipts in the human handoff. |
+| One unbounded request contains several independently valuable changes and orchestration adds real value | Let `scope-changes` create `docs/change-preparations/<slug>/preparation.md` for machine/coordinator state, source-level answers, evidence references, and the approved partition. Keep each resulting human contract under its own `docs/changes/<stable-slug>/change.md`; never use the preparation as a cross-change contract or delivery map. |
 | A change introduces a durable technical choice | Put the change-specific behavior in `docs/changes/` and the decision rationale in `docs/adr/`. Link the two records instead of duplicating their content. |
 | The team needs stable defaults for recurring design trade-offs | Add `docs/principles/README.md`, then split independent topics into focused files only when they improve navigation. A principle states the default, its rationale, implications, and exception route; it does not record one decision's alternatives. |
 | The team needs a stable explanation of system boundaries or cross-cutting semantics | Add a focused document directly under `docs/` or an established `docs/architecture/` subtree. Link it from affected changes and work items; keep its rationale in the durable record and create a category directory only when the category earns one. |
@@ -193,10 +204,13 @@ dependency, package, target framework, runtime asset, build behavior, or test ex
 
 ## Documentation ownership and links
 
-For a change with one or more work items, the documentation layout is:
+The expanded documentation layout for a Controlled change with two or more work items is:
 
 ```text
 docs/
+  change-preparations/
+    <request-slug>/
+      preparation.md                    # temporary source intake, partition, and lane index
   principles/
     README.md                           # scope, precedence, exception route, principle index
     <topic>.md                          # an independent enduring decision heuristic, when needed
@@ -215,19 +229,20 @@ docs/
         ecosystem-analysis.md           # ecosystem evidence, when applicable
         poc/                            # PoC manifest and durable output, when applicable
   changes/
-    <P0-P3>-<change-slug>/
-      change.md                         # outcome, planned approach, blockers, delivery map
+    <stable-slug>/
+      change.md                         # concise human contract and inline single-delivery brief
+      work-items.md                     # only for two or more necessary Controlled deliveries
       work-items/
-        <ID>-<slug>.md                  # one bounded repository-change contract
+        <ID>-<slug>.md                  # one human-implementable delivery brief
 ```
 
 The change record links to applicable principles, architecture records, and ADRs rather than repeating
 their rationale. Each work item links back to its change and prerequisites, and owns only its own
 outcome, delivery constraints, and verification standard. It does not predesign private code. A work
 item exists only for a bounded modification to version-controlled delivery artifacts; research,
-reviews, approvals, and external operations belong to change design or an operational handoff. Use
-this layout whenever a change needs an approved behavioral contract and delivery plan, including a
-small change with one work item.
+reviews, approvals, and external operations belong to change design or an operational handoff.
+Fast has no change artifact by default; Standard and single-delivery Controlled stop at
+`change.md` and never create a one-row delivery map.
 
 Use the smallest durable location that lets readers find a record from the repository root:
 
@@ -236,8 +251,9 @@ Use the smallest durable location that lets readers find a record from the repos
 | Repository purpose and first-use path | Root `README.md` | Project READMEs and relevant docs |
 | Package-specific consumer contract | README beside its `.csproj` | Root README when the package is public |
 | Repository-wide decision defaults and their rationale | `docs/principles/README.md` and focused topic files when navigation needs them | Root README, related ADRs, architecture records, and change designs |
-| Change outcome, planned approach, and status; later delivery order | `docs/changes/<P0-P3>-<change-slug>/change.md` | Root README or issue; each work item |
-| One bounded repository modification's outcome, scope, delivery constraints, and verification standard | `docs/changes/<P0-P3>-<change-slug>/work-items/<ID>-<slug>.md` | Parent change, implementation choices, and review |
+| One source request's temporary clarification, evidence index, and approved change partition | `docs/change-preparations/<slug>/preparation.md` | Resulting change designs while coordination remains active |
+| Change goal, current contract, single-delivery brief, proof, and status | `docs/changes/<stable-slug>/change.md` | Root README or issue; each work item when present |
+| One bounded delivery's outcome, scope, constraints, primary proof, and supplied prerequisites | `docs/changes/<stable-slug>/work-items/<ID>-<slug>.md` | Parent change, implementation choices, and review |
 | Enduring decision and trade-offs | `docs/adr/ADR-<number>-<slug>.md`, or `docs/adr/ADR-<number>-<slug>/README.md` when it owns durable evidence | Related change design and architecture documentation |
 | ADR-specific benchmark source | `docs/adr/ADR-<number>-<slug>/benchmark/`, listed by `docs/adr/Benchmark.slnx` | Its ADR and evidence index; never the main solution or default CI |
 | Architecture boundary or cross-cutting mechanism | `docs/` or `docs/architecture/` after the category earns its place | Root README, related ADR, and affected changes |

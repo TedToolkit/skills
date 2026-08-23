@@ -13,15 +13,6 @@
 - Supersedes: ADR-<number> or None
 - Superseded by: ADR-<number> or None
 
-## 📝 Clarification and decision log
-
-While this ADR is `Proposed`, record each material user answer immediately and update the affected
-sections. Retain only entries that explain a consequential driver, constraint, or selected option.
-
-| ID | Question and why it mattered | Recommended answer | User decision and source | Affected sections | Status |
-| --- | --- | --- | --- | --- | --- |
-| ADR-C-01 |  |  |  |  | Resolved |
-
 ## 📌 Decision at a glance
 
 State the decision in one precise sentence. A reader should understand the chosen direction without

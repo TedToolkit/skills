@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design Change"
+  short_description: "Design one coherent change contract."
+  default_prompt: "Use $design-change for this one coherent candidate. Investigate first, clarify its contract one high-impact question at a time, choose Fast, Standard, or Controlled, and produce the shortest approval-ready human handoff with proportionate proof."

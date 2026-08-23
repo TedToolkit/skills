@@ -1,0 +1,4 @@
+interface:
+  display_name: "Verify Implementation"
+  short_description: "Run candidate-bound build and test verification without fixes"
+  default_prompt: "Use $verify-implementation to execute the authoritative proof for this exact candidate and return a revision-bound verification result without changing source files."

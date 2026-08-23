@@ -1,0 +1,33 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Create one evidence-based root README"
+    prompt: "Use $write-readme. I approve creating the repository-root README in English for this small .NET library. Give a concise purpose, the verified build command, a minimal public-API example, and navigation to the project file. Do not invent installation, release, support, or license claims, and do not create child READMEs."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh"
+    assertions:
+      - type: "exit_success"
+      - type: "file_exists"
+        path: "README.md"
+      - type: "file_contains"
+        path: "README.md"
+        value: "dotnet build Sample.csproj -c Release"
+      - type: "file_contains"
+        path: "README.md"
+        value: "Parser.IsValid"
+      - type: "command"
+        run: "test \"$(find . -name README.md -type f | wc -l | tr -d ' ')\" = 1"
+      - type: "file_not_contains"
+        path: "README.md"
+        value: "MIT"
+      - type: "command"
+        run: "git diff --exit-code -- Sample.cs Sample.csproj CLAUDE.md AGENTS.md"
+    rubric:
+      - "Creates one concise root entry point for the actual repository audience and first task."
+      - "Bases purpose, example, link, and command on repository evidence without inventing package or release claims."
+      - "Does not create redundant project or directory READMEs or modify production artifacts."
+    timeout: 420

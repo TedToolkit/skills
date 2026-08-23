@@ -1,0 +1,4 @@
+interface:
+  display_name: "Implement Change"
+  short_description: "Implement one approved delivery with proportionate proof"
+  default_prompt: "Use $implement-change to implement this approved delivery with the loop and proof appropriate to its change kind."

@@ -15,7 +15,7 @@ README adds information that its parent cannot express clearly, rather than rete
 This skill owns reader-facing orientation and first-use guidance. Read the governing dependency
 direction in [change-development-workflow.md](../../references/change-development-workflow.md)
 before summarizing product, architecture, principle, or delivery content. Link the owning record;
-invoke `library-product-intent`, `architecture-design`, `design-principles`, or `change-design`
+invoke `library-product-intent`, `architecture-design`, `design-principles`, or `design-change`
 when that source content is missing.
 
 Keep `docs/changes/` on its explicit `change.md` and focused work-item files; place no README there.

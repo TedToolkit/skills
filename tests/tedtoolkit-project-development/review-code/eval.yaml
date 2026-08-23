@@ -1,0 +1,44 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Find a failure-semantic defect without reviewing tests"
+    prompt: "Use $review-code as a fresh read-only reviewer for eval-base..HEAD against docs/changes/ratio/change.md. Do not modify files, run tests, judge test adequacy, or issue a final merge conclusion."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "AC-02"
+      - type: "output_regex"
+        pattern: '(?mi)^## Lane conclusion[ \t]*\r?\n(?:[ \t]*\r?\n)?findings[ \t]*$'
+      - type: "output_not_contains"
+        value: "Ready to merge"
+    rubric:
+      - "Attempts to falsify the implementation and finds that a zero denominator throws instead of returning the approved failure result."
+      - "Separates the observed division from its contract impact and proposes the smallest implementation correction."
+      - "Limits itself to code correctness; it does not run tests, assess test coverage, modify files, or issue merge readiness."
+    timeout: 360
+
+  - name: "Pass a clean code-only correctness lane without inventing findings"
+    prompt: "Use $review-code as a fresh read-only code-only reviewer for eval-base..HEAD against docs/changes/ratio/change.md. Check implementation correctness only; do not review tests, run commands, modify files, or issue a final merge conclusion."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh clean"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "command", run: "git status --porcelain", stdout_empty: true }
+      - { type: "output_regex", pattern: '(?mi)^## Lane conclusion[ \t]*\r?\n(?:[ \t]*\r?\n)?pass[ \t]*$' }
+      - { type: "output_not_contains", value: "Ready to merge" }
+      - { type: "output_not_contains", value: "division by zero" }
+    rubric:
+      - "Checks both approved cases and concludes the code-correctness lane passes without manufacturing a defect."
+      - "Does not assess test adequacy or convert a specialist pass into merge readiness."
+    timeout: 360

@@ -1,0 +1,144 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Implement and prove an approved Standard bug fix"
+    prompt: "Implement the approved Standard clamp fix in docs/changes/temperature-clamp/change.md. Use the bug-fix reproduce/fix/regression loop, add the narrow AC-01 proof, run the repository's dotnet verification, record the implementation lifecycle state, and stop after the implementation is ready for review. Do not create work items or ask me to choose a workflow profile."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh standard-change-execute"
+    assertions:
+      - type: "exit_success"
+      - type: "file_exists"
+        path: "Temperature.cs"
+      - type: "file_contains"
+        path: "Temperature.cs"
+        value: "public readonly record struct Temperature(decimal Celsius)"
+      - type: "file_contains"
+        path: "Temperature.cs"
+        value: "Clamp(Celsius)"
+      - type: "file_contains"
+        path: "Temperature.cs"
+        value: "decimal.Clamp(value, -273.15m, 1000m)"
+      - type: "file_not_contains"
+        path: "Temperature.cs"
+        value: "decimal.Round(decimal.Clamp(value, -273.15m, 1000m))"
+      - type: "file_contains"
+        path: "TemperatureTests.cs"
+        value: "12.25"
+      - type: "file_contains"
+        path: "docs/changes/temperature-clamp/change.md"
+        value: "<!-- change-status: in-progress -->"
+      - type: "command"
+        run: "grep -Eq 'test|run' .dotnet-calls"
+      - type: "command"
+        run: "test ! -d docs/changes/temperature-clamp/work-items"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_contains: "Temperature.cs"
+    rubric:
+      - "Implements the approved Standard boundary directly without manufacturing a work item or asking the user to classify the change."
+      - "Observes the failing root cause before the fix, adds a narrow AC-01 regression proof, and records passing verification from the exact candidate."
+      - "Leaves the exact candidate In progress and ready for review; the delivery owner advances it to Implemented only after candidate-bound verification and required review."
+    timeout: 600
+
+  - name: "Profile routing implements directly from a Standard change"
+    prompt: "Prepare to implement the approved Standard clamp fix. Inspect docs/changes/temperature-clamp/change.md and the code, identify the primary proof and the appropriate change-kind loop, then present the concise local implementation plan. Do not modify files yet."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh standard-change"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "Temperature.cs"
+      - type: "output_contains"
+        value: "primary proof"
+      - type: "output_not_contains"
+        value: "work item is required"
+    rubric:
+      - "Accepts an approved Standard change with one embedded delivery brief as the implementation boundary."
+      - "Uses the bug-fix reproduce-red, green, regression loop and one narrow primary proof instead of demanding three test layers."
+      - "Does not require a separate work item, delivery map, or second approval when the approved contract and risk are unchanged."
+    timeout: 420
+
+  - name: "Complete structural maintenance without manufacturing tests"
+    prompt: "Implement the approved Standard maintenance change at docs/changes/readme-spelling/change.md. Correct only the documented typo, run its structural proof, and stop when the exact candidate is ready for review. There is no test project and the approved contract does not require one; do not create tests or production code."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh structural-maintenance"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_contains", path: "Guide.md", value: "Use the parser through its public Parse method." }
+      - { type: "file_not_contains", path: "Guide.md", value: "teh parser" }
+      - { type: "command", run: "bash verify-docs.sh" }
+      - { type: "command", run: "test -z \"$(find . -name '*Tests*' -o -name '*.csproj' -o -name '*.cs')\"" }
+      - { type: "output_contains", value: "maintenance" }
+      - { type: "output_not_contains", value: "zero tests" }
+    rubric:
+      - "Uses the maintenance verify-edit-verify loop and treats the structural command as the complete primary proof."
+      - "Does not invent a behavioral test, test project, TDD red phase, or production change."
+      - "Returns the exact candidate for review without claiming final merge readiness."
+    timeout: 420
+
+  - name: "Do not implement without an approved design"
+    prompt: "Implement the proposed TryParse API with TDD. The only change document is still marked Draft, and I have not approved it. Inspect the repository and tell me what you need next. Do not modify files yet."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh unapproved-design"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "approved"
+    rubric:
+      - "Identifies that the design is not approved and does not begin Red-Green-Refactor."
+      - "Requests approval or a completed behavioral contract rather than inventing the implementation."
+    timeout: 420
+
+  - name: "Do not implement directly from a change record"
+    prompt: "Implement the approved geometry-rebuild change with TDD. The repository only contains the Controlled change record, with several public migrations and no approved multi-item delivery map or selected work item. Do not modify files yet."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh change-index"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "work-item"
+    rubric:
+      - "Recognizes that this specific multi-delivery Controlled record is not yet an implementation boundary."
+      - "Requests an approved delivery map and selected work item and does not begin implementation."
+    timeout: 420
+
+  - name: "Choose private implementation from an approved delivery boundary"
+    prompt: "Prepare to implement TEMP-001 with TDD. Inspect the approved change, work item, and code, then present the local behavior slices, anticipated files, and focused verification commands. Do not modify files yet."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh implementation-freedom"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "Temperature.cs"
+    rubric:
+      - "Accepts the approved outcome, delivery constraints, prerequisites, and verification standard without demanding a prewritten private-file list or implementation steps."
+      - "Inspects the repository and chooses concrete tests, anticipated files, and behavior slices as a local implementation plan."
+      - "Treats the local plan as revisable within the approved behavior, public contract, scope, and governing constraints."
+      - "Does not modify files during this explicitly read-only planning request."
+    timeout: 600

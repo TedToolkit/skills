@@ -1,15 +1,5 @@
 # Repository design principles
 
-## 📝 Clarification and decision log
-
-While the principle set is `Draft`, record each material user answer immediately and update the
-affected principle or index. Retain only entries that explain a consequential scope, strength, or
-exception route.
-
-| ID | Question and why it mattered | Recommended answer | User decision and source | Affected sections | Status |
-| --- | --- | --- | --- | --- | --- |
-| DP-01 |  |  |  |  | Resolved |
-
 ## Scope and precedence
 
 - Governed scope:
@@ -23,10 +13,36 @@ exception route.
 
 | ID | Title | Strength | Status | Owner | Review trigger | Document |
 | --- | --- | --- | --- | --- | --- | --- |
-| <ID> |  | Required / Default / Advisory | Draft / Active / Retired |  |  | `architecture.md` / `engineering.md` |
+| <ID> |  | Required / Default / Advisory | Draft / Active / Retired |  |  | This file |
 
 Use exactly one lifecycle value in each Status cell. Do not include Git state or any delivery
 stage (for example, "pending commit"); an approved, in-force principle is `Active`.
+
+## Principles
+
+### <ID>: <Principle title>
+
+- Status: Draft | Active | Retired
+- Strength: Required | Default | Advisory
+- Scope:
+- Owner:
+- Review trigger:
+
+#### Default
+
+State the recurring decision and default direction.
+
+#### Rationale
+
+Explain the long-term cost or quality this default protects.
+
+#### Practical implications
+
+State the smallest implementation and review consequences.
+
+#### Exception route
+
+State what evidence and approval a deviation requires.
 
 ## Exception route
 

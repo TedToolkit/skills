@@ -1,0 +1,51 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Fail an exit-zero run that discovers no intended tests"
+    prompt: "Use $verify-implementation to execute the documented Release test command for exact HEAD. Do not change or fix source files. Return the candidate-bound verification result."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh"
+    assertions:
+      - type: "exit_success"
+      - type: "file_contains"
+        path: ".command-log.txt"
+        value: "dotnet test"
+      - type: "output_contains"
+        value: "failed"
+      - type: "output_regex"
+        pattern: '(?mi)^## Overall status[ \t]*\r?\n(?:[ \t]*\r?\n)?failed[ \t]*$'
+      - type: "output_regex"
+        pattern: '(?mi)\b(?:discovered|total)(?:[ \t]+tests?)?[ \t]*[:=]?[ \t]*0\b'
+      - type: "output_contains_file"
+        path: ".expected-head"
+      - type: "command"
+        run: "git status --porcelain --untracked-files=no"
+        stdout_empty: true
+    rubric:
+      - "Binds the result to the full HEAD candidate and executes the repository's documented command."
+      - "Treats zero discovered intended tests as failed verification even though the command exits successfully."
+      - "Does not diagnose or fix the implementation and does not claim that test adequacy or merge readiness was established."
+    timeout: 360
+
+  - name: "Pass a candidate-bound run with one discovered intended test"
+    prompt: "Use $verify-implementation to execute the documented Release test command for exact HEAD. Do not change or fix source files. Return the candidate-bound verification result with observed counts."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh success"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_contains", path: ".command-log.txt", value: "dotnet test" }
+      - { type: "output_regex", pattern: '(?mi)^## Overall status[ \t]*\r?\n(?:[ \t]*\r?\n)?passed[ \t]*$' }
+      - { type: "output_regex", pattern: '(?mi)\b(?:discovered|total)(?:[ \t]+tests?)?[ \t]*[:=]?[ \t]*1\b' }
+      - { type: "output_contains_file", path: ".expected-head" }
+      - { type: "output_not_contains", value: "Ready to merge" }
+      - { type: "command", run: "git status --porcelain --untracked-files=no", stdout_empty: true }
+    rubric:
+      - "Binds the successful result and non-zero discovered count to exact HEAD."
+      - "Reports execution only and does not infer test adequacy or merge readiness."
+    timeout: 360

@@ -16,7 +16,7 @@ not a marketing plan, API reference, or feature backlog.
 This skill owns only the library's purpose, consumers, value, and boundaries. Read
 [change-development-workflow.md](../../references/change-development-workflow.md) for its governing
 dependency direction. Invoke `design-principles` for recurring technical defaults,
-`architecture-design` for enduring technical decisions, and `change-design` for a bounded delivery.
+`architecture-design` for enduring technical decisions, and `design-change` for a bounded delivery.
 
 ## Inspect and classify
 
@@ -25,13 +25,14 @@ dependency direction. Invoke `design-principles` for recurring technical default
    architecture records, ADRs, and active changes.
 2. Separate evidence from assumptions. Do not infer the intended audience or value solely from a
    project name or current code.
-3. Copy the product-intent template immediately, mark it `Draft`, and write the available evidence
-   and explicit unknowns. The Draft is a working record, not an approved product commitment.
+3. Draft the available evidence and explicit unknowns in the conversation. Create or update
+   `docs/product/README.md` during discovery only when the user explicitly requested that Draft or
+   approved its creation; a Draft is not a product commitment.
 4. For a missing target consumer, problem, differentiating value, non-goal, or success evidence,
    ask one highest-impact question at a time. Explain why it affects the record and recommend an
-   answer with its main trade-off. On the user's answer, immediately update the Draft's
-   **Clarification and decision log** and all affected sections before asking the next question.
-   Continue until no material uncertainty remains.
+   answer with its main trade-off. On the user's answer, update the affected current-truth sections
+   before asking the next question. Do not preserve the question-and-answer transcript in the
+   durable product record. Continue until no material uncertainty remains.
 5. Classify the requested record correctly:
    - Durable library purpose and boundary belong in `docs/product/README.md`.
    - First-use instructions and public capability navigation belong in `README.md` or a project
@@ -77,14 +78,14 @@ product-process documents in Git history rather than `docs/product/history/` or 
 
 ## Govern revisions and downstream use
 
-Treat an approved product-intent revision as the product baseline. Revisit it when the intended
+Treat an active product-intent record with an explicit approval source as the product baseline. Revisit it when the intended
 audience, primary problem, value proposition, deliberate non-goal, or success measure changes; do
 not revise it merely to justify one feature.
 
 - `design-principles` derives recurring technical defaults from the approved intent.
 - `architecture-design` derives boundaries and quality attributes from it.
-- `change-design` reads it when a change affects public positioning, scope, target users, or a
-  stated boundary. Pin the approved revision and restate its implementation-facing constraint in
+- `design-change` reads it when a change affects public positioning, scope, target users, or a
+  stated boundary. Reference the active source and restate its implementation-facing constraint in
   the work item; ordinary internal fixes need not cite it.
 - `write-readme` may summarize the positioning statement and link to this record, but must not keep
   a competing full copy.
@@ -92,10 +93,10 @@ not revise it merely to justify one feature.
 ## Approval gate
 
 Present the positioning statement, target consumers, problem and evidence, non-goals, success
-evidence, resulting downstream implications, and unresolved assumptions. The `Draft`
-`docs/product/README.md` may be created and revised during clarification; wait for explicit approval
-before marking it `Approved`, creating or revising design principles, architecture records, ADRs,
-or production code.
+evidence, resulting downstream implications, and unresolved assumptions. An explicit request to
+create or update `docs/product/README.md` authorizes its Draft write; wait for explicit approval
+before marking it `Approved`, creating or revising downstream governance records, or changing
+production code.
 
 Complete when every material claim is evidence or an owned assumption, the six required record
 elements are present, no downstream technical decision is embedded in product intent, and the user

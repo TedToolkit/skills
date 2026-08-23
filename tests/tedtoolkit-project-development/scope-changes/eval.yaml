@@ -1,0 +1,185 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Route one unclear outcome without preparation ceremony"
+    prompt: "Use $scope-changes as the entry point for my request to add an in-memory cache. The request expresses one outcome, but I have not described the observed problem, affected user, consequence, consistency requirements, or acceptable staleness. Inspect the repository, route the candidate correctly, and ask only the next question owned by the correct skill. Do not create a preparation record, change Draft, work items, or implementation."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh ambiguous-request"
+    assertions:
+      - type: "exit_success"
+      - type: "output_contains"
+        value: "design-change"
+      - type: "command"
+        run: "test -z \"$(find docs/change-preparations -name preparation.md -print -quit 2>/dev/null)\""
+      - type: "command"
+        run: "test -z \"$(find docs/changes -name change.md -print -quit 2>/dev/null)\""
+      - type: "command"
+        run: "test -z \"$(find docs -type d -name work-items -print -quit 2>/dev/null)\""
+      - type: "command"
+        run: "git diff --exit-code -- CacheConsumer.cs"
+    rubric:
+      - "Recognizes one coherent candidate and takes the no-artifact path to design-change instead of manufacturing preparation control."
+      - "Leaves problem, behavior, consistency, and proof clarification to design-change, which asks one highest-impact contract question without asking the user to choose a profile."
+      - "Does not dispatch agents, create a preparation record, or start implementation."
+    timeout: 420
+
+  - name: "Ask a boundary question before deciding the change set"
+    prompt: "Use $scope-changes for a request to add in-memory caching and clean up the synchronization subsystem. I have not said whether the cleanup is required for caching or has independent value. Inspect the repository, ask the single highest-impact boundary question, and stop. Do not create preparation, change, work-item, or implementation artifacts."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh ambiguous-request"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "independent"
+      - type: "output_not_contains"
+        value: "Fast, Standard, or Controlled"
+    rubric:
+      - "Asks whether synchronization cleanup is inseparable from caching or independently valuable because that answer changes the number of changes."
+      - "Does not start a detailed cache behavior interview, ask for a workflow profile, or persist one-lane control state."
+    timeout: 420
+
+  - name: "Create isolated drafts from an approved partition"
+    prompt: "Continue $scope-changes from docs/change-preparations/account-request/preparation.md. Its exact two-change partition is approved. Create the two listed change Drafts through separate bounded $design-change authors, copy only each candidate's relevant evidence and lineage, then stop before questions, reviews, approvals, planning, or implementation."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh approved-two-change-partition"
+    assertions:
+      - type: "exit_success"
+      - type: "file_exists"
+        path: "docs/changes/P1-auth/change.md"
+      - type: "file_exists"
+        path: "docs/changes/P2-export/change.md"
+      - type: "command"
+        run: "test \"$(find docs/changes -name change.md | wc -l | tr -d ' ')\" = 2"
+      - type: "file_contains"
+        path: "docs/changes/P1-auth/change.md"
+        value: "AUTH-EVIDENCE-7K"
+      - type: "file_not_contains"
+        path: "docs/changes/P1-auth/change.md"
+        value: "EXPORT-EVIDENCE-9Q"
+      - type: "file_contains"
+        path: "docs/changes/P2-export/change.md"
+        value: "EXPORT-EVIDENCE-9Q"
+      - type: "file_not_contains"
+        path: "docs/changes/P2-export/change.md"
+        value: "AUTH-EVIDENCE-7K"
+      - type: "file_contains"
+        path: "docs/changes/P1-auth/change.md"
+        value: "<!-- change-format: 3 -->"
+      - type: "command"
+        run: "for f in docs/changes/P1-auth/change.md docs/changes/P2-export/change.md; do grep -Fq '<!-- change-status: draft -->' \"$f\" && grep -Fq '<!-- approval-source: none -->' \"$f\" || exit 1; done"
+      - type: "file_not_contains"
+        path: "docs/changes/P1-auth/change.md"
+        value: "Writer lease"
+      - type: "command"
+        run: "test -z \"$(find docs/changes -type d -name work-items -print -quit)\""
+      - type: "command"
+        run: "git diff --exit-code -- AuthBoundary.cs ExportService.cs"
+    rubric:
+      - "Uses flat short-lived authors with one candidate and one target path each; it does not give either author the sibling candidate's evidence."
+      - "Creates exactly the approved proposed Changes as concise human handoffs and keeps preparation lineage and agent control state outside them."
+    timeout: 420
+
+  - name: "Honor the partition approval gate"
+    prompt: "Continue $scope-changes from docs/change-preparations/account-request/preparation.md. Its two-candidate investigation and proposed split introduce a material release-boundary choice, but partition authorization is explicitly None. Present the exact proposed Change IDs and the preparation git hash-object blob for human approval, then stop. Do not create change Drafts, plans, or implementation."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh ready-unapproved-partition"
+    assertions:
+      - type: "exit_success"
+      - type: "file_exists"
+        path: "docs/change-preparations/account-request/preparation.md"
+      - type: "file_contains"
+        path: "docs/change-preparations/account-request/preparation.md"
+        value: "CH-01"
+      - type: "file_contains"
+        path: "docs/change-preparations/account-request/preparation.md"
+        value: "CH-02"
+      - type: "command"
+        run: "test -z \"$(find docs/changes -name change.md -print -quit 2>/dev/null)\""
+      - type: "command"
+        run: "test -z \"$(find docs -type d -name work-items -print -quit 2>/dev/null)\""
+      - type: "command"
+        run: "git diff --exit-code -- AuthBoundary.cs ExportService.cs"
+    rubric:
+      - "Requests explicit human approval for exactly CH-01 and CH-02 and treats silence or readiness as no approval; it does not use a Git SHA as approval evidence."
+      - "Does not create any candidate Draft before partition approval even though investigation is complete."
+    timeout: 300
+
+  - name: "Route a local answer to only its owning change"
+    prompt: "Continue $scope-changes for docs/change-preparations/account-request/preparation.md. My answer belongs only to CH-01 at docs/changes/P1-auth/change.md: leaked credentials are actively exploited, so revoked keys must fail immediately. Route it to that candidate's $design-change owner, update and verify only that change's current goal/rationale and behavior contract, then stop. Do not copy the answer into preparation, alter CH-02, create control transactions, plan, or implement."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh isolated-change-answer"
+    assertions:
+      - type: "exit_success"
+      - type: "file_contains"
+        path: "docs/changes/P1-auth/change.md"
+        value: "leaked credentials are actively exploited"
+      - type: "file_not_contains"
+        path: "docs/changes/P1-auth/change.md"
+        value: "Clarification and decision log"
+      - type: "file_not_contains"
+        path: "docs/changes/P2-export/change.md"
+        value: "leaked credentials are actively exploited"
+      - type: "file_not_contains"
+        path: "docs/change-preparations/account-request/preparation.md"
+        value: "leaked credentials are actively exploited"
+      - type: "command"
+        run: "! grep -Eqi 'writer lease|receipt|persistence transaction|PREP-r[0-9]+' docs/change-preparations/account-request/preparation.md docs/changes/P1-auth/change.md"
+      - type: "command"
+        run: "git diff --exit-code -- docs/changes/P2-export/change.md AuthBoundary.cs ExportService.cs"
+      - type: "command"
+        run: "test -z \"$(find docs/changes -type d -name work-items -print -quit)\""
+    rubric:
+      - "Routes the answer by the explicit change path and updates only the owning artifact's current truth."
+      - "Does not create lease, revision, transaction, or receipt machinery and does not expose lane-local truth to sibling context."
+    timeout: 300
+
+  - name: "Route one approved delivery without orchestration"
+    prompt: "Inspect the approved single-delivery change at docs/changes/P1-temperature-parse/change.md and decide whether $scope-changes or work-item planning is justified. A reserved empty TEMP-001 file exists from the legacy fixture. Do not modify any files."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh approved-design"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "implement-change"
+    rubric:
+      - "Recognizes one already approved bounded goal and one delivery, so scope-changes and plan-work-items add no value."
+      - "Routes the approved change directly to implement-change and does not populate the legacy one-row work item."
+    timeout: 420
+
+  - name: "Reject legacy one-row planning machinery"
+    prompt: "Inspect docs/changes/P1-temperature-parse/change.md and its one-row legacy planning state. Explain the smallest normalization required by the current workflow. Do not modify files, review, approve, or implement anything."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh planning-answer"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "embedded delivery brief"
+    rubric:
+      - "Identifies that a one-row map and person-month/log machinery should collapse into the human change's embedded delivery brief."
+      - "Does not invoke multi-agent preparation or manufacture a second approval for one bounded delivery."
+    timeout: 300

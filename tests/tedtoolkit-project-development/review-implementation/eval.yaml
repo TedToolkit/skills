@@ -4,6 +4,52 @@ config:
   max_parallel_runs: 1
 
 scenarios:
+  - name: "Block high-risk review when independence is not established"
+    prompt: "Use $review-implementation in delivery-candidate mode for eval-base..HEAD against docs/changes/public-id/change.md. This same coordinator implemented the candidate, no fresh specialist contexts or prior independent lane reports are available, and no independent executor has run verification. Do not modify files."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh independence-required"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_regex"
+        pattern: '(?mi)^## Conclusion[ \t]*\r?\n(?:[ \t]*\r?\n)?Not ready[ \t]*$'
+      - type: "output_contains"
+        value: "not-established"
+      - type: "output_not_contains"
+        value: "Ready to merge"
+    rubric:
+      - "Recognizes that the approved public API contract requires independent review."
+      - "Does not simulate multiple reviewers in the implementation context or claim independence from headings alone."
+      - "Reports missing specialist independence and candidate-bound verification as Blocking."
+    timeout: 420
+
+  - name: "Do not let passing verification outvote weak tests"
+    prompt: "Use $review-implementation in delivery-candidate mode for eval-base..HEAD against docs/changes/parse/change.md. Independent lane reports for the exact candidate are in review-packet/. Resolve their disagreement from the approved contract and current tests. Do not modify files or rerun commands."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh conflicting-lanes"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_regex"
+        pattern: '(?mi)^## Conclusion[ \t]*\r?\n(?:[ \t]*\r?\n)?Not ready[ \t]*$'
+      - type: "output_contains"
+        value: "AC-02"
+      - type: "output_contains"
+        value: "weak"
+    rubric:
+      - "Inspects the contract and test assertion rather than counting two passing lanes against one test finding."
+      - "Concludes that successful command execution cannot prove AC-02 when its assertion only checks non-null output."
+      - "Records the decisive primary source in contradiction resolution and does not rerun or modify anything."
+    timeout: 420
+
   - name: "Block behavior-changing code without a design"
     prompt: "Review the current implementation diff. No change design was created. You may use read-only commands to inspect files and the diff. Do not modify files or run builds or tests. Use the exact review report structure."
     setup:
@@ -15,38 +61,40 @@ scenarios:
       - type: "command"
         run: "git status --porcelain"
         stdout_contains: "Temperature.cs"
+      - type: "output_regex"
+        pattern: '(?mi)^## Conclusion[ \t]*\r?\n(?:[ \t]*\r?\n)?Not ready[ \t]*$'
       - type: "output_contains"
-        value: "Not ready"
-      - type: "output_contains"
-        value: "change-design"
+        value: "design-change"
     rubric:
       - "Recognizes the new Fahrenheit conversion API as a behavior-changing production-code modification."
       - "Reports the missing approved design as a blocking finding instead of treating local correctness as sufficient."
       - "Does not modify files or run builds or tests."
     timeout: 420
 
-  - name: "Block a change that misses an approved behavior case"
-    prompt: "Review the current change against docs/changes/P1-temperature-parse/work-items/TEMP-001-parse.md. You may use read-only commands to inspect files and the diff. Do not modify files or run builds or tests. Use the exact review report structure and determine whether it is Ready to merge, Ready with follow-ups, or Not ready."
+  - name: "Block a change that misses an approved acceptance case"
+    prompt: "Review the current change in delivery-candidate mode against docs/changes/P1-temperature-parse/work-items/TEMP-001-parse.md. You may use read-only commands to inspect files and the diff. Do not modify files or run builds or tests. Use the exact review report structure and determine whether it is Ready to merge, Ready with follow-ups, or Not ready."
     setup:
       copy_test_files: true
       commands:
-        - "bash setup_fixture.sh missing-behavior-case"
+        - "bash setup_fixture.sh missing-acceptance-case"
     assertions:
       - type: "exit_success"
       - type: "command"
         run: "git status --porcelain"
         stdout_empty: true
+      - type: "output_regex"
+        pattern: '(?mi)^## Conclusion[ \t]*\r?\n(?:[ \t]*\r?\n)?Not ready[ \t]*$'
       - type: "output_contains"
-        value: "Not ready"
+        value: "delivery-candidate"
       - type: "output_contains"
-        value: "BC-02"
+        value: "AC-02"
       - type: "output_contains"
         value: "Blocking"
       - type: "output_contains"
         value: "Documentation disposition"
     rubric:
-      - "Builds a traceability map from the approved BehaviorCases to the changed production and test code."
-      - "Identifies that BC-02 is missing from both implementation and tests, and treats it as a blocking finding."
+      - "Builds a traceability map from the approved acceptance cases to the changed production and test code."
+      - "Identifies that AC-02 is missing from both implementation and tests, and treats it as a blocking finding."
       - "States that it did not run builds or tests and does not modify any file."
       - "Separates a documentation-disposition recommendation from authorization to delete or archive documents."
       - "Does not ask for a change-closure deletion decision when the review is Not ready."
@@ -66,14 +114,14 @@ scenarios:
         run: "git status --porcelain"
         stdout_empty: true
       - type: "output_contains"
-        value: "work package"
+        value: "work item"
     rubric:
-      - "Explains that an implementation-readiness conclusion requires one selected work package."
+      - "Explains that this multi-delivery Controlled change requires one selected work item."
       - "Does not infer the work-package boundary from the diff or run tests."
     timeout: 420
 
-  - name: "Ask once for disposition after a complete ready change"
-    prompt: "Review the current change against docs/changes/P1-temperature-parse/work-items/TEMP-001-parse.md. You may use read-only commands to inspect files and the diff. Do not modify files or run builds or tests. Use the exact review report structure."
+  - name: "Apply the default retention policy without another gate"
+    prompt: "Review the fully integrated parent change at docs/changes/P1-temperature-parse/change.md in integrated-change mode. Review both non-superseded work items and the authoritative HEAD; exact candidate-bound independent code, test, and verification lane reports are stored in the Git note on HEAD. Do not modify files or rerun builds or tests. Use the exact review report structure."
     setup:
       copy_test_files: true
       commands:
@@ -83,20 +131,24 @@ scenarios:
       - type: "command"
         run: "git status --porcelain"
         stdout_empty: true
+      - type: "output_regex"
+        pattern: '(?mi)^## Conclusion[ \t]*\r?\n(?:[ \t]*\r?\n)?Ready to merge[ \t]*$'
       - type: "output_contains"
-        value: "Ready to merge"
+        value: "integrated-change"
       - type: "output_contains"
         value: "Change closure decision"
       - type: "output_contains"
-        value: "deleted after merge"
+        value: "Retain"
+      - type: "output_not_contains"
+        value: "delete after merge?"
     rubric:
       - "Recommends a documentation disposition for the completed parent change."
-      - "Asks exactly one human change-closure question after finding the complete parent change Ready to merge."
+      - "Applies the default retain disposition after finding the complete parent change Ready to merge and does not manufacture a cleanup approval gate."
       - "Does not delete or modify the change documents."
     timeout: 600
 
   - name: "Require durable documentation before recommending deletion"
-    prompt: "Review the current change against docs/changes/P1-temperature-parse/work-items/TEMP-001-parse.md. You may use read-only commands to inspect files and the diff. Do not modify files or run builds or tests. Use the exact review report structure."
+    prompt: "Review the fully integrated parent change at docs/changes/P1-temperature-parse/change.md in integrated-change mode. Review both non-superseded work items and the authoritative HEAD; exact candidate-bound independent lane reports are stored in the Git note on HEAD. You may use read-only commands to inspect files and the diff. Do not modify files or rerun builds or tests. Use the exact review report structure."
     setup:
       copy_test_files: true
       commands:
@@ -116,3 +168,19 @@ scenarios:
       - "Finds the unrecorded library-wide parsing policy as durable knowledge that requires an ADR."
       - "Does not recommend deletion or ask a closure question while documentation extraction is missing."
     timeout: 600
+
+  - name: "Accept a frozen uncommitted candidate bundle when commits are not authorized"
+    prompt: "Use $review-implementation to explain the exact candidate identity required for an independent final review when creating a candidate commit is prohibited. The working directory contains both edited versioned files and new in-scope files. Do not inspect or modify files; state how the bundle is constructed, shared consistently across lanes, and invalidated."
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "HEAD" }
+      - { type: "output_contains", value: "tracked diff" }
+      - { type: "output_contains", value: "untracked" }
+      - { type: "output_contains", value: "digest" }
+      - { type: "output_contains", value: "stale" }
+      - { type: "output_regex", pattern: '(?i)\b(?:cryptographic|SHA-?256)\b' }
+      - { type: "output_not_contains", value: "must commit" }
+    rubric:
+      - "Allows a cryptographically bound HEAD plus complete tracked diff and in-scope untracked blob bundle without silently creating a commit."
+      - "Requires identical frozen input for every lane and invalidates the aggregate conclusion on any candidate change."
+    timeout: 300

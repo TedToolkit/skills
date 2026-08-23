@@ -23,7 +23,8 @@ This skill owns current technical boundaries and enduring technical decisions. B
 handing a decision to delivery, read
 [change-development-workflow.md](../../references/change-development-workflow.md) for its governing
 dependency direction and shared terms. Re-establish every enduring claim from durable evidence,
-then invoke `change-design` to translate accepted constraints into a delivery contract.
+then route delivery through `scope-changes` unless exactly one coherent change boundary is already
+established; only then invoke `design-change` directly.
 
 ## Inspect the architecture
 
@@ -31,17 +32,17 @@ then invoke `change-design` to translate accepted constraints into a delivery co
 2. Inspect repository conventions, approved product intent when it exists, applicable design
    principles, current architecture, dependencies, deployment and operational constraints, relevant
    ADRs, and the status quo.
-3. Copy the applicable architecture-record or ADR template immediately, mark it `Draft` or
-   `Proposed`, and fill it with the evidence already known. The draft is editable during discovery;
-   it is not an accepted architecture decision.
+3. Draft the applicable architecture record or ADR from known evidence in the conversation. Create
+   or update the repository Draft during discovery only when the user explicitly requested it or
+   approved its creation. A Draft or Proposed record is not an accepted architecture decision.
 4. Separate hard constraints from preferences and list credible alternatives, including the status
    quo. Do not reject an option without recording the constraint or evidence that rules it out.
 5. Run the clarification loop for every missing constraint, decision owner, or success criterion
    that could change the decision: ask only the highest-impact unanswered question, say why it
    matters, and recommend an answer with its main trade-off. On each user answer, immediately
-   update the Draft's **Clarification and decision log** and every affected section, then ask the
-   next question. Continue until no material ambiguity remains; do not invent product workload,
-   risk tolerance, or operational ownership.
+   update every affected current-truth section, then ask the next question. Do not retain the
+   question-and-answer transcript in the durable record. Continue until no material ambiguity
+   remains; do not invent product workload, risk tolerance, or operational ownership.
 6. Show how the proposed architecture conforms to each applicable principle, or identify the
    deliberate exception and its required ADR status.
 
@@ -53,9 +54,10 @@ principles, current boundaries and dependency direction, material flows, quality
 objective review triggers. Describe current intended architecture, not an implementation plan or a
 history of alternatives.
 
-Pin the record's full Git commit SHA from an approved revision when a later change design references
-it. When the record changes while a dependent change is active, that change must reassess and gain
-approval again before implementation continues.
+Record the explicit human approval source and status. A Git commit or blob identity may identify a
+technical repository version for dependency consistency, but it never proves human approval. When
+the record changes while a dependent change is active, that change must reassess and gain approval
+again before implementation continues.
 
 ## Choose evidence proportionately
 
@@ -117,10 +119,10 @@ An ADR may be initiated by a user outcome, a known constraint, or temporary deli
 identifies an unresolved enduring decision. Independently verify and restate the durable decision
 question and constraints; do not link or cite the temporary material.
 
-An ADR must not name future work items. After the ADR is `Accepted` and committed,
-`change-design` creates or resumes the delivery design, pins that ADR revision, and turns its
-downstream constraints into the delivery's behavioral requirements. `plan-work-items` then decides
-locations, steps, sequencing, and verification. If delivery discovers that the accepted decision no
+An ADR must not name future work items. After the ADR is `Accepted` and pinned by a full commit SHA
+or an exact uncommitted Git blob SHA, `design-change` creates or resumes the delivery design and
+turns its downstream constraints into the delivery's behavioral requirements. `plan-work-items`
+then decides delivery boundaries and proof. If delivery discovers that the accepted decision no
 longer meets its drivers, return to this skill for a new or superseding ADR; do not silently
 reinterpret the accepted record.
 
@@ -156,11 +158,11 @@ Before changing code, packages, infrastructure, or project structure, show:
    applicable. Do not present or link source edits, change designs, work items, test plans, or
    delivery procedures as ADR content.
 
-Create and revise `Draft` architecture records and `Proposed` ADRs during the clarification loop.
-Wait for explicit approval before changing their status to `Active` or `Accepted`, creating
-benchmark projects, or changing code, packages, infrastructure, or project structure. Record the
-approved architecture in `docs/architecture/` and any approved enduring decision in the repository's
-ADR format.
+An explicit request to create or update an architecture record or ADR authorizes its Draft or
+Proposed write. Wait for explicit approval before changing its status to `Active` or `Accepted`,
+creating benchmark projects, or changing code, packages, infrastructure, or project structure.
+Record approved architecture in `docs/architecture/` and approved enduring decisions in the
+repository's ADR format.
 
 Complete when every decision driver and alternative has evidence, durable records depend only on
 durable sources, consequences and review triggers are explicit, and the user has approved the

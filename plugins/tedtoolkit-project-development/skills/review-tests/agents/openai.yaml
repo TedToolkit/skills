@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review Tests"
+  short_description: "Audit test scope, assertions, isolation, and traceability"
+  default_prompt: "Use $review-tests to determine whether the tests for this exact candidate credibly prove the approved contracts without modifying or executing them."

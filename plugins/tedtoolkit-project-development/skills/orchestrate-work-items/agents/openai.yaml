@@ -1,0 +1,4 @@
+interface:
+  display_name: "Orchestrate Work Items"
+  short_description: "Coordinate isolated work and verified integration"
+  default_prompt: "Use $orchestrate-work-items only when at least two approved items are ready for isolated work; keep one coordinator and serialize verified integration."
