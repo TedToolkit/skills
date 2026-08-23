@@ -1,0 +1,4 @@
+interface:
+  display_name: "TUnit Testing"
+  short_description: "Design and maintain reliable TUnit tests at real boundaries"
+  default_prompt: "Use $tunit-testing to add, improve, or framework-review the narrowest reliable TUnit proof, naming its proof role, purpose, and execution shape without manufacturing test layers."

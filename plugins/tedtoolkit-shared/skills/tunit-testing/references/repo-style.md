@@ -60,16 +60,20 @@ Good examples:
   `DataSourceGeneratorAttribute<T>`.
 - `MatrixDataSource` is used when combinatorial coverage is intended.
 
-Prefer the following order in this codebase:
+Choose the source that makes the material behavior partition visible:
 
-1. Custom generator attribute
-2. `CombinedDataSources`
-3. `MatrixDataSource`
-4. `Arguments`
-5. `MethodDataSource`
+- use `[Arguments(...)]` for named examples and exact boundaries whose values are part of the test's
+  meaning;
+- use a custom generator attribute for a reusable shaped family or invariant where several tests
+  need the same domain distribution;
+- use `[CombinedDataSources]` when independent parameter-level sources form the intended scenario;
+- use `MatrixDataSource` only when the Cartesian product itself is intended coverage; and
+- use `MethodDataSource` when construction cannot be expressed clearly by the options above.
 
-This order applies to deterministic unit behavior. Integration tests prioritize an explicit
-resource boundary, setup, cleanup, and parallel-safety over parameterized input coverage.
+Generated volume does not replace explicit success, failure, or boundary partitions, and a few
+literal rows do not replace a domain invariant when broad shaped inputs are the actual contract.
+Integration tests prioritize an explicit resource boundary, setup, cleanup, and parallel safety
+over parameterized input coverage.
 
 ## Custom Generator Pattern
 

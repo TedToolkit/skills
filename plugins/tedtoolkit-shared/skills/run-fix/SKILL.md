@@ -28,9 +28,15 @@ Read the project, repository scripts, CI, and documentation. Classify it as:
 - an executable, using Release build then Release run; or
 - a library, using Release build.
 
-When a test-project repair changes TUnit tests and `tunit-unit-testing` is available, invoke it for
-their expression, layout, lifecycle, isolation, and mocks; this skill retains ownership of
-reproduction and final Release verification.
+When a test-project repair changes or migrates TUnit tests and `tunit-testing` is available, invoke
+it with an explicit delegated scope: test expression, layout, lifecycle, isolation, mocks, and
+framework migration only. Tell it that `run-fix` already owns the failing-project workflow so it
+must not re-enter `run-fix`. Resume here for root-cause integration and the one final Release
+verification.
+
+When this skill was entered from `tunit-testing`, state `Workflow owner: run-fix` and do not delegate
+back merely because the project uses TUnit. Delegate once only when the repair actually changes the
+test-framework slice; a production-only fix needs no return delegation.
 
 Complete when one project path, one type, and one exact Release command sequence are recorded.
 

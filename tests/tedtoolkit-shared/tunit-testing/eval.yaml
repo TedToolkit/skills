@@ -1,0 +1,200 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Keep acceptance proof in one coherent test project"
+    prompt: "An approved Angle.Normalize behavior needs a Primary proof serving Acceptance and Regression purposes. It is deterministic and observable through the public Angle API, and the repository already has Geometry.Tests.csproj. Inspect the repository, classify the proof role, purpose, and execution shape, and explain where the test belongs. Do not modify files or run tests."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh tunit-command-selection"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "Proof role: Primary"
+      - type: "output_contains"
+        value: "Proof purpose: Acceptance"
+      - type: "output_contains"
+        value: "Execution shape: Unit"
+      - type: "output_contains"
+        value: "Geometry.Tests.csproj"
+    rubric:
+      - "Classifies Primary as the proof role, Acceptance and Regression as purposes, and Unit as the execution shape through the public API."
+      - "Keeps the proof in the existing coherent Geometry.Tests project rather than creating Unit or Acceptance projects."
+      - "Selects one focused observable assertion that can serve both purposes without duplicate tests."
+    timeout: 300
+
+  - name: "Return delegated TUnit work to run-fix without re-entry"
+    prompt: "run-fix has already reproduced a failure in Geometry.Tests.csproj and delegates only the TUnit test-design slice to you. Inspect the existing project, classify the proof role, purpose, and execution shape, and return the bounded test guidance to run-fix. Do not invoke run-fix again, modify files, or run tests."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh tunit-command-selection"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "command"
+        run: "test ! -e .command-log.txt"
+      - type: "output_contains"
+        value: "run-fix"
+      - type: "output_contains"
+        value: "Execution shape: Unit"
+      - type: "output_contains"
+        value: "Geometry.Tests.csproj"
+    rubric:
+      - "Accepts run-fix ownership of reproduction and final Release verification without re-entering it."
+      - "Returns only the TUnit framework/design slice needed by the owning run-fix workflow."
+    timeout: 300
+
+  - name: "Follow the repository's TUnit command"
+    prompt: "This repository uses TUnit. Please inspect the existing test project and its contributor documentation, keep the current test style, verify it with the documented command, and then tell me the final verification command you used."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh tunit-command-selection"
+    assertions:
+      - type: "exit_success"
+      - type: "file_contains"
+        path: ".command-log.txt"
+        value: "dotnet test"
+      - type: "output_contains"
+        value: "dotnet test"
+      - type: "output_contains"
+        value: "Passed: 1"
+    rubric:
+      - "Recognizes that both TUnit command paths are valid and follows the repository's documented command."
+      - "Uses `dotnet test --configuration Release --project Geometry.Tests.csproj` as the verification command."
+      - "Keeps the explanation aligned with TUnit conventions, including its Microsoft.Testing.Platform runner."
+    timeout: 420
+
+  - name: "Remove VSTest conflicts during TUnit migration"
+    prompt: "Migrate the existing Legacy.Tests.csproj and its one xUnit test to TUnit without changing the tested Calculator.Add behavior. Remove incompatible runner and coverage packages, preserve the documented Release command, run it, and report discovered and passed counts. This request approves the migration edits after you show the bounded plan."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh tunit-migration"
+    assertions:
+      - type: "exit_success"
+      - type: "file_contains"
+        path: "Legacy.Tests.csproj"
+        value: "TUnit"
+      - type: "file_not_contains"
+        path: "Legacy.Tests.csproj"
+        value: "RCS1046"
+      - type: "file_not_contains"
+        path: "Legacy.Tests.csproj"
+        value: "Microsoft.NET.Test.Sdk"
+      - type: "file_not_contains"
+        path: "Legacy.Tests.csproj"
+        value: "coverlet.collector"
+      - type: "file_not_contains"
+        path: "Legacy.Tests.csproj"
+        value: "coverlet.msbuild"
+      - type: "file_not_contains"
+        path: "Legacy.Tests.csproj"
+        value: "xunit"
+      - type: "file_contains"
+        path: "CalculatorTests/AddTests.cs"
+        value: "[Test]"
+      - type: "file_contains"
+        path: "CalculatorTests/AddTests.cs"
+        value: "await Assert.That"
+      - type: "file_contains"
+        path: "CalculatorTests/AddTests.cs"
+        value: "/// <summary>"
+      - type: "file_not_contains"
+        path: "CalculatorTests/AddTests.cs"
+        value: "[Fact]"
+      - type: "file_contains"
+        path: ".command-log.txt"
+        value: "dotnet test --configuration Release --project Legacy.Tests.csproj"
+      - type: "output_contains"
+        value: "Passed: 1"
+      - type: "file_contains"
+        path: "Calculator.cs"
+        value: "=> left + right;"
+    rubric:
+      - "Preserves the Calculator.Add behavior proof while translating xUnit syntax to TUnit."
+      - "Removes Microsoft.NET.Test.Sdk, Coverlet, and xUnit packages because the approved project is being migrated to Microsoft.Testing.Platform-based TUnit."
+      - "Does not change the production Calculator implementation or invent another test project."
+      - "Treats a non-zero discovered count as part of successful verification."
+    timeout: 420
+
+  - name: "Hand a failing TUnit project to run-fix once and return the bounded result"
+    prompt: "Use $tunit-testing. Buggy.Tests.csproj is a failing TUnit project. Reproduce and fix the production defect through the owning run-fix workflow, use the TUnit skill only for its bounded test-framework slice, and finish with the exact Release verification. This request approves the bounded root-cause edit after diagnosis. Report the workflow owner, proof role, proof purpose, and execution shape."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh tunit-run-fix-handoff"
+    assertions:
+      - type: "exit_success"
+      - type: "file_contains"
+        path: "Calculator.cs"
+        value: "=> value * value;"
+      - type: "command"
+        run: "test $(grep -c '^dotnet test' .command-log.txt) -ge 2"
+      - type: "output_contains"
+        value: "Workflow owner: run-fix"
+      - type: "output_contains"
+        value: "Proof role: Primary"
+      - type: "output_contains"
+        value: "Proof purpose: Regression"
+      - type: "output_contains"
+        value: "Execution shape: Unit"
+    rubric:
+      - "Enters run-fix once for reproduction, root-cause ownership, and final Release verification, without bouncing recursively between skills."
+      - "Keeps the existing TUnit test unchanged and fixes the production square implementation that violates it."
+      - "Returns the bounded TUnit classification to the owning run-fix workflow and reports the final non-zero test result."
+    timeout: 420
+
+  - name: "Write a focused TUnit.Mocks test"
+    prompt: "Add a focused TUnit test for PricingService.GetTotal. Isolate IPriceSource with the official TUnit mocking library, update the test project dependencies as needed, follow the repository's test style, run the documented Release command, and report the result."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh tunit-mocks"
+    assertions:
+      - type: "exit_success"
+      - type: "file_contains"
+        path: "Pricing.Tests.csproj"
+        value: "TUnit.Mocks"
+      - type: "file_exists"
+        path: "PricingServiceTests/GetTotalTests.cs"
+      - type: "file_contains"
+        path: "PricingServiceTests/GetTotalTests.cs"
+        value: "class GetTotalTests"
+      - type: "file_contains"
+        path: "PricingServiceTests/GetTotalTests.cs"
+        value: "IPriceSource.Mock("
+      - type: "file_contains"
+        path: "PricingServiceTests/GetTotalTests.cs"
+        value: "MockBehavior.Strict"
+      - type: "file_contains"
+        path: "PricingServiceTests/GetTotalTests.cs"
+        value: "WasCalled(Times.Once)"
+      - type: "file_contains"
+        path: "PricingServiceTests/GetTotalTests.cs"
+        value: "await Assert.That"
+      - type: "file_not_contains"
+        path: "**/*.cs"
+        value: "Moq"
+      - type: "file_not_contains"
+        path: "**/*.cs"
+        value: "NSubstitute"
+      - type: "file_contains"
+        path: ".command-log.txt"
+        value: "dotnet test"
+    rubric:
+      - "Uses TUnit.Mocks rather than introducing a second mocking framework."
+      - "Configures only the price-source behavior needed by the scenario and asserts the observable total."
+      - "Classifies this isolated deterministic proof as a Unit execution shape without inventing another project or layer."
+      - "Verifies the contractually meaningful collaborator call with awaited TUnit assertion integration."
+      - "Places GetTotalTests.cs and GetTotalTests under the PricingServiceTests directory."
+      - "Preserves the repository's XML summary, naming, and documented Release command conventions."
+    timeout: 420

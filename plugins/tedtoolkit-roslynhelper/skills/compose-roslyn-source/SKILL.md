@@ -11,7 +11,7 @@ description: >-
 Keep generated syntax **structural** until one final emission.
 
 Keep this skill as the owner of source composition. When available, let
-`write-csharp-api-comments` own caller-facing XML contract prose, `tunit-unit-testing` own TUnit
+`write-csharp-api-comments` own caller-facing XML contract prose, `tunit-testing` own TUnit
 generator-test mechanics, and `fix-csharp-diagnostics` own a diagnostics-only cleanup phase.
 
 1. Inspect the active project, central package file, and reference graph. Continue only when

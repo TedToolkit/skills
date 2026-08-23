@@ -7,6 +7,29 @@
   simple-project command and is often better for runner-specific arguments.
 - TUnit filtering uses `--treenode-filter`, not the VSTest `--filter` syntax.
 
+Treat a zero-test run as failure even when the command exits successfully. Record the discovered,
+passed, failed, and skipped counts so a runner or filter mistake cannot masquerade as verification.
+
+## Migration Compatibility
+
+When migrating an existing test project to TUnit, inspect the project file, central package
+management, build props, CI, and coverage scripts before editing:
+
+- remove `Microsoft.NET.Test.Sdk`; it selects the VSTest platform and conflicts with TUnit's
+  Microsoft.Testing.Platform runner;
+- remove `coverlet.collector` and `coverlet.msbuild`; use TUnit's
+  Microsoft.Testing.Platform-compatible coverage support instead;
+- remove the previous framework's packages after all in-scope tests have been translated;
+- replace framework-specific test, assertion, data-source, setup, teardown, ordering, and filtering
+  APIs without changing the behavior being proved;
+- preserve central package management and the repository's target frameworks unless the installed
+  TUnit or TUnit.Mocks version makes an incompatibility explicit; and
+- verify the repository's documented Release command with a non-zero discovered-test count after
+  the incompatible packages and syntax are gone.
+
+Do not remove VSTest packages from a different test project that is not part of the approved
+migration. Do not report a migration complete from package-file inspection alone.
+
 ## Core Rules
 
 - TUnit test classes are instantiated per test method.

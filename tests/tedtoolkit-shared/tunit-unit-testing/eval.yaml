@@ -3,66 +3,57 @@ config:
   max_parallel_runs: 1
 
 scenarios:
-  - name: "Follow the repository's TUnit command"
-    prompt: "This repository uses TUnit. Please inspect the existing test project and its contributor documentation, keep the current test style, verify it with the documented command, and then tell me the final verification command you used."
+  - name: "Execute canonical behavior through the deprecated explicit name"
+    prompt: "Use $tunit-unit-testing. An approved Angle.Normalize behavior needs a Primary proof serving Acceptance and Regression purposes. It is deterministic through the public API and this repository already has Geometry.Tests.csproj. Classify the proof role, purpose, and execution shape, and explain where one focused test belongs. Do not modify files or run tests."
     setup:
       copy_test_files: true
       commands:
-        - "bash setup_fixture.sh tunit-command-selection"
+        - "bash setup_fixture.sh"
     assertions:
       - type: "exit_success"
-      - type: "file_contains"
-        path: ".command-log.txt"
-        value: "dotnet test"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
       - type: "output_contains"
-        value: "dotnet test"
+        value: "tunit-testing"
+      - type: "output_contains"
+        value: "Proof role: Primary"
+      - type: "output_contains"
+        value: "Proof purpose: Acceptance"
+      - type: "output_contains"
+        value: "Execution shape: Unit"
+      - type: "output_contains"
+        value: "Geometry.Tests.csproj"
     rubric:
-      - "Recognizes that both TUnit command paths are valid and follows the repository's documented command."
-      - "Uses `dotnet test --configuration Release --project Geometry.Tests.csproj` as the verification command."
-      - "Keeps the explanation aligned with TUnit conventions, including its Microsoft.Testing.Platform runner."
-    timeout: 420
+      - "Treats tunit-unit-testing as a deprecated explicit compatibility alias and routes to tunit-testing."
+      - "Executes the canonical proof-purpose, execution-shape, and coherent-project workflow instead of stopping after the rename notice."
+      - "Does not modify the fixture."
+    timeout: 240
 
-  - name: "Write a focused TUnit.Mocks test"
-    prompt: "Add a focused TUnit test for PricingService.GetTotal. Isolate IPriceSource with the official TUnit mocking library, update the test project dependencies as needed, follow the repository's test style, run the documented Release command, and report the result."
+  - name: "Use the canonical skill for an ordinary natural-language TUnit request"
+    prompt: "A deterministic public Angle.Normalize behavior needs a Primary proof serving Acceptance and Regression purposes with TUnit. The repository already has Geometry.Tests.csproj. Classify the proof role, purpose, and execution shape, and explain where the focused test belongs. Do not modify files or run tests."
     setup:
       copy_test_files: true
       commands:
-        - "bash setup_fixture.sh tunit-mocks"
+        - "bash setup_fixture.sh"
     assertions:
       - type: "exit_success"
-      - type: "file_contains"
-        path: "Pricing.Tests.csproj"
-        value: "TUnit.Mocks"
-      - type: "file_exists"
-        path: "PricingServiceTests/GetTotalTests.cs"
-      - type: "file_contains"
-        path: "PricingServiceTests/GetTotalTests.cs"
-        value: "class GetTotalTests"
-      - type: "file_contains"
-        path: "PricingServiceTests/GetTotalTests.cs"
-        value: "IPriceSource.Mock("
-      - type: "file_contains"
-        path: "PricingServiceTests/GetTotalTests.cs"
-        value: "MockBehavior.Strict"
-      - type: "file_contains"
-        path: "PricingServiceTests/GetTotalTests.cs"
-        value: "WasCalled(Times.Once)"
-      - type: "file_contains"
-        path: "PricingServiceTests/GetTotalTests.cs"
-        value: "await Assert.That"
-      - type: "file_not_contains"
-        path: "*.cs"
-        value: "Moq"
-      - type: "file_not_contains"
-        path: "*.cs"
-        value: "NSubstitute"
-      - type: "file_contains"
-        path: ".command-log.txt"
-        value: "dotnet test"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - type: "output_contains"
+        value: "Proof role: Primary"
+      - type: "output_contains"
+        value: "Proof purpose: Acceptance"
+      - type: "output_contains"
+        value: "Execution shape: Unit"
+      - type: "output_contains"
+        value: "Geometry.Tests.csproj"
+      - type: "output_not_contains"
+        value: "tunit-unit-testing"
+      - type: "output_not_contains"
+        value: "deprecated"
     rubric:
-      - "Uses TUnit.Mocks rather than introducing a second mocking framework."
-      - "Configures only the price-source behavior needed by the scenario and asserts the observable total."
-      - "Verifies the contractually meaningful collaborator call with awaited TUnit assertion integration."
-      - "Places GetTotalTests.cs and GetTotalTests under the PricingServiceTests directory."
-      - "Preserves the repository's XML summary, naming, and documented Release command conventions."
-    timeout: 420
+      - "Selects canonical tunit-testing behavior for ordinary natural-language TUnit work."
+      - "Does not surface or route through the deprecated explicit-only alias."
+    timeout: 240

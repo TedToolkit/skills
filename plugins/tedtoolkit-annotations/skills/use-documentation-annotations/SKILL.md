@@ -27,7 +27,7 @@ behavior contract.
 4. Choose the narrowest target and one attribute per independent rule. Draft equivalent XML
    documentation and a focused test for each `BehaviorCase`; keep `hasUnitTest: false` until its test
    passes.
-   When that test project uses TUnit and `tunit-unit-testing` is available, invoke it for the test
+   When that test project uses TUnit and `tunit-testing` is available, invoke it for the test
    expression while this skill retains ownership of the `BehaviorCase` contract.
 5. Show the complete proposal and wait for explicit approval before modifying source or tests.
 6. After approval, build with the analyzer and run the focused tests. Complete when every annotation

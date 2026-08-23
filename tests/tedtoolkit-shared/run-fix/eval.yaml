@@ -14,7 +14,7 @@ scenarios:
       - type: "file_exists"
         path: "bin/Release/net10.0/MathLib.dll"
       - type: "file_not_contains"
-        path: "*.cs"
+        path: "**/*.cs"
         value: "run-fix:debug"
       - type: "command"
         run: "dotnet build -c Release MathLib.csproj"
@@ -35,7 +35,7 @@ scenarios:
     assertions:
       - type: "exit_success"
       - type: "file_not_contains"
-        path: "*.cs"
+        path: "**/*.cs"
         value: "run-fix:debug"
       - type: "command"
         run: "dotnet run -c Release --project Calc.csproj"
@@ -59,7 +59,7 @@ scenarios:
     assertions:
       - type: "exit_success"
       - type: "file_not_contains"
-        path: "*.cs"
+        path: "**/*.cs"
         value: "run-fix:debug"
       - type: "command"
         run: "dotnet test -c Release Widget.Tests.csproj"
