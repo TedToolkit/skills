@@ -437,6 +437,18 @@ def check_assertion(a: dict, workdir: Path, env: dict, result_text: str, exit_co
     return {"label": label, "passed": passed, "evidence": evidence}
 
 
+def check_assertion_safe(a: dict, workdir: Path, env: dict, result_text: str, exit_code: int,
+                         *, real_home: Path, deadline: float) -> dict:
+    """Turn malformed assertion definitions into one failed assertion, not a crashed eval run."""
+    try:
+        return check_assertion(a, workdir, env, result_text, exit_code,
+                               real_home=real_home, deadline=deadline)
+    except (KeyError, TypeError, ValueError) as exc:
+        assertion_type = a.get("type") if isinstance(a, dict) else None
+        return {"label": f"invalid:{assertion_type}", "passed": False,
+                "evidence": f"malformed assertion: {exc}"}
+
+
 # ---------------------------------------------------------------------------
 # Running a scenario
 # ---------------------------------------------------------------------------
@@ -523,7 +535,7 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args) -> dict:
             record["cost_usd"] = None
             record["result_text"] = result_text
             for a in scen.get("assertions", []):
-                record["assertions"].append(check_assertion(
+                record["assertions"].append(check_assertion_safe(
                     a, workdir, env, result_text, 0, real_home=real_home, deadline=deadline))
             if args.judge and scen.get("rubric"):
                 record["rubric_grades"] = judge_rubric(
@@ -584,7 +596,7 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args) -> dict:
 
         # 5. assertions
         for a in scen.get("assertions", []):
-            record["assertions"].append(check_assertion(
+            record["assertions"].append(check_assertion_safe(
                 a, workdir, env, result_text, exit_code,
                 real_home=real_home, deadline=deadline))
 

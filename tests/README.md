@@ -19,6 +19,7 @@ their Release-build gate.
 ## Running
 
 ```powershell
+py -3.10 tests/test_run_evals.py                          # harness self-tests; no model/API call
 py -3.10 tests/run_evals.py                               # every eval
 py -3.10 tests/run_evals.py generate-commit-message      # one skill
 py -3.10 tests/run_evals.py --filter "conflict"          # scenarios whose name contains "conflict"

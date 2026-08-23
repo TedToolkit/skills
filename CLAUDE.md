@@ -50,6 +50,7 @@ Bespoke headless harness (not pytest/jest): each scenario runs a skill via `code
 Requires: Python 3.10+ with `pyyaml`, Codex CLI, `git`, `bash`, and .NET 10 SDK (for `merge-default-branch` Release-build gates).
 
 ```powershell
+py -3.10 tests/test_run_evals.py                          # harness self-tests; no API
 py -3.10 tests/run_evals.py                               # all scenarios
 py -3.10 tests/run_evals.py generate-commit-message      # one skill
 py -3.10 tests/run_evals.py --filter conflict            # scenarios matching substring
