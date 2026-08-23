@@ -14,16 +14,22 @@ to one), ``git``, and a ``bash`` (Git Bash on Windows is fine) must be available
 bash itself if it isn't on PATH. The runner never downloads Codex through npm.
 
 Usage:
-    py -3.13 tests/run_evals.py [skill ...] [--plugin PLUGIN] [--filter SUBSTR] [--keep] [--judge]
+    py -3.10 tests/run_evals.py [skill ...] [--plugin PLUGIN] [--filter SUBSTR] [--keep] [--judge]
 
-With no skill names it discovers and runs every eval.yaml. Skill names match the
-directory holding the eval.yaml (e.g. ``generate-commit-message``).
+With no plugin it groups evals by ``tests/<plugin>/`` and loads each matching plugin in turn.
+Skill names match the directory holding the eval.yaml (e.g. ``generate-commit-message``).
+Scenarios marked ``mode: static`` run their fixture commands without invoking Codex.
 """
 from __future__ import annotations
 
 import argparse
+import ctypes
+from ctypes import wintypes
+from datetime import datetime
 import json
 import os
+import re
+import signal
 import shutil
 import subprocess
 import sys
@@ -43,17 +49,18 @@ RESULTS_DIR = TESTS_DIR / ".results"
 # ---------------------------------------------------------------------------
 
 def find_bash() -> str | None:
-    found = shutil.which("bash")
-    if found:
-        return found
-    for c in (
+    windows_candidates = (
         r"C:\Program Files\Git\bin\bash.exe",
         r"C:\Program Files\Git\usr\bin\bash.exe",
         r"C:\Program Files (x86)\Git\bin\bash.exe",
-    ):
+    )
+    # Prefer Git Bash on Windows. ``bash`` on PATH may be the WSL launcher,
+    # which cannot consume the Windows cwd/PATH values this runner supplies.
+    candidates = windows_candidates if os.name == "nt" else ()
+    for c in candidates:
         if Path(c).exists():
             return c
-    return None
+    return shutil.which("bash")
 
 
 def git_bin_dirs(bash_path: str) -> list[str]:
@@ -70,10 +77,158 @@ BASH = find_bash()
 CODEX = os.environ.get("CODEX_BIN") or shutil.which("codex")
 
 
-def preflight(plugin_dir: Path) -> None:
+if os.name == "nt":
+    class _IoCounters(ctypes.Structure):
+        _fields_ = [(name, ctypes.c_uint64) for name in (
+            "ReadOperationCount", "WriteOperationCount", "OtherOperationCount",
+            "ReadTransferCount", "WriteTransferCount", "OtherTransferCount")]
+
+    class _BasicLimitInformation(ctypes.Structure):
+        _fields_ = [
+            ("PerProcessUserTimeLimit", ctypes.c_int64),
+            ("PerJobUserTimeLimit", ctypes.c_int64),
+            ("LimitFlags", wintypes.DWORD),
+            ("MinimumWorkingSetSize", ctypes.c_size_t),
+            ("MaximumWorkingSetSize", ctypes.c_size_t),
+            ("ActiveProcessLimit", wintypes.DWORD),
+            ("Affinity", ctypes.c_size_t),
+            ("PriorityClass", wintypes.DWORD),
+            ("SchedulingClass", wintypes.DWORD),
+        ]
+
+    class _ExtendedLimitInformation(ctypes.Structure):
+        _fields_ = [
+            ("BasicLimitInformation", _BasicLimitInformation),
+            ("IoInfo", _IoCounters),
+            ("ProcessMemoryLimit", ctypes.c_size_t),
+            ("JobMemoryLimit", ctypes.c_size_t),
+            ("PeakProcessMemoryUsed", ctypes.c_size_t),
+            ("PeakJobMemoryUsed", ctypes.c_size_t),
+        ]
+
+
+def _windows_kill_job(proc: subprocess.Popen):
+    """Put a Windows subprocess in a job that kills its complete tree on close."""
+    if os.name != "nt":
+        return None
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel32.CreateJobObjectW.restype = wintypes.HANDLE
+    kernel32.SetInformationJobObject.argtypes = [wintypes.HANDLE, ctypes.c_int,
+                                                  ctypes.c_void_p, wintypes.DWORD]
+    kernel32.AssignProcessToJobObject.argtypes = [wintypes.HANDLE, wintypes.HANDLE]
+    kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+    job = kernel32.CreateJobObjectW(None, None)
+    if not job:
+        return None
+    info = _ExtendedLimitInformation()
+    info.BasicLimitInformation.LimitFlags = 0x00002000  # JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+    if not kernel32.SetInformationJobObject(job, 9, ctypes.byref(info), ctypes.sizeof(info)):
+        kernel32.CloseHandle(job)
+        return None
+    if not kernel32.AssignProcessToJobObject(job, wintypes.HANDLE(proc._handle)):
+        kernel32.CloseHandle(job)
+        return None
+    return job
+
+
+def _close_windows_handle(handle) -> None:
+    if handle is not None:
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+        kernel32.CloseHandle(handle)
+
+
+def run_bounded(command: list[str], *, timeout: float, capture_output: bool = False,
+                **kwargs) -> subprocess.CompletedProcess:
+    """Run a command with a wall-clock bound that also terminates child processes."""
+    if capture_output:
+        if "stdout" in kwargs or "stderr" in kwargs:
+            raise ValueError("capture_output cannot be combined with stdout/stderr")
+        kwargs["stdout"] = subprocess.PIPE
+        kwargs["stderr"] = subprocess.PIPE
+    text_mode = bool(kwargs.get("text") or kwargs.get("universal_newlines"))
+    encoding = kwargs.get("encoding") or "utf-8"
+    errors = kwargs.get("errors") or "strict"
+    stdout_target = kwargs.get("stdout")
+    stderr_target = kwargs.get("stderr")
+    stdout_file = tempfile.TemporaryFile() if stdout_target == subprocess.PIPE else None
+    stderr_file = tempfile.TemporaryFile() if stderr_target == subprocess.PIPE else None
+    if stdout_file is not None:
+        kwargs["stdout"] = stdout_file
+    if stderr_file is not None:
+        kwargs["stderr"] = stderr_file
+    if os.name == "nt":
+        kwargs["creationflags"] = kwargs.get("creationflags", 0) | subprocess.CREATE_NEW_PROCESS_GROUP
+    else:
+        kwargs["start_new_session"] = True
+    try:
+        proc = subprocess.Popen(command, **kwargs)
+    except Exception:
+        for output_file in (stdout_file, stderr_file):
+            if output_file is not None:
+                output_file.close()
+        raise
+    kill_job = _windows_kill_job(proc)
+    timed_out = False
+    try:
+        proc.wait(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        timed_out = True
+        if os.name == "nt":
+            # Closing the job terminates bash/codex and every descendant,
+            # including MSYS children that otherwise retain output handles.
+            _close_windows_handle(kill_job)
+            kill_job = None
+            if proc.poll() is None:
+                proc.kill()
+            try:
+                proc.wait(timeout=1)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+        else:
+            try:
+                os.killpg(proc.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            if proc.poll() is None:
+                proc.kill()
+            try:
+                proc.wait(timeout=0.2)
+            except subprocess.TimeoutExpired:
+                pass
+    _close_windows_handle(kill_job)
+    stdout = stderr = None
+    if stdout_file is not None:
+        stdout_file.seek(0)
+        stdout = stdout_file.read()
+        stdout_file.close()
+    if stderr_file is not None:
+        stderr_file.seek(0)
+        stderr = stderr_file.read()
+        stderr_file.close()
+    if text_mode:
+        if isinstance(stdout, bytes):
+            stdout = stdout.decode(encoding, errors)
+        if isinstance(stderr, bytes):
+            stderr = stderr.decode(encoding, errors)
+    if timed_out:
+        raise subprocess.TimeoutExpired(command, timeout, output=stdout, stderr=stderr)
+    return subprocess.CompletedProcess(command, proc.returncode, stdout, stderr)
+
+
+def preflight(plugin_dir: Path, *, require_codex: bool) -> None:
     problems = []
-    if not CODEX:
+    if require_codex and not CODEX:
         problems.append("`codex` not found on PATH; install Codex CLI or set CODEX_BIN to its executable.")
+    elif require_codex:
+        try:
+            probe = run_bounded(codex_command("--version"), capture_output=True, text=True,
+                                encoding="utf-8", errors="replace", timeout=10)
+            if probe.returncode != 0:
+                detail = (probe.stderr or probe.stdout or "unknown error").strip()[:200]
+                problems.append(f"`codex --version` failed: {detail}. Set CODEX_BIN to a working executable.")
+        except (OSError, subprocess.SubprocessError) as exc:
+            problems.append(f"`codex` was found but could not start: {exc}. Set CODEX_BIN to a working executable.")
     if not shutil.which("git"):
         problems.append("`git` not found on PATH.")
     if not BASH:
@@ -110,7 +265,8 @@ def install_eval_plugin(plugin_dir: Path) -> tuple[Path, str]:
     try:
         for command in (codex_command("plugin", "marketplace", "add", str(root)),
                         codex_command("plugin", "add", f"{plugin}@{marketplace}")):
-            result = subprocess.run(command, capture_output=True, text=True, encoding="utf-8", errors="replace")
+            result = run_bounded(command, timeout=60, capture_output=True, text=True,
+                                 encoding="utf-8", errors="replace")
             if result.returncode:
                 raise RuntimeError((result.stderr or result.stdout).strip())
     except Exception:
@@ -123,7 +279,11 @@ def cleanup_eval_plugin(plugin: str, marketplace: str, root: Path) -> None:
     if CODEX:
         for command in (codex_command("plugin", "remove", f"{plugin}@{marketplace}"),
                         codex_command("plugin", "marketplace", "remove", marketplace)):
-            subprocess.run(command, capture_output=True, text=True, encoding="utf-8", errors="replace")
+            try:
+                run_bounded(command, timeout=30, capture_output=True, text=True,
+                            encoding="utf-8", errors="replace")
+            except (OSError, subprocess.SubprocessError):
+                pass
     shutil.rmtree(root, ignore_errors=True)
 
 
@@ -131,8 +291,19 @@ def cleanup_eval_plugin(plugin: str, marketplace: str, root: Path) -> None:
 # Discovery
 # ---------------------------------------------------------------------------
 
-def discover(skill_filters: list[str]):
-    for path in sorted(TESTS_DIR.rglob("eval.yaml")):
+def eval_plugins() -> list[str]:
+    return sorted(
+        path.name
+        for path in TESTS_DIR.iterdir()
+        if path.is_dir() and any(path.rglob("eval.yaml"))
+    )
+
+
+def discover(plugin: str, skill_filters: list[str]):
+    plugin_tests = TESTS_DIR / plugin
+    if not plugin_tests.is_dir():
+        return
+    for path in sorted(plugin_tests.rglob("eval.yaml")):
         skill = path.parent.name
         if skill_filters and skill not in skill_filters:
             continue
@@ -146,17 +317,18 @@ def discover(skill_filters: list[str]):
 # ---------------------------------------------------------------------------
 
 def _glob(workdir: Path, pattern: str) -> list[Path]:
-    matches = [p for p in workdir.glob(pattern) if p.is_file()]
-    if not matches and "/" not in pattern and "\\" not in pattern:
-        matches = [p for p in workdir.rglob(pattern) if p.is_file()]
-    return matches
+    # All patterns are rooted at the fixture; recursion must be explicit with
+    # ``**``. This prevents a missing root artifact from being satisfied by a
+    # nested file with the same name.
+    return [p for p in workdir.glob(pattern) if p.is_file()]
 
 
 def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
 
 
-def check_assertion(a: dict, workdir: Path, env: dict, result_text: str, exit_code: int) -> dict:
+def check_assertion(a: dict, workdir: Path, env: dict, result_text: str, exit_code: int,
+                    *, real_home: Path, deadline: float) -> dict:
     """Return {label, passed, evidence}."""
     t = a.get("type")
     label = t
@@ -184,8 +356,11 @@ def check_assertion(a: dict, workdir: Path, env: dict, result_text: str, exit_co
         label = f"file_not_contains: {pattern} !~ {value!r}"
         matches = _glob(workdir, pattern)
         hit = next((m for m in matches if value in _read(m)), None)
-        passed = hit is None
-        evidence = (f"present in {hit.name}" if hit else "absent")
+        allow_no_match = bool(a.get("allow_no_match", False))
+        passed = hit is None and (bool(matches) or allow_no_match)
+        evidence = (f"present in {hit.name}" if hit else
+                    ("absent" if matches else
+                     ("no matching file (allowed)" if allow_no_match else "no matching file")))
 
     elif t == "exit_success":
         label = "exit_success"
@@ -204,12 +379,42 @@ def check_assertion(a: dict, workdir: Path, env: dict, result_text: str, exit_co
         passed = value not in result_text
         evidence = "absent" if passed else "present in model output"
 
+    elif t == "output_regex":
+        pattern = a["pattern"]
+        label = f"output_regex: {pattern!r}"
+        try:
+            passed = re.search(pattern, result_text) is not None
+            evidence = "matched" if passed else "no match in model output"
+        except re.error as exc:
+            passed = False
+            evidence = f"invalid regex: {exc}"
+
+    elif t == "output_contains_file":
+        pattern = a["path"]
+        label = f"output_contains_file: {pattern}"
+        matches = _glob(workdir, pattern)
+        values = [_read(match).strip() for match in matches]
+        hit = next((value for value in values if value and value in result_text), None)
+        passed = hit is not None
+        evidence = "file content present" if passed else (
+            f"content from {len(matches)} file(s) absent" if matches else "no matching file")
+
     elif t == "command":
-        run = a["run"]
+        run = expand(a["run"], workdir, real_home)
         label = f"command: {run if len(run) <= 60 else run[:57] + '...'}"
-        proc = subprocess.run([BASH, "-c", run], cwd=workdir, env=env,
-                              capture_output=True, text=True,
-                              encoding="utf-8", errors="replace")
+        remaining = deadline - time.monotonic()
+        requested_timeout = float(a.get("timeout", 60))
+        command_timeout = min(requested_timeout, remaining)
+        if command_timeout <= 0:
+            return {"label": label, "passed": False,
+                    "evidence": "scenario deadline expired before command assertion"}
+        try:
+            proc = run_bounded([BASH, "-c", run], cwd=workdir, env=env,
+                               capture_output=True, text=True, encoding="utf-8",
+                               errors="replace", timeout=command_timeout)
+        except subprocess.TimeoutExpired:
+            return {"label": label, "passed": False,
+                    "evidence": f"timed out after {command_timeout:.1f}s"}
         out = proc.stdout or ""
         checks = []
         if proc.returncode != a.get("expect_exit", 0):
@@ -237,64 +442,17 @@ def check_assertion(a: dict, workdir: Path, env: dict, result_text: str, exit_co
 # ---------------------------------------------------------------------------
 
 def expand(value: str, workdir: Path, real_home: Path) -> str:
-    return value.replace("${WORKDIR}", str(workdir)).replace("${REAL_HOME}", str(real_home))
+    return (value.replace("${WORKDIR}", str(workdir))
+            .replace("${REAL_HOME}", str(real_home))
+            .replace("${REPO_ROOT}", REPO_ROOT.as_posix()))
 
 
-def parse_claude_json(stdout: str) -> tuple[str, float | None]:
-    """Return (result_text, cost_usd). Falls back to raw stdout on parse error."""
-    stdout = stdout.strip()
-    try:
-        obj = json.loads(stdout)
-    except json.JSONDecodeError:
-        # stream of objects or junk: take the last JSON line we can parse
-        for line in reversed(stdout.splitlines()):
-            try:
-                obj = json.loads(line)
-                break
-            except json.JSONDecodeError:
-                continue
-        else:
-            return stdout, None
-    result = obj.get("result", "") if isinstance(obj, dict) else ""
-    cost = obj.get("total_cost_usd") if isinstance(obj, dict) else None
-    return result or stdout, cost
-
-
-def parse_stream_file(path: Path) -> tuple[str, float | None]:
-    """From a stream-json transcript return (result_text, cost_usd).
-
-    Prefer the final ``{"type":"result"}`` event. If it's absent — e.g. the run
-    timed out before finishing — fall back to the concatenated assistant text so
-    a partial transcript is still inspectable.
-    """
-    if not path.is_file():
-        return "", None
-    result_text, cost, chunks = "", None, []
-    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
-        line = line.strip()
-        if not line:
-            continue
-        try:
-            obj = json.loads(line)
-        except json.JSONDecodeError:
-            continue
-        if not isinstance(obj, dict):
-            continue
-        if obj.get("type") == "result":
-            result_text = obj.get("result") or result_text
-            if obj.get("total_cost_usd") is not None:
-                cost = obj.get("total_cost_usd")
-        elif obj.get("type") == "assistant":
-            for block in (obj.get("message", {}).get("content") or []):
-                if isinstance(block, dict) and block.get("type") == "text":
-                    chunks.append(block.get("text", ""))
-    if not result_text and chunks:
-        result_text = "\n".join(chunks)
-    return result_text, cost
-
-
-def run_scenario(skill: str, eval_dir: Path, scen: dict, args, plugin_dir: Path) -> dict:
+def run_scenario(skill: str, eval_dir: Path, scen: dict, args) -> dict:
     name = scen.get("name", "<unnamed>")
+    mode = scen.get("mode", "codex")
+    scenario_timeout = float(scen.get("timeout", 300))
+    scenario_started = time.monotonic()
+    deadline = scenario_started + scenario_timeout
     workdir = Path(tempfile.mkdtemp(prefix=f"eval-{skill}-"))
     result_path: Path | None = None
     setup = scen.get("setup", {}) or {}
@@ -304,6 +462,12 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args, plugin_dir: Path)
               "rubric": scen.get("rubric", []), "assertions": [], "workdir": str(workdir)}
 
     try:
+        if mode not in {"codex", "static"}:
+            record["error"] = f"unsupported scenario mode: {mode}"
+            record["assertions"] = [{"label": "mode", "passed": False,
+                                     "evidence": record["error"]}]
+            return record
+
         # 1. copy sibling test files into the work dir
         if setup.get("copy_test_files"):
             for item in eval_dir.iterdir():
@@ -315,19 +479,36 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args, plugin_dir: Path)
                 else:
                     shutil.copy2(item, dest)
 
-        # 2. build the subprocess env (shared by setup, claude, and command asserts)
+        # 2. build the subprocess env (shared by setup, Codex, and command asserts)
         env = os.environ.copy()
         path_prefix = git_bin_dirs(BASH)
         binstub = workdir / ".binstub"
         for key, val in (setup.get("env") or {}).items():
             env[key] = expand(str(val), workdir, real_home)
 
-        # 3. run setup commands
-        for cmd in setup.get("commands", []):
-            proc = subprocess.run([BASH, "-c", cmd], cwd=workdir,
-                                  env={**env, "PATH": os.pathsep.join(path_prefix + [env["PATH"]])},
-                                  capture_output=True, text=True,
-                                  encoding="utf-8", errors="replace", timeout=300)
+        # 3. run setup commands. Static scenarios use these commands as their
+        # complete execution and therefore share the scenario's hard timeout.
+        setup_outputs = []
+        for raw_cmd in setup.get("commands", []):
+            cmd = expand(raw_cmd, workdir, real_home)
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                record["error"] = f"scenario timed out after {scenario_timeout:g}s during setup ({cmd})"
+                record["assertions"] = [{"label": "setup", "passed": False,
+                                         "evidence": record["error"]}]
+                return record
+            try:
+                proc = run_bounded(
+                    [BASH, "-c", cmd], cwd=workdir,
+                    env={**env, "PATH": os.pathsep.join(path_prefix + [env["PATH"]])},
+                    capture_output=True, text=True, encoding="utf-8", errors="replace",
+                    timeout=remaining)
+            except subprocess.TimeoutExpired:
+                record["error"] = f"scenario timed out after {scenario_timeout:g}s during setup ({cmd})"
+                record["assertions"] = [{"label": "setup", "passed": False,
+                                         "evidence": record["error"]}]
+                return record
+            setup_outputs.extend(part for part in (proc.stdout, proc.stderr) if part)
             if proc.returncode != 0:
                 record["error"] = f"setup failed ({cmd}): {proc.stderr.strip()[:400]}"
                 record["assertions"] = [{"label": "setup", "passed": False, "evidence": record["error"]}]
@@ -336,6 +517,19 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args, plugin_dir: Path)
         # .binstub may have been created by setup; it must shadow real tools.
         path_parts = ([str(binstub)] if binstub.is_dir() else []) + path_prefix + [env["PATH"]]
         env["PATH"] = os.pathsep.join(path_parts)
+
+        if mode == "static":
+            result_text = "\n".join(setup_outputs)
+            record["cost_usd"] = None
+            record["result_text"] = result_text
+            for a in scen.get("assertions", []):
+                record["assertions"].append(check_assertion(
+                    a, workdir, env, result_text, 0, real_home=real_home, deadline=deadline))
+            if args.judge and scen.get("rubric"):
+                record["rubric_grades"] = judge_rubric(
+                    scen, result_text, workdir, env, args, deadline=deadline)
+            record["duration_s"] = round(time.monotonic() - scenario_started, 1)
+            return record
 
         # A setup that needs a dynamic prompt (e.g. a freshly created issue iid)
         # writes the final prompt to prompt.txt; it overrides the static yaml prompt.
@@ -351,47 +545,55 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args, plugin_dir: Path)
         result_path = workdir.parent / f"{workdir.name}-codex-{uuid.uuid4().hex}.last-message.txt"
         cmd = codex_command("exec", "--ephemeral", "--skip-git-repo-check",
                             "--sandbox", "workspace-write", "--output-last-message",
-                            str(result_path), prompt_text)
+                            str(result_path))
         if getattr(args, "model", None):
             cmd += ["--model", args.model]
-        t0 = time.monotonic()
+        cmd.append(prompt_text)
         timed_out = False
         stderr_text = ""
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            record["error"] = f"scenario timed out after {scenario_timeout:g}s before Codex execution"
+            record["assertions"] = [{"label": "run", "passed": False,
+                                     "evidence": record["error"]}]
+            return record
         try:
-            proc = subprocess.run(cmd, cwd=workdir, env=env, stdout=subprocess.DEVNULL,
-                                  stderr=subprocess.PIPE, text=True, encoding="utf-8", errors="replace",
-                                  stdin=subprocess.DEVNULL, timeout=scen.get("timeout", 300))
+            proc = run_bounded(cmd, cwd=workdir, env=env, stdout=subprocess.DEVNULL,
+                               stderr=subprocess.PIPE, text=True, encoding="utf-8", errors="replace",
+                               stdin=subprocess.DEVNULL, timeout=remaining)
             exit_code = proc.returncode
             stderr_text = proc.stderr or ""
         except subprocess.TimeoutExpired as exc:
             timed_out = True
             exit_code = -1
             stderr_text = exc.stderr if isinstance(exc.stderr, str) else ""
-        duration = time.monotonic() - t0
-
         result_text = _read(result_path) if result_path.is_file() else ""
         cost = None
         if not result_text.strip() and stderr_text.strip():
             result_text = stderr_text
 
-        record["duration_s"] = round(duration, 1)
+        record["duration_s"] = round(time.monotonic() - scenario_started, 1)
         record["cost_usd"] = cost
         record["result_text"] = result_text
 
         if timed_out:
-            record["error"] = f"claude timed out after {scen.get('timeout', 300)}s"
+            record["error"] = f"scenario timed out after {scenario_timeout:g}s during Codex execution"
             record["assertions"] = [{"label": "run", "passed": False,
                                      "evidence": record["error"]}]
             return record
 
         # 5. assertions
         for a in scen.get("assertions", []):
-            record["assertions"].append(check_assertion(a, workdir, env, result_text, exit_code))
+            record["assertions"].append(check_assertion(
+                a, workdir, env, result_text, exit_code,
+                real_home=real_home, deadline=deadline))
 
         # 6. optional rubric judge
         if args.judge and scen.get("rubric"):
-            record["rubric_grades"] = judge_rubric(scen, result_text)
+            record["rubric_grades"] = judge_rubric(
+                scen, result_text, workdir, env, args, deadline=deadline)
 
+        record["duration_s"] = round(time.monotonic() - scenario_started, 1)
         return record
     finally:
         # Tear down anything the run created outside the work dir. Runs on every
@@ -399,7 +601,7 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args, plugin_dir: Path)
         # — success, assertion failure, setup failure, or timeout — while the
         # work dir still exists, so cleanup scripts can read files setup left
         # behind (e.g. issue.iid). Best-effort: failures are recorded, never
-        # raised. The env mirrors the claude run (real $GITLAB_TOKEN from the
+        # raised. The env mirrors the Codex run (real $GITLAB_TOKEN from the
         # parent env, Git's bin dirs and any .binstub on PATH).
         cleanup_cmds = setup.get("cleanup_commands", [])
         if cleanup_cmds and BASH:
@@ -411,11 +613,12 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args, plugin_dir: Path)
             parts = ([str(binstub)] if binstub.is_dir() else []) + path_prefix + [tenv["PATH"]]
             tenv["PATH"] = os.pathsep.join(parts)
             warnings = []
-            for cmd in cleanup_cmds:
+            for raw_cmd in cleanup_cmds:
+                cmd = expand(raw_cmd, workdir, real_home)
                 try:
-                    proc = subprocess.run([BASH, "-c", cmd], cwd=workdir, env=tenv,
-                                          capture_output=True, text=True,
-                                          encoding="utf-8", errors="replace", timeout=120)
+                    proc = run_bounded([BASH, "-c", cmd], cwd=workdir, env=tenv,
+                                       capture_output=True, text=True,
+                                       encoding="utf-8", errors="replace", timeout=120)
                     if proc.returncode != 0:
                         msg = (proc.stderr or proc.stdout or "").strip()[:200]
                         warnings.append(f"{cmd!r} exit {proc.returncode}: {msg}")
@@ -440,7 +643,8 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args, plugin_dir: Path)
             shutil.rmtree(workdir, ignore_errors=True)
 
 
-def judge_rubric(scen: dict, result_text: str) -> list[dict]:
+def judge_rubric(scen: dict, result_text: str, workdir: Path, env: dict, args,
+                 *, deadline: float) -> list[dict]:
     rubric_lines = "\n".join(f"{i+1}. {pt}" for i, pt in enumerate(scen["rubric"]))
     prompt = (
         "You are grading whether a transcript satisfies each rubric point. "
@@ -450,16 +654,38 @@ def judge_rubric(scen: dict, result_text: str) -> list[dict]:
         f"MODEL OUTPUT / TRANSCRIPT:\n{result_text}\n\n"
         f"RUBRIC POINTS:\n{rubric_lines}\n"
     )
+    result_path = workdir.parent / f"{workdir.name}-judge-{uuid.uuid4().hex}.last-message.txt"
     try:
-        proc = subprocess.run(
-            ["claude", "-p", prompt, "--output-format", "json"],
-            capture_output=True, text=True, encoding="utf-8", errors="replace",
-            stdin=subprocess.DEVNULL, timeout=180)
-        text, _ = parse_claude_json(proc.stdout)
-        start, end = text.find("["), text.rfind("]")
-        return json.loads(text[start:end + 1]) if start >= 0 and end > start else []
-    except Exception as exc:  # judge is best-effort
+        remaining = min(180.0, deadline - time.monotonic())
+        if remaining <= 0:
+            raise TimeoutError("scenario deadline expired before rubric judging")
+        cmd = codex_command("exec", "--ephemeral", "--skip-git-repo-check",
+                            "--sandbox", "read-only", "--output-last-message",
+                            str(result_path))
+        if getattr(args, "model", None):
+            cmd += ["--model", args.model]
+        cmd.append(prompt)
+        proc = run_bounded(cmd, cwd=workdir, env=env, stdout=subprocess.DEVNULL,
+                           stderr=subprocess.PIPE, text=True, encoding="utf-8", errors="replace",
+                           stdin=subprocess.DEVNULL, timeout=remaining)
+        if proc.returncode != 0:
+            detail = (proc.stderr or "Codex judge exited unsuccessfully").strip()[:200]
+            raise RuntimeError(detail)
+        judge_text = _read(result_path) if result_path.is_file() else ""
+        start, end = judge_text.find("["), judge_text.rfind("]")
+        if start < 0 or end <= start:
+            raise ValueError("Codex judge did not return a JSON array")
+        grades = json.loads(judge_text[start:end + 1])
+        if not isinstance(grades, list) or len(grades) != len(scen["rubric"]):
+            raise ValueError("Codex judge returned the wrong number of rubric grades")
+        if any(not isinstance(grade, dict) or not isinstance(grade.get("passed"), bool)
+               for grade in grades):
+            raise ValueError("Codex judge returned an invalid rubric grade")
+        return grades
+    except Exception as exc:
         return [{"text": "judge error", "passed": False, "evidence": str(exc)[:200]}]
+    finally:
+        result_path.unlink(missing_ok=True)
 
 
 # ---------------------------------------------------------------------------
@@ -469,9 +695,17 @@ def judge_rubric(scen: dict, result_text: str) -> list[dict]:
 GREEN, RED, DIM, BOLD, RESET = "\033[32m", "\033[31m", "\033[2m", "\033[1m", "\033[0m"
 
 
+def record_passes(rec: dict) -> bool:
+    asserts = rec.get("assertions", [])
+    if not (asserts and all(a["passed"] for a in asserts) and "error" not in rec):
+        return False
+    grades = rec.get("rubric_grades")
+    return grades is None or (bool(grades) and all(g.get("passed") for g in grades))
+
+
 def print_scenario(rec: dict) -> bool:
     asserts = rec.get("assertions", [])
-    ok = bool(asserts) and all(a["passed"] for a in asserts) and "error" not in rec
+    ok = record_passes(rec)
     head = f"{GREEN}PASS{RESET}" if ok else f"{RED}FAIL{RESET}"
     meta = []
     if rec.get("duration_s") is not None:
@@ -496,15 +730,15 @@ def print_scenario(rec: dict) -> bool:
 
 
 def write_results(all_recs: list[dict], passed: int, total: int) -> Path:
-    stamp = time.strftime("%Y%m%d-%H%M%S")
+    stamp = f"{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}-{uuid.uuid4().hex[:8]}"
     out = RESULTS_DIR / stamp
-    out.mkdir(parents=True, exist_ok=True)
+    out.mkdir(parents=True)
     (out / "results.json").write_text(
         json.dumps({"passed": passed, "total": total, "scenarios": all_recs},
                    ensure_ascii=False, indent=2), encoding="utf-8")
     lines = [f"# Eval results — {stamp}", "", f"**{passed}/{total} scenarios passed**", ""]
     for r in all_recs:
-        ok = bool(r.get("assertions")) and all(a["passed"] for a in r["assertions"]) and "error" not in r
+        ok = record_passes(r)
         lines.append(f"## {'✅' if ok else '❌'} {r['skill']} — {r['scenario']}")
         meta = []
         if r.get("duration_s") is not None:
@@ -515,6 +749,9 @@ def write_results(all_recs: list[dict], passed: int, total: int) -> Path:
             lines.append(f"_{', '.join(meta)}_")
         for a in r.get("assertions", []):
             lines.append(f"- {'✅' if a['passed'] else '❌'} {a['label']} — {a['evidence']}")
+        for g in r.get("rubric_grades", []):
+            lines.append(f"- {'✅' if g.get('passed') else '❌'} rubric: {g.get('text','')} — "
+                         f"{g.get('evidence','')}")
         lines.append("")
     (out / "results.md").write_text("\n".join(lines), encoding="utf-8")
     return out
@@ -525,18 +762,16 @@ def write_results(all_recs: list[dict], passed: int, total: int) -> Path:
 # ---------------------------------------------------------------------------
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Run tedtoolkit-shared skill evals.")
+    ap = argparse.ArgumentParser(description="Run TedToolkit plugin skill evals.")
     ap.add_argument("skills", nargs="*", help="skill names to run (default: all)")
     ap.add_argument("--filter", help="only run scenarios whose name contains this substring")
     ap.add_argument("--keep", action="store_true", help="keep work dirs for debugging")
-    ap.add_argument("--judge", action="store_true", help="also LLM-judge the rubric points")
-    ap.add_argument("--model", help="pass through to `claude -p --model` (e.g. 'sonnet' to "
-                        "run on standard context when 1M-context credits are unavailable)")
-    ap.add_argument("--plugin", default="tedtoolkit-shared",
-                    help="plugin directory under plugins/ to load (default: tedtoolkit-shared)")
+    ap.add_argument("--judge", action="store_true",
+                    help="grade rubric points with Codex and fail scenarios on any failed grade")
+    ap.add_argument("--model", help="pass the model through to Codex for scenarios and rubric judging")
+    ap.add_argument("--plugin",
+                    help="run only tests/<plugin>/ with the matching plugin (default: all plugins)")
     args = ap.parse_args()
-
-    plugin_dir = REPO_ROOT / "plugins" / args.plugin
 
     for stream in (sys.stdout, sys.stderr):
         try:
@@ -544,33 +779,61 @@ def main() -> int:
         except Exception:
             pass
 
-    preflight(plugin_dir)
-
     all_recs: list[dict] = []
     passed = total = 0
-    marketplace_root = None
-    marketplace_name = None
+    plugins = [args.plugin] if args.plugin else eval_plugins()
+
     try:
-        marketplace_root, marketplace_name = install_eval_plugin(plugin_dir)
-        for skill, eval_dir, spec in discover(args.skills):
-            scenarios = spec.get("scenarios", [])
-            if args.filter:
-                scenarios = [s for s in scenarios if args.filter.lower() in s.get("name", "").lower()]
-            if not scenarios:
+        for plugin in plugins:
+            plugin_dir = REPO_ROOT / "plugins" / plugin
+            selected = []
+            for skill, eval_dir, spec in discover(plugin, args.skills):
+                scenarios = spec.get("scenarios", [])
+                if args.filter:
+                    scenarios = [s for s in scenarios
+                                 if args.filter.lower() in s.get("name", "").lower()]
+                if scenarios:
+                    selected.append((skill, eval_dir, scenarios))
+
+            if not selected:
                 continue
-            print(f"\n{BOLD}{skill}{RESET}  ({len(scenarios)} scenario(s))")
-            for scen in scenarios:
-                rec = run_scenario(skill, eval_dir, scen, args, plugin_dir)
-                all_recs.append(rec)
-                total += 1
-                if print_scenario(rec):
-                    passed += 1
+
+            load_plugin = any(
+                scen.get("mode", "codex") != "static"
+                for _, _, scenarios in selected
+                for scen in scenarios
+            )
+            require_codex = load_plugin or any(
+                args.judge and scen.get("rubric")
+                for _, _, scenarios in selected
+                for scen in scenarios
+            )
+            preflight(plugin_dir, require_codex=require_codex)
+
+            marketplace_root = marketplace_name = None
+            try:
+                if load_plugin:
+                    marketplace_root, marketplace_name = install_eval_plugin(plugin_dir)
+                print(f"\n{BOLD}{plugin}{RESET}")
+                for skill, eval_dir, scenarios in selected:
+                    print(f"\n{BOLD}{skill}{RESET}  ({len(scenarios)} scenario(s))")
+                    for scen in scenarios:
+                        rec = run_scenario(skill, eval_dir, scen, args)
+                        all_recs.append(rec)
+                        total += 1
+                        if print_scenario(rec):
+                            passed += 1
+            finally:
+                if marketplace_root is not None and marketplace_name is not None:
+                    cleanup_eval_plugin(plugin_dir.name, marketplace_name, marketplace_root)
     except Exception as exc:
         print(f"Eval setup failed: {exc}", file=sys.stderr)
         return 2
-    finally:
-        if marketplace_root is not None and marketplace_name is not None:
-            cleanup_eval_plugin(plugin_dir.name, marketplace_name, marketplace_root)
+
+    if total == 0:
+        target = f"plugin {args.plugin!r}" if args.plugin else "the requested filters"
+        print(f"No eval scenarios matched {target}.", file=sys.stderr)
+        return 2
 
     out = write_results(all_recs, passed, total)
     color = GREEN if passed == total else RED

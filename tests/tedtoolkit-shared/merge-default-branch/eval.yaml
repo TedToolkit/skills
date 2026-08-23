@@ -78,10 +78,10 @@ scenarios:
         - "bash setup_fixture.sh merge-breaks-build"
     assertions:
       - type: "file_contains"
-        path: "*.cs"
+        path: "**/*.cs"
         value: "FeatureArea"
       - type: "file_contains"
-        path: "*.cs"
+        path: "**/*.cs"
         value: "UpstreamArea"
       - type: "file_exists"
         path: "bin/Release/net10.0/App.dll"
