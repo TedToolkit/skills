@@ -32,14 +32,15 @@ Select exactly one mode:
 - `integrated-change`: one multi-item Controlled parent, every non-superseded item, authoritative
   integration SHA, combined verification, operational handoffs, and documentation disposition.
 
-Require the approval source, repository guidance, affected artifacts, and one immutable candidate
-identity. Prefer a committed full candidate SHA. When a candidate commit was not authorized, an
-independent final review may instead bind to `HEAD` plus a cryptographic digest of the complete
-tracked diff and every in-scope untracked blob, provided every lane receives that exact frozen bundle
-and the coordinator detects any candidate-input change as stale. Record the approved contract path
-and human approval source as authorization context, as well as the reviewed range or bundle. Any
-candidate, baseline, or approved-contract change makes the
-aggregate conclusion and affected specialist lanes `stale`.
+Require the approval source, repository guidance, affected artifacts, and a candidate binding scaled
+to the review. Independent, cross-context, asynchronous, CI, or integrated review uses a committed
+full SHA or, when a candidate commit was not authorized, `HEAD` plus a cryptographic digest of the
+complete tracked diff and every in-scope untracked blob. A synchronous compact review in the same
+workspace may instead bind to the baseline plus a complete raw working-tree snapshot captured and
+compared before and after its serial checks; it needs no commit or digest and is not reusable outside
+that context. Record the approved contract path and human approval source as authorization context.
+Any candidate, relevant baseline, or approved-contract change makes the conclusion or affected
+professional judgment stale.
 
 Do not infer a missing behavior contract from the diff. Route behavior-changing code without an
 approved boundary to `design-change`. In `delivery-candidate`, require one selected work item when a
@@ -50,13 +51,12 @@ Controlled change has a delivery map. In `integrated-change`, require every non-
 
 Record one aggregate independence level:
 
-- `independent`: every required judgment lane uses a fresh context that did not implement the
-  candidate, receives the exact candidate and raw governing artifacts, has no write task, and does
-  not see sibling conclusions before returning its own;
+- `independent`: at least one fresh read-only review context that did not implement the candidate
+  receives the exact candidate and raw governing artifacts, owns every required professional
+  judgment, and synthesizes the conclusion;
 - `compact`: the delivery coordinator performs the necessary checks for a bounded low-risk change
   and does not claim independence; or
-- `not-established`: reviewer separation, exact candidate, read-only ownership, or identity is
-  insufficient.
+- `not-established`: reviewer separation, candidate binding, or read-only ownership is insufficient.
 
 Require `independent` for public or persisted contracts, security, migration, shared cross-item
 boundaries, concurrency, difficult reversal, or another material Controlled risk. When independent
@@ -65,13 +65,21 @@ reviewers in one context and label them independent.
 
 Use SubAgents only when their independence or context separation has material review value:
 
-1. Keep one user-facing coordinator and reserve its context for contract selection and synthesis.
-2. Dispatch `review-code` and `review-tests` as fresh read-only SubAgents when both lanes are material;
-   run `verify-implementation` in a separate executor context when independent execution matters.
-3. Send each lane only the objective, exact baseline/candidate, approved contract and IDs, governing
-   paths, allowed read scope, required handoff, and stop conditions.
-4. Do not send an implementer transcript, sibling findings, suspected answer, or proposed fix; those
-   inputs anchor the review and defeat contextual independence.
+1. Keep one user-facing delivery owner. In independent mode, one fresh review coordinator owns the
+   judgments and synthesis; the delivery owner only receives the conclusion and updates status. In
+   compact mode, the delivery owner may coordinate and synthesize in the same context while remaining
+   read-only during review.
+2. A single fresh reviewer may perform `review-code` and `review-tests` checks serially and keep the
+   conclusions distinct. Split them into additional SubAgents only when specialist expertise,
+   context size, or conflict isolation justifies it. Use a separate verification executor only when
+   environment or permission separation adds material confidence; otherwise the reviewer may run it
+   or reuse exact-revision CI.
+3. When splitting concerns across contexts, send each lane only the objective, exact
+   baseline/candidate, approved contract and IDs, governing paths, allowed read scope, required
+   handoff, and stop conditions.
+4. Do not send a split lane an implementer transcript, sibling findings, suspected answer, or
+   proposed fix. One fresh reviewer covering several concerns may retain its own evidence while
+   keeping conclusions distinct.
 5. Use a compact coordinator review when only one bounded low-risk lane is useful or SubAgent setup
    costs more than the risk reduction.
 
@@ -112,6 +120,12 @@ In `delivery-candidate`, include every owned contract and promised supporting in
 `integrated-change`, trace every parent contract through its owning item to the integrated
 implementation and combined verification. Read primary artifacts behind every specialist citation;
 a matching test name or worker success message is not proof.
+
+In integrated mode, reuse still-valid item-level judgments when the item patch, approved contract,
+and relevant baseline behavior are unchanged. Review the parent mapping, integration-only diff,
+cross-item/shared-boundary interaction, combined verification, documentation, and operational
+handoffs. A new integration commit SHA alone does not make equivalent evidence stale; changed patch
+content or relevant baseline semantics does.
 
 ## Resolve contradictions without voting
 
@@ -158,8 +172,8 @@ Ready to merge | Ready with follow-ups | Not ready | Stale
 - Mode: delivery-candidate | integrated-change
 - Independence: independent | compact | not-established
 - Baseline:
-- Candidate identity: committed SHA | HEAD + tracked-diff digest + untracked-blob digests
-- Contract source/digest:
+- Candidate binding: current workspace snapshot (compact only) | committed SHA | frozen uncommitted bundle
+- Contract source/revision:
 - Implementer context:
 - Code reviewer:
 - Test reviewer:

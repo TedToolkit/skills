@@ -73,7 +73,8 @@ map_rows=$(awk -F'|' '
     function trim(s) { gsub(/^[[:space:]]+|[[:space:]]+$/, "", s); return s }
     /^\|/ {
         id=trim($2); outcome=trim($3); contracts=trim($4); prereqs=trim($5)
-        proof=trim($6); status=trim($7); doc=trim($8)
+        if (trim($8) != "") { proof=trim($6); status=trim($7); doc=trim($8) }
+        else { proof=""; status=trim($6); doc=trim($7) }
         if (id == "ID" || id ~ /^-+$/ || doc == "") next
         gsub(/`/, "", doc)
         printf "%s\034%s\034%s\034%s\034%s\034%s\034%s\n", id, outcome, contracts, prereqs, proof, status, doc
@@ -93,6 +94,8 @@ requires_approval=0
 has_draft=0
 while IFS=$'\034' read -r id outcome contracts prereqs primary_proof map_status document; do
     [[ -n $id ]] || continue
+    normalized_status=${map_status,,}
+    normalized_status=${normalized_status// /-}
     [[ $id =~ ^[A-Z][A-Z0-9]*-[0-9]+$ ]] || {
         fail "$map_file: invalid work-item ID '$id'"
         continue
@@ -100,21 +103,19 @@ while IFS=$'\034' read -r id outcome contracts prereqs primary_proof map_status 
     ids+=("$id")
     contracts_by_row+=("$contracts")
     prerequisites_by_row+=("$prereqs")
-    statuses_by_row+=("${map_status,,}")
+    statuses_by_row+=("$normalized_status")
 
     if [[ -n ${known_ids[$id]+x} ]]; then
         fail "$map_file: duplicate work-item ID '$id'"
     fi
     known_ids["$id"]=1
-    status_by_id["$id"]=${map_status,,}
+    status_by_id["$id"]=$normalized_status
 
     [[ -n $outcome ]] || fail "$map_file: $id needs a non-empty outcome"
     [[ -n $contracts ]] || fail "$map_file: $id needs explicit contract ownership or None"
     [[ -n $prereqs ]] || fail "$map_file: $id needs explicit prerequisites or None"
-    [[ -n $primary_proof ]] || fail "$map_file: $id needs a primary proof summary"
-
-    case "${map_status,,}" in
-        draft|approved|implementing|implemented|verified|superseded) ;;
+    case "$normalized_status" in
+        draft|approved|in-progress|implemented|verified|superseded) ;;
         *) fail "$map_file: $id has unsupported or missing authoritative status '$map_status'" ;;
     esac
 
@@ -133,7 +134,7 @@ while IFS=$'\034' read -r id outcome contracts prereqs primary_proof map_status 
     grep -Fq "<!-- work-item-id: $id -->" "$item_file" ||
         fail "$item_file: work-item-id does not match map row '$id'"
 
-    if [[ ${map_status,,} == draft ]]; then
+    if [[ $normalized_status == draft ]]; then
         has_draft=1
         [[ $(marker_value "$item_file" approval-source) == none ]] ||
             fail "$item_file: Draft approval-source must be 'none'"
@@ -158,17 +159,22 @@ while IFS=$'\034' read -r id outcome contracts prereqs primary_proof map_status 
             fail "$item_file: proof plan does not map owned $owned_contract"
         primary_count=$(grep -Eic "<!--[[:space:]]*primary-proof:[[:space:]]*$owned_contract[[:space:]]+purpose=(acceptance|regression|boundary|structural|journey|decision)[[:space:]]+shape=(unit|component|contract|integration|end-to-end|benchmark|manual)[[:space:]]*-->" <<<"$item_proof" || true)
         (( primary_count == 1 )) ||
-            fail "$item_file: owned $owned_contract must have exactly one stable primary-proof marker (found $primary_count)"
+            fail "$item_file: owned $owned_contract must have exactly one canonical primary-proof marker (found $primary_count)"
         awk -F'|' -v wanted="$owned_contract" '
             function trim(s) { gsub(/^[[:space:]]+|[[:space:]]+$/, "", s); return s }
             /^\|/ {
-                contract=trim($2); role=tolower(trim($3)); assertion=trim($6); command=trim($7)
-                if (contract == wanted && role == "primary" && assertion != "" && command != "" &&
-                    assertion !~ /^<.*>$/ && command !~ /^<.*>$/) found++
+                contract=trim($2); role=tolower(trim($3))
+                if (contract == wanted && role == "primary") {
+                    found++
+                    if (NF >= 8) { assertion=trim($6); command=trim($7) }
+                    else { assertion=trim($4); command=trim($5) }
+                    if (assertion == "" || command == "" ||
+                        assertion ~ /^<.*>$/ || command ~ /^<.*>$/) invalid=1
+                }
             }
-            END { exit(found == 1 ? 0 : 1) }
+            END { exit(found == 1 && !invalid ? 0 : 1) }
         ' <<<"$item_proof" ||
-            fail "$item_file: owned $owned_contract needs one Primary proof row with assertion and command/procedure"
+            fail "$item_file: owned $owned_contract needs exactly one Primary proof row with assertion and command/procedure"
     done < <(grep -Eio '(Owns|负责)[[:space:]]+(AC-[0-9]+|INV-[0-9]+|STR-[0-9]+|EXP-[0-9]+)' <<<"$contracts" |
         grep -Eo 'AC-[0-9]+|INV-[0-9]+|STR-[0-9]+|EXP-[0-9]+' || true)
 

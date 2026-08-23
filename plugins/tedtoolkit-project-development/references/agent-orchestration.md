@@ -26,11 +26,15 @@ Use flat scheduling:
 
 ## Keep one authority per concern
 
-The coordinator owns user dialogue, routing, the ready queue, approval interpretation, integrated
-status, review planning, and the final synthesized conclusion. A worker owns only its dispatched
-read or isolated write boundary. `review-code` owns implementation correctness findings;
-`review-tests` owns test-adequacy findings; `verify-implementation` owns observed execution results;
-none of them implements, fixes, approves, or independently announces merge readiness.
+The delivery owner owns user dialogue, approval interpretation, and lifecycle/status updates. For a
+single delivery it is the user-facing implementation coordinator; for a multi-item change it is the
+integration coordinator. A review coordinator owns only review routing, evidence synthesis, and the
+merge-readiness conclusion. In compact mode both roles may share one user-facing context, but the
+review phase remains read-only. In independent mode a fresh review context owns the judgments and
+returns its conclusion to the delivery owner. A worker owns only its dispatched read or isolated
+write boundary. `review-code` owns implementation-correctness findings; `review-tests` owns
+test-adequacy findings; `verify-implementation` owns observed execution results; none of them
+implements, fixes, approves, or updates lifecycle state.
 
 For shared-workspace writes, assign disjoint explicit write sets and one writer per path. For code or
 other overlapping delivery artifacts, use one branch and worktree per worker; otherwise serialize the
@@ -61,18 +65,24 @@ work, broad repository summaries, long source excerpts, or another worker's tran
 When the packet is insufficient, the worker returns the missing path or decision and its impact; the
 coordinator supplies only that addition.
 
-Pin one immutable candidate identity for final independent review. Prefer a full Git commit SHA. If
-creating a candidate commit was not authorized, freeze an uncommitted candidate as the baseline
-`HEAD` plus a cryptographic digest of the complete tracked diff and every in-scope untracked blob;
-give every lane that exact bundle and stop stale if a candidate input changes. Declare ordinary
-build/test output paths separately and exclude them from the candidate-input manifest. A path list or bare
-`git diff` summary is not sufficient. One candidate identity is enough; do not pair it with an
-independently maintained local revision counter.
+Scale candidate binding to how the result will travel. Independent, cross-context, asynchronous, CI,
+or integrated review needs one immutable identity: prefer a full Git commit SHA; when a candidate
+commit was not authorized, freeze `HEAD` plus a cryptographic digest of the complete tracked diff and
+every in-scope untracked blob. Give every participating context that exact bundle and stop stale if a
+candidate input changes. Declare ordinary build/test output paths separately and exclude them from
+the manifest. A path list or bare diff summary is not sufficient for a reusable cross-context result.
 
-For independent specialist review, give every fresh lane the same approved contract and exact raw
-candidate, but do not give it implementer narration, sibling findings, suspected defects, proposed
-fixes, or a desired conclusion. This prevents contextual anchoring. A verifier receives authoritative
-commands and expected contract/risk purposes, not a claim that the candidate is already correct.
+A synchronous compact review in the same workspace needs no commit or digest. Capture the baseline,
+complete raw diff, and in-scope untracked contents before its serial code/test/execution checks;
+compare that raw snapshot again before synthesis. The conclusion is immediate and non-reusable
+outside that context. One binding is enough in either mode; do not add a local revision counter.
+
+When independent concerns are split across contexts, give each fresh lane the same approved contract
+and exact raw candidate, but not implementer narration, sibling findings, suspected defects, proposed
+fixes, or a desired conclusion. This prevents contextual anchoring. One fresh reviewer covering
+several concerns serially may retain its own evidence and judgments; it must still keep the
+professional conclusions distinct. A verifier receives authoritative commands and expected
+contract/risk purposes, not a claim that the candidate is already correct.
 
 ## Require compact, evidence-first handoffs
 
@@ -95,21 +105,25 @@ when the repository artifact or cited source is available.
 
 Use one of three explicit levels:
 
-- `independent`: every required judgment lane is a fresh non-writing context that did not implement
-  the exact candidate and did not see sibling conclusions before returning;
+- `independent`: at least one fresh non-writing review context that did not implement the exact
+  candidate owns all required judgments and the synthesis;
 - `compact`: the coordinator performs the risk-relevant checks for bounded low-risk work and does
   not claim independence; or
-- `not-established`: separation, exact revision, identity, or read-only ownership is insufficient.
+- `not-established`: separation, candidate binding, or read-only ownership is insufficient.
 
-Use fresh independent `review-code` and `review-tests` lanes for implementation that changes public
-or persisted contracts, security, migrations, concurrency, shared cross-item boundaries, or other
-difficult-to-reverse behavior. Use a separate `verify-implementation` executor when independent
-execution adds confidence. A coordinator may perform compact checks for bounded low-risk items whose
-proof is direct and whose diff does not cross a shared boundary.
+Use a fresh independent review context for implementation that changes public or persisted
+contracts, security, migrations, concurrency, shared cross-item boundaries, or other
+difficult-to-reverse behavior. That reviewer may perform code and test judgments serially while
+keeping their conclusions distinct, and may execute verification or reuse exact-revision CI.
+Split lanes across additional contexts only for specialist expertise, excessive context size,
+security/permission separation, contested findings, or materially different execution environments.
+A delivery owner may perform compact checks for bounded low-risk items whose proof is direct and
+whose diff does not cross a shared boundary.
 
-Review the exact artifact digest or diff range. A worker's success message is not review evidence, and
-a reviewer never grants human approval. If required independent lanes cannot be established, the
-aggregate review is Not ready.
+Review the applicable bound input: immutable range/bundle for independent or reusable results, or
+the before/after raw workspace snapshot for synchronous compact review. A worker's success message is
+not review evidence, and a reviewer never grants human approval. If required independence cannot be
+established, the aggregate review is Not ready.
 
 Resolve lane disagreement from primary artifacts, never votes. Command failure is an observed fact;
 command success cannot overrule weak test coverage. If the coordinator implemented the candidate or
@@ -119,7 +133,7 @@ contract owner.
 
 ## Recover from repository evidence
 
-Resume from Git status, baseline and candidate SHAs, the authoritative control artifact, approved
+Resume from Git status, applicable candidate binding, the authoritative control artifact, approved
 contracts, and recorded verification. Candidate, baseline, or approved-contract changes make the
 aggregate conclusion stale; code, test, configuration, or result changes invalidate their affected
 lanes. Re-dispatch only the affected bounded task. If an agent result targets an obsolete baseline,

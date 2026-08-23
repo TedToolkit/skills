@@ -72,6 +72,9 @@ scenarios:
         path: "docs/changes/temperature-ingestion/work-items.md"
         value: "person-month"
       - type: "file_not_contains"
+        path: "docs/changes/temperature-ingestion/work-items.md"
+        value: "| Primary proof |"
+      - type: "file_not_contains"
         path: "docs/changes/temperature-ingestion/work-items/TEMP-001-parser.md"
         value: "Executable implementation steps"
       - type: "command"
@@ -83,6 +86,7 @@ scenarios:
       - "Names the expected affected delivery area and makes public contracts exact without treating internal files or private symbols as an exhaustive authorization list."
       - "References every parent acceptance case, assigns exactly one owner, and treats the parser result as a concrete supplied prerequisite for ingestion."
       - "Gives every item start conditions, constraints, primary proof, an objective definition of done, and completion evidence that can unlock dependent work without requiring fixed test layers."
+      - "Keeps the proof definition in each item document instead of repeating a proof-summary column in work-items.md."
       - "Does not prescribe executable edit steps, private type structure, algorithms, or method decomposition."
       - "Does not change the approved behavior contract or implement production code."
     timeout: 420

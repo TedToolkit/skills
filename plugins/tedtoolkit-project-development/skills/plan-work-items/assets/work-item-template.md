@@ -27,7 +27,7 @@ State one independently verifiable result and how it contributes to the parent c
 <!-- work-item: contract-coverage -->
 ## Contract responsibility
 
-| Parent contract | Responsibility | Verified input or primary-proof intent |
+| Parent contract | Responsibility | Contribution or supplied input |
 | --- | --- | --- |
 | AC-01, INV-01, STR-01, or EXP-01 | Owns / Supports |  |
 
@@ -41,14 +41,14 @@ State one independently verifiable result and how it contributes to the parent c
 ## Proof
 
 <!-- primary-proof: AC-01 purpose=acceptance shape=unit -->
-| Contract or gate | Role | Proof purpose | Execution shape | Observable assertion | Command or bounded procedure |
-| --- | --- | --- | --- | --- | --- |
-| AC-01, INV-01, STR-01, or EXP-01 | Primary | Acceptance / regression / boundary / structural / journey / decision | Unit / Component / Contract / Integration / End-to-end / Benchmark / Manual |  |  |
+| Contract or gate | Role | Observable assertion | Command or bounded procedure |
+| --- | --- | --- | --- |
+| AC-01, INV-01, STR-01, or EXP-01 | Primary |  |  |
 
-Replace the marker with the owned contract and actual lowercase purpose and shape. Add exactly one
-primary marker and row for each owned contract. Keep `Primary` as the stable Role value and provide
-a non-empty observable assertion plus command or bounded procedure. Add conditional proof only when
-actual boundary or risk requires it.
+The marker is the sole machine-readable source for the owned contract, purpose, and shape; use the
+actual lowercase identifiers. Add exactly one marker and one concise Primary row for each owned
+contract. The row owns only the observable assertion and command or bounded procedure. Add
+conditional proof only when actual boundary or risk requires it.
 
 <!-- work-item: definition-of-done -->
 ## Done

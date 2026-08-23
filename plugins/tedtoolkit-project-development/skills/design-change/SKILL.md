@@ -86,8 +86,8 @@ edit order open unless one is itself a public or persisted contract. Use stable 
 behavior changes, bug fixes, and migrations; `INV-*` for behavior-preserving refactors;
 `STR-*` target structural outcomes for maintenance; and `EXP-*` questions, method, thresholds, stop condition,
 owner, and downstream decision for experiments. Give every contract exactly one stable
-`primary-proof` marker with its role, purpose, and execution shape; add conditional proof only for
-an applicable risk.
+`primary-proof` marker as the canonical contract/purpose/shape mapping and one concise human row for
+its observable assertion and command; add conditional proof only for an applicable risk.
 
 Run `bash "${CLAUDE_PLUGIN_ROOT}"/scripts/validate-acceptance-specification.sh <change.md>` for a
 format-3 record. Invoke `architecture-design` when an enduring technical choice is required. Before

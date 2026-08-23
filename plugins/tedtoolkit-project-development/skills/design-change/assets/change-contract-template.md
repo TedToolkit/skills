@@ -98,14 +98,15 @@ state that `plan-work-items` will create the separately approved map.
 ## Proof
 
 <!-- primary-proof: AC-01 purpose=acceptance shape=unit -->
-| Contract | Role | Proof purpose | Execution shape | Observable assertion | Command or bounded procedure |
-| --- | --- | --- | --- | --- | --- |
-| AC-01, INV-01, STR-01, or EXP-01 | Primary | Acceptance / regression / boundary / structural / journey / decision | Unit / Component / Contract / Integration / End-to-end / Benchmark / Manual |  |  |
+| Contract | Role | Observable assertion | Command or bounded procedure |
+| --- | --- | --- | --- |
+| AC-01, INV-01, STR-01, or EXP-01 | Primary |  |  |
 
-Replace the marker contract, purpose, and shape with the actual lowercase identifiers. Add exactly
-one `primary-proof` marker and primary row per contract. Keep `Primary` as the stable Role value and
-provide a non-empty observable assertion plus command or bounded procedure. Add conditional rows
-only when the actual boundary or risk requires them; do not add rows merely to represent test layers.
+The marker is the sole machine-readable source for the contract, proof purpose, and execution shape;
+use the actual lowercase identifiers. Add exactly one marker and one concise Primary row per
+contract. The row owns only the observable assertion and command or bounded procedure. Add
+conditional rows only when the actual boundary or risk requires them; do not repeat marker metadata
+or add rows merely to represent test layers.
 
 <!-- section: completion-criteria -->
 ## Completion

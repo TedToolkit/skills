@@ -51,10 +51,10 @@ cat > "$change_dir/change.md" <<'EOF'
 
 <!-- primary-proof: AC-01 purpose=acceptance shape=unit -->
 <!-- primary-proof: AC-02 purpose=acceptance shape=component -->
-| 契约 | Role | 目的 | 执行形态 | 可观察断言 | 命令或过程 |
-| --- | --- | --- | --- | --- | --- |
-| AC-01 | Primary | 验收 | Unit | 合法值解析且非法值拒绝 | bash verify-parser.sh |
-| AC-02 | Primary | 验收 | Component | 摄取结果与公共解析一致 | bash verify-ingestion.sh |
+| 契约 | Role | 可观察断言 | 命令或过程 |
+| --- | --- | --- | --- |
+| AC-01 | Primary | 合法值解析且非法值拒绝 | bash verify-parser.sh |
+| AC-02 | Primary | 摄取结果与公共解析一致 | bash verify-ingestion.sh |
 
 <!-- section: completion-criteria -->
 ## 完成条件
@@ -96,9 +96,9 @@ $owned
 ## 证明
 
 <!-- primary-proof: $owned purpose=acceptance shape=unit -->
-| Contract | Role | Purpose | Shape | Observable assertion | Command or procedure |
-| --- | --- | --- | --- | --- | --- |
-| $owned | Primary | Acceptance | Unit | Stable boundary demonstrates $owned | bash verify-item.sh |
+| Contract | Role | Observable assertion | Command or procedure |
+| --- | --- | --- | --- |
+| $owned | Primary | Stable boundary demonstrates $owned | bash verify-item.sh |
 
 <!-- work-item: definition-of-done -->
 ## 完成
@@ -121,10 +121,10 @@ cat > "$change_dir/work-items.md" <<'EOF'
 
 <!-- approval-source: Workflow fixture -->
 
-| ID | Outcome | Contract ownership | Real prerequisites and supplied input | Primary proof | Status | Document |
-| --- | --- | --- | --- | --- | --- | --- |
-| TEMP-001 | 公共解析器 | Owns AC-01 / Supports AC-02 | None | 公共解析示例 | Verified | `work-items/TEMP-001-parser.md` |
-| TEMP-002 | 摄取边界 | Owns AC-02 | TEMP-001: verified parser contract | 摄取示例 | Approved | `work-items/TEMP-002-ingestion.md` |
+| ID | Outcome | Contract ownership | Real prerequisites and supplied input | Status | Document |
+| --- | --- | --- | --- | --- | --- |
+| TEMP-001 | 公共解析器 | Owns AC-01 / Supports AC-02 | None | Verified | `work-items/TEMP-001-parser.md` |
+| TEMP-002 | 摄取边界 | Owns AC-02 | TEMP-001: verified parser contract | Approved | `work-items/TEMP-002-ingestion.md` |
 EOF
 
 "$scripts/validate-acceptance-specification.sh" "$change_dir/change.md"
@@ -163,6 +163,18 @@ if "$scripts/schedule-work-items.sh" "$change_dir" >/dev/null 2>&1; then
 fi
 cp "$fixture/verified-map.md" "$change_dir/work-items.md"
 
+cp "$change_dir/work-items.md" "$fixture/status-map.md"
+sed -i 's/| Approved | `work-items\/TEMP-002-ingestion.md`/| In progress | `work-items\/TEMP-002-ingestion.md`/' "$change_dir/work-items.md"
+"$scripts/validate-work-items.sh" "$change_dir"
+in_progress_schedule=$("$scripts/schedule-work-items.sh" "$change_dir")
+grep -Fq $'TEMP-002\tBLOCKED\tdocument status is In progress' <<<"$in_progress_schedule"
+sed -i 's/| In progress | `work-items\/TEMP-002-ingestion.md`/| Implementing | `work-items\/TEMP-002-ingestion.md`/' "$change_dir/work-items.md"
+if "$scripts/validate-work-items.sh" "$change_dir" >/dev/null 2>&1; then
+    echo "deprecated Implementing status was incorrectly accepted" >&2
+    exit 1
+fi
+cp "$fixture/status-map.md" "$change_dir/work-items.md"
+
 cp "$change_dir/work-items.md" "$fixture/multi-map.md"
 grep -v 'TEMP-002' "$fixture/multi-map.md" > "$change_dir/work-items.md"
 if "$scripts/validate-work-items.sh" "$change_dir" >/dev/null 2>&1; then
@@ -171,7 +183,7 @@ if "$scripts/validate-work-items.sh" "$change_dir" >/dev/null 2>&1; then
 fi
 
 cp "$fixture/multi-map.md" "$change_dir/work-items.md"
-sed -i 's/| None | 公共解析示例/| MISS-999: missing input | 公共解析示例/' "$change_dir/work-items.md"
+sed -i 's/| None | Verified/| MISS-999: missing input | Verified/' "$change_dir/work-items.md"
 if "$scripts/validate-work-items.sh" "$change_dir" >/dev/null 2>&1; then
     echo "missing prerequisite was incorrectly accepted" >&2
     exit 1
@@ -191,11 +203,11 @@ cat > "$change_dir/work-items.md" <<'EOF'
 
 <!-- approval-source: Workflow fixture -->
 
-| ID | Outcome | Contract ownership | Real prerequisites and supplied input | Primary proof | Status | Document |
-| --- | --- | --- | --- | --- | --- | --- |
-| TEMP-001 | 公共解析器 | Owns AC-01 | None | 公共解析示例 | Verified | `work-items/TEMP-001-parser.md` |
-| TEMP-002 | 摄取边界 | Owns AC-02 | TEMP-003: candidate output | 摄取示例 | Approved | `work-items/TEMP-002-ingestion.md` |
-| TEMP-003 | 循环候选 | None | TEMP-002: candidate output | 结构检查 | Approved | `work-items/TEMP-003-cycle.md` |
+| ID | Outcome | Contract ownership | Real prerequisites and supplied input | Status | Document |
+| --- | --- | --- | --- | --- | --- |
+| TEMP-001 | 公共解析器 | Owns AC-01 | None | Verified | `work-items/TEMP-001-parser.md` |
+| TEMP-002 | 摄取边界 | Owns AC-02 | TEMP-003: candidate output | Approved | `work-items/TEMP-002-ingestion.md` |
+| TEMP-003 | 循环候选 | None | TEMP-002: candidate output | Approved | `work-items/TEMP-003-cycle.md` |
 EOF
 if "$scripts/validate-work-items.sh" "$change_dir" >/dev/null 2>&1; then
     echo "partial dependency cycle was incorrectly accepted" >&2
@@ -206,6 +218,11 @@ cp "$fixture/multi-map.md" "$change_dir/work-items.md"
 cp "$change_dir/change.md" "$fixture/language-neutral-proof.md"
 sed -i 's/主要证明/补充证据/g; s/Primary proof/Conditional proof/g' "$fixture/language-neutral-proof.md"
 "$scripts/validate-acceptance-specification.sh" "$fixture/language-neutral-proof.md"
+
+cp "$change_dir/change.md" "$fixture/expanded-format3-proof.md"
+sed -i 's/| AC-01 | Primary | 合法值解析且非法值拒绝 | bash verify-parser.sh |/| AC-01 | Primary | Acceptance | Unit | 合法值解析且非法值拒绝 | bash verify-parser.sh |/' "$fixture/expanded-format3-proof.md"
+grep -Fq '| AC-01 | Primary | Acceptance | Unit |' "$fixture/expanded-format3-proof.md"
+"$scripts/validate-acceptance-specification.sh" "$fixture/expanded-format3-proof.md"
 
 cat > "$fixture/refactor.md" <<'EOF'
 # Preserve temperature semantics while reorganizing internals
@@ -243,9 +260,9 @@ One bounded internal refactor.
 ## Proof
 
 <!-- primary-proof: INV-01 purpose=regression shape=unit -->
-| Contract | Role | Evidence purpose | Execution shape | Observable assertion | Command or procedure |
-| --- | --- | --- | --- | --- | --- |
-| INV-01 | Primary | Regression | Unit | Existing public-boundary behavior remains unchanged | bash verify-refactor.sh |
+| Contract | Role | Observable assertion | Command or procedure |
+| --- | --- | --- | --- |
+| INV-01 | Primary | Existing public-boundary behavior remains unchanged | bash verify-refactor.sh |
 
 <!-- section: completion-criteria -->
 ## Completion
@@ -298,9 +315,9 @@ Create isolated evidence only.
 ## Proof
 
 <!-- primary-proof: EXP-01 purpose=decision shape=benchmark -->
-| Contract | Role | Evidence purpose | Execution shape | Observable assertion | Command or procedure |
-| --- | --- | --- | --- | --- | --- |
-| EXP-01 | Primary | Decision | Benchmark | Measurements answer the approved threshold question | bash run-benchmark.sh |
+| Contract | Role | Observable assertion | Command or procedure |
+| --- | --- | --- | --- |
+| EXP-01 | Primary | Measurements answer the approved threshold question | bash run-benchmark.sh |
 
 <!-- section: completion-criteria -->
 ## Completion
@@ -317,10 +334,10 @@ sed -i 's/workflow-profile: standard/workflow-profile: controlled/' "$experiment
 cat > "$experiment_dir/work-items.md" <<'EOF'
 <!-- delivery-map -->
 <!-- approval-source: Workflow fixture -->
-| ID | Outcome | Contract ownership | Real prerequisites and supplied input | Primary proof | Status | Document |
-| --- | --- | --- | --- | --- | --- | --- |
-| EXPW-001 | First evidence slice | Owns EXP-01 | None | Evidence | Approved | `work-items/EXPW-001.md` |
-| EXPW-002 | Second evidence slice | None | None | Evidence | Approved | `work-items/EXPW-002.md` |
+| ID | Outcome | Contract ownership | Real prerequisites and supplied input | Status | Document |
+| --- | --- | --- | --- | --- | --- |
+| EXPW-001 | First evidence slice | Owns EXP-01 | None | Approved | `work-items/EXPW-001.md` |
+| EXPW-002 | Second evidence slice | None | None | Approved | `work-items/EXPW-002.md` |
 EOF
 if "$scripts/validate-work-items.sh" "$experiment_dir" >"$fixture/experiment-map.out" 2>&1; then
     echo "experiment work-item map was incorrectly accepted" >&2
@@ -416,9 +433,9 @@ Repair the one link.
 <!-- section: proof-plan -->
 ## Proof
 <!-- primary-proof: STR-01 purpose=structural shape=manual -->
-| Contract | Role | Purpose | Shape | Observable assertion | Command or procedure |
-| --- | --- | --- | --- | --- | --- |
-| STR-01 | Primary | Structural | Manual | No broken guide link is reported | bash verify-links.sh |
+| Contract | Role | Observable assertion | Command or procedure |
+| --- | --- | --- | --- |
+| STR-01 | Primary | No broken guide link is reported | bash verify-links.sh |
 <!-- section: completion-criteria -->
 ## Completion
 STR-01 passes without production changes.
@@ -427,17 +444,44 @@ EOF
 
 cat > "$fixture/legacy-approved.md" <<'EOF'
 # Historical change
+<!-- change-format: 2 -->
 ## 📌 Status
 Approved
 ## 🎯 Change goal
 Preserve an existing approved outcome.
 ## ✅ Acceptance specification
 The historical approved behavior remains authoritative.
+| ID | Outcome | Result | Proof | Owner | Prerequisites | Notes | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| LEG-001 | Historical slice | Done | Existing proof | Owner | None | None | Implemented |
+| LEG-002 | Final slice | Pending | Existing proof | Owner | LEG-001 | None | Approved |
 EOF
-"$scripts/validate-acceptance-specification.sh" "$fixture/legacy-approved.md"
-sed -i 's/^Approved$/Draft/' "$fixture/legacy-approved.md"
 if "$scripts/validate-acceptance-specification.sh" "$fixture/legacy-approved.md" >/dev/null 2>&1; then
+    echo "legacy change entered compatibility without an explicit flag" >&2
+    exit 1
+fi
+legacy_validation=$("$scripts/validate-acceptance-specification.sh" --allow-approved-legacy "$fixture/legacy-approved.md")
+grep -Fq 'DEPRECATED:' <<<"$legacy_validation"
+legacy_dir="$fixture/docs/changes/legacy"
+mkdir -p "$legacy_dir"
+cp "$fixture/legacy-approved.md" "$legacy_dir/change.md"
+legacy_schedule=$("$scripts/schedule-work-items.sh" "$legacy_dir" 2>"$fixture/legacy-warning.txt")
+grep -Fq $'LEG-002\tREADY' <<<"$legacy_schedule"
+grep -Fq 'DEPRECATED:' "$fixture/legacy-warning.txt"
+sed -i 's/^Approved$/Draft/' "$fixture/legacy-approved.md"
+cp "$fixture/legacy-approved.md" "$legacy_dir/change.md"
+if "$scripts/validate-acceptance-specification.sh" --allow-approved-legacy "$fixture/legacy-approved.md" >/dev/null 2>&1; then
     echo "legacy Draft was incorrectly accepted as approved compatibility input" >&2
+    exit 1
+fi
+if "$scripts/schedule-work-items.sh" "$legacy_dir" >/dev/null 2>&1; then
+    echo "legacy Draft embedded map was incorrectly scheduled" >&2
+    exit 1
+fi
+
+sed '/change-format: 2/d; s/^Draft$/Approved/' "$fixture/legacy-approved.md" > "$fixture/unversioned-legacy.md"
+if "$scripts/validate-acceptance-specification.sh" --allow-approved-legacy "$fixture/unversioned-legacy.md" >/dev/null 2>&1; then
+    echo "unversioned Markdown was incorrectly recognized as a legacy contract" >&2
     exit 1
 fi
 

@@ -4,6 +4,32 @@ config:
   max_parallel_runs: 1
 
 scenarios:
+  - name: "Complete a low-risk Standard review in compact mode"
+    prompt: "Use $review-implementation in delivery-candidate mode for the current uncommitted workspace change against docs/changes/guide-link/change.md. This is a bounded low-risk Standard maintenance delivery in the same coordinator context. Perform the code/document check, proof-adequacy check, and documented verification serially; do not create a commit, digest bundle, SubAgent, or extra lane report, and do not modify files."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh compact-maintenance"
+    assertions:
+      - type: "exit_success"
+      - type: "output_regex"
+        pattern: '(?mi)^## Conclusion[ \t]*\r?\n(?:[ \t]*\r?\n)?Ready to merge[ \t]*$'
+      - type: "output_contains"
+        value: "compact"
+      - type: "output_contains"
+        value: "current workspace snapshot"
+      - type: "output_contains"
+        value: "STR-01"
+      - type: "output_not_contains"
+        value: "must commit"
+      - type: "command"
+        run: "test \"$(git status --porcelain)\" = ' M Guide.md' && grep -Fq '[setup](setup.md)' Guide.md"
+    rubric:
+      - "Uses one synchronous compact review and does not claim implementation independence."
+      - "Checks implementation/document correctness, proof adequacy, and the documented command serially without manufacturing separate agents or reports."
+      - "Binds the conclusion to the baseline plus complete current workspace snapshot, confirms it remained unchanged, and does not require a commit or cryptographic digest."
+    timeout: 420
+
   - name: "Block high-risk review when independence is not established"
     prompt: "Use $review-implementation in delivery-candidate mode for eval-base..HEAD against docs/changes/public-id/change.md. This same coordinator implemented the candidate, no fresh specialist contexts or prior independent lane reports are available, and no independent executor has run verification. Do not modify files."
     setup:
@@ -24,8 +50,30 @@ scenarios:
     rubric:
       - "Recognizes that the approved public API contract requires independent review."
       - "Does not simulate multiple reviewers in the implementation context or claim independence from headings alone."
-      - "Reports missing specialist independence and candidate-bound verification as Blocking."
+      - "Reports missing implementation-independent review and candidate-bound verification as Blocking."
     timeout: 420
+
+  - name: "Allow one fresh reviewer to cover code and test judgments"
+    prompt: "Use $review-implementation to classify this review arrangement without inspecting files: a high-risk Controlled candidate is bound to one exact committed SHA; one fresh read-only reviewer who did not implement it will inspect both code correctness and test adequacy serially and keep those conclusions distinct; exact-SHA trusted CI supplies the verification result. State whether this can establish independent review and when more reviewer contexts would actually be required."
+    assertions:
+      - type: "exit_success"
+      - type: "output_contains"
+        value: "independent"
+      - type: "output_contains"
+        value: "code"
+      - type: "output_contains"
+        value: "test"
+      - type: "output_contains"
+        value: "CI"
+      - type: "output_not_contains"
+        value: "not-established"
+      - type: "output_not_contains"
+        value: "two reviewers are required"
+    rubric:
+      - "Defines independence from the implementer rather than equating each professional concern with a separate agent."
+      - "Allows one fresh reviewer to keep code and test judgments distinct and reuse exact-candidate CI verification."
+      - "Adds contexts only for specialist expertise, context size, contested findings, permission separation, or materially different execution environments."
+    timeout: 300
 
   - name: "Do not let passing verification outvote weak tests"
     prompt: "Use $review-implementation in delivery-candidate mode for eval-base..HEAD against docs/changes/parse/change.md. Independent lane reports for the exact candidate are in review-packet/. Resolve their disagreement from the approved contract and current tests. Do not modify files or rerun commands."
@@ -169,7 +217,7 @@ scenarios:
       - "Does not recommend deletion or ask a closure question while documentation extraction is missing."
     timeout: 600
 
-  - name: "Accept a frozen uncommitted candidate bundle when commits are not authorized"
+  - name: "Accept a frozen bundle for independent cross-context review"
     prompt: "Use $review-implementation to explain the exact candidate identity required for an independent final review when creating a candidate commit is prohibited. The working directory contains both edited versioned files and new in-scope files. Do not inspect or modify files; state how the bundle is constructed, shared consistently across lanes, and invalidated."
     assertions:
       - { type: "exit_success" }

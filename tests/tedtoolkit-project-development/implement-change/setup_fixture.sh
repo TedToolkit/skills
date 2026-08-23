@@ -58,9 +58,9 @@ Scenario: Preserve an in-range decimal value
 ## Proof
 
 <!-- primary-proof: AC-01 purpose=regression shape=unit -->
-| Contract | Role | Evidence purpose | Execution shape | Observable assertion | Command |
-| --- | --- | --- | --- | --- | --- |
-| AC-01 | Primary | Regression | Unit | `Normalize` preserves 12.25 Celsius | Repository test command |
+| Contract | Role | Observable assertion | Command |
+| --- | --- | --- | --- |
+| AC-01 | Primary | `Normalize` preserves 12.25 Celsius | Repository test command |
 
 <!-- section: completion-criteria -->
 ## Completion
@@ -159,9 +159,9 @@ Edit `Guide.md` only and leave the exact implementation of the wording correctio
 ## Proof
 
 <!-- primary-proof: STR-01 purpose=structural shape=manual -->
-| Contract | Role | Purpose | Shape | Assertion | Command |
-| --- | --- | --- | --- | --- | --- |
-| STR-01 | Primary | Structural | Manual | Correct phrase exists and typo is absent | `bash verify-docs.sh` |
+| Contract | Role | Assertion | Command |
+| --- | --- | --- | --- |
+| STR-01 | Primary | Correct phrase exists and typo is absent | `bash verify-docs.sh` |
 
 <!-- section: completion-criteria -->
 ## Completion

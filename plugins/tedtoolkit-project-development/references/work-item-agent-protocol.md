@@ -10,8 +10,7 @@ and recovery rules are authoritative.
 | --- | --- | --- |
 | Integration coordinator | Ready queue, worktrees, runtime collisions, integration, `work-items.md` status, and combined verification | Production semantics or independent review |
 | Implementation worker | One approved item on one branch and worktree | Other items, integration branch, or map status |
-| Code reviewer | Correctness and applicable code risks for one exact candidate | Tests, execution, implementation, merge conclusion, or approval |
-| Test reviewer | Test adequacy and traceability for one exact candidate | Test execution, fixes, merge conclusion, or approval |
+| Review specialist | Code correctness, test adequacy, or both as distinct judgments for one exact candidate | Implementation, status, merge, or approval |
 | Verification executor | Candidate-bound command/procedure results | Test adequacy, fixes, merge conclusion, or approval |
 | Review coordinator | Risk routing, contradiction resolution, and the aggregate conclusion | Implementation, item status, merge, or human approval |
 
@@ -19,10 +18,10 @@ and recovery rules are authoritative.
 contracts; workers record candidate verification results in their handoff or coordinator-owned control state,
 not by racing to update shared status.
 
-The coordinator is the sole writer of the authoritative integration branch and delivery map. A
+The integration coordinator is the sole writer of the authoritative integration branch and delivery map. A
 worker owns one item, branch, and worktree. Dependents consume prerequisites only from a verified
 integration SHA, never another worker's message or unintegrated branch.
-The coordinator also advances the parent change from `approved` to `in-progress`, `implemented`,
+The integration coordinator also advances the parent change from `approved` to `in-progress`, `implemented`,
 and `completed` at the lifecycle gates defined by the shared workflow.
 
 ## Schedule only useful concurrency
@@ -66,9 +65,11 @@ deviations or None, migration/documentation state, and temporary-artifact status
 Invoke `review-implementation` with `independent` required for a candidate that changes a public or
 persisted contract, security, migration, concurrency, a shared cross-item boundary, or another
 difficult-to-reverse concern. It dispatches fresh `review-code` and `review-tests` SubAgents only
-when those lanes are material, obtains candidate-bound results from `verify-implementation` or
-equivalent CI, and synthesizes the only final conclusion. For a bounded low-risk item with direct
-proof and no shared boundary, the coordinator may perform the same checks in `compact` mode.
+when additional contexts materially improve expertise, context isolation, or dispute resolution. One
+fresh review context may perform both judgments serially and keep their conclusions distinct. It
+obtains candidate-bound results from the same reviewer, `verify-implementation`, or equivalent CI,
+and synthesizes the only final conclusion. For a bounded low-risk item with direct proof and no
+shared boundary, the delivery owner may perform the same checks in `compact` mode.
 
 Specialist lanes receive the exact range and raw contract/artifacts without implementer narration or
 sibling findings. Review pins the exact baseline-to-candidate range and approved contract; a change
@@ -90,7 +91,12 @@ integrated completion.
 6. Advance the authoritative integration ref only after the combined candidate passes, then record
    included items as `Verified` on that authoritative revision. Only `Verified` items satisfy
    prerequisites. A `Superseded` item does not satisfy dependents unless the approved map names a
-   verified replacement and supplied input.
+    verified replacement and supplied input.
+
+The final integrated review reuses item judgments when their patch, approved contract, and relevant
+baseline behavior are unchanged. It concentrates on parent coverage, integration-only differences,
+cross-item interaction, combined proof, documentation, and operational handoffs. Integration-only
+SHA changes do not invalidate equivalent evidence.
 
 If one candidate fails, omit it and real dependents. Independent accepted candidates may form a
 smaller verified wave. Preserve a failed candidate until diagnosis is recorded or cleanup is

@@ -20,16 +20,17 @@ review agent is used.
 
 ## Establish the review packet
 
-Require the approved Fast plan, change, or selected work item; an exact baseline-to-candidate range
-or authoritative integration SHA; repository guidance; and the affected production/configuration
-artifacts. Do not reconstruct a missing behavior contract from the diff.
+Require the approved Fast plan, change, or selected work item; repository guidance; affected
+production/configuration artifacts; and the review coordinator's candidate binding. Independent or
+reusable review uses an exact range/bundle; compact same-context review may use the captured current
+workspace snapshot. Do not reconstruct a missing behavior contract from the diff.
 
 State the independence level:
 
 - `independent`: a fresh context that did not implement the candidate, has no write task, and reviews
   the exact candidate;
 - `compact`: the delivery coordinator performs the lane for a bounded low-risk change; or
-- `not-established`: identity, range, or separation is insufficient.
+- `not-established`: candidate binding or separation is insufficient.
 
 Never claim independence merely because the report uses review language. A changed candidate makes
 the lane stale. Controlled public or persisted contracts, security, migration, concurrency, shared

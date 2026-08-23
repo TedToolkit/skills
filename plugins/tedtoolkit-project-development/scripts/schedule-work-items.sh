@@ -23,14 +23,16 @@ if [[ -f $map_file ]]; then
     rows=$(awk -F'|' '
         function trim(s) { gsub(/^[[:space:]]+|[[:space:]]+$/, "", s); return s }
         /^\|/ {
-            id=trim($2); prereqs=trim($5); status=trim($7)
+            id=trim($2); prereqs=trim($5)
+            if (trim($8) != "") status=trim($7); else status=trim($6)
             if (id == "ID" || id ~ /^-+$/ || id == "") next
             printf "%s\t%s\t%s\n", id, prereqs, status
         }
     ' "$map_file")
-elif grep -Fq '<!-- change-format: 2 -->' "$change_file" ||
-    { grep -Eq '^## .*Status' "$change_file" && grep -Eq '^## .*Acceptance specification' "$change_file"; }; then
+elif grep -Fq '<!-- change-format: 2 -->' "$change_file"; then
     # Transitional support for the former nine-column map embedded in change.md.
+    "$script_dir/validate-acceptance-specification.sh" --allow-approved-legacy "$change_file" >/dev/null
+    printf 'DEPRECATED: scheduling unchanged approved change-format 2; migrate before any edit or renewed approval\n' >&2
     legacy_embedded=1
     rows=$(awk -F'|' '
         function trim(s) { gsub(/^[[:space:]]+|[[:space:]]+$/, "", s); return s }
@@ -64,6 +66,7 @@ ready_count=0
 pending_count=0
 while IFS=$'\t' read -r id prerequisites status; do
     normalized=${status,,}
+    normalized=${normalized// /-}
     case "$normalized" in
         verified)
             printf '%s\tCOMPLETE\t%s\n' "$id" "$status"
@@ -92,8 +95,11 @@ while IFS=$'\t' read -r id prerequisites status; do
         dependency_status=$(status_of "$dependency")
         if [[ -z $dependency_status ]]; then
             blocked_by+=("$dependency (missing)")
-        elif [[ ${dependency_status,,} != verified ]]; then
-            if ! (( legacy_embedded == 1 )) || [[ ${dependency_status,,} != implemented ]]; then
+        else
+            dependency_normalized=${dependency_status,,}
+            dependency_normalized=${dependency_normalized// /-}
+            if [[ $dependency_normalized != verified ]] &&
+                { ! (( legacy_embedded == 1 )) || [[ $dependency_normalized != implemented ]]; }; then
                 blocked_by+=("$dependency ($dependency_status)")
             fi
         fi

@@ -4,7 +4,16 @@ set -euo pipefail
 # Validate stable markers and the minimum executable human handoff of one change.
 # Visible headings may be translated; machine values and proof-table columns are stable.
 
-change_file=${1:?usage: validate-acceptance-specification.sh <change.md>}
+allow_approved_legacy=0
+if [[ ${1:-} == --allow-approved-legacy ]]; then
+    allow_approved_legacy=1
+    shift
+fi
+[[ $# == 1 ]] || {
+    printf 'ERROR: usage: validate-acceptance-specification.sh [--allow-approved-legacy] <change.md>\n' >&2
+    exit 1
+}
+change_file=$1
 errors=0
 
 fail() { printf 'ERROR: %s\n' "$*" >&2; errors=1; }
@@ -50,7 +59,8 @@ require_section() {
 }
 
 legacy_approved() {
-    grep -Eq '^## .*Status' "$change_file" &&
+    grep -Fq '<!-- change-format: 2 -->' "$change_file" &&
+        grep -Eq '^## .*Status' "$change_file" &&
         grep -Eq '^## .*Change goal' "$change_file" &&
         grep -Eq '^## .*Acceptance specification' "$change_file" &&
         awk '
@@ -73,9 +83,14 @@ proof_row_complete() {
     awk -F'|' -v wanted="$contract_id" '
         function trim(s) { gsub(/^[[:space:]]+|[[:space:]]+$/, "", s); return s }
         /^\|/ {
-            contract=trim($2); role=tolower(trim($3)); assertion=trim($6); command=trim($7)
-            if (contract == wanted && role == "primary" && assertion != "" && command != "" &&
-                assertion !~ /^<.*>$/ && command !~ /^<.*>$/) found++
+            contract=trim($2); role=tolower(trim($3))
+            if (contract == wanted && role == "primary") {
+                # New compact rows have four content columns. Expanded format-3
+                # rows remain readable, but their purpose/shape prose is not authoritative.
+                if (NF >= 8) { assertion=trim($6); command=trim($7) }
+                else { assertion=trim($4); command=trim($5) }
+                if (assertion != "" && command != "" && assertion !~ /^<.*>$/ && command !~ /^<.*>$/) found++
+            }
         }
         END { exit(found == 1 ? 0 : 1) }
     ' <<<"$(section proof-plan)"
@@ -87,13 +102,13 @@ proof_row_complete() {
 }
 
 if ! grep -Fq '<!-- change-format: 3 -->' "$change_file"; then
-    # Historical records predate the format marker. Only an already-approved
-    # recognizable legacy contract may continue; a Draft must migrate to format 3.
-    if legacy_approved; then
-        printf 'OK: approved legacy change accepted: %s\n' "$change_file"
+    # Legacy completion is an explicit, temporary compatibility path. New or
+    # revised contracts must migrate to format 3 before validation.
+    if (( allow_approved_legacy == 1 )) && legacy_approved; then
+        printf 'DEPRECATED: approved format-2 change accepted only for unchanged completion: %s\n' "$change_file"
         exit 0
     fi
-    fail "$change_file: expected format 3 or a recognizable already-approved legacy change"
+    fail "$change_file: expected format 3; use --allow-approved-legacy only to complete an unchanged already-approved legacy contract"
     exit 1
 fi
 
@@ -175,7 +190,7 @@ while IFS= read -r contract_id; do
     [[ -n $contract_id ]] || continue
     primary_count=$(grep -Ec "<!--[[:space:]]*primary-proof:[[:space:]]*$contract_id[[:space:]]" <<<"$proof_markers" || true)
     (( primary_count == 1 )) ||
-        fail "$change_file: $contract_id must have exactly one stable primary-proof marker (found $primary_count)"
+        fail "$change_file: $contract_id must have exactly one canonical primary-proof marker (found $primary_count)"
     proof_row_complete "$contract_id" ||
         fail "$change_file: $contract_id needs exactly one Primary proof row with observable assertion and command/procedure"
 done <<<"$contract_ids"

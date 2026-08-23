@@ -22,9 +22,11 @@ framework mechanics that remain unreviewed.
 
 ## Establish the review packet
 
-Require the approved `AC-*`/`INV-*`/`STR-*`/`EXP-*` contract, exact baseline-to-candidate range or authoritative
-integration SHA, relevant production and test code, repository test conventions, proof definition,
-and any candidate-bound verification result. Do not execute commands or infer missing results.
+Require the approved `AC-*`/`INV-*`/`STR-*`/`EXP-*` contract, the review coordinator's candidate
+binding, relevant production and test code, repository test conventions, proof definition, and any
+candidate-bound verification result. Independent or reusable review uses an exact range/bundle;
+compact same-context review may use the captured current workspace snapshot. Do not execute commands
+or infer missing results.
 
 Use the same independence levels as `review-code`: `independent`, `compact`, or `not-established`.
 A changed candidate makes the lane stale. Material Controlled risks require a fresh independent

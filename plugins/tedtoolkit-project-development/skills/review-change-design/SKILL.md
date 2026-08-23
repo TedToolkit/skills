@@ -28,12 +28,14 @@ Do not use proposed implementation or tests as evidence that the future delivery
 
 State review independence as `independent`, `compact`, or `not-established` using the shared
 definitions. Controlled approval requires a fresh read-only reviewer that did not author the exact
-Draft and is bound to its digest. If that cannot be established, report a Blocking finding. A
-requested Standard quality check may be `compact`, but must not claim independence.
+Draft. Bind cross-context or asynchronous review with a commit or content digest; a synchronous
+read-only handoff may instead compare the complete Draft before and after review. If exact input or
+author separation cannot be established, report a Blocking finding. A requested Standard quality
+check may be `compact`, but must not claim independence.
 
-A legacy format-2 record that was already approved may complete under its existing contract. A
-format-2 Draft is not eligible for a new approval under the profile-aware workflow: route it to
-`design-change` for the smallest format-3 migration before declaring it ready.
+An explicit `change-format: 2` record that was already approved may complete unchanged only through
+the deprecated compatibility path. A Draft, renewed approval, or change to its scope, contract,
+proof, or map must migrate through `design-change` before review.
 
 ## Review profile and kind
 
@@ -88,9 +90,9 @@ live in separate control state or Git history.
 
 ## Review proof proportionately
 
-Every contract row needs exactly one credible primary proof with an explicit `primary-proof`
-marker, proof purpose, execution shape, observable assertion, and known command or bounded
-procedure. Acceptance is a purpose, not a
+Every contract row needs exactly one credible primary proof. Its `primary-proof` marker is the
+canonical purpose and execution-shape mapping; its concise human row supplies the observable
+assertion and known command or bounded procedure. Acceptance is a purpose, not a
 mandatory test project.
 
 Report a blocker when a named real boundary, migration, compatibility, security, or critical

@@ -80,9 +80,9 @@ the Temperature implementation and its existing test project; private parsing st
 
 <!-- primary-proof: AC-01 purpose=acceptance shape=unit -->
 <!-- primary-proof: AC-02 purpose=acceptance shape=unit -->
-| Contract | Role | Purpose | Shape | Observable assertion | Command |
-| --- | --- | --- | --- | --- | --- |
-| AC-01 | Primary | Acceptance | Unit | Valid input returns its Celsius value | Repository test command |
+| Contract | Role | Observable assertion | Command |
+| --- | --- | --- | --- |
+| AC-01 | Primary | Valid input returns its Celsius value | Repository test command |
 | AC-02 | Primary | Acceptance and regression | Unit | Invalid and impossible input returns false without throwing | Repository test command |
 
 <!-- section: completion-criteria -->

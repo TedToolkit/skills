@@ -45,9 +45,9 @@ Change normalization of in-range values only; preserve the public API and out-of
 ## Proof
 
 <!-- primary-proof: AC-01 purpose=acceptance shape=unit -->
-| Contract | Role | Evidence purpose | Execution shape | Observable assertion | Command |
-| --- | --- | --- | --- | --- | --- |
-| AC-01 | Primary | Acceptance | Unit | Preserve 12.25 Celsius | Repository test command |
+| Contract | Role | Observable assertion | Command |
+| --- | --- | --- | --- |
+| AC-01 | Primary | Preserve 12.25 Celsius | Repository test command |
 
 <!-- section: completion-criteria -->
 ## Completion
@@ -114,10 +114,10 @@ Two independently verifiable deliveries are necessary: the public parser and its
 
 <!-- primary-proof: AC-01 purpose=acceptance shape=unit -->
 <!-- primary-proof: AC-02 purpose=acceptance shape=component -->
-| Contract | Role | Evidence purpose | Execution shape | Observable assertion | Command |
-| --- | --- | --- | --- | --- | --- |
-| AC-01 | Primary | Acceptance | Unit | Parser examples satisfy public behavior | Repository test command |
-| AC-02 | Primary | Acceptance | Component | Ingestion examples reuse parser results | Repository test command |
+| Contract | Role | Observable assertion | Command |
+| --- | --- | --- | --- |
+| AC-01 | Primary | Parser examples satisfy public behavior | Repository test command |
+| AC-02 | Primary | Ingestion examples reuse parser results | Repository test command |
 
 <!-- section: completion-criteria -->
 ## Completion

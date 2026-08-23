@@ -8,6 +8,53 @@ git config user.name "Fixture"
 git config user.email "fixture@example.com"
 
 case "$scenario" in
+  compact-maintenance)
+    mkdir -p docs/changes/guide-link
+    cat > docs/changes/guide-link/change.md <<'EOF'
+# Repair the guide link
+<!-- change-format: 3 -->
+<!-- workflow-profile: standard -->
+<!-- change-kind: maintenance -->
+<!-- change-status: approved -->
+<!-- delivery-shape: single -->
+<!-- approval-source: Fixture owner -->
+<!-- section: goal-rationale -->
+## Goal
+Readers can follow the local setup link.
+<!-- section: scope -->
+## Scope
+Change one private documentation link; no product behavior changes.
+<!-- section: structural-contract -->
+## Structural outcome
+<!-- structural-outcome: STR-01 -->
+- STR-01: the guide points to `setup.md` and no stale `setpu.md` target remains.
+<!-- section: delivery-brief -->
+## Delivery
+Correct the one link in Guide.md.
+<!-- section: proof-plan -->
+## Proof
+<!-- primary-proof: STR-01 purpose=structural shape=manual -->
+| Contract | Role | Observable assertion | Command or bounded procedure |
+| --- | --- | --- | --- |
+| STR-01 | Primary | The valid link exists and the stale link is absent | `bash verify-docs.sh` |
+<!-- section: completion-criteria -->
+## Completion
+STR-01 passes and no unrelated file changes.
+EOF
+    cat > Guide.md <<'EOF'
+Read [setup](setpu.md).
+EOF
+    cat > setup.md <<'EOF'
+# Setup
+EOF
+    cat > verify-docs.sh <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+grep -Fq '[setup](setup.md)' Guide.md
+! grep -Fq 'setpu.md' Guide.md
+EOF
+    chmod +x verify-docs.sh
+    ;;
   independence-required)
     mkdir -p docs/changes/public-id
     cat > docs/changes/public-id/change.md <<'EOF'
@@ -453,6 +500,10 @@ esac
 rm -f setup_fixture.sh
 git add -A
 git commit -qm "fixture"
+
+if [[ "$scenario" == "compact-maintenance" ]]; then
+  printf '%s\n' 'Read [setup](setup.md).' > Guide.md
+fi
 
 if [[ "$scenario" == "ready-final-change" || "$scenario" == "ready-final-change-missing-extraction" ]]; then
   candidate="$(git rev-parse HEAD)"

@@ -14,7 +14,7 @@ write_change() {
     proof_markers=$(grep -Eo 'AC-[0-9]+' <<<"$contracts" | sort -u |
         sed 's/.*/<!-- primary-proof: & purpose=acceptance shape=unit -->/')
     proof_rows=$(grep -Eo 'AC-[0-9]+' <<<"$contracts" | sort -u |
-        sed 's/.*/| & | Primary | Acceptance | Unit | Approved outcome is observable | bash verify-all.sh |/')
+        sed 's/.*/| & | Primary | Approved outcome is observable | bash verify-all.sh |/')
     mkdir -p "$change_dir/work-items"
     cat > "$change_dir/change.md" <<EOF
 # $title
@@ -54,8 +54,8 @@ The approved outcome requires two or more independently verifiable deliveries.
 
 $proof_markers
 
-| Contract | Role | Purpose | Shape | Observable assertion | Command or procedure |
-| --- | --- | --- | --- | --- | --- |
+| Contract | Role | Observable assertion | Command or procedure |
+| --- | --- | --- | --- |
 $proof_rows
 
 <!-- section: completion-criteria -->
@@ -71,7 +71,7 @@ write_item() {
     proof_markers=$(grep -Eo 'AC-[0-9]+|INV-[0-9]+' <<<"$owned" | sort -u |
         sed 's/.*/<!-- primary-proof: & purpose=acceptance shape=unit -->/' || true)
     proof_rows=$(grep -Eo 'AC-[0-9]+|INV-[0-9]+|STR-[0-9]+' <<<"$owned" | sort -u |
-        sed "s/.*/| & | Primary | Acceptance | Unit | $outcome | bash verify-item.sh |/" || true)
+        sed "s/.*/| & | Primary | $outcome | bash verify-item.sh |/" || true)
     cat > "$change_dir/work-items/$id.md" <<EOF
 # $id: $title
 
@@ -106,8 +106,8 @@ Preserve adjacent public behavior.
 
 $proof_markers
 
-| Contract | Role | Purpose | Shape | Observable assertion | Command or procedure |
-| --- | --- | --- | --- | --- | --- |
+| Contract | Role | Observable assertion | Command or procedure |
+| --- | --- | --- | --- |
 $proof_rows
 
 <!-- work-item: definition-of-done -->
@@ -132,12 +132,12 @@ case "$scenario" in
 
 <!-- approval-source: Fixture owner -->
 
-| ID | Outcome | Contract ownership | Real prerequisites and supplied input | Primary proof | Status | Document |
-| --- | --- | --- | --- | --- | --- | --- |
-| FLOW-001 | Foundation | Owns AC-01 | None | Foundation assertion | Verified | `work-items/FLOW-001.md` |
-| FLOW-002 | Left consumer | Owns AC-02 | FLOW-001: verified foundation | Left assertion | Approved | `work-items/FLOW-002.md` |
-| FLOW-003 | Right consumer | Owns AC-03 | FLOW-001: verified foundation | Right assertion | Approved | `work-items/FLOW-003.md` |
-| FLOW-004 | Combined surface | Owns AC-04 | FLOW-002: verified left result; FLOW-003: verified right result | Combined assertion | Approved | `work-items/FLOW-004.md` |
+| ID | Outcome | Contract ownership | Real prerequisites and supplied input | Status | Document |
+| --- | --- | --- | --- | --- | --- |
+| FLOW-001 | Foundation | Owns AC-01 | None | Verified | `work-items/FLOW-001.md` |
+| FLOW-002 | Left consumer | Owns AC-02 | FLOW-001: verified foundation | Approved | `work-items/FLOW-002.md` |
+| FLOW-003 | Right consumer | Owns AC-03 | FLOW-001: verified foundation | Approved | `work-items/FLOW-003.md` |
+| FLOW-004 | Combined surface | Owns AC-04 | FLOW-002: verified left result; FLOW-003: verified right result | Approved | `work-items/FLOW-004.md` |
 EOF
     write_item "$change_dir" FLOW-001 Foundation Implemented None Foundation.cs "Owns AC-01" "Provide the verified foundation."
     write_item "$change_dir" FLOW-002 "Left consumer" Approved "FLOW-001: verified foundation" LeftConsumer.cs "Owns AC-02" "Consume the foundation on the left path."
@@ -153,10 +153,10 @@ EOF
 
 <!-- approval-source: Fixture owner -->
 
-| ID | Outcome | Contract ownership | Real prerequisites and supplied input | Primary proof | Status | Document |
-| --- | --- | --- | --- | --- | --- | --- |
-| REG-001 | Register alpha | Owns AC-01 | None | Alpha resolution | Approved | `work-items/REG-001.md` |
-| REG-002 | Register beta | Owns AC-02 | None | Beta resolution | Approved | `work-items/REG-002.md` |
+| ID | Outcome | Contract ownership | Real prerequisites and supplied input | Status | Document |
+| --- | --- | --- | --- | --- | --- |
+| REG-001 | Register alpha | Owns AC-01 | None | Approved | `work-items/REG-001.md` |
+| REG-002 | Register beta | Owns AC-02 | None | Approved | `work-items/REG-002.md` |
 EOF
     write_item "$change_dir" REG-001 "Register alpha" Approved None "SharedRegistry.cs and registration tests" "Owns AC-01" "Register the alpha service."
     write_item "$change_dir" REG-002 "Register beta" Approved None "SharedRegistry.cs and registration tests" "Owns AC-02" "Register the beta service."
@@ -175,10 +175,10 @@ EOF
 
 <!-- approval-source: Fixture owner -->
 
-| ID | Outcome | Contract ownership | Real prerequisites and supplied input | Primary proof | Status | Document |
-| --- | --- | --- | --- | --- | --- | --- |
-| LOOP-001 | First | Owns AC-01 | LOOP-002: second result | First assertion | Approved | `work-items/LOOP-001.md` |
-| LOOP-002 | Second | Owns AC-02 | LOOP-001: first result | Second assertion | Approved | `work-items/LOOP-002.md` |
+| ID | Outcome | Contract ownership | Real prerequisites and supplied input | Status | Document |
+| --- | --- | --- | --- | --- | --- |
+| LOOP-001 | First | Owns AC-01 | LOOP-002: second result | Approved | `work-items/LOOP-001.md` |
+| LOOP-002 | Second | Owns AC-02 | LOOP-001: first result | Approved | `work-items/LOOP-002.md` |
 EOF
     write_item "$change_dir" LOOP-001 First Approved "LOOP-002: second result" First.cs "Owns AC-01" "Produce the first result."
     write_item "$change_dir" LOOP-002 Second Approved "LOOP-001: first result" Second.cs "Owns AC-02" "Produce the second result."
@@ -192,11 +192,11 @@ EOF
 
 <!-- approval-source: Fixture owner -->
 
-| ID | Outcome | Contract ownership | Real prerequisites and supplied input | Primary proof | Status | Document |
-| --- | --- | --- | --- | --- | --- | --- |
-| PART-001 | Independent | Owns AC-01 | None | Independent assertion | Verified | `work-items/PART-001.md` |
-| PART-002 | Second | Owns AC-02 | PART-003: third result | Second assertion | Approved | `work-items/PART-002.md` |
-| PART-003 | Third | Owns AC-03 | PART-002: second result | Third assertion | Approved | `work-items/PART-003.md` |
+| ID | Outcome | Contract ownership | Real prerequisites and supplied input | Status | Document |
+| --- | --- | --- | --- | --- | --- |
+| PART-001 | Independent | Owns AC-01 | None | Verified | `work-items/PART-001.md` |
+| PART-002 | Second | Owns AC-02 | PART-003: third result | Approved | `work-items/PART-002.md` |
+| PART-003 | Third | Owns AC-03 | PART-002: second result | Approved | `work-items/PART-003.md` |
 EOF
     write_item "$change_dir" PART-001 Independent Verified None Independent.cs "Owns AC-01" "Produce the independent result."
     write_item "$change_dir" PART-002 Second Approved "PART-003: third result" Second.cs "Owns AC-02" "Produce the second result."
@@ -211,10 +211,10 @@ EOF
 
 <!-- approval-source: Fixture owner -->
 
-| ID | Outcome | Contract ownership | Real prerequisites and supplied input | Primary proof | Status | Document |
-| --- | --- | --- | --- | --- | --- | --- |
-| CHAIN-001 | Expose alpha | Owns AC-01 | None | `bash verify-registry.sh` | Approved | `work-items/CHAIN-001.md` |
-| CHAIN-002 | Consume alpha | Owns AC-02 | CHAIN-001: verified alpha registry | `bash verify-consumer.sh` | Approved | `work-items/CHAIN-002.md` |
+| ID | Outcome | Contract ownership | Real prerequisites and supplied input | Status | Document |
+| --- | --- | --- | --- | --- | --- |
+| CHAIN-001 | Expose alpha | Owns AC-01 | None | Approved | `work-items/CHAIN-001.md` |
+| CHAIN-002 | Consume alpha | Owns AC-02 | CHAIN-001: verified alpha registry | Approved | `work-items/CHAIN-002.md` |
 EOF
     write_item "$change_dir" CHAIN-001 "Expose alpha" Approved None Registry.cs "Owns AC-01" "Set Registry.Alpha to the exact value ready. Prove with bash verify-registry.sh."
     write_item "$change_dir" CHAIN-002 "Consume alpha" Approved "CHAIN-001: verified alpha registry" Consumer.cs "Owns AC-02" "Return Registry.Alpha from Consumer.Read. Prove with bash verify-consumer.sh."
@@ -262,10 +262,10 @@ EOF
 
 <!-- approval-source: Fixture owner -->
 
-| ID | Outcome | Contract ownership | Real prerequisites and supplied input | Primary proof | Status | Document |
-| --- | --- | --- | --- | --- | --- | --- |
-| FLAG-001 | Enable alpha | Owns AC-01 | None | `bash verify-alpha.sh` | Approved | `work-items/FLAG-001.md` |
-| FLAG-002 | Enable beta | Owns AC-02 | None | `bash verify-beta.sh` | Approved | `work-items/FLAG-002.md` |
+| ID | Outcome | Contract ownership | Real prerequisites and supplied input | Status | Document |
+| --- | --- | --- | --- | --- | --- |
+| FLAG-001 | Enable alpha | Owns AC-01 | None | Approved | `work-items/FLAG-001.md` |
+| FLAG-002 | Enable beta | Owns AC-02 | None | Approved | `work-items/FLAG-002.md` |
 EOF
     write_item "$change_dir" FLAG-001 "Enable alpha" Approved None Alpha.cs "Owns AC-01" "Enable alpha; prove with bash verify-alpha.sh."
     write_item "$change_dir" FLAG-002 "Enable beta" Approved None Beta.cs "Owns AC-02" "Enable beta; prove with bash verify-beta.sh."

@@ -129,6 +129,7 @@ constraint it consumes instead of making a human reopen every upstream document.
 | Change design | One approved goal, behavior, invariant, or experiment contract, scope, constraints, proof, and completion boundary. | An agent transcript, exhaustive file list, or task sequence. |
 | Embedded delivery brief | The one Standard or single-delivery Controlled implementation boundary inside `change.md`. | A hidden second work item or multi-delivery map. |
 | Work item | One independently verifiable delivery inside one Controlled change, with a bounded outcome, real prerequisites, constraints, primary proof, and done criteria. | Research, approval, external operation, or private implementation script. |
+| Delivery owner | The user-facing implementation coordinator for one delivery, or integration coordinator for a multi-item change; the only role that updates lifecycle/status. | The review coordinator or a specialist reviewer. |
 | Proof definition | The contract-bound test, command, assertion, or bounded procedure expected to demonstrate one approved behavior, invariant, experiment claim, or risk. | A claim that it already ran or passed. |
 | Proof role | `Primary` directly demonstrates one approved contract row; `Conditional` addresses an additional applicable risk. | A proof purpose or execution shape. |
 | Proof purpose | Acceptance, regression, boundary, structural, journey, or decision evidence: why the evidence exists. | Primary versus conditional role. |
@@ -177,7 +178,7 @@ blob, or digest proves that a human approved a change.
    items. Missing required independence is Blocking.
 9. The user-facing delivery owner advances lifecycle state. A single delivery uses
    `Draft → Approved → In progress → Implemented → Completed`. A multi-item map uses
-   `Draft → Approved → Implementing → Implemented → Verified`; only `Verified` supplies a
+   `Draft → Approved → In progress → Implemented → Verified`; only `Verified` supplies a
    prerequisite to another item.
    `Implemented` means an exact candidate has candidate-bound verification plus the required review,
    but has not yet passed authoritative integration verification. Any candidate, approved-contract,
@@ -186,6 +187,13 @@ blob, or digest proves that a human approved a change.
 10. A change becomes `Completed` only after the applicable final review is ready, proof and required
    operational handoffs pass, durable documentation disposition is complete, and the delivery owner
     records the transition.
+
+Legacy `change-format: 2` is a deprecated read/execute-only compatibility path. It accepts only an
+explicitly versioned, already-approved record whose scope, contract, proof, and embedded map remain
+unchanged. Drafts, renewed approval, or material edits migrate to format 3. Validators and schedulers
+must enter compatibility explicitly and emit a deprecation notice; unversioned Markdown never enters
+it heuristically. Remove the path in the next declared breaking plugin release after maintained
+repositories have no active format-2 changes.
 
 A Fast plan is recoverable only in the user-facing context that presented and received approval for
 its exact text. If that context or exact plan identity is unavailable, re-present the smallest plan

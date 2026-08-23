@@ -57,18 +57,18 @@ flowchart LR
   D -. "new independent outcome" .-> SC
 ```
 
-Agent scheduling stays flat: one coordinator retains user dialogue, integration authority, and the
-aggregate review conclusion. For material Controlled or shared-boundary risk,
-`review-implementation` may dispatch fresh read-only `review-code` and `review-tests` SubAgents plus
-a separate `verify-implementation` executor; they receive exact raw artifacts without implementer or
-sibling conclusions. Bounded low-risk work uses a compact coordinator review instead of manufacturing
-multiple agents.
+Agent scheduling stays flat. The delivery owner retains user dialogue, integration authority, and
+status; `review-implementation` owns the aggregate review conclusion. For material Controlled or
+shared-boundary risk, at least one fresh read-only reviewer covers code and test judgments against an
+exact candidate; split reviewers or verification executors only when expertise, context, permissions,
+or environment justify it. Bounded low-risk work uses one synchronous compact review over the current
+workspace snapshot without requiring a commit or digest.
 `work-items.md` is the single mutable delivery-status source.
 
 Change and work-item records are concise current-truth handoffs for human developers. Process logs,
 leases, receipts, and other orchestration state live in separate control artifacts. Tests are
 selected by proof purpose and execution shape; test source defines how behavior can be proved,
-candidate-bound verification records what actually ran, and review traceability connects the two.
+revision-bound or immediate compact verification records what actually ran, and review traceability connects the two.
 Small repositories normally keep one coherent test project and split only for real environment,
 lifecycle, cadence, isolation, or ownership boundaries.
 

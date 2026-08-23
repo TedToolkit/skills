@@ -18,13 +18,14 @@ candidate before running anything.
 
 ## Bind the candidate
 
-Prefer a full candidate commit SHA for final independent verification. When a candidate commit was
-not authorized, bind the run to `HEAD` plus a cryptographic digest of the complete tracked diff and
-every in-scope untracked blob. This bundle can support independent verification only when it is
-frozen before dispatch, supplied identically to every lane, and rechecked after execution. Declare
-ordinary build/test output paths outside that candidate-input manifest. Do not
-invent a second revision counter. Record the initial identity and stop stale if any reviewed source,
-test, configuration, generated input, or dependency declaration changes before the run completes.
+For independent, cross-context, asynchronous, reusable, or CI verification, prefer a full candidate
+commit SHA. When a candidate commit was not authorized, bind the run to `HEAD` plus a cryptographic
+digest of the complete tracked diff and every in-scope untracked blob; freeze and recheck that bundle.
+For synchronous compact review in the same workspace, the review coordinator may instead supply its
+complete raw working-tree snapshot. Recompare it after execution; this result must be synthesized
+immediately and cannot be reused across contexts. Declare ordinary build/test output paths outside
+the candidate input. Do not invent a second revision counter. Stop stale if any reviewed source,
+test, configuration, generated input, or dependency declaration changes before completion.
 
 Verification may create ordinary build/test output, but must not edit source, tests, configuration,
 contracts, status records, Git history, external systems, or production state. A manual or external

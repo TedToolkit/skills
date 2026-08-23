@@ -40,8 +40,9 @@ Confirm:
 
 For a format-3 multi-item change, run
 `bash "${CLAUDE_PLUGIN_ROOT}"/scripts/validate-work-items.sh <parent-change-directory>` and require
-completed integrated prerequisites. For an already approved legacy format-2 embedded map, preserve
-the approved contract and use `schedule-work-items.sh` without manufacturing a new format-3 map.
+completed integrated prerequisites. For an explicit, already-approved `change-format: 2` embedded
+map, select the deprecated compatibility path and preserve the contract unchanged. Any scope,
+contract, proof, map, or renewed-approval change must migrate to format 3.
 For Standard or a single-delivery Controlled change, validate its supported format and use its
 embedded delivery brief directly.
 
@@ -57,7 +58,7 @@ informative: continue without another approval unless it reveals a workflow esca
 
 ### Behavior change
 
-1. Establish the primary-proof Red for one observable result.
+1. Establish the primary proof Red for one observable result.
 2. Use the smallest useful Unit, Component, Contract, or Integration inner Red when it helps localize
    deterministic behavior or a real boundary.
 3. Make the smallest production change that turns it Green.

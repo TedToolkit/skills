@@ -106,9 +106,12 @@ New profile-aware change records use stable, language-independent markers:
 ```
 
 Visible headings and prose may use the repository language. Deterministic scripts parse markers,
-not translated headings. Legacy format-2 change records may complete under their approved
-contracts; revise a material change contract into format 3. Work-item format 2 remains the current
-item schema and is not a legacy change format.
+not translated headings. Legacy `change-format: 2` records are deprecated, read/execute-only
+compatibility inputs. Only an already-approved record may complete unchanged, and callers must
+select that path explicitly. Any Draft, renewed approval, or change to scope, contract, proof, or
+work-item mapping must migrate to format 3. Remove compatibility in the next declared breaking
+plugin release after maintained repositories report no active format-2 changes. Work-item format 2
+remains the current item schema and is not a legacy change format.
 
 ### Behavior-changing contracts
 
@@ -181,17 +184,17 @@ Every Standard change and Controlled delivery maps its contract to evidence:
 ```md
 <!-- section: proof-plan -->
 <!-- primary-proof: AC-01 purpose=acceptance shape=unit -->
-| Contract | Role | Proof purpose | Execution shape | Observable assertion | Command or bounded procedure |
-| --- | --- | --- | --- | --- | --- |
-| AC-01 | Primary | Acceptance and regression | Unit through public API | Valid input returns the expected value | Repository test command |
+| Contract | Role | Observable assertion | Command or bounded procedure |
+| --- | --- | --- | --- |
+| AC-01 | Primary | Valid input returns the expected value | Repository test command |
 ```
 
-Use one stable `primary-proof` marker for each contract row so deterministic validation does not
-depend on translated headings or table labels. Normalize marker values to lowercase identifiers.
-Marker purposes are `acceptance`, `regression`, `boundary`, `structural`, `journey`, or `decision`;
-execution shapes are `unit`, `component`, `contract`, `integration`, `end-to-end`, `benchmark`, or
-`manual`. Keep `Primary` as the stable proof-row Role value and provide an observable assertion plus
-an actual command or bounded procedure.
+Use one stable `primary-proof` marker for each contract row. It is the sole machine-readable source
+for contract, purpose, and execution shape, so validation does not depend on translated headings or
+duplicate table prose. Normalize marker values to lowercase identifiers. Purposes are `acceptance`,
+`regression`, `boundary`, `structural`, `journey`, or `decision`; execution shapes are `unit`,
+`component`, `contract`, `integration`, `end-to-end`, `benchmark`, or `manual`. The concise human
+row owns only Role, observable assertion, and actual command or bounded procedure.
 Conditional rows need no marker unless another automation contract explicitly defines one.
 
 The execution shape is chosen for reliability, not status. Do not require Integration when no real

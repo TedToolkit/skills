@@ -27,8 +27,9 @@ plausible saved time or independent-review value exist. In a shared-worktree fal
 writers while preserving the same authoritative integration and status path.
 
 For format 3, run `bash "${CLAUDE_PLUGIN_ROOT}"/scripts/validate-work-items.sh
-<parent-change-directory>`. For an already approved legacy format-2 embedded map, preserve its
-contract and use the scheduler's compatibility path rather than manufacturing `work-items.md`.
+<parent-change-directory>`. For an explicit, already-approved `change-format: 2` embedded map,
+select the deprecated scheduler compatibility path and preserve its contract unchanged. Any scope,
+contract, proof, map, or renewed-approval change must migrate to format 3.
 Then run `bash "${CLAUDE_PLUGIN_ROOT}"/scripts/schedule-work-items.sh <parent-change-directory>`.
 Establish
 one clean authoritative integration branch and full SHA. Preserve a dirty baseline and stop rather
@@ -83,6 +84,13 @@ worker blocks only itself and real dependents.
    change-level regression. Do not blindly rerun unchanged item proof that remains valid.
 7. Fast-forward the authoritative integration ref only after the combined result passes, then mark
    included items `Verified`. Only this state unlocks dependents.
+
+Preserve still-valid item-level code/test conclusions as inputs to the final integrated review when
+the item patch, approved contract, and relevant baseline behavior have not changed. Focus the final
+review on parent-contract coverage, integration-only diff, cross-item/shared-boundary interaction,
+combined verification, documentation, and operational handoffs. A different commit SHA caused only
+by integration does not invalidate equivalent evidence; a changed patch or relevant baseline
+semantics invalidates only the affected judgments.
 
 ## Route discoveries
 
