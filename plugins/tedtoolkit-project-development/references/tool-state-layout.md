@@ -26,8 +26,8 @@ and never substitutes a global ignore file or `.git/info/exclude`. Do not ignore
 `.tedtoolkit/`; tracked preparation records and future approved configuration must remain possible.
 
 Provision only an area an authorized workflow actually needs. Creating or updating a named tracked
-preparation authorizes its namespace setup. An approved multi-item implementation authorizes its
-worker-worktree setup. `runs/` remains optional: create it only when the user requested persistent
+preparation authorizes its namespace setup. An explicit continuation of an approved multi-item
+implementation authorizes its worker-worktree setup. `runs/` remains optional: create it only when the user requested persistent
 orchestration or approved local control-state persistence. Ordinary same-context handoffs stay in
 the conversation and create no run directory.
 

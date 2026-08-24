@@ -19,7 +19,7 @@ Both marketplace manifests must declare the same plugins: `.codex-plugin/marketp
 - `plugins/<plugin>/hooks/hooks.json` + scripts — plugin-level hooks
 - `tests/` — custom Python eval harness (see Testing)
 
-The marketplace exposes five plugins: `tedtoolkit-shared`, `tedtoolkit-annotations`, `tedtoolkit-roslynhelper`, `tedtoolkit-project-development`, and `tedtoolkit-resume`. `tedtoolkit-shared` contains reusable Git and .NET skills including `fix-csharp-diagnostics`, `generate-commit-message`, `merge-default-branch`, `run-fix`, and `tunit-testing`; `tunit-unit-testing` is a deprecated explicit compatibility alias. Project-development uses `design-change`, `implement-change`, and `orchestrate-work-items`; `change-design` and `implement-change-tdd` are deprecated explicit aliases. `tedtoolkit-resume` contains factual resume creation, revision, review, job-matching, and interview-question workflows.
+The marketplace exposes five plugins: `tedtoolkit-shared`, `tedtoolkit-annotations`, `tedtoolkit-roslynhelper`, `tedtoolkit-project-development`, and `tedtoolkit-resume`. `tedtoolkit-shared` contains reusable Git and .NET skills including `fix-csharp-diagnostics`, `generate-commit-message`, `merge-default-branch`, `run-fix`, and `tunit-testing`; `tunit-unit-testing` is a deprecated explicit compatibility alias. Project-development uses `design-change`, `continue-change`, `implement-change`, and `orchestrate-work-items`; `change-design` and `implement-change-tdd` are deprecated explicit aliases. `tedtoolkit-resume` contains factual resume creation, revision, review, job-matching, and interview-question workflows.
 
 ## SKILL.md conventions
 

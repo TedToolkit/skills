@@ -314,6 +314,11 @@ EOF
 
 "$scripts/validate-acceptance-specification.sh" "$fixture/refactor.md"
 
+cp "$fixture/refactor.md" "$fixture/refactor-candidate-ready.md"
+sed -i 's/change-status: approved/change-status: candidate-ready/' "$fixture/refactor-candidate-ready.md"
+sed -i '/<!-- approval-source:/a <!-- candidate-binding: commit:0123456789abcdef0123456789abcdef01234567 -->' "$fixture/refactor-candidate-ready.md"
+"$scripts/validate-acceptance-specification.sh" "$fixture/refactor-candidate-ready.md"
+
 grep -v '<!-- approval-source:' "$fixture/refactor.md" > "$fixture/refactor-without-approval.md"
 if "$scripts/validate-acceptance-specification.sh" "$fixture/refactor-without-approval.md" >/dev/null 2>&1; then
     echo "approved change without a pinned approval source was incorrectly accepted" >&2
@@ -783,6 +788,60 @@ fi
 sed '/change-format: 2/d; s/^Draft$/Approved/' "$fixture/legacy-approved.md" > "$fixture/unversioned-legacy.md"
 if "$scripts/validate-acceptance-specification.sh" --allow-approved-legacy "$fixture/unversioned-legacy.md" >/dev/null 2>&1; then
     echo "unversioned Markdown was incorrectly recognized as a legacy contract" >&2
+    exit 1
+fi
+
+route_dir="$fixture/continue-change"
+mkdir -p "$route_dir"
+write_route_change() {
+    local status=$1
+    local shape=$2
+    local approval=$3
+    cat > "$route_dir/change.md" <<EOF
+# Route fixture
+<!-- change-format: 3 -->
+<!-- workflow-profile: $([[ $shape == multi-item ]] && printf controlled || printf standard) -->
+<!-- change-kind: maintenance -->
+<!-- change-status: $status -->
+<!-- delivery-shape: $shape -->
+<!-- approval-source: $approval -->
+<!-- candidate-binding: $([[ $status == candidate-ready || $status == implemented ]] && printf 'commit:0123456789abcdef0123456789abcdef01234567' || printf none) -->
+EOF
+    rm -f "$route_dir/work-items.md"
+}
+assert_next_action() {
+    local expected=$1
+    local output
+    output=$("$scripts/resolve-change-step.sh" "$route_dir/change.md")
+    grep -Fxq "next-action=$expected" <<<"$output"
+}
+
+write_route_change draft single none
+assert_next_action request-change-approval
+write_route_change approved single "Workflow fixture"
+assert_next_action implement-change
+write_route_change in-progress single "Workflow fixture"
+assert_next_action implement-change
+write_route_change candidate-ready single "Workflow fixture"
+assert_next_action review-implementation
+write_route_change implemented single "Workflow fixture"
+assert_next_action complete-change
+write_route_change completed single "Workflow fixture"
+assert_next_action none
+
+write_route_change approved multi-item "Workflow fixture"
+assert_next_action plan-work-items
+cat > "$route_dir/work-items.md" <<'EOF'
+<!-- delivery-map -->
+<!-- approval-source: none -->
+EOF
+assert_next_action request-work-item-map-approval
+sed -i 's/approval-source: none/approval-source: Workflow fixture/' "$route_dir/work-items.md"
+assert_next_action orchestrate-work-items
+
+write_route_change draft single "Workflow fixture"
+if "$scripts/resolve-change-step.sh" "$route_dir/change.md" >/dev/null 2>&1; then
+    echo "Draft with an approval source incorrectly received a next action" >&2
     exit 1
 fi
 

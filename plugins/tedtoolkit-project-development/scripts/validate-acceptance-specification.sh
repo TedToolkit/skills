@@ -247,7 +247,7 @@ repository_relative_path() {
 }
 
 active_status() {
-    case "$1" in approved|in-progress|implemented|completed|superseded) return 0 ;; *) return 1 ;; esac
+    case "$1" in approved|in-progress|candidate-ready|implemented|completed|superseded) return 0 ;; *) return 1 ;; esac
 }
 
 legacy_prerequisite_eligible_file() {
@@ -531,6 +531,9 @@ kind=$(marker_value change-kind)
 status=$(marker_value change-status)
 delivery_shape=$(marker_value delivery-shape)
 approval_source=$(marker_value approval-source)
+candidate_bindings=$(marker_values candidate-binding)
+candidate_binding_count=$(sed '/^[[:space:]]*$/d' <<<"$candidate_bindings" | wc -l | tr -d ' ')
+candidate_binding=$(sed -n '1p' <<<"$candidate_bindings")
 
 case "$profile" in standard|controlled) ;; *) fail "$change_file: workflow-profile must be standard or controlled" ;; esac
 case "$kind" in
@@ -538,7 +541,7 @@ case "$kind" in
     *) fail "$change_file: unsupported or missing change-kind" ;;
 esac
 case "$status" in
-    draft|approved|in-progress|implemented|completed|superseded) ;;
+    draft|approved|in-progress|candidate-ready|implemented|completed|superseded) ;;
     *) fail "$change_file: unsupported or missing change-status" ;;
 esac
 case "$delivery_shape" in single|multi-item) ;; *) fail "$change_file: delivery-shape must be single or multi-item" ;; esac
@@ -611,6 +614,18 @@ done <<<"$contract_ids"
 
 if grep -Eqi '^##[[:space:]]+(clarification log|decision ledger|agent log|澄清日志|决策日志|代理日志)' "$change_file"; then
     fail "$change_file: agent/process logs belong outside the human change record"
+fi
+
+(( candidate_binding_count <= 1 )) || fail "$change_file: expected at most one 'candidate-binding' marker"
+if [[ $status == candidate-ready ]]; then
+    (( candidate_binding_count == 1 )) || fail "$change_file: candidate-ready requires a candidate-binding marker"
+    [[ $candidate_binding =~ ^commit:([0-9a-f]{40}|[0-9a-f]{64})$ ||
+       $candidate_binding =~ ^workspace:([0-9a-f]{40}|[0-9a-f]{64}):sha256:[0-9a-f]{64}$ ]] ||
+        fail "$change_file: candidate-ready requires a full commit or frozen workspace binding"
+elif (( candidate_binding_count == 1 )) && [[ $candidate_binding != none ]]; then
+    [[ $candidate_binding =~ ^commit:([0-9a-f]{40}|[0-9a-f]{64})$ ||
+       $candidate_binding =~ ^workspace:([0-9a-f]{40}|[0-9a-f]{64}):sha256:[0-9a-f]{64}$ ]] ||
+        fail "$change_file: candidate-binding must identify a full commit or frozen workspace digest"
 fi
 
 validate_structural_prerequisites "$change_file"

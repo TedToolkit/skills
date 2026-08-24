@@ -3,6 +3,22 @@ config:
   max_parallel_runs: 1
 
 scenarios:
+  - name: "Redirect a mistaken planning request for one approved delivery"
+    prompt: "Use $plan-work-items on docs/changes/temperature-clamp/change.md because I assume planning work items is next. Inspect the approved record and route the actual next phase. Do not modify files."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh standard-single"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "command", run: "git status --porcelain", stdout_empty: true }
+      - { type: "command", run: "test ! -e docs/changes/temperature-clamp/work-items.md" }
+      - { type: "output_contains", value: "implement-change" }
+    rubric:
+      - "Corrects the user's mistaken internal route from persisted profile and delivery shape instead of asking whether the work is simple or complex."
+      - "Reports direct implementation as the one next phase and creates no one-row map."
+    timeout: 300
+
   - name: "Profile routing keeps a single Standard delivery inline"
     prompt: "Inspect the approved Standard change at docs/changes/temperature-clamp/change.md and decide whether to create work items. Do not modify production code or tests."
     setup:

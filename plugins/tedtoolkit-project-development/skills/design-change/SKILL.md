@@ -65,7 +65,7 @@ Evidence: <why this is the lightest safe route>
 Delivery shape: single | multi-item
 Artifacts: <none, one change.md, or change.md plus a separately approved work-item map>
 Primary proof: <role=primary, purpose, execution shape, observable assertion, known command>
-Approval gate: <what the next approval authorizes>
+Approval gate: <what contract approval records; state that continuation is separate unless combined>
 Escalation triggers: <facts that would expand the contract or risk>
 ```
 
@@ -76,8 +76,10 @@ An experiment is always `single`; split independent evidence questions into sepa
 
 ## 4. Write the human contract
 
-For Fast, present one concise pre-write plan and create no `docs/changes/` record by default. For
-Standard or Controlled, write `docs/changes/<stable-slug>/change.md` from
+For Fast, present one concise pre-write plan and create no `docs/changes/` record by default. Use
+Standard when the user requires an @-addressable record or cross-conversation recovery, even if the
+implementation is otherwise small. For Standard or Controlled, write
+`docs/changes/<stable-slug>/change.md` from
 [change-contract-template.md](assets/change-contract-template.md) only when the user explicitly requests
 the Draft or approves creating it. Remove inapplicable sections and make it pass the workflow
 reference's five-minute handoff test.
@@ -108,11 +110,16 @@ Resolve blocking findings before presenting approval.
 Before modifying a delivery artifact, present the complete contract, proof, risks, escalation
 triggers, and exact authorization boundary. Wait for explicit approval. Record the explicit human
 approval source and update status; a Git SHA or digest may bind technical inputs but never proves
-human authorization. A Fast approval binds the exact plan stated in the approval context.
+human authorization. Approval accepts the contract only and stops unless the same user request
+explicitly says to approve and continue. A Fast approval binds the exact plan stated in the
+approval context and remains resumable only there.
 
-An approved Fast, Standard, or single-delivery Controlled change may enter `implement-change`. An
-approved multi-item Controlled change enters `plan-work-items`; its
-design approval authorizes planning only until the map receives separate approval.
+After approval, report one derived next action and ask the user to say `continue` rather than asking
+them to choose a skill. An explicit continuation routes an approved Fast, Standard, or
+single-delivery Controlled change to `implement-change`, and an approved multi-item Controlled
+change to `plan-work-items`. Use `continue-change` when a persisted record is referenced or the
+conversation may differ from the one that created it. Planning produces a Draft map that receives
+separate approval and continuation.
 
 Seek renewed approval only for a workflow escalation trigger. Private implementation choices inside
 the approved boundary do not require another design round.

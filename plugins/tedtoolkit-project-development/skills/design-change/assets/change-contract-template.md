@@ -3,11 +3,12 @@
 <!-- change-format: 3 -->
 <!-- workflow-profile: standard | controlled -->
 <!-- change-kind: behavior-change | bug-fix | behavior-preserving-refactor | maintenance | migration | experiment -->
-<!-- change-status: draft | approved | in-progress | implemented | completed | superseded -->
+<!-- change-status: draft | approved | in-progress | candidate-ready | implemented | completed | superseded -->
 <!-- delivery-shape: single | multi-item -->
 
 - Priority: Unknown | P0 | P1 | P2 | P3
 <!-- approval-source: none -->
+<!-- candidate-binding: none -->
 
 <!-- section: goal-rationale -->
 ## Goal and rationale

@@ -14,7 +14,9 @@ Implement one approved delivery boundary and preserve its contract. Read
 authorization, and escalation rules. Read [testing-strategy.md](../../references/testing-strategy.md)
 for proof purpose, execution shape, and change-kind loops.
 
-This skill owns private implementation choices and concrete verification for:
+Require both an approved boundary and an explicit current request to implement or continue.
+Approval alone does not start target writes. This skill owns private implementation choices and
+concrete verification for:
 
 - an explicitly approved Fast plan;
 - one approved Standard `change.md` with an embedded delivery brief;
@@ -201,9 +203,12 @@ tool state layout; do not make the worker or reviewer a second status owner.
 
 Stop for renewed approval only on a workflow escalation trigger. For a single delivery, set the
 change to `in-progress` when target work starts. After primary and conditional proof pass, the diff
-stays inside the approved boundary, and temporary/debug artifacts are absent, return the exact
-candidate to `review-implementation`; do not mark it `implemented` yet. The user-facing delivery
-owner sets `implemented` only after candidate-bound verification and required review pass, then sets
-`completed` after operational handoffs and durable documentation disposition close on that exact
-revision. Under parallel execution, return the candidate for review and verified integration; do
-not update the parent status independently.
+stays inside the approved boundary, temporary/debug artifacts are absent, and the exact candidate
+identity is captured, set the change to `candidate-ready` and stop. Record the committed SHA or
+frozen workspace binding used by review as `commit:<full-sha>` or
+`workspace:<full-head-sha>:sha256:<complete-bundle-digest>` in the `candidate-binding` marker. Then report that an
+explicit continuation will enter `review-implementation`; do not mark it `implemented` yet. The user-facing
+delivery owner sets `implemented` only after candidate-bound verification and required review pass,
+then sets `completed` only on a later explicit continuation after operational handoffs and durable
+documentation disposition close on that exact revision. Under parallel execution, return the
+candidate for review and verified integration; do not update the parent status independently.

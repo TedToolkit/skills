@@ -107,7 +107,7 @@ scenarios:
         value: "<!-- change-status: draft -->"
       - type: "file_contains"
         path: "docs/changes/*/change.md"
-        value: "<!-- delivery-shape: multi-item -->"
+        value: "<!-- delivery-shape: single -->"
       - type: "file_contains"
         path: "docs/changes/*/change.md"
         value: "<!-- approval-source: none -->"

@@ -1,0 +1,58 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Continue on a Draft requests approval without mutating delivery"
+    prompt: "Use $continue-change for @docs/changes/comment-cleanup/change.md. 继续下一步. Do not infer any approval I did not state."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh draft"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_contains", path: "docs/changes/comment-cleanup/change.md", value: "<!-- change-status: draft -->" }
+      - { type: "file_contains", path: "docs/changes/comment-cleanup/change.md", value: "<!-- approval-source: none -->" }
+      - { type: "file_contains", path: "Temperature.cs", value: "Represnts" }
+      - { type: "command", run: "test ! -e docs/changes/comment-cleanup/work-items.md" }
+      - { type: "output_contains", value: "批准" }
+    rubric:
+      - "Reconstructs the change from the referenced artifact and recognizes that continue is not approval for a Draft."
+      - "Presents one approval gate and does not plan work items, implement the cleanup, or ask the user to choose a skill."
+    timeout: 300
+
+  - name: "Approval records the contract and stops before implementation"
+    prompt: "Use $continue-change for @docs/changes/comment-cleanup/change.md. I explicitly approve this change. Record that approval, but I am not asking you to continue yet."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh draft"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_contains", path: "docs/changes/comment-cleanup/change.md", value: "<!-- change-status: approved -->" }
+      - { type: "file_not_contains", path: "docs/changes/comment-cleanup/change.md", value: "<!-- approval-source: none -->" }
+      - { type: "file_contains", path: "Temperature.cs", value: "Represnts" }
+      - { type: "output_contains", value: "继续" }
+    rubric:
+      - "Persists explicit human approval in the referenced change and stops."
+      - "Reports direct implementation as the single derived next phase but does not execute it without a continuation request."
+    timeout: 300
+
+  - name: "Cross-conversation continuation implements one approved single delivery"
+    prompt: "Use $continue-change for @docs/changes/comment-cleanup/change.md. This is a new conversation with no prior transcript. 继续下一步."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh approved"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_not_contains", path: "Temperature.cs", value: "Represnts" }
+      - { type: "file_contains", path: "Temperature.cs", value: "Represents" }
+      - { type: "file_contains", path: "docs/changes/comment-cleanup/change.md", value: "<!-- change-status: candidate-ready -->" }
+      - { type: "file_not_contains", path: "docs/changes/comment-cleanup/change.md", value: "<!-- candidate-binding: none -->" }
+      - { type: "command", run: "test ! -e docs/changes/comment-cleanup/work-items.md" }
+      - { type: "output_contains", value: "review" }
+    rubric:
+      - "Uses only the referenced persisted change and repository evidence, routes the approved single delivery directly to implement-change, and does not manufacture work items."
+      - "Completes the structural proof, records candidate-ready rather than implemented, and stops before review until another explicit continuation."
+    timeout: 420

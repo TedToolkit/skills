@@ -63,9 +63,9 @@ conditions are evidenced; uncertainty about a material risk moves upward, never 
 
 | Profile | Use when | Main artifact | Required gate |
 | --- | --- | --- | --- |
-| Fast | One local, reversible outcome; no public contract, persistence, security, migration, architecture, or external-operation risk; verification is known. | No `docs/changes/` record by default. | One concise pre-write plan and explicit approval. |
-| Standard | One goal and one independently implementable, bounded, reversible delivery of any change kind; no Controlled trigger. | One concise `change.md` with an embedded delivery brief. | One approval authorizes that contract and its bounded implementation. |
-| Controlled | Public API/protocol/data-format compatibility, security/compliance, migration/rollback, difficult reversal, cross-cutting delivery, material architecture, or two or more necessary delivery boundaries. | Full `change.md`; work items only when more than one delivery is required. | Independent design review; separate plan approval only for a multi-item map. |
+| Fast | One local, reversible outcome; no public contract, persistence, security, migration, architecture, or external-operation risk; verification is known; cross-conversation recovery is not required. | No `docs/changes/` record by default. | One concise pre-write plan, explicit approval, then explicit continuation. |
+| Standard | One goal and one independently implementable, bounded, reversible delivery of any change kind; no Controlled trigger; also use when an otherwise Fast delivery must be @-addressable or recoverable across conversations. | One concise `change.md` with an embedded delivery brief. | Approval records the contract; a separate or combined explicit continuation starts implementation. |
+| Controlled | Public API/protocol/data-format compatibility, security/compliance, migration/rollback, difficult reversal, cross-cutting delivery, material architecture, or two or more necessary delivery boundaries. | Full `change.md`; work items only when more than one delivery is required. | Independent design review; explicit approval and continuation at each required contract or map gate. |
 
 Profile expresses delivery risk, not agent count. After classification, select a separate delivery
 shape:
@@ -151,9 +151,12 @@ constraint it consumes instead of making a human reopen every upstream document.
 
 ## Gates and lifecycle
 
-`approval-source` plus lifecycle status records explicit human authorization. Candidate, baseline,
-integration, commit, or diff identities bind technical inputs for reproducibility only; no Git SHA,
-blob, or digest proves that a human approved a change.
+`approval-source` plus lifecycle status records explicit human approval. Approval accepts the
+current contract only; it does not itself start planning, implementation, review, external
+operations, or closure. Each phase requires a current explicit `continue`, direct phase request, or
+combined `approve and continue`. Candidate, baseline, integration, commit, or diff identities bind
+technical inputs for reproducibility only; no Git SHA, blob, or digest proves human approval or
+continuation.
 
 1. `scope-changes` investigates the source request and repository evidence, asks only material
    boundary questions, and routes zero, one, or several coherent candidates. One candidate creates
@@ -162,22 +165,24 @@ blob, or digest proves that a human approved a change.
    profile and kind, and presents the proposed artifacts, proof, risks, and escalation triggers. A
    format-3 Draft declares exactly no cross-change prerequisite or complete `PRE-*` source outcomes;
    default validation proves graph structure but does not require planned sources to be complete.
-3. Fast stops at a concise pre-write plan; after approval it hands implementation directly to the
-   applicable implementation skill without creating a change record.
-4. Standard creates one concise `change.md` from the current truth. Its single human approval
-   authorizes the described bounded implementation; it does not authorize later scope expansion.
+3. Fast stops at a concise pre-write plan. Approval records that plan and stops unless the same
+   request explicitly says to approve and continue; only then does it enter implementation without
+   creating a change record.
+4. Standard creates one concise `change.md` from the current truth. Approval records the described
+   bounded contract; a later explicit continuation enters implementation and does not authorize
+   scope expansion.
 5. Controlled creates a full contract and receives independent `review-change-design` review. If
-   one embedded delivery can implement it, approval may authorize implementation directly. If it
-   needs several deliveries, `plan-work-items` creates and validates the smallest map and obtains a
-   separate plan approval.
+   one embedded delivery can implement it, explicit continuation after approval enters
+   implementation directly. If it needs several deliveries, continuation enters `plan-work-items`,
+   which creates the smallest map and stops for separate map approval and continuation.
 6. Multi-change investigation or authoring under `scope-changes` uses parallel workers only when at
    least two bounded lanes are ready and coordination provides material value. Parallel work-item
    execution remains coordinated for every approved multi-item Controlled map. Parallelize a wave
    only with at least two ready, isolated tasks whose expected benefit exceeds coordination cost;
    otherwise run the wave serially under the same coordinator.
-7. `implement-change` chooses private implementation and concrete proof. Its local preflight is
-   informative after implementation authorization; another approval is required only when it
-   discloses new scope, behavior, public contract, security, migration, dependency, architecture,
+7. `implement-change` chooses private implementation and concrete proof after an explicit current
+   implementation or continuation request. Its local preflight is informative; another approval is
+   required only when it discloses new scope, behavior, public contract, security, migration, dependency, architecture,
    destructive action, or external side effect. Before lifecycle or target writes, it validates
    cross-change readiness against the exact implementation baseline SHA. A blocked prerequisite
    leaves the dependent change Approved.
@@ -189,7 +194,10 @@ blob, or digest proves that a human approved a change.
    risks require `independent`; a coordinator may perform a `compact` review for bounded low-risk
    items. Missing required independence or candidate-bound cross-change readiness is Blocking.
 9. The user-facing delivery owner advances lifecycle state. A single delivery uses
-   `Draft → Approved → In progress → Implemented → Completed`. A multi-item map uses
+   `Draft → Approved → In progress → Candidate ready → Implemented → Completed`. `Candidate ready`
+   means target work and implementation-context proof are complete on an exact candidate, but the
+   required candidate-bound review has not yet passed. Its `candidate-binding` marker records the
+   committed SHA or frozen workspace binding needed to resume review without chat history. A multi-item map uses
    `Draft → Approved → In progress → Implemented → Verified`; only `Verified` supplies a
    prerequisite to another item.
    `Implemented` means an exact candidate has candidate-bound verification plus the required review,
@@ -198,7 +206,20 @@ blob, or digest proves that a human approved a change.
    supplies a prerequisite unless the map names a verified replacement.
 10. A change becomes `Completed` only after the applicable final review is ready, proof and required
    operational handoffs pass, durable documentation disposition is complete, and the delivery owner
-    records the transition.
+    records the transition in response to an explicit continuation.
+
+## Resume a persisted change
+
+`continue-change` is the single user-facing router when a format-3 `change.md` is referenced or
+@-mentioned. It reads the change and current map, validates their stable markers, and runs
+`resolve-change-step.sh` to derive exactly one phase. It never asks the user to choose an internal
+skill and never persists a duplicated `next-action` field.
+
+`Draft` requests approval. Approved single delivery enters `implement-change`; approved multi-item
+delivery enters `plan-work-items` until a map exists, then requests map approval or enters
+`orchestrate-work-items`. `Candidate ready` enters `review-implementation`; `Implemented` enters
+closure; `Completed` and `Superseded` are terminal. `In progress` resumes its owning delivery path.
+Contradictory state fails closed rather than relying on prior conversation.
 
 Legacy `change-format: 2` is a deprecated read/execute-only compatibility path. It accepts only an
 explicitly versioned, already-approved record whose scope, contract, proof, and embedded map remain

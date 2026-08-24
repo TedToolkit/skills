@@ -22,8 +22,9 @@ persistent run state.
 
 ## Confirm orchestration has value
 
-Require an approved Controlled change, at least two approved work items, and a valid map. This skill
-retains coordinator ownership even when only one item is dependency-ready. Run a one-item wave
+Require an approved Controlled change, at least two approved work items, a valid map, and an
+explicit current request to orchestrate or continue. Approval alone does not start workers. This
+skill retains coordinator ownership even when only one item is dependency-ready. Run a one-item wave
 serially. Parallelize only when at least two ready bounded tasks, isolated agents/worktrees, and
 plausible saved time or independent-review value exist. In a shared-worktree fallback, serialize
 writers while preserving the same authoritative integration and status path.
@@ -66,9 +67,9 @@ contracts, ports, databases, or other exclusive resources. Collision edges seria
 do not invent logical prerequisites. Partition a deterministic set of collision-free execution
 groups. A group with one item is a valid serial wave; it does not leave this coordinator.
 
-Present the wave and material newly disclosed risks. Approved item/map implementation already
-authorizes ordinary private worker plans, branches, worktrees, and collision ordering. Seek renewed
-approval only for a workflow escalation trigger.
+Present the wave and material newly disclosed risks. The current explicit orchestration request
+authorizes ordinary private worker plans, branches, worktrees, and collision ordering inside the
+approved item/map boundaries. Seek renewed approval only for a workflow escalation trigger.
 
 ## Execute isolated workers
 

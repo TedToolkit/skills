@@ -102,9 +102,9 @@ Controlled without asking the user to classify it. A candidate remains a standal
 does not cite sibling drafts as authority. Run design review and approval per change. A response may
 batch the same gate across explicitly enumerated artifacts.
 
-After one change is approved, it may enter planning without waiting for unrelated lanes. Invoke
-`plan-work-items` only for a Controlled change with at least two necessary delivery boundaries. Work
-items never cross parent changes.
+After one change is approved, an explicit continuation may enter its planning without waiting for
+unrelated lanes. Invoke `plan-work-items` only for a Controlled change with at least two necessary
+delivery boundaries. Work items never cross parent changes.
 
 Reopen only affected partition rows when later evidence changes candidate ownership, source
 coverage, independence, public-contract compatibility, or migration atomicity. Unrelated lanes

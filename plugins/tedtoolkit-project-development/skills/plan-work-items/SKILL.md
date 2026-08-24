@@ -24,9 +24,12 @@ state for recovery.
 ## Confirm planning is justified
 
 Require an approved Controlled format-3 change whose approved delivery shape is `multi-item`, with
-one goal and a complete contract. Do not ask the user to choose a complexity label.
+one goal and a complete contract, plus an explicit current request to plan or continue. Approval
+alone records the contract and does not start planning. Do not ask the user to choose a complexity
+label.
 
-- If the record is Fast or Standard, keep its one delivery in the embedded delivery brief and stop.
+- If the record is Fast or Standard, keep its one delivery in the embedded delivery brief, report
+  `implement-change` as the only next delivery phase, and stop.
 - If one bounded delivery can implement and prove the complete change, stop and return the delivery
   shape to `design-change` for revision and renewed approval; do not edit the approved contract or
   create a one-row map here.
@@ -102,8 +105,9 @@ delivery contracts; workers and reviewers do not maintain a second status field 
 
 Present the map with each item's outcome, prerequisites, primary proof, conditional proof, done
 criteria, and material collision risks. Wait for explicit approval of the complete enumerated map
-and item set, record the human approval source, then set its rows to `Approved` and rerun the validator. The
-approval authorizes the included item boundaries and their implementation; an ordinary worker
+and item set, record the human approval source, set its rows to `Approved`, rerun the validator, and
+stop unless the same request explicitly says to approve and continue. Approval accepts the item
+boundaries only. A later explicit continuation enters `orchestrate-work-items`; an ordinary worker
 preflight is informative unless it discloses a material escalation trigger.
 
 Return behavioral or public-contract change to `design-change`; return a changed item outcome, real

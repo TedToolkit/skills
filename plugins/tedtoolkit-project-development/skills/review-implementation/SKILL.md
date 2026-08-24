@@ -10,9 +10,10 @@ description: >-
 
 # Implementation Review
 
-Own the review plan and final conclusion. Use `review-code`, `review-tests`, and
-`verify-implementation` as distinct professional lanes; do not collapse implementation correctness,
-test adequacy, and successful execution into one vague claim.
+Require an explicit current request to review or continue; a candidate becoming ready does not
+start review by itself. Own the review plan and final conclusion. Use `review-code`, `review-tests`,
+and `verify-implementation` as distinct professional lanes; do not collapse implementation
+correctness, test adequacy, and successful execution into one vague claim.
 
 Read [change-development-workflow.md](../../references/change-development-workflow.md),
 [testing-strategy.md](../../references/testing-strategy.md), and

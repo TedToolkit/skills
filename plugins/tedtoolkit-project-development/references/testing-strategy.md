@@ -105,6 +105,15 @@ New profile-aware change records use stable, language-independent markers:
 <!-- delivery-shape: single -->
 ```
 
+Format-3 lifecycle values are `draft`, `approved`, `in-progress`, `candidate-ready`, `implemented`,
+`completed`, and `superseded`. `candidate-ready` is the recoverable boundary between completed
+implementation-context proof and required candidate-bound review; it requires an exact
+`candidate-binding` rather than conversation-only candidate identity.
+
+New records start with `<!-- candidate-binding: none -->`. At `candidate-ready`, replace it with
+`commit:<full-sha>` or `workspace:<full-head-sha>:sha256:<complete-bundle-digest>` and retain that
+binding through review and closure unless the candidate changes.
+
 Visible headings and prose may use the repository language. Deterministic scripts parse markers,
 not translated headings. Legacy `change-format: 2` records are deprecated, read/execute-only
 compatibility inputs. Only an already-approved record may complete unchanged, and callers must
