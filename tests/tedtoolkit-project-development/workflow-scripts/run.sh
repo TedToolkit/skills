@@ -9,6 +9,34 @@ scripts="$repo_root/plugins/tedtoolkit-project-development/scripts"
 fixture=$(mktemp -d)
 trap 'rm -rf -- "$fixture"' EXIT
 
+state_repo="$fixture/state-repo"
+mkdir -p "$state_repo/.tedtoolkit"
+git -C "$state_repo" init -q
+printf '# existing namespace rule without a final newline' >"$state_repo/.tedtoolkit/.gitignore"
+(
+    cd "$state_repo"
+    bash "$scripts/ensure-tool-state.sh" worktrees >/dev/null
+    bash "$scripts/ensure-tool-state.sh" worktrees >/dev/null
+    bash "$scripts/ensure-tool-state.sh" runs >/dev/null
+    bash "$scripts/ensure-tool-state.sh" preparations >/dev/null
+)
+test -d "$state_repo/.tedtoolkit/worktrees"
+test -d "$state_repo/.tedtoolkit/runs"
+test -d "$state_repo/.tedtoolkit/preparations"
+test "$(grep -Fxc '/worktrees/' "$state_repo/.tedtoolkit/.gitignore")" = 1
+test "$(grep -Fxc '/runs/' "$state_repo/.tedtoolkit/.gitignore")" = 1
+test ! -e "$state_repo/.gitignore"
+git -C "$state_repo" check-ignore -q .tedtoolkit/worktrees/probe
+git -C "$state_repo" check-ignore -q .tedtoolkit/runs/probe
+if git -C "$state_repo" check-ignore -q .tedtoolkit/preparations/probe; then
+    echo "tracked preparation namespace was incorrectly ignored" >&2
+    exit 1
+fi
+if (cd "$state_repo" && bash "$scripts/ensure-tool-state.sh" unknown >/dev/null 2>&1); then
+    echo "unknown tool-state area was incorrectly accepted" >&2
+    exit 1
+fi
+
 change_dir="$fixture/docs/changes/temperature-ingestion"
 mkdir -p "$change_dir/work-items"
 

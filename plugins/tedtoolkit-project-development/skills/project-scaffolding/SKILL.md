@@ -133,6 +133,8 @@ needs them.
 Read the **Documentation ownership and links** section of
 [repository-layout.md](references/repository-layout.md) before adding or moving documentation, and
 read [principles.md](references/principles.md) before creating or revising `docs/principles/`.
+Read [tool-state-layout.md](../../references/tool-state-layout.md) before adding or moving
+TedToolkit-owned repository state under `.tedtoolkit/`.
 Create only locations whose owning record already exists or has been approved by its owning skill.
 Scaffolding supplies the location; `library-product-intent`, `design-principles`,
 `architecture-design`, `design-change`, `plan-work-items`, and `write-readme` supply the content.

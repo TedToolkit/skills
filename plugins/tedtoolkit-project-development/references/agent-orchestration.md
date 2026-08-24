@@ -4,6 +4,9 @@ This reference is the shared policy for every project-development skill that coo
 Domain protocols may add delivery-specific rules, but must not redefine scheduling, context packets,
 or handoff semantics.
 
+Read [tool-state-layout.md](tool-state-layout.md) before materializing coordinator state, candidate
+bundles, verification/review reports, or worktrees in the repository.
+
 ## Use agents only when they buy something
 
 Keep one coordinator in the user-facing context. Add agents when at least two bounded tasks can
@@ -43,7 +46,10 @@ identify the same boundary more directly.
 
 Use one source of truth for mutable status. Human contract documents hold approved current truth;
 orchestration state belongs in one coordinator-owned control artifact. Agent messages are evidence or
-proposals, not durable authority.
+proposals, not durable authority. Keep that state in the user-facing context by default. When the
+user requested persistent orchestration or approved local state, the delivery owner provisions
+`.tedtoolkit/runs/<workflow-id>/` and persists only the minimum recovery material defined by the tool
+state layout; specialist review and verification lanes remain read-only.
 
 ## Send minimum-sufficient context
 

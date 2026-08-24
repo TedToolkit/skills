@@ -42,6 +42,9 @@ editing skills; they are the core safety design, not boilerplate.
   new developer should understand the why, changed and preserved behavior, scope, constraints,
   proof, and next delivery within five minutes. The authoritative rules live in
   `plugins/tedtoolkit-project-development/references/change-development-workflow.md`.
+- **Repository-local TedToolkit state**: use the tracked `.tedtoolkit/` namespace and the lifecycle
+  in `plugins/tedtoolkit-project-development/references/tool-state-layout.md`. New skills must not
+  invent another preparation, worktree, run-state, cache, log, or temporary-state root.
 
 ## Testing
 

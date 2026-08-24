@@ -15,8 +15,9 @@ Repeat `Owns` or `Supports` before every contract ID; do not use an unlabeled co
 Keep every Outcome, prerequisites, Status, and Document cell non-empty. The item document is the
 single source for its proof definition; do not summarize it again in this map.
 
-Keep only material plan decisions in separate control state when recovery requires them. The human
-map shows current delivery truth. Remove these instructions before approval.
+Keep only material plan decisions in `.tedtoolkit/runs/<workflow-id>/` when recovery requires them
+and persistence is approved. The human map shows current delivery truth. Remove these instructions
+before approval.
 
 Status values are `Draft`, `Approved`, `In progress`, `Implemented`, `Verified`, and `Superseded`.
 `Implemented` is an item candidate that passed item-level proof and required review; only `Verified`

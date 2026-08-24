@@ -2,7 +2,8 @@
 
 This protocol coordinates an approved multi-item Controlled change. Read
 [agent-orchestration.md](agent-orchestration.md) first; its scheduling, context, ownership, review,
-and recovery rules are authoritative.
+and recovery rules are authoritative. Read [tool-state-layout.md](tool-state-layout.md) for the
+repository-local namespace, provisioning, and common cleanup rules.
 
 ## Boundary and authority
 
@@ -38,6 +39,23 @@ Parallelize only collision-free items in isolated worktrees. A one-item ready wa
 same coordinator and runs serially. If isolation is unavailable, serialize writes. Keep one
 coordinator slot free and prefer breadth across distinct items over duplicate perspectives on one
 item.
+
+### Repository-local worktree lifecycle
+
+Use `<repository-root>/.tedtoolkit/worktrees/<change-and-item-id>` for every worker worktree. Before
+the first `git worktree add`, provision the directory with `bash
+"${CLAUDE_PLUGIN_ROOT}"/scripts/ensure-tool-state.sh worktrees` and record the resulting tracked
+`.tedtoolkit/.gitignore` on the authoritative integration branch before pinning worker baselines.
+The shared layout owns ignore-file contents and prevents root/global ignore pollution.
+
+Treat worktrees as temporary execution state. After a candidate is accepted, first verify that its
+commits are reachable from the authoritative integration ref, its required evidence is recorded
+elsewhere, and the worktree is clean; then remove it with `git worktree remove`. After successful
+parent completion, remove every remaining clean worktree created for the change, run
+`git worktree prune`, and verify none is registered below `.tedtoolkit/worktrees/`. Cleanup needs no
+additional approval because it is part of the authorized worktree lifecycle. Never force-remove a
+dirty, blocked, stale, or sole-evidence worktree. Retain it and report its exact path and blocking
+reason so recovery remains possible. Do not delete temporary branches unless separately authorized.
 
 ## Dispatch and handoff
 
@@ -124,6 +142,5 @@ confirm operational handoffs and durable documentation disposition before record
 change `Completed`.
 
 Resume from the authoritative integration SHA, `work-items.md`, worker branches, candidate SHAs,
-review reports when required, and candidate-bound command results. Before deleting a branch or worktree, verify it
-is clean, accepted commits are reachable, and no blocked evidence exists only there. Cleanup remains
-a separate authorized action.
+review reports when required, and candidate-bound command results. Apply the repository-local
+worktree lifecycle above during both resumed execution and cleanup.

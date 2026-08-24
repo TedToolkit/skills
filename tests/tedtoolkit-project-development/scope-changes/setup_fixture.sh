@@ -202,9 +202,16 @@ namespace Weather.Tests;
 internal sealed class TemperatureTests;
 EOF
     ;;
-  approved-two-change-partition|ready-unapproved-partition)
-    mkdir -p docs/change-preparations/account-request
-    cat > docs/change-preparations/account-request/preparation.md <<'EOF'
+  approved-two-change-partition|ready-unapproved-partition|legacy-preparation-update)
+    if [[ "$scenario" == approved-two-change-partition ]]; then
+      preparation_path=.tedtoolkit/preparations/account-request/preparation.md
+      mkdir -p .tedtoolkit/preparations/account-request
+      printf '/worktrees/\n/runs/\n' > .tedtoolkit/.gitignore
+    else
+      preparation_path=docs/change-preparations/account-request/preparation.md
+      mkdir -p docs/change-preparations/account-request
+    fi
+    cat > "$preparation_path" <<'EOF'
 # Account security and export request
 
 <!-- change-preparation-format: 2 -->
@@ -269,9 +276,9 @@ serve different actors and release independently.
 - Partition approval source and approved Change IDs: None.
 EOF
     if [[ "$scenario" == approved-two-change-partition ]]; then
-      sed -i 's/^Draft$/Partition authorized/' docs/change-preparations/account-request/preparation.md
-      sed -i "s/^- Human authorization and exact Change IDs:.*$/- Human authorization and exact Change IDs: CH-01 and CH-02./" docs/change-preparations/account-request/preparation.md
-      sed -i "s/^- Partition approval source.*$/- Partition approval source and approved Change IDs: User explicitly approved CH-01 and CH-02./" docs/change-preparations/account-request/preparation.md
+      sed -i 's/^Draft$/Partition authorized/' "$preparation_path"
+      sed -i "s/^- Human authorization and exact Change IDs:.*$/- Human authorization and exact Change IDs: CH-01 and CH-02./" "$preparation_path"
+      sed -i "s/^- Partition approval source.*$/- Partition approval source and approved Change IDs: User explicitly approved CH-01 and CH-02./" "$preparation_path"
     fi
     cat > AuthBoundary.cs <<'EOF'
 namespace Example;

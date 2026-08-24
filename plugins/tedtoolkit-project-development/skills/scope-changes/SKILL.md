@@ -18,7 +18,9 @@ Read [change-development-workflow.md](../../references/change-development-workfl
 [requirements-clarification.md](../../references/requirements-clarification.md) in `scope` mode.
 Read [agent-orchestration.md](../../references/agent-orchestration.md) and
 [change-preparation-agent-protocol.md](../../references/change-preparation-agent-protocol.md) only
-when several bounded investigation or authoring lanes make coordination worthwhile.
+when several bounded investigation or authoring lanes make coordination worthwhile. Read
+[tool-state-layout.md](../../references/tool-state-layout.md) before creating or resuming a
+persistent preparation.
 
 ## Establish the change set
 
@@ -96,12 +98,15 @@ stays with `design-change` and must not bounce back.
 
 ## Keep orchestration optional
 
-Create `docs/change-preparations/<slug>/preparation.md` from
+Create `.tedtoolkit/preparations/<slug>/preparation.md` from
 [preparation-template.md](assets/preparation-template.md) only when the user explicitly requests
 persistent preparation or approves it for useful multi-change recovery. Never create a one-lane
 record. Keep source coverage, candidate relationships, lane state, blockers, and material partition
 approval there; exclude transcripts, writer leases, receipts, transaction envelopes, copied change
-content, and local revision counters.
+content, and local revision counters. Provision the namespace with `bash
+"${CLAUDE_PLUGIN_ROOT}"/scripts/ensure-tool-state.sh preparations`. New preparations never use
+`docs/change-preparations/`; read a legacy record in place when no write is needed and apply the
+shared migration rule before its next authorized update.
 
 Use flat, short-lived investigators only when at least two independent bounded questions are ready.
 Ask one blocking user question directly instead of spawning workers that cannot progress. Preserve

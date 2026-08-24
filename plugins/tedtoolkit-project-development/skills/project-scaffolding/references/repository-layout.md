@@ -192,7 +192,7 @@ reference concrete implementations only when composing them is part of its expli
 | SDK selection must be reproducible across developers and CI | Add `global.json`; otherwise omit it. |
 | The repository needs custom feeds, package-source mapping, or source policy | Add `nuget.config`; otherwise omit it. |
 | A Standard or Controlled change needs a human implementation handoff | Add `docs/changes/<stable-slug>/change.md` for current approved truth: goal and rationale, scope, observable behavior or preserved invariants, constraints, one delivery disposition, proportionate proof, and completion. Keep one delivery brief inline. Only a Controlled change with two or more necessary deliveries adds `work-items.md` plus `work-items/<ID>-<slug>.md`. Never add a `README.md` below one change, create a one-row delivery map, use priority in the directory name, or store agent logs and receipts in the human handoff. |
-| One unbounded request contains several independently valuable changes and orchestration adds real value | Let `scope-changes` create `docs/change-preparations/<slug>/preparation.md` for machine/coordinator state, source-level answers, evidence references, and the approved partition. Keep each resulting human contract under its own `docs/changes/<stable-slug>/change.md`; never use the preparation as a cross-change contract or delivery map. |
+| One unbounded request contains several independently valuable changes and orchestration adds real value | Let `scope-changes` create `.tedtoolkit/preparations/<slug>/preparation.md` for tracked machine/coordinator state, source-level answers, evidence references, and the approved partition. Keep each resulting human contract under its own `docs/changes/<stable-slug>/change.md`; never use the preparation as a cross-change contract or delivery map. |
 | A change introduces a durable technical choice | Put the change-specific behavior in `docs/changes/` and the decision rationale in `docs/adr/`. Link the two records instead of duplicating their content. |
 | The team needs stable defaults for recurring design trade-offs | Add `docs/principles/README.md`, then split independent topics into focused files only when they improve navigation. A principle states the default, its rationale, implications, and exception route; it does not record one decision's alternatives. |
 | The team needs a stable explanation of system boundaries or cross-cutting semantics | Add a focused document directly under `docs/` or an established `docs/architecture/` subtree. Link it from affected changes and work items; keep its rationale in the durable record and create a category directory only when the category earns one. |
@@ -204,13 +204,16 @@ dependency, package, target framework, runtime asset, build behavior, or test ex
 
 ## Documentation ownership and links
 
-The expanded documentation layout for a Controlled change with two or more work items is:
+The expanded record layout for a prepared request and a Controlled change with two or more work
+items is:
 
 ```text
-docs/
-  change-preparations/
+.tedtoolkit/
+  .gitignore                              # ignores only transient worktrees/ and runs/
+  preparations/
     <request-slug>/
-      preparation.md                    # temporary source intake, partition, and lane index
+      preparation.md                      # tracked temporary intake, partition, and lane index
+docs/
   principles/
     README.md                           # scope, precedence, exception route, principle index
     <topic>.md                          # an independent enduring decision heuristic, when needed
@@ -251,7 +254,7 @@ Use the smallest durable location that lets readers find a record from the repos
 | Repository purpose and first-use path | Root `README.md` | Project READMEs and relevant docs |
 | Package-specific consumer contract | README beside its `.csproj` | Root README when the package is public |
 | Repository-wide decision defaults and their rationale | `docs/principles/README.md` and focused topic files when navigation needs them | Root README, related ADRs, architecture records, and change designs |
-| One source request's temporary clarification, evidence index, and approved change partition | `docs/change-preparations/<slug>/preparation.md` | Resulting change designs while coordination remains active |
+| One source request's temporary clarification, evidence index, and approved change partition | `.tedtoolkit/preparations/<slug>/preparation.md` | Resulting change designs while coordination remains active |
 | Change goal, current contract, single-delivery brief, proof, and status | `docs/changes/<stable-slug>/change.md` | Root README or issue; each work item when present |
 | One bounded delivery's outcome, scope, constraints, primary proof, and supplied prerequisites | `docs/changes/<stable-slug>/work-items/<ID>-<slug>.md` | Parent change, implementation choices, and review |
 | Enduring decision and trade-offs | `docs/adr/ADR-<number>-<slug>.md`, or `docs/adr/ADR-<number>-<slug>/README.md` when it owns durable evidence | Related change design and architecture documentation |

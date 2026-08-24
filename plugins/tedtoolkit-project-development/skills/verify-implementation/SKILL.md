@@ -14,7 +14,9 @@ whether tests are adequate and `review-implementation` owns the delivery conclus
 
 Read [testing-strategy.md](../../references/testing-strategy.md) for proof definitions and result
 requirements. Read repository guidance, CI configuration, the approved proof plan, and the exact
-candidate before running anything.
+candidate before running anything. Read
+[tool-state-layout.md](../../references/tool-state-layout.md) when the delivery owner has authorized
+persistent local verification state.
 
 ## Bind the candidate
 
@@ -54,6 +56,11 @@ different revision. Do not diagnose or fix a failure beyond identifying which co
 condition failed; return it to `implement-change` or the appropriate owner.
 
 ## Return a verification manifest
+
+Return the manifest to the delivery owner by default. Do not write it merely because verification
+ran. When persistent local state is already authorized, the delivery owner may store the returned
+manifest under `.tedtoolkit/runs/<workflow-id>/verification/`; the verification lane remains
+read-only and raw authoritative results stay in their owning CI or tool location.
 
 ```md
 # Verification Result

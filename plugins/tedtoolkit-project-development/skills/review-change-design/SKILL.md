@@ -86,7 +86,8 @@ delivery shape, or primary proof. Do not block approval for private implementati
 
 Do not require a full clarification history in the human document. When a conversation answer
 changes current truth, require that truth and its authority to be reflected; detailed history may
-live in separate control state or Git history.
+live in Git history or, when persistence is approved, delivery-owner control state under
+`.tedtoolkit/runs/<workflow-id>/`.
 
 ## Review proof proportionately
 

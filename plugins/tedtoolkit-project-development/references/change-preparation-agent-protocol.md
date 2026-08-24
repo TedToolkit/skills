@@ -3,7 +3,8 @@
 This protocol prepares one genuinely multi-outcome request into independent changes without loading
 the whole request and every agent conversation into every context. Read
 [agent-orchestration.md](agent-orchestration.md) first; its scheduling, context, ownership, review,
-and recovery rules are authoritative.
+and recovery rules are authoritative. Read [tool-state-layout.md](tool-state-layout.md) before
+creating or resuming a persistent preparation.
 
 ## Boundary and roles
 
@@ -34,8 +35,10 @@ remaining uncertainty needs user authority.
 
 ## Persist only useful control state
 
-Create `docs/change-preparations/<slug>/preparation.md` only after the user explicitly requests
-persistent preparation or approves that artifact. It contains:
+Create `.tedtoolkit/preparations/<slug>/preparation.md` only after the user explicitly requests
+persistent preparation or approves that artifact. Provision it with `ensure-tool-state.sh
+preparations`. New records never use `docs/change-preparations/`; apply the legacy read/migrate rule
+in the tool state layout when an existing preparation uses that path. The preparation contains:
 
 - repository baseline for technical investigation and the explicit human approval source;
 - source intent and hard constraints;

@@ -14,7 +14,7 @@ scenarios:
       - type: "output_contains"
         value: "design-change"
       - type: "command"
-        run: "test -z \"$(find docs/change-preparations -name preparation.md -print -quit 2>/dev/null)\""
+        run: "test -z \"$(find .tedtoolkit/preparations docs/change-preparations -name preparation.md -print -quit 2>/dev/null)\""
       - type: "command"
         run: "test -z \"$(find docs/changes -name change.md -print -quit 2>/dev/null)\""
       - type: "command"
@@ -48,7 +48,7 @@ scenarios:
     timeout: 420
 
   - name: "Create isolated drafts from an approved partition"
-    prompt: "Continue $scope-changes from docs/change-preparations/account-request/preparation.md. Its exact two-change partition is approved. Create the two listed change Drafts through separate bounded $design-change authors, copy only each candidate's relevant evidence and lineage, then stop before questions, reviews, approvals, planning, or implementation."
+    prompt: "Continue $scope-changes from .tedtoolkit/preparations/account-request/preparation.md. Its exact two-change partition is approved. Create the two listed change Drafts through separate bounded $design-change authors, copy only each candidate's relevant evidence and lineage, then stop before questions, reviews, approvals, planning, or implementation."
     setup:
       copy_test_files: true
       commands:
@@ -85,6 +85,8 @@ scenarios:
         run: "test -z \"$(find docs/changes -type d -name work-items -print -quit)\""
       - type: "command"
         run: "git diff --exit-code -- AuthBoundary.cs ExportService.cs"
+      - type: "command"
+        run: "grep -Fxq '/worktrees/' .tedtoolkit/.gitignore && grep -Fxq '/runs/' .tedtoolkit/.gitignore && test ! -e .gitignore"
     rubric:
       - "Uses flat short-lived authors with one candidate and one target path each; it does not give either author the sibling candidate's evidence."
       - "Creates exactly the approved proposed Changes as concise human handoffs and keeps preparation lineage and agent control state outside them."
@@ -112,9 +114,12 @@ scenarios:
         run: "test -z \"$(find docs -type d -name work-items -print -quit 2>/dev/null)\""
       - type: "command"
         run: "git diff --exit-code -- AuthBoundary.cs ExportService.cs"
+      - type: "command"
+        run: "test ! -e .tedtoolkit/preparations/account-request/preparation.md"
     rubric:
       - "Requests explicit human approval for exactly CH-01 and CH-02 and treats silence or readiness as no approval; it does not use a Git SHA as approval evidence."
       - "Does not create any candidate Draft before partition approval even though investigation is complete."
+      - "Reads the deprecated docs/change-preparations path in place and does not migrate it because this read-only gate performs no authorized preparation update."
     timeout: 300
 
   - name: "Route a local answer to only its owning change"
@@ -146,6 +151,30 @@ scenarios:
     rubric:
       - "Routes the answer by the explicit change path and updates only the owning artifact's current truth."
       - "Does not create lease, revision, transaction, or receipt machinery and does not expose lane-local truth to sibling context."
+    timeout: 300
+
+  - name: "Migrate a legacy preparation on its next authorized update"
+    prompt: "Continue $scope-changes from the legacy docs/change-preparations/account-request/preparation.md. I authorize this exact preparation update: change its Preparation owner to Security delivery coordinator. Migrate the complete preparation directory to the canonical .tedtoolkit/preparations path before editing, preserve its other content, and stop without creating change Drafts, work items, or implementation."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh legacy-preparation-update"
+    assertions:
+      - type: "exit_success"
+      - type: "file_exists"
+        path: ".tedtoolkit/preparations/account-request/preparation.md"
+      - type: "file_contains"
+        path: ".tedtoolkit/preparations/account-request/preparation.md"
+        value: "Preparation owner: Security delivery coordinator"
+      - type: "command"
+        run: "test ! -e docs/change-preparations/account-request/preparation.md"
+      - type: "command"
+        run: "grep -Fxq '/worktrees/' .tedtoolkit/.gitignore && grep -Fxq '/runs/' .tedtoolkit/.gitignore && test ! -e .gitignore"
+      - type: "command"
+        run: "test -z \"$(find docs/changes -name change.md -print -quit 2>/dev/null)\""
+    rubric:
+      - "Treats the exact requested preparation edit as authorization to migrate that one legacy slug directory before updating it."
+      - "Preserves the preparation as tracked workflow truth, provisions only the TedToolkit namespace, and does not create delivery artifacts or implementation."
     timeout: 300
 
   - name: "Route one approved delivery without orchestration"

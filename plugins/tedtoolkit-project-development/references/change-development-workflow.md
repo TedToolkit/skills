@@ -8,6 +8,7 @@ the originating conversation.
 Read [testing-strategy.md](testing-strategy.md) when a change defines behavior or proof.
 Read [requirements-clarification.md](requirements-clarification.md) when user intent is incomplete.
 Read [agent-orchestration.md](agent-orchestration.md) whenever agents are considered.
+Read [tool-state-layout.md](tool-state-layout.md) before creating repository-local TedToolkit state.
 
 ## Human-readable delivery records
 
@@ -19,7 +20,7 @@ truth, not the transcript or machinery that produced it.
   superseded answers, and empty template sections from the main document.
 - Keep machine-readable profile, kind, status, section, and identity markers stable even when the
   visible headings are translated. Put detailed orchestration state in a preparation or other
-  separate control artifact.
+  separate control artifact using the tool state layout.
 - Give likely code or component touchpoints when evidence supports them and label them non-binding;
   a human should not need to rediscover the whole repository, but remains free to choose private
   files, types, algorithms, and test organization inside the approved boundary.

@@ -16,7 +16,9 @@ does not implement production behavior or resolve semantic conflicts.
 Read [change-development-workflow.md](../../references/change-development-workflow.md),
 [testing-strategy.md](../../references/testing-strategy.md),
 [agent-orchestration.md](../../references/agent-orchestration.md), and
-[work-item-agent-protocol.md](../../references/work-item-agent-protocol.md).
+[work-item-agent-protocol.md](../../references/work-item-agent-protocol.md). Read
+[tool-state-layout.md](../../references/tool-state-layout.md) before provisioning worktrees or
+persistent run state.
 
 ## Confirm orchestration has value
 
@@ -31,9 +33,14 @@ For format 3, run `bash "${CLAUDE_PLUGIN_ROOT}"/scripts/validate-work-items.sh
 select the deprecated scheduler compatibility path and preserve its contract unchanged. Any scope,
 contract, proof, map, or renewed-approval change must migrate to format 3.
 Then run `bash "${CLAUDE_PLUGIN_ROOT}"/scripts/schedule-work-items.sh <parent-change-directory>`.
-Establish
-one clean authoritative integration branch and full SHA. Preserve a dirty baseline and stop rather
-than stashing, committing, or mixing unrelated changes.
+Establish one clean authoritative integration branch and full SHA. Preserve a dirty baseline and
+stop rather than stashing, committing, or mixing unrelated changes. Before the first worker
+worktree is created in a repository, provision the repository-local worktree root as defined by the
+work-item agent protocol by running `bash
+"${CLAUDE_PLUGIN_ROOT}"/scripts/ensure-tool-state.sh worktrees`. Record the namespace-local
+`.tedtoolkit/.gitignore` on the authoritative branch before pinning worker baselines; do not leave
+that coordinator-owned setup as an uncommitted change or modify the root `.gitignore` for this
+purpose.
 
 ## Preflight the ready wave
 
@@ -54,7 +61,9 @@ approval only for a workflow escalation trigger.
 ## Execute isolated workers
 
 For each group, pin the latest verified integration SHA and create one branch/worktree per item from
-that exact baseline. A worker owns only its item and invokes `implement-change` with the
+that exact baseline. Put every worker worktree under the repository root's ignored
+`.tedtoolkit/worktrees/` directory; do not scatter worker directories beside the repository or
+directly across its root. A worker owns only its item and invokes `implement-change` with the
 approved contract. Set the parent change `in-progress` when the first writing worker starts. Workers
 read prerequisites from verified repository state, never another worker's message or unintegrated
 branch.
@@ -107,14 +116,19 @@ semantics invalidates only the affected judgments.
 ## Finish
 
 Repeat until every non-superseded item has its required risk-scaled review, is integrated, verified,
-and recorded `Verified` in `work-items.md`.
+and recorded `Verified` in `work-items.md`. Once an accepted worker candidate is reachable from the
+authoritative integration ref and its worktree is clean, remove that worktree without seeking a
+separate cleanup approval. Never force-remove a dirty, blocked, stale, or evidence-bearing worktree;
+retain it and report its exact path and reason.
 Run change-level proof, confirm operational handoffs and documentation disposition, and invoke final
 `review-implementation` in `integrated-change` mode with the independence level required by the
 parent risk, against the parent contract, all non-superseded items, and the authoritative integration
 SHA. After the integrated review is `Ready to merge`, set the parent change `implemented` when every
 item and change-level gate is Verified on that SHA. Set it `completed` only after closure checks.
-Present temporary branches/worktrees for authorized cleanup only after their accepted commits are
-reachable and no evidence exists solely there.
+At successful completion, remove every remaining clean worktree created by this orchestration, run
+`git worktree prune`, and verify that none remains registered beneath `.tedtoolkit/worktrees/`.
+Report retained temporary branches separately; worktree cleanup does not by itself authorize branch
+deletion.
 
 Complete when dependency order is respected, combined proof passes at the authoritative SHA,
 central status matches repository evidence, and remaining risks/control artifacts are reported.

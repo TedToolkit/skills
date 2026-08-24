@@ -91,7 +91,7 @@ scenarios:
     timeout: 300
 
   - name: "Execute, integrate, and verify two independent items"
-    prompt: "Fully implement the approved independent-flags Controlled change. FLAG-001 and FLAG-002 are both ready and have disjoint write sets, so use isolated workers when available, preserve one coordinator, run each item proof, serialize integration, run bash verify-all.sh on the combined authoritative revision, mark items Verified only after combined proof passes, and perform the final integrated-change review. Branch and worktree creation for these approved items is authorized; do not delete worktrees or branches."
+    prompt: "Fully implement the approved independent-flags Controlled change. FLAG-001 and FLAG-002 are both ready and have disjoint write sets, so use isolated workers when available, preserve one coordinator, run each item proof, serialize integration, run bash verify-all.sh on the combined authoritative revision, mark items Verified only after combined proof passes, and perform the final integrated-change review. Branch and worktree creation for these approved items is authorized; clean up completed worker worktrees but retain temporary branches."
     setup:
       copy_test_files: true
       commands:
@@ -116,6 +116,17 @@ scenarios:
       - type: "command"
         run: "bash verify-all.sh"
       - type: "command"
+        run: "grep -Fxq '/worktrees/' .tedtoolkit/.gitignore && grep -Fxq '/runs/' .tedtoolkit/.gitignore && test ! -e .gitignore"
+      - type: "command"
+        run: >-
+          root=$(pwd -P) &&
+          test -z "$(git worktree list --porcelain |
+          awk '/^worktree / { sub(/^worktree /, ""); print }' |
+          while IFS= read -r path; do
+          resolved=$(cd "$path" 2>/dev/null && pwd -P || true);
+          case "$resolved" in "$root/.tedtoolkit/worktrees"/*) printf '%s\n' "$resolved";; esac;
+          done)"
+      - type: "command"
         run: >-
           alpha=$(git log --all --format=%H -n 1 -- Alpha.cs) &&
           beta=$(git log --all --format=%H -n 1 -- Beta.cs) &&
@@ -134,10 +145,11 @@ scenarios:
       - "Runs FLAG-001 and FLAG-002 from the same verified baseline with isolated ownership and does not invent a dependency between their disjoint outcomes."
       - "Preserves identifiable item integration units, runs item proof and combined proof, and marks each item Verified only on the authoritative integrated revision."
       - "Reviews the complete parent contract in integrated-change mode and records the parent Completed only after the ready final review."
+      - "Tracks the canonical worktrees/runs rules in .tedtoolkit/.gitignore without creating a root .gitignore, creates workers only below .tedtoolkit/worktrees, then removes completed worktrees and prunes their registrations without deleting their temporary branches."
     timeout: 1200
 
   - name: "Coordinate a sequential dependency chain through verified integration"
-    prompt: "Fully implement the approved dependent-chain Controlled change. Only CHAIN-001 is initially ready; keep one orchestration coordinator, run that wave serially, integrate and mark CHAIN-001 Verified before starting CHAIN-002, then integrate CHAIN-002, run bash verify-all.sh on the authoritative revision, and perform the final integrated-change review. Do not bypass central work-items.md status or delete temporary branches/worktrees."
+    prompt: "Fully implement the approved dependent-chain Controlled change. Only CHAIN-001 is initially ready; keep one orchestration coordinator, run that wave serially, integrate and mark CHAIN-001 Verified before starting CHAIN-002, then integrate CHAIN-002, run bash verify-all.sh on the authoritative revision, perform the final integrated-change review, and clean up completed worker worktrees while retaining temporary branches. Do not bypass central work-items.md status."
     setup:
       copy_test_files: true
       commands:
@@ -154,6 +166,16 @@ scenarios:
       - { type: "file_contains", path: "Registry.cs", value: "Alpha = \"ready\"" }
       - { type: "file_contains", path: "Consumer.cs", value: "Read() => Registry.Alpha" }
       - { type: "command", run: "bash verify-all.sh" }
+      - { type: "command", run: "grep -Fxq '/worktrees/' .tedtoolkit/.gitignore && grep -Fxq '/runs/' .tedtoolkit/.gitignore && test ! -e .gitignore" }
+      - type: "command"
+        run: >-
+          root=$(pwd -P) &&
+          test -z "$(git worktree list --porcelain |
+          awk '/^worktree / { sub(/^worktree /, ""); print }' |
+          while IFS= read -r path; do
+          resolved=$(cd "$path" 2>/dev/null && pwd -P || true);
+          case "$resolved" in "$root/.tedtoolkit/worktrees"/*) printf '%s\n' "$resolved";; esac;
+          done)"
       - { type: "command", run: "grep -Eq '^\\| CHAIN-001 .*\\| Verified \\|' docs/changes/dependent-chain/work-items.md && grep -Eq '^\\| CHAIN-002 .*\\| Verified \\|' docs/changes/dependent-chain/work-items.md" }
       - type: "command"
         run: >-
@@ -170,4 +192,5 @@ scenarios:
       - "Keeps one coordinator for the whole multi-item map even though each wave has only one ready item."
       - "Does not start CHAIN-002 until CHAIN-001 is present and Verified on the authoritative integration revision."
       - "Preserves identifiable item integration units and bases final readiness on the combined candidate."
+      - "Tracks the ignore rule inside .tedtoolkit, uses its worktrees directory, and automatically removes completed worktrees while retaining their temporary branches."
     timeout: 1200

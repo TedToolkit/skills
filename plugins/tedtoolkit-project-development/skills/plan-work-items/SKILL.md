@@ -17,7 +17,9 @@ does not change the approved behavioral contract or prescribe private implementa
 
 Read [change-development-workflow.md](../../references/change-development-workflow.md) for profile,
 human-handoff, and approval rules. Read [testing-strategy.md](../../references/testing-strategy.md)
-for proof purpose and execution shape.
+for proof purpose and execution shape. Read
+[tool-state-layout.md](../../references/tool-state-layout.md) before persisting planning control
+state for recovery.
 
 ## Confirm planning is justified
 
@@ -75,8 +77,8 @@ Every item states:
 
 Do not include agent history, coordination state, executable edit steps, exhaustive private file
 lists, algorithms, method decomposition, or repeated parent rationale. Store only material planning
-decisions in separate control state when recovery needs them; update the work item with the
-resulting current truth.
+decisions in `.tedtoolkit/runs/<workflow-id>/` when recovery needs them and the user approved that
+persistence; update the work item with the resulting current truth.
 
 ## Map proof and ownership
 
