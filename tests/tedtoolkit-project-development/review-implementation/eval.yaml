@@ -119,6 +119,36 @@ scenarios:
       - "Does not modify files or run builds or tests."
     timeout: 420
 
+  - name: "Block review when a source change is not completed on the candidate"
+    prompt: "Review docs/changes/preferences-screen/change.md in delivery-candidate mode against exact HEAD. Exact-candidate independent code, test, and verification lane reports are already stored in the Git note on HEAD; reuse them rather than dispatching reviewers. Check cross-change readiness on the candidate before issuing the aggregate conclusion. Do not modify files or run implementation."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh blocked-cross-change"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "command", run: "git status --porcelain", stdout_empty: true }
+      - { type: "output_contains", value: "Not ready" }
+      - { type: "output_regex", pattern: "(?i)\\bblock(?:ed|ing)\\b" }
+      - { type: "output_contains", value: "settings-store" }
+      - { type: "output_contains", value: "## Review mode and independence" }
+      - { type: "output_contains", value: "## Traceability" }
+      - { type: "output_contains", value: "## Professional lane conclusions" }
+      - { type: "output_contains", value: "## Blocking findings" }
+      - { type: "output_contains", value: "## Important findings" }
+      - { type: "output_contains", value: "## Suggestions" }
+      - { type: "output_contains", value: "## Design deviations" }
+      - { type: "output_contains", value: "## Documentation extraction and disposition" }
+      - { type: "output_contains", value: "## Review scope and limits" }
+      - type: "output_regex"
+        pattern: '(?s)## Conclusion.*## Review mode and independence.*## Traceability.*## Professional lane conclusions.*## Blocking findings.*## Important findings.*## Suggestions.*## Design deviations.*## Documentation extraction and disposition.*## Review scope and limits'
+    rubric:
+      - "Repeats prerequisite readiness against exact HEAD and finds the source AC-01 only Approved, not Completed."
+      - "Treats unmet candidate-bound readiness as Blocking even if local implementation appears correct."
+      - "Does not mutate either change status or route the prerequisite through work-item planning."
+      - "Uses the exact review report structure, binds the candidate to HEAD, and records the blocked contract in traceability and Blocking findings."
+    timeout: 420
+
   - name: "Block a change that misses an approved acceptance case"
     prompt: "Review the current change in delivery-candidate mode against docs/changes/P1-temperature-parse/work-items/TEMP-001-parse.md. You may use read-only commands to inspect files and the diff. Do not modify files or run builds or tests. Use the exact review report structure and determine whether it is Ready to merge, Ready with follow-ups, or Not ready."
     setup:

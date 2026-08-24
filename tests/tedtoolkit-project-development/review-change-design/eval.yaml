@@ -68,6 +68,24 @@ scenarios:
       - "Routes ADR creation and approval to architecture-design before change approval."
     timeout: 420
 
+  - name: "Allow approval review before a valid prerequisite is ready"
+    prompt: "Act as a fresh read-only reviewer of docs/changes/P1-temperature-parse/change.md. Validate its cross-change prerequisite structurally, but do not require the approved settings-store source to be completed during design review. Do not modify files."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh planned-prerequisite"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "command", run: "git status --porcelain", stdout_empty: true }
+      - { type: "output_contains", value: "Ready for approval" }
+      - { type: "output_contains", value: "PRE-01" }
+      - { type: "output_not_contains", value: "source must already be completed" }
+    rubric:
+      - "Confirms the source path, AC-01, supplied guarantee, human row, and acyclic structure without applying the implementation readiness gate."
+      - "Allows the standalone dependent Draft to be ready for human approval while its valid upstream source remains Approved."
+      - "Remains read-only and does not claim that approval or implementation readiness has been granted."
+    timeout: 420
+
   - name: "Block a contract whose material rationale is missing"
     prompt: "Review docs/changes/P1-temperature-parse/change.md as a change design. Do not modify files or create work items. Route material rationale gaps to design-change."
     setup:

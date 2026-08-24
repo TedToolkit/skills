@@ -83,11 +83,29 @@ applicable governing records, alternatives, compatibility, migration/recovery, o
 handoffs. Link durable sources and restate the implementation-facing constraint; do not copy their
 rationale.
 
+<!-- section: start-conditions -->
+## Start conditions
+
+For no cross-change prerequisite, keep exactly:
+
+<!-- change-prerequisite: none -->
+
+None. Ready from the approved baseline.
+
+For each concrete upstream outcome, remove `none`, add one stable marker and one matching row. The
+source is relative to this `change.md`, remains inside `docs/changes/`, and names the upstream
+contract that supplies the guarantee. State required evidence, not an observed runtime result.
+
+<!-- change-prerequisite: PRE-01 source=../<source-slug>/change.md contract=AC-01 -->
+| ID | Required input or guarantee | Source change outcome | Required readiness evidence |
+| --- | --- | --- | --- |
+| PRE-01 |  | `../<source-slug>/change.md`, AC-01 | Source contract is completed on the selected Git baseline |
+
 <!-- section: delivery-brief -->
 ## Delivery brief
 
 - Outcome and target delivery area:
-- Real start conditions or prerequisites:
+- Other real start conditions or resource prerequisites:
 - Likely touchpoints (non-binding):
 - Private implementation choices left open:
 

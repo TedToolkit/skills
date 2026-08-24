@@ -113,6 +113,21 @@ work-item mapping must migrate to format 3. Remove compatibility in the next dec
 plugin release after maintained repositories report no active format-2 changes. Work-item format 2
 remains the current item schema and is not a legacy change format.
 
+Every new or materially revised format-3 Draft also declares cross-change start conditions. Use
+exactly `none` or one marker per concrete source outcome:
+
+```md
+<!-- section: start-conditions -->
+<!-- change-prerequisite: none -->
+
+<!-- change-prerequisite: PRE-01 source=../source-change/change.md contract=AC-01 -->
+```
+
+Remove the inapplicable example. Each `PRE-*` marker has one human row describing the supplied
+guarantee and required readiness evidence. Structural validation checks the repository-contained,
+acyclic source-contract graph. Readiness validation is separate and reads completed source records
+from an explicit Git revision so working-tree status edits cannot satisfy proof prerequisites.
+
 ### Behavior-changing contracts
 
 Describe observable deltas with markers:

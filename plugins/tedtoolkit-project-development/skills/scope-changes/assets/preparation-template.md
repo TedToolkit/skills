@@ -46,7 +46,7 @@ Every material source intent maps exactly once to a candidate, deferral, or no-c
 
 | From | To | Relationship | Evidence | Consequence |
 | --- | --- | --- | --- | --- |
-| C-01 | C-02 | Independent / Inseparable / Depends on completed outcome / Overlap / Runtime collision |  | Split / Merge / Defer / Clarify |
+| C-01 | C-02 | Independent / Inseparable / Depends on completed outcome / Overlap / Runtime collision |  | Split / Merge / Defer / Clarify / Restate source outcome as dependent start condition |
 
 ## Proposed change set
 

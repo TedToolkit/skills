@@ -4,7 +4,20 @@ set -euo pipefail
 # Report logical readiness only. Runtime write collisions are established by
 # implementation preflight and never become invented delivery dependencies.
 
-change_dir=${1:?usage: schedule-work-items.sh <parent-change-directory>}
+prerequisite_legacy_base=""
+if [[ ${1:-} == --allow-approved-prerequisite-legacy ]]; then
+    [[ $# -ge 3 ]] || {
+        printf 'ERROR: --allow-approved-prerequisite-legacy requires a Git revision and parent change directory\n' >&2
+        exit 1
+    }
+    prerequisite_legacy_base=$2
+    shift 2
+fi
+[[ $# == 1 ]] || {
+    printf 'ERROR: usage: schedule-work-items.sh [--allow-approved-prerequisite-legacy <git-rev>] <parent-change-directory>\n' >&2
+    exit 1
+}
+change_dir=$1
 change_file="$change_dir/change.md"
 map_file="$change_dir/work-items.md"
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
@@ -16,7 +29,11 @@ script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
 legacy_embedded=0
 if [[ -f $map_file ]]; then
-    "$script_dir/validate-work-items.sh" "$change_dir" >/dev/null
+    validation_args=()
+    if [[ -n $prerequisite_legacy_base ]]; then
+        validation_args+=(--allow-approved-prerequisite-legacy "$prerequisite_legacy_base")
+    fi
+    "$script_dir/validate-work-items.sh" "${validation_args[@]}" "$change_dir" >/dev/null
 fi
 
 if [[ -f $map_file ]]; then

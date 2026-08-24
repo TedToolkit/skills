@@ -87,6 +87,25 @@ scenarios:
       - "Returns the exact candidate for review without claiming final merge readiness."
     timeout: 420
 
+  - name: "Block implementation until a source change is completed on HEAD"
+    prompt: "Implement the approved preferences-screen change at docs/changes/preferences-screen/change.md. Establish the exact implementation baseline and enforce its cross-change prerequisite before changing lifecycle status or target files."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh blocked-cross-change"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "command", run: "git status --porcelain", stdout_empty: true }
+      - { type: "file_contains", path: "docs/changes/preferences-screen/change.md", value: "<!-- change-status: approved -->" }
+      - { type: "file_contains", path: "PreferencesScreen.cs", value: "internal sealed class PreferencesScreen;" }
+      - { type: "output_regex", pattern: "(?i)\\bblocked\\b" }
+      - { type: "output_contains", value: "settings-store" }
+    rubric:
+      - "Runs prerequisite readiness against the exact HEAD baseline before target writes or lifecycle mutation."
+      - "Treats the source change's Approved status as insufficient because only Completed supplies readiness."
+      - "Leaves the dependent change Approved and the workspace unchanged while reporting the concrete unmet AC-01 source outcome."
+    timeout: 420
+
   - name: "Implement a simple behavior without manufacturing abstractions"
     prompt: "Implement the approved Standard greeting-whitespace change at docs/changes/greeting-whitespace/change.md, add its focused AC-01 proof, and stop when the exact candidate is ready for review."
     setup:

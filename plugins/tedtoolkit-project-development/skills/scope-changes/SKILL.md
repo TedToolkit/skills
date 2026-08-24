@@ -83,6 +83,13 @@ Different candidates may be designed concurrently only when their contexts and w
 independent and the benefit exceeds coordination cost. Each resulting change remains standalone;
 never create a cross-change work-item map.
 
+For `Depends on completed outcome`, carry the supplying candidate outcome and dependent guarantee
+to both design owners. After the source design assigns its stable contract ID and path, require the
+dependent `design-change` owner to restate that exact source outcome as a `PRE-*` start condition.
+Do not reduce the relationship to priority, preferred sequence, a change ID alone, or current
+planning status. A runtime collision remains ordering evidence only and never becomes a logical
+prerequisite.
+
 ## Coordinate clarification without duplicating it
 
 Question ownership follows decision ownership. `scope-changes` owns boundary questions;

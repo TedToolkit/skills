@@ -181,6 +181,25 @@ scenarios:
       - "Names the exact boundary evidence and does not decide detailed settings behavior for either candidate."
     timeout: 420
 
+  - name: "Author an already-scoped cross-change prerequisite"
+    prompt: "The partition and dependency are already authorized: create the Draft preferences-screen change at docs/changes/preferences-screen/change.md. It remains standalone but requires docs/changes/settings-store/change.md AC-01 to be completed on the implementation baseline. Record the concrete supplied guarantee and required readiness evidence, validate the Draft structurally, and stop without approving, planning, or implementing it."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh scoped-dependent-draft"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_contains", path: "docs/changes/preferences-screen/change.md", value: "<!-- section: start-conditions -->" }
+      - { type: "file_contains", path: "docs/changes/preferences-screen/change.md", value: "<!-- change-prerequisite: PRE-01 source=../settings-store/change.md contract=AC-01 -->" }
+      - { type: "file_contains", path: "docs/changes/preferences-screen/change.md", value: "Required readiness evidence" }
+      - { type: "file_not_contains", path: "docs/changes/preferences-screen/change.md", value: "<!-- change-prerequisite: none -->" }
+      - { type: "command", run: "test ! -e docs/changes/preferences-screen/work-items.md" }
+    rubric:
+      - "Restates the authorized source outcome as a concrete PRE-01 contract instead of depending on priority, a change ID, or planned status alone."
+      - "Keeps the dependent change standalone and records expected readiness evidence without claiming the upstream result already passed."
+      - "Runs structural validation only; it does not block Draft authoring because the approved source is not yet completed."
+    timeout: 600
+
   - name: "Clarify a material contract uncertainty before creating a Draft"
     prompt: "The scoped candidate is to add display-density preferences. I have not said whether the preference must persist across restarts, whether it is per-user or machine-wide, or what happens when stored data is invalid. Investigate and ask the highest-impact contract question, but do not create a repository Draft yet."
     setup:

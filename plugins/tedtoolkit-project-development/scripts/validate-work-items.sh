@@ -4,7 +4,20 @@ set -euo pipefail
 # Validate a real multi-item delivery map. Human headings are free to vary;
 # stable comments and table columns are the automation contract.
 
-change_dir=${1:?usage: validate-work-items.sh <parent-change-directory>}
+prerequisite_legacy_base=""
+if [[ ${1:-} == --allow-approved-prerequisite-legacy ]]; then
+    [[ $# -ge 3 ]] || {
+        printf 'ERROR: --allow-approved-prerequisite-legacy requires a Git revision and parent change directory\n' >&2
+        exit 1
+    }
+    prerequisite_legacy_base=$2
+    shift 2
+fi
+[[ $# == 1 ]] || {
+    printf 'ERROR: usage: validate-work-items.sh [--allow-approved-prerequisite-legacy <git-rev>] <parent-change-directory>\n' >&2
+    exit 1
+}
+change_dir=$1
 change_file="$change_dir/change.md"
 map_file="$change_dir/work-items.md"
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
@@ -52,7 +65,11 @@ require_section() {
 [[ -f $map_file ]] || fail "missing delivery map: $map_file"
 (( errors == 0 )) || exit 1
 
-"$script_dir/validate-acceptance-specification.sh" "$change_file" ||
+acceptance_args=()
+if [[ -n $prerequisite_legacy_base ]]; then
+    acceptance_args+=(--allow-approved-prerequisite-legacy "$prerequisite_legacy_base")
+fi
+"$script_dir/validate-acceptance-specification.sh" "${acceptance_args[@]}" "$change_file" ||
     fail "$change_file: parent change is not structurally valid"
 grep -Fq '<!-- workflow-profile: controlled -->' "$change_file" ||
     fail "$change_file: a multi-item map requires a Controlled parent"

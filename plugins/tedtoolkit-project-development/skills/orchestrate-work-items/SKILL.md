@@ -29,10 +29,10 @@ plausible saved time or independent-review value exist. In a shared-worktree fal
 writers while preserving the same authoritative integration and status path.
 
 For format 3, run `bash "${CLAUDE_PLUGIN_ROOT}"/scripts/validate-work-items.sh
+<parent-change-directory>`. Then run `bash "${CLAUDE_PLUGIN_ROOT}"/scripts/schedule-work-items.sh
 <parent-change-directory>`. For an explicit, already-approved `change-format: 2` embedded map,
 select the deprecated scheduler compatibility path and preserve its contract unchanged. Any scope,
 contract, proof, map, or renewed-approval change must migrate to format 3.
-Then run `bash "${CLAUDE_PLUGIN_ROOT}"/scripts/schedule-work-items.sh <parent-change-directory>`.
 Establish one clean authoritative integration branch and full SHA. Preserve a dirty baseline and
 stop rather than stashing, committing, or mixing unrelated changes. Before the first worker
 worktree is created in a repository, provision the repository-local worktree root as defined by the
@@ -41,6 +41,18 @@ work-item agent protocol by running `bash
 `.tedtoolkit/.gitignore` on the authoritative branch before pinning worker baselines; do not leave
 that coordinator-owned setup as an uncommitted change or modify the root `.gitignore` for this
 purpose.
+
+Before dispatching the first writing worker, run the parent format-3 change through
+`validate-acceptance-specification.sh --require-ready --baseline <authoritative-integration-sha>`.
+Cross-change readiness gates the whole parent change; item readiness cannot bypass it. Leave the
+parent approved and report the concrete unmet source outcome when this check is blocked.
+If the parent is an unchanged, tracked, active format-3 record that predates prerequisite markers,
+the caller must explicitly select its known approved base. Pass
+`--allow-approved-prerequisite-legacy <known-approved-base-sha>` to both `validate-work-items.sh`
+and `schedule-work-items.sh`, then compose it with `--require-ready --baseline
+<authoritative-integration-sha>` for acceptance validation. Resolve and record both full SHAs and
+surface the `DEPRECATED` notice. Never infer the compatibility base; block a Draft, untracked
+record, material revision, or default validation failure instead of dispatching work.
 
 ## Preflight the ready wave
 

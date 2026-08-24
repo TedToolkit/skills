@@ -28,6 +28,10 @@ Change one private documentation link; no product behavior changes.
 ## Structural outcome
 <!-- structural-outcome: STR-01 -->
 - STR-01: the guide points to `setup.md` and no stale `setpu.md` target remains.
+<!-- section: start-conditions -->
+## Start conditions
+<!-- change-prerequisite: none -->
+None. Ready from the approved baseline.
 <!-- section: delivery-brief -->
 ## Delivery
 Correct the one link in Guide.md.
@@ -270,6 +274,85 @@ namespace Geometry;
 public sealed class Bounds;
 EOF
     ;;
+  blocked-cross-change)
+    mkdir -p docs/changes/settings-store docs/changes/preferences-screen
+    cat > docs/changes/settings-store/change.md <<'EOF'
+# Settings store
+<!-- change-format: 3 -->
+<!-- workflow-profile: standard -->
+<!-- change-kind: behavior-change -->
+<!-- change-status: approved -->
+<!-- delivery-shape: single -->
+<!-- approval-source: Fixture owner -->
+<!-- section: goal-rationale -->
+## Goal
+Persist settings.
+<!-- section: scope -->
+## Scope
+One settings contract.
+<!-- section: behavior-contract -->
+## Behavior
+<!-- acceptance-case: AC-01 -->
+- AC-01: persisted settings can be retrieved.
+<!-- section: start-conditions -->
+## Start conditions
+<!-- change-prerequisite: none -->
+None. Ready from the approved baseline.
+<!-- section: delivery-brief -->
+## Delivery
+One delivery.
+<!-- section: proof-plan -->
+## Proof
+<!-- primary-proof: AC-01 purpose=acceptance shape=component -->
+| Contract | Role | Observable assertion | Command or procedure |
+| --- | --- | --- | --- |
+| AC-01 | Primary | A saved setting is retrieved | Repository test command |
+<!-- section: completion-criteria -->
+## Completion
+AC-01 passes.
+EOF
+    cat > docs/changes/preferences-screen/change.md <<'EOF'
+# Preferences screen
+<!-- change-format: 3 -->
+<!-- workflow-profile: standard -->
+<!-- change-kind: behavior-change -->
+<!-- change-status: in-progress -->
+<!-- delivery-shape: single -->
+<!-- approval-source: Fixture owner -->
+<!-- section: goal-rationale -->
+## Goal
+Users edit persisted preferences.
+<!-- section: scope -->
+## Scope
+One screen; preserve the source contract.
+<!-- section: behavior-contract -->
+## Behavior
+<!-- acceptance-case: AC-01 -->
+- AC-01: a saved preference remains visible after reopening.
+<!-- section: start-conditions -->
+## Start conditions
+<!-- change-prerequisite: PRE-01 source=../settings-store/change.md contract=AC-01 -->
+| ID | Required input or guarantee | Source change outcome | Required readiness evidence |
+| --- | --- | --- | --- |
+| PRE-01 | Persisted settings are available | `../settings-store/change.md`, AC-01 | Source contract is completed on the candidate baseline |
+<!-- section: delivery-brief -->
+## Delivery
+One screen delivery.
+<!-- section: proof-plan -->
+## Proof
+<!-- primary-proof: AC-01 purpose=acceptance shape=component -->
+| Contract | Role | Observable assertion | Command or procedure |
+| --- | --- | --- | --- |
+| AC-01 | Primary | Saved preference remains visible | Repository test command |
+<!-- section: completion-criteria -->
+## Completion
+AC-01 passes.
+EOF
+    cat > PreferencesScreen.cs <<'EOF'
+namespace Preferences;
+internal sealed class PreferencesScreen;
+EOF
+    ;;
   undocumented-behavior-change)
     cat > Temperature.cs <<'EOF'
 namespace Weather;
@@ -508,6 +591,11 @@ fi
 if [[ "$scenario" == "ready-final-change" || "$scenario" == "ready-final-change-missing-extraction" ]]; then
   candidate="$(git rev-parse HEAD)"
   git notes add -m "Independent review packet for candidate $candidate. Fresh code reviewer: pass against AC-01 and AC-02 with no implementation findings. Fresh test reviewer: both material partitions have strong observable assertions, no shared resources, and no adequacy findings. Independent verification executor: dotnet run --project Weather.Tests.csproj -c Release passed; 2 discovered, 2 passed, 0 failed, 0 skipped. Each lane reviewed the raw contract and candidate without sibling conclusions."
+fi
+
+if [[ "$scenario" == "blocked-cross-change" ]]; then
+  candidate="$(git rev-parse HEAD)"
+  git notes add -m "Independent review packet for exact candidate $candidate. Fresh code reviewer: PreferencesScreen.cs is only a placeholder and does not implement AC-01. Fresh test reviewer: no test or procedure proves AC-01. Independent verification executor: no implementation command was runnable. Each lane reviewed the raw contract and candidate without sibling conclusions."
 fi
 
 if [[ "$scenario" == "undocumented-behavior-change" ]]; then

@@ -63,6 +63,12 @@ Check that the main document contains current truth rather than clarification lo
 receipts, transaction state, repeated rationale, empty headings, or an exhaustive private edit plan.
 Likely touchpoints should orient the developer while remaining explicitly non-binding.
 
+Run default structural validation for format-3 records. Require exactly `none` or complete `PRE-*`
+start conditions, repository-contained source paths, declared source contracts, complete human
+rows, and an acyclic graph. Do not use `--require-ready` during design review: a structurally valid
+dependent change may be approved while its upstream outcome is still planned. Report a missing or
+ambiguous source outcome as Blocking; readiness itself remains an implementation gate.
+
 ## Review the contract
 
 Check:

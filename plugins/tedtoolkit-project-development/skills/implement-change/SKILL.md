@@ -46,6 +46,23 @@ contract, proof, map, or renewed-approval change must migrate to format 3.
 For Standard or a single-delivery Controlled change, validate its supported format and use its
 embedded delivery brief directly.
 
+For every format-3 implementation boundary, capture the full implementation baseline SHA before
+changing lifecycle status or target artifacts, then run:
+
+```text
+bash "${CLAUDE_PLUGIN_ROOT}"/scripts/validate-acceptance-specification.sh \
+  --require-ready --baseline <full-implementation-baseline-sha> <change.md>
+```
+
+Use `--allow-approved-prerequisite-legacy <known-approved-base-sha>` only for an unchanged active
+format-3 record that predates prerequisite markers; record that compatibility choice in the
+handoff. For a multi-item parent, pass the same explicit option to `validate-work-items.sh` before
+running candidate-bound readiness; never let the structural preflight silently drop it. A nonzero
+validation or readiness result blocks implementation, does not change the approved status, and
+returns the exact unmet source contract to `scope-changes` or `design-change`. Never accept an
+uncommitted upstream status edit, another worker's message, priority, or preferred sequence as
+readiness evidence.
+
 Inspect the code and choose concrete tests, files, private symbols, algorithms, and behavior slices.
 Treat evidence-backed likely touchpoints as helpful, non-binding orientation. Prefer repository
 conventions and the smallest design that satisfies the approved result.

@@ -11,9 +11,9 @@ scenarios:
         TEDTOOLKIT_REPO_ROOT: "${REPO_ROOT}"
         LC_ALL: "C.UTF-8"
       commands:
-        - "timeout 220s bash -lc 'export PATH=\"/usr/bin:/bin:$PATH\"; bash run.sh'"
+        - "timeout 420s bash -lc 'export PATH=\"/usr/bin:/bin:$PATH\"; bash run.sh'"
     assertions:
       - type: "exit_success"
       - type: "output_contains"
         value: "OK: workflow script regressions passed"
-    timeout: 230
+    timeout: 430

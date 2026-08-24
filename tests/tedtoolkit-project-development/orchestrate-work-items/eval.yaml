@@ -90,6 +90,28 @@ scenarios:
       - "Does not dispatch work around the PART-002/PART-003 cycle and routes correction to plan-work-items."
     timeout: 300
 
+  - name: "Compose explicit compatibility for an unchanged legacy parent"
+    prompt: "Audit the approved multi-item parent at docs/changes/legacy-parent/change.md before dispatch. It is an unchanged tracked active format-3 record that predates prerequisite markers. The caller explicitly selects legacy-approved-base as the known approved compatibility base and HEAD as the authoritative integration revision. Run the complete read-only pre-dispatch chain: work-item validation, scheduling, and candidate-bound readiness, consistently passing the explicit compatibility base wherever required. Report the exact commands and, only if the whole chain passes, state exactly `Overall dispatch preflight: READY`. Do not create workers, branches, worktrees, or modify files."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh legacy-parent-readiness"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "command", run: "git status --porcelain", stdout_empty: true }
+      - { type: "output_contains", value: "--allow-approved-prerequisite-legacy" }
+      - { type: "output_contains", value: "legacy-approved-base" }
+      - { type: "output_contains", value: "--require-ready" }
+      - { type: "output_contains", value: "--baseline" }
+      - { type: "output_contains", value: "DEPRECATED" }
+      - { type: "output_contains", value: "Overall dispatch preflight: READY" }
+    rubric:
+      - "Composes the caller-selected legacy compatibility base with candidate-bound readiness instead of omitting either option or inferring a base."
+      - "Resolves and records the compatibility base and authoritative integration revision while surfacing the deprecation notice."
+      - "Actually runs structural work-item validation, scheduling, and candidate-bound readiness with the explicit base; every stage passes before it reports the overall preflight READY."
+      - "Does not dispatch or mutate repository state."
+    timeout: 420
+
   - name: "Execute, integrate, and verify two independent items"
     prompt: "Fully implement the approved independent-flags Controlled change. FLAG-001 and FLAG-002 are both ready and have disjoint write sets, so use isolated workers when available, preserve one coordinator, run each item proof, serialize integration, run bash verify-all.sh on the combined authoritative revision, mark items Verified only after combined proof passes, and perform the final integrated-change review. Branch and worktree creation for these approved items is authorized; clean up completed worker worktrees but retain temporary branches."
     setup:

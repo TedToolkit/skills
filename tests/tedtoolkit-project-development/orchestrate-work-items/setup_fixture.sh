@@ -44,6 +44,11 @@ $contract_markers
 
 $contracts
 
+<!-- section: start-conditions -->
+## Start conditions
+<!-- change-prerequisite: none -->
+None. Ready from the approved baseline.
+
 <!-- section: delivery-brief -->
 ## Delivery disposition
 
@@ -202,6 +207,24 @@ EOF
     write_item "$change_dir" PART-002 Second Approved "PART-003: third result" Second.cs "Owns AC-02" "Produce the second result."
     write_item "$change_dir" PART-003 Third Approved "PART-002: second result" Third.cs "Owns AC-03" "Produce the third result."
     ;;
+  legacy-parent-readiness)
+    change_dir=docs/changes/legacy-parent
+    write_change "$change_dir" "Legacy parent readiness" $'- AC-01: the first result is available.\n- AC-02: the second result is available.'
+    sed -i '/<!-- section: start-conditions -->/,/<!-- section: delivery-brief -->/{ /<!-- section: delivery-brief -->/!d; }' "$change_dir/change.md"
+    cat > "$change_dir/work-items.md" <<'EOF'
+<!-- delivery-map -->
+## Delivery map
+
+<!-- approval-source: Fixture owner -->
+
+| ID | Outcome | Contract ownership | Real prerequisites and supplied input | Status | Document |
+| --- | --- | --- | --- | --- | --- |
+| LEGACY-001 | First | Owns AC-01 | None | Approved | `work-items/LEGACY-001.md` |
+| LEGACY-002 | Second | Owns AC-02 | None | Approved | `work-items/LEGACY-002.md` |
+EOF
+    write_item "$change_dir" LEGACY-001 First Approved None First.cs "Owns AC-01" "Produce the first result."
+    write_item "$change_dir" LEGACY-002 Second Approved None Second.cs "Owns AC-02" "Produce the second result."
+    ;;
   execute-dependent-items)
     change_dir=docs/changes/dependent-chain
     write_change "$change_dir" "Build and consume a verified registry" $'- AC-01: the registry exposes alpha.\n- AC-02: the consumer reads alpha from the verified registry.'
@@ -309,3 +332,6 @@ esac
 rm -f setup_fixture.sh
 git add -A
 git commit -qm "fixture"
+if [[ $scenario == legacy-parent-readiness ]]; then
+    git tag legacy-approved-base
+fi

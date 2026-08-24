@@ -60,6 +60,44 @@ EOF
 This planned change introduces the persistent settings store required by future consumers.
 EOF
     ;;
+  scoped-dependent-draft)
+    mkdir -p docs/changes/settings-store
+    cat > docs/changes/settings-store/change.md <<'EOF'
+# Provide a settings store
+<!-- change-format: 3 -->
+<!-- workflow-profile: standard -->
+<!-- change-kind: behavior-change -->
+<!-- change-status: approved -->
+<!-- delivery-shape: single -->
+<!-- approval-source: Fixture owner -->
+<!-- section: goal-rationale -->
+## Goal
+Applications can persist settings.
+<!-- section: scope -->
+## Scope
+Provide the settings-store contract only.
+<!-- section: behavior-contract -->
+## Behavior
+<!-- acceptance-case: AC-01 -->
+- AC-01: a caller can persist and retrieve one setting.
+<!-- section: start-conditions -->
+## Start conditions
+<!-- change-prerequisite: none -->
+None. Ready from the approved baseline.
+<!-- section: delivery-brief -->
+## Delivery
+One bounded settings-store delivery.
+<!-- section: proof-plan -->
+## Proof
+<!-- primary-proof: AC-01 purpose=acceptance shape=component -->
+| Contract | Role | Observable assertion | Command or procedure |
+| --- | --- | --- | --- |
+| AC-01 | Primary | Persisted setting can be retrieved | Repository test command |
+<!-- section: completion-criteria -->
+## Completion
+AC-01 passes.
+EOF
+    ;;
   answer-persistence)
     mkdir -p docs/changes/compatibility
     cat > docs/changes/compatibility/change.md <<'EOF'

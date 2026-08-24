@@ -41,7 +41,8 @@ the contract:
 2. current, expected, failure, boundary, and deliberately preserved behavior;
 3. scope, non-goals, public or persisted contracts, and reversibility;
 4. security, migration/recovery, operations, compatibility, architecture, and external effects;
-5. real prerequisites and whether one bounded delivery can implement and prove the goal; and
+5. real prerequisites, concrete outcomes supplied by another change, and whether one bounded
+   delivery can implement and prove the goal; and
 6. the narrowest credible primary proof plus risk-driven conditional proof.
 
 Ask one highest-impact question at a time. When repository evidence supports a recommendation,
@@ -88,6 +89,13 @@ behavior changes, bug fixes, and migrations; `INV-*` for behavior-preserving ref
 owner, and downstream decision for experiments. Give every contract exactly one stable
 `primary-proof` marker as the canonical contract/purpose/shape mapping and one concise human row for
 its observable assertion and command; add conditional proof only for an applicable risk.
+
+Give every format-3 Draft a `start-conditions` section. Declare exactly
+`<!-- change-prerequisite: none -->` or one or more stable `PRE-*` markers from the template. A
+concrete prerequisite names the relative source `change.md`, the source `AC-*`, `INV-*`, `STR-*`,
+or `EXP-*` outcome, the supplied guarantee, and the readiness evidence required on an explicit Git
+baseline. Record an expected criterion, not a claim that it already passed. Keep the dependent
+change standalone and return an unscoped dependency or possible inseparability to `scope-changes`.
 
 Run `bash "${CLAUDE_PLUGIN_ROOT}"/scripts/validate-acceptance-specification.sh <change.md>` for a
 format-3 record. Invoke `architecture-design` when an enduring technical choice is required. Before

@@ -76,6 +76,12 @@ shape:
 Several independently valuable changes form a change set owned by `scope-changes`; they are not a
 delivery shape of one change.
 
+Separate changes may have a directed prerequisite when the source outcome retains independent
+value and the dependent change consumes one concrete completed contract. The dependent record
+restates the supplied guarantee with a repository-relative source path and contract ID; it never
+depends on priority, preferred order, or change status alone. If the outcomes cannot be approved,
+proved, released, and recovered independently, keep them inseparable instead of adding an edge.
+
 One delivery coordinator owns every approved multi-item Controlled change through authoritative
 integration, even when only one item is ready. Execution is sequential by default.
 `multi-item-parallel` is an optional wave strategy only when at least two dependency-ready,
@@ -128,6 +134,7 @@ constraint it consumes instead of making a human reopen every upstream document.
 | --- | --- | --- |
 | Change set | The zero, one, or several coherent changes that exactly cover one source request and its explicit dispositions. | One umbrella change, a cross-change work-item map, or a reason to create orchestration state. |
 | Change design | One approved goal, behavior, invariant, or experiment contract, scope, constraints, proof, and completion boundary. | An agent transcript, exhaustive file list, or task sequence. |
+| Change prerequisite | One concrete `AC-*`, `INV-*`, `STR-*`, or `EXP-*` outcome supplied by another standalone change and required on an explicit Git baseline before dependent implementation. | Priority, preferred sequence, a cross-change work-item, or an upstream status without its contract. |
 | Embedded delivery brief | The one Standard or single-delivery Controlled implementation boundary inside `change.md`. | A hidden second work item or multi-delivery map. |
 | Work item | One independently verifiable delivery inside one Controlled change, with a bounded outcome, real prerequisites, constraints, primary proof, and done criteria. | Research, approval, external operation, or private implementation script. |
 | Delivery owner | The user-facing implementation coordinator for one delivery, or integration coordinator for a multi-item change; the only role that updates lifecycle/status. | The review coordinator or a specialist reviewer. |
@@ -152,7 +159,9 @@ blob, or digest proves that a human approved a change.
    boundary questions, and routes zero, one, or several coherent candidates. One candidate creates
    no preparation artifact by default.
 2. `design-change` investigates one candidate, owns its contract clarification, classifies the
-   profile and kind, and presents the proposed artifacts, proof, risks, and escalation triggers.
+   profile and kind, and presents the proposed artifacts, proof, risks, and escalation triggers. A
+   format-3 Draft declares exactly no cross-change prerequisite or complete `PRE-*` source outcomes;
+   default validation proves graph structure but does not require planned sources to be complete.
 3. Fast stops at a concise pre-write plan; after approval it hands implementation directly to the
    applicable implementation skill without creating a change record.
 4. Standard creates one concise `change.md` from the current truth. Its single human approval
@@ -169,14 +178,16 @@ blob, or digest proves that a human approved a change.
 7. `implement-change` chooses private implementation and concrete proof. Its local preflight is
    informative after implementation authorization; another approval is required only when it
    discloses new scope, behavior, public contract, security, migration, dependency, architecture,
-   destructive action, or external side effect.
+   destructive action, or external side effect. Before lifecycle or target writes, it validates
+   cross-change readiness against the exact implementation baseline SHA. A blocked prerequisite
+   leaves the dependent change Approved.
 8. `review-implementation` coordinates code-correctness, test-adequacy, and candidate-bound
    verification lanes, then issues the only aggregate conclusion for one delivery candidate or the
    integrated parent change. It uses fresh, non-writing SubAgents only when independence or context
    separation materially improves confidence. Public/persisted contracts, security, migration,
    concurrency, shared cross-item boundaries, difficult reversal, and other material Controlled
    risks require `independent`; a coordinator may perform a `compact` review for bounded low-risk
-   items. Missing required independence is Blocking.
+   items. Missing required independence or candidate-bound cross-change readiness is Blocking.
 9. The user-facing delivery owner advances lifecycle state. A single delivery uses
    `Draft → Approved → In progress → Implemented → Completed`. A multi-item map uses
    `Draft → Approved → In progress → Implemented → Verified`; only `Verified` supplies a
@@ -195,6 +206,13 @@ unchanged. Drafts, renewed approval, or material edits migrate to format 3. Vali
 must enter compatibility explicitly and emit a deprecation notice; unversioned Markdown never enters
 it heuristically. Remove the path in the next declared breaking plugin release after maintained
 repositories have no active format-2 changes.
+
+An active format-3 record created before change-prerequisite markers may complete only through
+`--allow-approved-prerequisite-legacy <known-approved-base-sha>`. The validator requires the same
+tracked path and permits only lifecycle-status drift from that base, emits a deprecation notice, and
+rejects Draft, untracked, or materially revised records. New and revised format-3 contracts use the
+normal prerequisite declaration. Readiness additionally requires `--require-ready --baseline
+<exact-sha>` and reads upstream contracts only from that Git tree.
 
 A Fast plan is recoverable only in the user-facing context that presented and received approval for
 its exact text. If that context or exact plan identity is unavailable, re-present the smallest plan

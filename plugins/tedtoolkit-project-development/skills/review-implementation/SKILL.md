@@ -42,6 +42,14 @@ that context. Record the approved contract path and human approval source as aut
 Any candidate, relevant baseline, or approved-contract change makes the conclusion or affected
 professional judgment stale.
 
+Repeat cross-change readiness before concluding. For a committed candidate, run format-3 validation
+with `--require-ready --baseline <candidate-sha>`. For a frozen uncommitted bundle, use the recorded
+implementation `HEAD` baseline only after proving that every prerequisite source record is unchanged
+by the bundle; otherwise report Blocking because readiness is not candidate-bound. An unmet source
+contract is Blocking and never changes the dependent change's approved lifecycle status. An explicit
+legacy prerequisite base remains valid only when the validator confirms the contract changed by
+lifecycle status alone.
+
 Do not infer a missing behavior contract from the diff. Route behavior-changing code without an
 approved boundary to `design-change`. In `delivery-candidate`, require one selected work item when a
 Controlled change has a delivery map. In `integrated-change`, require every non-superseded item to be
@@ -208,6 +216,11 @@ Ready to merge | Ready with follow-ups | Not ready | Stale
 - Executed by verification lane:
 - Not reviewed or verified:
 ```
+
+Emit every report heading above exactly and in order for every conclusion, including `Not ready`.
+Do not rename, merge, or omit later sections after finding an early blocker. Omit only `## Change
+closure decision` unless the reviewed subject is a complete Ready-to-merge parent with extraction
+complete; use `none` or `not applicable` where another section has no content.
 
 Choose `Not ready` for Blocking findings or missing required independence, `Ready with follow-ups`
 when only Important findings remain, `Ready to merge` only with complete traceability, required

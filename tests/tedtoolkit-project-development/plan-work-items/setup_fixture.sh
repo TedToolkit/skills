@@ -34,6 +34,11 @@ Change normalization of in-range values only; preserve the public API and out-of
 <!-- acceptance-case: AC-01 -->
 - AC-01: normalization preserves an in-range decimal value exactly.
 
+<!-- section: start-conditions -->
+## Start conditions
+<!-- change-prerequisite: none -->
+None. Ready from the approved baseline.
+
 <!-- section: delivery-brief -->
 ## Delivery brief
 
@@ -103,6 +108,11 @@ Ingestion uses the verified public parser and exposes the same accepted and reje
 ## Constraints and risks
 
 `TryParse(string?, out Temperature)` is public and existing constructor behavior remains compatible.
+
+<!-- section: start-conditions -->
+## Start conditions
+<!-- change-prerequisite: none -->
+None. Ready from the approved baseline.
 
 <!-- section: delivery-brief -->
 ## Delivery disposition

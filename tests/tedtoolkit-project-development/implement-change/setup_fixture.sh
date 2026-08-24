@@ -48,6 +48,11 @@ Scenario: Preserve an in-range decimal value
   Then the result remains 12.25 Celsius
 ```
 
+<!-- section: start-conditions -->
+## Start conditions
+<!-- change-prerequisite: none -->
+None. Ready from the approved baseline.
+
 <!-- section: delivery-brief -->
 ## Delivery brief
 
@@ -150,6 +155,11 @@ Correct the one documented spelling error. Do not change code, APIs, examples, o
 <!-- structural-outcome: STR-01 -->
 - STR-01: `Guide.md` contains "the parser" and no longer contains "teh parser"; all other lines remain unchanged.
 
+<!-- section: start-conditions -->
+## Start conditions
+<!-- change-prerequisite: none -->
+None. Ready from the approved baseline.
+
 <!-- section: delivery-brief -->
 ## Delivery brief
 
@@ -222,6 +232,11 @@ Scenario: Format a name with surrounding whitespace
   Then the result is "Hello, Ada!"
 ```
 
+<!-- section: start-conditions -->
+## Start conditions
+<!-- change-prerequisite: none -->
+None. Ready from the approved baseline.
+
 <!-- section: delivery-brief -->
 ## Delivery brief
 
@@ -288,6 +303,86 @@ EOF
     cat > .binstub/dotnet.cmd <<'EOF'
 @echo off
 bash "%~dp0dotnet" %*
+EOF
+    ;;
+  blocked-cross-change)
+    mkdir -p docs/changes/settings-store docs/changes/preferences-screen
+    cat > docs/changes/settings-store/change.md <<'EOF'
+# Provide a settings store
+<!-- change-format: 3 -->
+<!-- workflow-profile: standard -->
+<!-- change-kind: behavior-change -->
+<!-- change-status: approved -->
+<!-- delivery-shape: single -->
+<!-- approval-source: Fixture owner -->
+<!-- section: goal-rationale -->
+## Goal
+Applications can persist settings.
+<!-- section: scope -->
+## Scope
+Provide the settings-store contract only.
+<!-- section: behavior-contract -->
+## Behavior
+<!-- acceptance-case: AC-01 -->
+- AC-01: a caller can persist and retrieve one setting.
+<!-- section: start-conditions -->
+## Start conditions
+<!-- change-prerequisite: none -->
+None. Ready from the approved baseline.
+<!-- section: delivery-brief -->
+## Delivery
+One bounded settings-store delivery.
+<!-- section: proof-plan -->
+## Proof
+<!-- primary-proof: AC-01 purpose=acceptance shape=component -->
+| Contract | Role | Observable assertion | Command or procedure |
+| --- | --- | --- | --- |
+| AC-01 | Primary | Persisted setting can be retrieved | Repository test command |
+<!-- section: completion-criteria -->
+## Completion
+AC-01 passes.
+EOF
+    cat > docs/changes/preferences-screen/change.md <<'EOF'
+# Add a preferences screen
+<!-- change-format: 3 -->
+<!-- workflow-profile: standard -->
+<!-- change-kind: behavior-change -->
+<!-- change-status: approved -->
+<!-- delivery-shape: single -->
+<!-- approval-source: Fixture owner -->
+<!-- section: goal-rationale -->
+## Goal
+Users can edit persisted preferences.
+<!-- section: scope -->
+## Scope
+Add the preferences screen without changing the settings-store contract.
+<!-- section: behavior-contract -->
+## Behavior
+<!-- acceptance-case: AC-01 -->
+- AC-01: a user can save one preference through the screen.
+<!-- section: start-conditions -->
+## Start conditions
+<!-- change-prerequisite: PRE-01 source=../settings-store/change.md contract=AC-01 -->
+| ID | Required input or guarantee | Source change outcome | Required readiness evidence |
+| --- | --- | --- | --- |
+| PRE-01 | Persisted settings are available | `../settings-store/change.md`, AC-01 | Source contract is completed on the implementation baseline |
+<!-- section: delivery-brief -->
+## Delivery
+Add one preferences screen.
+<!-- section: proof-plan -->
+## Proof
+<!-- primary-proof: AC-01 purpose=acceptance shape=component -->
+| Contract | Role | Observable assertion | Command or procedure |
+| --- | --- | --- | --- |
+| AC-01 | Primary | Saved preference is visible after reopening | Repository test command |
+<!-- section: completion-criteria -->
+## Completion
+AC-01 passes.
+EOF
+    cat > PreferencesScreen.cs <<'EOF'
+namespace Preferences;
+
+internal sealed class PreferencesScreen;
 EOF
     ;;
   unapproved-design)
