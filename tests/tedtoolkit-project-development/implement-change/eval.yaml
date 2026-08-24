@@ -87,6 +87,27 @@ scenarios:
       - "Returns the exact candidate for review without claiming final merge readiness."
     timeout: 420
 
+  - name: "Implement a simple behavior without manufacturing abstractions"
+    prompt: "Implement the approved Standard greeting-whitespace change at docs/changes/greeting-whitespace/change.md, add its focused AC-01 proof, and stop when the exact candidate is ready for review."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh minimal-shape"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_contains", path: "Greeter.cs", value: "Trim()" }
+      - { type: "file_contains", path: "GreeterTests.cs", value: " Ada " }
+      - { type: "file_contains", path: "GreeterTests.cs", value: "Hello, Ada!" }
+      - { type: "command", run: "test \"$(find . -maxdepth 1 -name '*.cs' -type f | wc -l | tr -d ' ')\" = 2" }
+      - { type: "command", run: "test \"$(grep -Ec '^[[:space:]]*public ' Greeter.cs)\" = 2" }
+      - { type: "command", run: "! grep -Eq '^[[:space:]]*(private|protected|internal)[[:space:]].*\\(' Greeter.cs" }
+      - { type: "command", run: "git status --porcelain", stdout_contains: "Greeter.cs" }
+    rubric:
+      - "Implements AC-01 through the existing Greeter.Format owner and preserves its public signature."
+      - "Does not create a helper class, interface, factory, strategy, forwarding method, or widened production surface for this one direct transformation."
+      - "Adds the focused AC-01 proof and returns the exact candidate for review without claiming final merge readiness."
+    timeout: 420
+
   - name: "Do not implement without an approved design"
     prompt: "Implement the proposed TryParse API with TDD. The only change document is still marked Draft, and I have not approved it. Inspect the repository and tell me what you need next. Do not modify files yet."
     setup:

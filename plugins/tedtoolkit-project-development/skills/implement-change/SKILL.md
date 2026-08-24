@@ -54,6 +54,31 @@ Present a concise local plan containing the loop, primary proof, conditional gat
 shared resources, and risks. After implementation was already authorized, this preflight is
 informative: continue without another approval unless it reveals a workflow escalation trigger.
 
+## Justify the implementation shape
+
+Use the smallest design that clearly satisfies the approved result and repository conventions, not
+the design with mechanically fewest lines. Before adding or retaining a production type, member, or
+abstraction, identify its present responsibility, caller, or boundary and compare it with a direct
+change to the existing design:
+
+- Add a class, record, module, or similar type only when it owns a cohesive responsibility, state,
+  lifecycle, policy, or boundary that does not fit an existing owner without materially weakening
+  cohesion. Do not create a single-use wrapper or data carrier when the existing design already has
+  a natural owner.
+- Extract a function or method when it names a meaningful operation, removes real duplication,
+  isolates a non-trivial decision or side effect, or serves an actual caller. Keep simple one-use
+  logic inline when extraction would only add navigation or forwarding.
+- Add an interface, base type, factory, adapter, or other indirection only for an evidenced boundary,
+  substitutability need, lifecycle, dependency rule, or integration constraint. Neither a possible
+  future use nor the current number of implementations decides this by itself.
+- Choose the narrowest accessibility supported by real callers and required tooling. Do not widen
+  production visibility solely for tests. A new or widened public or protected surface must already
+  belong to the approved contract; otherwise stop on the public-contract escalation trigger.
+
+After proof is Green, remove superseded helpers, forwarding layers, duplicated paths, and speculative
+extension points. Do not split or combine code to satisfy arbitrary size, type-count, or method-count
+thresholds.
+
 ## Use the change-kind loop
 
 ### Behavior change
@@ -154,6 +179,8 @@ Record actual changed artifacts, proof purpose and execution shape, command or p
 assertion, candidate-bound results/counts, resource prerequisites, migration/documentation state, and
 remaining risks. Keep process narration out of the human change/item; update only current completion
 truth and put only necessary candidate or integration state in coordinator-owned control state.
+When that state is persisted with approval, use `.tedtoolkit/runs/<workflow-id>/` through the shared
+tool state layout; do not make the worker or reviewer a second status owner.
 
 Stop for renewed approval only on a workflow escalation trigger. For a single delivery, set the
 change to `in-progress` when target work starts. After primary and conditional proof pass, the diff

@@ -42,3 +42,22 @@ scenarios:
       - "Checks both approved cases and concludes the code-correctness lane passes without manufacturing a defect."
       - "Does not assess test adequacy or convert a specialist pass into merge readiness."
     timeout: 360
+
+  - name: "Find unnecessary public abstractions with concrete cost"
+    prompt: "Use $review-code as a fresh read-only code-only reviewer for eval-base..HEAD against docs/changes/ratio/change.md. Check implementation correctness, public-contract compatibility, and maintainability only; do not review tests, run verification, modify files, or issue a final merge conclusion."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh overdesigned"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "command", run: "git status --porcelain", stdout_empty: true }
+      - { type: "output_regex", pattern: '(?mi)^## Lane conclusion[ \t]*\r?\n(?:[ \t]*\r?\n)?`?findings`?[ \t]*$' }
+      - { type: "output_regex", pattern: '(?i)(unnecessary public|public (policy|surface|api|supporting|extension)|compatibility surface)' }
+      - { type: "output_not_contains", value: "Ready to merge" }
+    rubric:
+      - "Recognizes that the candidate satisfies AC-01 and AC-02 but adds two unapproved public extension points for a local denominator check."
+      - "Explains the concrete public-surface, ownership, or navigation cost and proposes the smallest correction, such as keeping the check inside Ratio.TryDivide."
+      - "Bases the finding on the approved contract and actual candidate rather than a class-count, method-length, or one-implementation rule."
+      - "Remains a read-only code-correctness lane and does not assess tests or announce merge readiness."
+    timeout: 360

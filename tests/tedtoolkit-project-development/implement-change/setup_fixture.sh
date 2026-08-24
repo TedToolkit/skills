@@ -181,6 +181,115 @@ grep -Fq 'Use the parser through its public Parse method.' Guide.md
 EOF
     chmod +x verify-docs.sh
     ;;
+  minimal-shape)
+    mkdir -p docs/changes/greeting-whitespace .binstub
+    cat > docs/changes/greeting-whitespace/change.md <<'EOF'
+# Ignore surrounding name whitespace
+
+<!-- change-format: 3 -->
+<!-- workflow-profile: standard -->
+<!-- change-kind: behavior-change -->
+<!-- change-status: approved -->
+<!-- delivery-shape: single -->
+<!-- approval-source: Fixture owner -->
+
+<!-- section: goal-rationale -->
+## Goal and rationale
+
+A greeting uses the caller's name without accidental surrounding whitespace.
+
+<!-- section: scope -->
+## Scope and non-goals
+
+Trim leading and trailing whitespace from the supplied name. Preserve the existing public type and
+method signature; do not add another formatting mode or change the greeting punctuation.
+
+<!-- section: behavior-contract -->
+## Behavior contract
+
+<!-- behavior-change: OB-01 -->
+- Current: surrounding name whitespace appears in the greeting.
+- Expected: surrounding name whitespace is omitted.
+- Preserved: the greeting remains `Hello, <name>!` through `Greeter.Format(string)`.
+
+<!-- acceptance-case: AC-01 -->
+### AC-01 — Trim surrounding name whitespace
+
+```gherkin
+Scenario: Format a name with surrounding whitespace
+  Given the name " Ada "
+  When a caller formats the greeting
+  Then the result is "Hello, Ada!"
+```
+
+<!-- section: delivery-brief -->
+## Delivery brief
+
+- Likely touchpoints: `Greeter.cs` and `GreeterTests.cs`; these are non-binding.
+- Constraint: preserve the existing public surface.
+
+<!-- section: proof-plan -->
+## Proof
+
+<!-- primary-proof: AC-01 purpose=acceptance shape=unit -->
+| Contract | Role | Observable assertion | Command |
+| --- | --- | --- | --- |
+| AC-01 | Primary | `Format(" Ada ")` returns `Hello, Ada!` | Repository test command |
+
+<!-- section: completion-criteria -->
+## Completion
+
+AC-01 passes and the candidate introduces no public-contract change.
+EOF
+    cat > CLAUDE.md <<'EOF'
+# Repository guidance
+
+Use `dotnet test Greeting.Tests.csproj -c Release` for focused verification.
+EOF
+    cat > Greeter.cs <<'EOF'
+namespace Greetings;
+
+public static class Greeter
+{
+    public static string Format(string name) => $"Hello, {name}!";
+}
+EOF
+    cat > GreeterTests.cs <<'EOF'
+namespace Greetings.Tests;
+
+internal sealed class GreeterTests;
+EOF
+    cat > .binstub/dotnet <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >> .dotnet-calls
+grep -Fq 'public static class Greeter' Greeter.cs || {
+  echo "AC-01 verification failed: the public Greeter type changed" >&2
+  exit 1
+}
+grep -Fq 'public static string Format(string name)' Greeter.cs || {
+  echo "AC-01 verification failed: the public Format signature changed" >&2
+  exit 1
+}
+grep -Fq 'Trim()' Greeter.cs || {
+  echo "AC-01 verification failed: surrounding whitespace is not trimmed" >&2
+  exit 1
+}
+grep -Fq ' Ada ' GreeterTests.cs || {
+  echo "AC-01 proof is missing its representative input" >&2
+  exit 1
+}
+grep -Fq 'Hello, Ada!' GreeterTests.cs || {
+  echo "AC-01 proof is missing its expected result" >&2
+  exit 1
+}
+echo "1 discovered, 1 passed, 0 failed, 0 skipped"
+EOF
+    chmod +x .binstub/dotnet
+    cat > .binstub/dotnet.cmd <<'EOF'
+@echo off
+bash "%~dp0dotnet" %*
+EOF
+    ;;
   unapproved-design)
     mkdir -p docs/changes/P2-temperature-parse
     cat > docs/changes/P2-temperature-parse/change.md <<'EOF'

@@ -58,6 +58,17 @@ Do not turn preferences, hypothetical style improvements, generic security advic
 layers into findings. Do not accept a green test name as code-correctness evidence; test adequacy is
 owned by `review-tests`.
 
+Evaluate implementation shape against present evidence, not raw code size. For every added type,
+member, abstraction, or widened access level that materially affects maintainability, determine its
+actual responsibility, caller, lifecycle, policy, or boundary and whether a simpler shape would
+preserve cohesion and the approved contract. In particular, check for single-use wrappers, trivial
+forwarding methods, speculative interfaces or factories, fragmented control flow, and production
+visibility widened only for tests. Treat a new or widened public or protected surface outside the
+approved contract as a design deviation. Report unnecessary structure only when it creates a
+concrete cost such as extra public surface, duplicated paths, obscured ownership, navigation without
+separation, or additional state/lifecycle burden. Do not issue findings solely because a class or
+method is long, an interface has one implementation, or a personal count threshold was exceeded.
+
 ## Make findings falsifiable
 
 Separate what was observed from what is inferred:

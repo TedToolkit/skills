@@ -22,7 +22,7 @@ cat > docs/changes/ratio/change.md <<'EOF'
 <!-- primary-proof: AC-02 purpose=acceptance shape=unit -->
 
 <!-- acceptance-case: AC-01 -->
-- AC-01: A non-zero denominator returns the quotient.
+- AC-01: A non-zero denominator whose quotient is representable returns the quotient.
 
 <!-- acceptance-case: AC-02 -->
 - AC-02: A zero denominator returns false without throwing.
@@ -48,6 +48,36 @@ public static class Ratio
     public static bool TryDivide(decimal numerator, decimal denominator, out decimal result)
     {
         if (denominator == 0)
+        {
+            result = default;
+            return false;
+        }
+
+        result = numerator / denominator;
+        return true;
+    }
+}
+EOF
+elif [[ $scenario == overdesigned ]]; then
+cat > Ratio.cs <<'EOF'
+namespace Numbers;
+
+public interface IDenominatorPolicy
+{
+    bool CanDivide(decimal denominator);
+}
+
+public sealed class NonZeroDenominatorPolicy : IDenominatorPolicy
+{
+    public bool CanDivide(decimal denominator) => denominator != 0;
+}
+
+public static class Ratio
+{
+    public static bool TryDivide(decimal numerator, decimal denominator, out decimal result)
+    {
+        IDenominatorPolicy policy = new NonZeroDenominatorPolicy();
+        if (!policy.CanDivide(denominator))
         {
             result = default;
             return false;
