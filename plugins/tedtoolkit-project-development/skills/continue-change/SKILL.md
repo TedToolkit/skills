@@ -68,7 +68,7 @@ Use the resolver's action without asking the user to classify size or complexity
 | `orchestrate-work-items` | Invoke `orchestrate-work-items` for the approved map. |
 | `review-implementation` | Invoke `review-implementation` against the exact candidate. If Ready, the delivery owner records `implemented`; otherwise retain `candidate-ready` or return to the owning phase. |
 | `complete-change` | Verify required review, operational handoffs, durable documentation disposition, and exact candidate identity; then record `completed`, or report the exact blocker. |
-| `none` | Report that the change is terminal and perform no delivery action. |
+| `cleanup-change` | Treat delivery as terminal, inspect repository retention guidance and durable-extraction disposition, resolve the authoritative local default-branch ref, and run `cleanup-change.sh` without `--delete`. On an explicit cleanup request or explicit continuation of this already terminal change, rerun it with `--delete`; otherwise report eligibility or the exact blocker. |
 
 If discovery changes behavior, scope, public or persisted contracts, security, migration,
 dependencies, architecture, destructive actions, or external effects, stop and return to the
@@ -82,7 +82,22 @@ For a single delivery, `implement-change` sets `in-progress` when target writes 
 `candidate-ready` after its primary and conditional proof pass and the candidate identity is
 captured in `candidate-binding`. A later continuation then resolves to review. `implemented` means
 required review passed against that binding; the next continuation owns closure. `completed` and
-`superseded` are terminal.
+`superseded` are terminal delivery states whose persisted records route only to safe cleanup.
+
+Cleanup supports structurally valid format-3 records. It never infers authority from completion,
+review, approval, or merge alone. Before deletion, name the exact directory, classify repository
+guidance as `cleanup` or `retain`, and confirm durable extraction as `captured` or `not needed`.
+`Completed` already guarantees the extraction gate; `Superseded` requires the explicit helper flag
+after the delivery owner establishes that disposition. Use:
+
+```text
+bash "${CLAUDE_PLUGIN_ROOT}"/scripts/cleanup-change.sh --default-ref <authoritative-local-ref> --retention-policy cleanup [--durable-extraction-confirmed] <change.md>
+bash "${CLAUDE_PLUGIN_ROOT}"/scripts/cleanup-change.sh --default-ref <authoritative-local-ref> --retention-policy cleanup [--durable-extraction-confirmed] --delete <change.md>
+```
+
+The first command is the eligibility check; the second is allowed only by the explicit cleanup or
+terminal-change continuation request. Preserve every reported blocker and never substitute an
+archive directory.
 
 Fast plans have no durable change record and cannot use this cross-conversation route. When the
 user requires an @-addressable change or cross-conversation recovery, `design-change` uses a

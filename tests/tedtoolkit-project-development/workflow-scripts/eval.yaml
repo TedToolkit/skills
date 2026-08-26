@@ -3,7 +3,7 @@ config:
   max_parallel_runs: 1
 
 scenarios:
-  - name: "Validate workflow scripts offline"
+  - name: "Validate core workflow scripts offline"
     mode: "static"
     setup:
       copy_test_files: true
@@ -11,7 +11,22 @@ scenarios:
         TEDTOOLKIT_REPO_ROOT: "${REPO_ROOT}"
         LC_ALL: "C.UTF-8"
       commands:
-        - "timeout 420s bash -lc 'export PATH=\"/usr/bin:/bin:$PATH\"; bash run.sh'"
+        - "timeout 420s bash -lc 'export PATH=\"/usr/bin:/bin:$PATH\"; WORKFLOW_SCRIPT_SCOPE=core bash run.sh'"
+    assertions:
+      - type: "exit_success"
+      - type: "output_contains"
+        value: "OK: workflow script regressions passed"
+    timeout: 430
+
+  - name: "Validate completed-change cleanup offline"
+    mode: "static"
+    setup:
+      copy_test_files: true
+      env:
+        TEDTOOLKIT_REPO_ROOT: "${REPO_ROOT}"
+        LC_ALL: "C.UTF-8"
+      commands:
+        - "timeout 420s bash -lc 'export PATH=\"/usr/bin:/bin:$PATH\"; WORKFLOW_SCRIPT_SCOPE=cleanup bash run.sh'"
     assertions:
       - type: "exit_success"
       - type: "output_contains"

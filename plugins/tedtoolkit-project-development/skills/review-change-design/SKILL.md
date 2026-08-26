@@ -80,7 +80,8 @@ Check:
 5. maintenance uses `STR-<number>` target structural outcomes rather than mislabeling changed state as a preserved invariant;
 6. every material contract claim has an evidence, governing constraint, or current user decision;
 7. required enduring decisions have accepted ADRs before approval;
-8. risks, migration/recovery, operational handoffs, and completion are proportional;
+8. risks, migration/recovery, operational handoffs, durable extraction, and completion are
+   proportional, with no completed-change archive or implicit retention exception;
 9. a Standard or single-delivery Controlled record contains a usable embedded delivery brief;
 10. a multi-delivery Controlled record routes planning to `plan-work-items` without prescribing the
    future map; and

@@ -56,3 +56,19 @@ scenarios:
       - "Uses only the referenced persisted change and repository evidence, routes the approved single delivery directly to implement-change, and does not manufacture work items."
       - "Completes the structural proof, records candidate-ready rather than implemented, and stops before review until another explicit continuation."
     timeout: 420
+
+  - name: "Explicit continuation cleans one eligible terminal change"
+    prompt: "Use $continue-change for @docs/changes/comment-cleanup/change.md. This completed change is already on the authoritative default branch; continue its next lifecycle action now."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh completed"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "command", run: "test ! -e docs/changes/comment-cleanup" }
+      - { type: "file_contains", path: "Temperature.cs", value: "Represnts" }
+      - { type: "output_contains", value: "Git history" }
+    rubric:
+      - "Treats explicit continuation of the identified terminal record as cleanup authorization, resolves the authoritative local default-branch ref, and uses the deterministic cleanup helper."
+      - "Deletes only docs/changes/comment-cleanup after eligibility passes; it does not modify production source or create an archive."
+    timeout: 420

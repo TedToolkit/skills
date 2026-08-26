@@ -78,17 +78,19 @@ lifecycle, cadence, isolation, or ownership boundaries.
 
 | Document | Owns | Completion handling |
 | --- | --- | --- |
-| `.tedtoolkit/preparations/` | One source request's tracked temporary evidence index, partition, and active lanes | Apply the repository retention policy after all resulting changes no longer need coordination; otherwise retain it unless cleanup is requested. |
-| `docs/changes/` | One delivery's behavior contract and work items | Apply the repository retention policy after verified completion; otherwise retain it unless cleanup is requested. |
+| `.tedtoolkit/preparations/` | One source request's tracked temporary evidence index, partition, and active lanes | Delete after all resulting changes no longer need coordination and no tracked workflow record references it; retain only when explicit repository policy requires it. |
+| `docs/changes/` | One delivery's behavior contract and work items | Delete a completed or superseded record after it is present on the default branch, durable extraction is complete or not needed, and no tracked workflow record references it; retain only when explicit repository policy requires it. |
 | `docs/adr/` | Enduring, material decision rationale and trade-offs | Retain; supersede with a new ADR when the decision changes. |
 | `docs/architecture/` | Current system boundaries and cross-cutting semantics | Update when the current system changes. |
 | `docs/principles/` | Default rules for recurring design trade-offs | Maintain as durable guidance. |
 
 `review-implementation` reports documentation disposition after durable decisions are captured in
 ADRs, current semantics are captured in architecture records, and active migration or operational
-procedures are retained elsewhere. Deleting tracked documentation remains a separate action
-requested by the user; ignored `.tedtoolkit/runs/` and `.tedtoolkit/worktrees/` follow their defined
-successful-completion cleanup lifecycle.
+procedures are retained elsewhere. `continue-change` performs exact eligibility checks and deletes
+one terminal change only after an explicit cleanup request or explicit continuation of that already
+terminal record. Git history is the archive; do not create a completed-change documentation tree.
+Ignored `.tedtoolkit/runs/` and `.tedtoolkit/worktrees/` follow their defined successful-completion
+cleanup lifecycle.
 
 ## Development
 

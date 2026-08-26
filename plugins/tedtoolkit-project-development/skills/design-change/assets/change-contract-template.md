@@ -130,8 +130,10 @@ or add rows merely to represent test layers.
 <!-- section: completion-criteria -->
 ## Completion
 
-State the objective proof, required migration or documentation state, and operational handoff
-closure needed to complete this one goal.
+State the objective proof, required migration or durable documentation state, and operational
+handoff closure needed to complete this one goal. Record an explicit retention exception only when
+repository policy requires one; otherwise the terminal change is cleaned after merge and reference
+release under the shared workflow lifecycle.
 
 Remove every instruction, placeholder, empty heading, and inapplicable optional section before
 presenting the record. A Standard result should normally remain within one or two screens.

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-status=${1:?usage: setup_fixture.sh <draft|approved>}
+status=${1:?usage: setup_fixture.sh <draft|approved|completed>}
 case "$status" in
     draft) approval=none ;;
-    approved) approval="Fixture owner" ;;
+    approved|completed) approval="Fixture owner" ;;
     *) echo "unknown status: $status" >&2; exit 1 ;;
 esac
 
@@ -75,3 +75,4 @@ EOF
 rm -f setup_fixture.sh
 git add -A
 git commit -qm "fixture"
+git update-ref refs/remotes/origin/main HEAD

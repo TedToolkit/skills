@@ -91,6 +91,8 @@ behavior changes, bug fixes, and migrations; `INV-*` for behavior-preserving ref
 owner, and downstream decision for experiments. Give every contract exactly one stable
 `primary-proof` marker as the canonical contract/purpose/shape mapping and one concise human row for
 its observable assertion and command; add conditional proof only for an applicable risk.
+Include any durable documentation extraction or explicit retention exception needed before the
+temporary change record can be cleaned; never create a completed-change archive.
 
 Give every format-3 Draft a `start-conditions` section. Declare exactly
 `<!-- change-prerequisite: none -->` or one or more stable `PRE-*` markers from the template. A

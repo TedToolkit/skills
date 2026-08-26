@@ -203,8 +203,9 @@ continuation.
    prerequisite to another item.
    `Implemented` means an exact candidate has candidate-bound verification plus the required review,
    but has not yet passed authoritative integration verification. Any candidate, approved-contract,
-   or relevant baseline change makes the prior conclusion stale. `Superseded` is terminal and never
-   supplies a prerequisite unless the map names a verified replacement.
+   or relevant baseline change makes the prior conclusion stale. `Completed` and `Superseded` are
+   terminal delivery states and cleanup candidates; `Superseded` never supplies a prerequisite
+   unless the map names a verified replacement.
 10. A change becomes `Completed` only after the applicable final review is ready, proof and required
    operational handoffs pass, durable documentation disposition is complete, and the delivery owner
     records the transition in response to an explicit continuation.
@@ -219,8 +220,9 @@ skill and never persists a duplicated `next-action` field.
 `Draft` requests approval. Approved single delivery enters `implement-change`; approved multi-item
 delivery enters `plan-work-items` until a map exists, then requests map approval or enters
 `orchestrate-work-items`. `Candidate ready` enters `review-implementation`; `Implemented` enters
-closure; `Completed` and `Superseded` are terminal. `In progress` resumes its owning delivery path.
-Contradictory state fails closed rather than relying on prior conversation.
+closure; `Completed` and `Superseded` enter eligibility-checked cleanup when explicitly continued.
+`In progress` resumes its owning delivery path. Contradictory state fails closed rather than relying
+on prior conversation.
 
 Legacy `change-format: 2` is a deprecated read/execute-only compatibility path. It accepts only an
 explicitly versioned, already-approved record whose scope, contract, proof, and embedded map remain
@@ -260,7 +262,20 @@ turned out easier than expected.
 ## Documentation lifecycle
 
 At final review, extract enduring decisions to ADRs, current cross-cutting semantics to architecture
-records, and active migration or operations procedures to their owning guide. Apply the repository's
-document-retention policy to remaining temporary records. When no policy exists, retain them and
-report that disposition; ask about deletion only when the user requests cleanup. Git history supplies
-process recovery, so durable records and human handoffs do not retain superseded conversation history.
+records, and active migration or operations procedures to their owning guide. `docs/changes/` is an
+active-delivery workspace, not an archive. Absence of policy means cleanup: after a format-3 change
+is terminal, its exact directory is present on the authoritative default-branch ref, durable
+extraction and operational handoffs are complete, its subtree is clean, and no tracked change or
+preparation record references it, delete that directory on an explicit cleanup request or explicit
+continuation of the already terminal change. Completion, review, approval, or merge alone does not
+authorize deletion.
+
+Any remaining prerequisite marker that resolves to the target pins it regardless of the dependent
+change's lifecycle status. Any tracked preparation containing its normalized repository-relative
+path also pins it regardless of preparation status. Clean terminal referrers first. An explicit
+repository retention policy may require an exception; absence of one never defaults to retention.
+The cleanup caller passes that inspected policy disposition explicitly. `Completed` establishes
+durable extraction through its lifecycle gate; `Superseded` requires a separate `captured` or `not
+needed` extraction disposition before cleanup. Legacy records require separately inspected explicit
+cleanup rather than automatic routing. Do not create a completed-change archive, tombstone, or
+index: Git history supplies process recovery.

@@ -65,8 +65,8 @@ case "$status" in
         reason="the change contract is Draft and cannot advance without explicit approval"
         ;;
     completed|superseded)
-        action=none
-        reason="the change lifecycle is terminal"
+        action=cleanup-change
+        reason="delivery is terminal and its temporary record requires eligibility-checked cleanup"
         ;;
     candidate-ready)
         candidate_binding=$(marker_value "$change_file" candidate-binding)

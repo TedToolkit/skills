@@ -126,3 +126,7 @@ Complete when every material source intent has exactly one disposition, each sel
 entered `design-change`, material partition choices are approved, and unresolved blockers name an
 owner and next decision. Stop before implementation. For an already approved single change, bypass
 this skill and route directly to its eligible planning or implementation skill.
+
+When a tracked preparation later has no remaining coordination responsibility, delete it under the
+shared documentation lifecycle after confirming no tracked workflow record still references it.
+Do not retain it by default or move it to an archive.

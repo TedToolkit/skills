@@ -75,5 +75,8 @@ records, and authoritative status remain outside ignored state.
 After successful completion, remove the owning `runs/<workflow-id>/` only when every accepted
 candidate is reachable or otherwise preserved and no required recovery evidence exists solely
 there. Retain blocked, stale, dirty, or sole-recovery state and report its exact path and reason.
-Preparation cleanup follows the repository documentation-retention policy because it is tracked.
+Delete a tracked preparation after all resulting changes no longer need coordination and no tracked
+workflow record references it. Retain it only when explicit repository policy requires retention;
+absence of policy means cleanup. Git history supplies recovery for successfully completed tracked
+preparation state.
 Do not pre-create `cache/`, `logs/`, `tmp/`, locks, leases, receipts, or transaction state.

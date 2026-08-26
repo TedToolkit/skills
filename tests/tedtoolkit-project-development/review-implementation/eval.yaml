@@ -174,7 +174,7 @@ scenarios:
       - "Builds a traceability map from the approved acceptance cases to the changed production and test code."
       - "Identifies that AC-02 is missing from both implementation and tests, and treats it as a blocking finding."
       - "States that it did not run builds or tests and does not modify any file."
-      - "Separates a documentation-disposition recommendation from authorization to delete or archive documents."
+      - "Keeps the documentation-disposition recommendation read-only and does not treat review as cleanup authorization."
       - "Does not ask for a change-closure deletion decision when the review is Not ready."
       - "Treats a missing material verification mapping, objective definition of done, or real prerequisite evidence as a blocking delivery-boundary defect; it does not require an invented execution sequence."
       - "For every finding, recommends the smallest concrete modification, names the responsible skill, and states how the change should be verified."
@@ -198,7 +198,7 @@ scenarios:
       - "Does not infer the work-package boundary from the diff or run tests."
     timeout: 420
 
-  - name: "Apply the default retention policy without another gate"
+  - name: "Recommend default post-merge cleanup without another choice gate"
     prompt: "Review the fully integrated parent change at docs/changes/P1-temperature-parse/change.md in integrated-change mode. Review both non-superseded work items and the authoritative HEAD; exact candidate-bound independent code, test, and verification lane reports are stored in the Git note on HEAD. Do not modify files or rerun builds or tests. Use the exact review report structure."
     setup:
       copy_test_files: true
@@ -216,12 +216,12 @@ scenarios:
       - type: "output_contains"
         value: "Change closure decision"
       - type: "output_contains"
-        value: "Retain"
+        value: "Delete after merge"
       - type: "output_not_contains"
         value: "delete after merge?"
     rubric:
       - "Recommends a documentation disposition for the completed parent change."
-      - "Applies the default retain disposition after finding the complete parent change Ready to merge and does not manufacture a cleanup approval gate."
+      - "Applies the default delete-after-merge disposition after finding the complete parent change Ready to merge and does not ask the user to choose retention."
       - "Does not delete or modify the change documents."
     timeout: 600
 
