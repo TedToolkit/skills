@@ -1,0 +1,4 @@
+interface:
+  display_name: "Continue Change"
+  short_description: "Derive and continue one persisted change phase"
+  default_prompt: "Use $continue-change for the identified change.md, derive its next phase from repository state, and continue without asking the user to choose an internal workflow skill."

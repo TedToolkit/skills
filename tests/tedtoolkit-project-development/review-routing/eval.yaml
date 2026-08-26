@@ -1,0 +1,72 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Use aggregate review for an ordinary implementation-review request"
+    prompt: "For a general implementation-review request on one exact candidate, name the single workflow that owns the aggregate merge-readiness conclusion and explain when specialist lanes are dispatched. Do not inspect or modify files."
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "review-implementation" }
+      - { type: "output_regex", pattern: "(?i)aggregate.{0,80}merge-readiness|merge-readiness.{0,80}aggregate" }
+      - { type: "output_regex", pattern: "(?i)\\bspecialist\\b" }
+      - { type: "output_not_contains", value: "unavailable" }
+    rubric:
+      - "Routes the ordinary request to review-implementation as aggregate owner and treats specialists as dispatched lanes, not competing final owners."
+    timeout: 420
+
+  - name: "Allow an explicit review-code invocation"
+    prompt: "$review-code is already explicitly selected. Read selected-plugin/skills/review-code/SKILL.md, then state this lane's bounded responsibility and whether it issues the aggregate merge-readiness conclusion or executes tests. Do not inspect or modify files."
+    setup:
+      env:
+        TEDTOOLKIT_REPO_ROOT: "${REPO_ROOT}"
+      commands:
+        - "cp -R \"$TEDTOOLKIT_REPO_ROOT/plugins/tedtoolkit-project-development\" selected-plugin"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_regex", pattern: "(?i)code.{0,40}correctness|correctness.{0,40}code" }
+      - { type: "output_regex", pattern: "(?is)(?:does not|doesn't|not|neither|outside).{0,120}aggregate" }
+      - { type: "output_not_contains", value: "unavailable" }
+      - { type: "output_not_contains", value: "not available" }
+      - { type: "output_not_contains", value: "not installed" }
+    rubric:
+      - "Recognizes the explicit specialist and keeps aggregate conclusion and test execution outside review-code ownership."
+    timeout: 300
+
+  - name: "Allow an explicit review-tests invocation"
+    prompt: "$review-tests is already explicitly selected. Read selected-plugin/skills/review-tests/SKILL.md, then state this lane's bounded responsibility and whether it executes tests or issues the aggregate merge-readiness conclusion. Do not inspect or modify files."
+    setup:
+      env:
+        TEDTOOLKIT_REPO_ROOT: "${REPO_ROOT}"
+      commands:
+        - "cp -R \"$TEDTOOLKIT_REPO_ROOT/plugins/tedtoolkit-project-development\" selected-plugin"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_regex", pattern: "(?i)test.{0,40}adequacy|adequacy.{0,40}test" }
+      - { type: "output_regex", pattern: "(?i)partition|assertion strength|oracles?" }
+      - { type: "output_regex", pattern: "(?is)(?:does not|doesn't|not|neither|outside).{0,120}(?:execute|run)" }
+      - { type: "output_not_contains", value: "unavailable" }
+      - { type: "output_not_contains", value: "not available" }
+      - { type: "output_not_contains", value: "not installed" }
+    rubric:
+      - "Recognizes the explicit test-adequacy specialist without executing tests or taking aggregate ownership."
+    timeout: 300
+
+  - name: "Allow an explicit verify-implementation invocation"
+    prompt: "$verify-implementation is already explicitly selected. Read selected-plugin/skills/verify-implementation/SKILL.md, then state this lane's bounded responsibility for one exact candidate and whether it fixes implementation defects or issues the aggregate merge-readiness conclusion. Do not inspect or modify files."
+    setup:
+      env:
+        TEDTOOLKIT_REPO_ROOT: "${REPO_ROOT}"
+      commands:
+        - "cp -R \"$TEDTOOLKIT_REPO_ROOT/plugins/tedtoolkit-project-development\" selected-plugin"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_regex", pattern: "(?is)verif.{0,100}candidate|candidate.{0,100}verif" }
+      - { type: "output_regex", pattern: "(?i)(?:exact|precisely|specific).{0,60}candidate|candidate.{0,60}(?:exact|precisely|specific)|one.{0,40}(?:bound )?candidate" }
+      - { type: "output_regex", pattern: "(?i)(?:does not|doesn't|not|neither|outside).{0,100}(?:fix|modify|change)" }
+      - { type: "output_not_contains", value: "unavailable" }
+      - { type: "output_not_contains", value: "not available" }
+      - { type: "output_not_contains", value: "not installed" }
+    rubric:
+      - "Recognizes the explicit verification executor and keeps fixes and aggregate conclusions outside its ownership."
+    timeout: 300

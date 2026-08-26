@@ -1,0 +1,17 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Validate project-development release and invocation contract offline"
+    mode: "static"
+    setup:
+      copy_test_files: true
+      env:
+        TEDTOOLKIT_REPO_ROOT: "${REPO_ROOT}"
+      commands:
+        - "py -3.10 check.py"
+        - "py -3.10 -m unittest -v test_check.py"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "OK: project-development plugin contract" }

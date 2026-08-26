@@ -1,0 +1,36 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Route an explicit prepare-change invocation to scope-changes"
+    prompt: "$prepare-change is already explicitly selected. Read selected-plugin/skills/prepare-change/SKILL.md and follow it to separate a request that asks for both a resume rewrite and a repository lint command. Name the independent outcomes and canonical workflow, then stop without writing files."
+    setup:
+      env:
+        TEDTOOLKIT_REPO_ROOT: "${REPO_ROOT}"
+      commands:
+        - "cp -R \"$TEDTOOLKIT_REPO_ROOT/plugins/tedtoolkit-project-development\" selected-plugin"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "scope-changes" }
+      - { type: "output_not_contains", value: "unavailable" }
+      - { type: "output_not_contains", value: "not available" }
+      - { type: "output_not_contains", value: "not installed" }
+      - { type: "output_regex", pattern: "(?is)(?:\\bprepare-change\\b.{0,200}\\b(?:now|renamed|deprecated|replacement|replaced)\\b.{0,200}\\bscope-changes\\b|\\bscope-changes\\b.{0,200}\\b(?:replaces|replacement|renamed|deprecated)\\b.{0,200}\\bprepare-change\\b)" }
+      - { type: "output_regex", pattern: "(?i)\\br[eé]sum[eé]\\b" }
+      - { type: "output_contains", value: "lint" }
+      - { type: "output_not_contains", value: "docs/changes/" }
+    rubric:
+      - "Announces the rename and actually partitions the two independent outcomes through scope-changes."
+    timeout: 240
+
+  - name: "Use canonical scope-changes for an ordinary ambiguous request"
+    prompt: "Partition this ambiguous request into coherent independent changes: improve plugin release metadata and separately add an offline repository lint. Name the workflow and stop before writing files."
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "scope-changes" }
+      - { type: "output_not_contains", value: "deprecated" }
+      - { type: "output_not_contains", value: "renamed" }
+    rubric:
+      - "Routes the unprefixed request to scope-changes without compatibility-alias migration noise."
+    timeout: 240

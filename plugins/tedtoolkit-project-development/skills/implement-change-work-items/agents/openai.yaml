@@ -1,0 +1,6 @@
+interface:
+  display_name: "Implement Change Work Items (Deprecated)"
+  short_description: "Compatibility alias; use orchestrate-work-items"
+  default_prompt: "Use $implement-change-work-items only to route this legacy invocation to $orchestrate-work-items."
+policy:
+  allow_implicit_invocation: false

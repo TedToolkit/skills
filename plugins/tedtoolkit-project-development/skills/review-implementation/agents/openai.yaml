@@ -1,4 +1,4 @@
 interface:
   display_name: "Review Implementation"
   short_description: "Coordinate independent code, test, and verification review"
-  default_prompt: "Use $review-implementation to plan and synthesize a risk-scaled review of this exact candidate, using fresh specialist SubAgents only when independence or context separation materially improves confidence."
+  default_prompt: "Use $review-implementation to own the aggregate merge-readiness conclusion for this exact candidate, dispatching read-only specialist lanes only when risk or independence requires them."

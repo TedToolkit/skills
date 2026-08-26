@@ -1,0 +1,6 @@
+interface:
+  display_name: "Prepare Change (Deprecated)"
+  short_description: "Compatibility alias; use scope-changes"
+  default_prompt: "Use $prepare-change only to route this legacy invocation to $scope-changes."
+policy:
+  allow_implicit_invocation: false

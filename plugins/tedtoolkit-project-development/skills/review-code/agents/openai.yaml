@@ -2,3 +2,5 @@ interface:
   display_name: "Review Code"
   short_description: "Independently audit implementation correctness and code risk"
   default_prompt: "Use $review-code to audit this exact candidate against its approved contract without modifying files, running tests, or issuing the final merge conclusion."
+policy:
+  allow_implicit_invocation: false

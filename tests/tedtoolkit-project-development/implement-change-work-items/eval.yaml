@@ -1,0 +1,35 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Route an explicit work-item implementation alias to orchestration"
+    prompt: "$implement-change-work-items is already explicitly selected. Read selected-plugin/skills/implement-change-work-items/SKILL.md and follow it to explain how an approved Controlled change with two items is coordinated when only the first item is dependency-ready. Name the canonical workflow and execution shape; do not modify files."
+    setup:
+      env:
+        TEDTOOLKIT_REPO_ROOT: "${REPO_ROOT}"
+      commands:
+        - "cp -R \"$TEDTOOLKIT_REPO_ROOT/plugins/tedtoolkit-project-development\" selected-plugin"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "orchestrate-work-items" }
+      - { type: "output_not_contains", value: "unavailable" }
+      - { type: "output_not_contains", value: "not available" }
+      - { type: "output_not_contains", value: "not installed" }
+      - { type: "output_regex", pattern: "(?is)(?:\\bimplement-change-work-items\\b.{0,200}\\b(?:now|renamed|deprecated|replacement|replaced)\\b.{0,200}\\borchestrate-work-items\\b|\\borchestrate-work-items\\b.{0,200}\\b(?:replaces|replacement|renamed|deprecated)\\b.{0,200}\\bimplement-change-work-items\\b)" }
+      - { type: "output_regex", pattern: "(?i)(?:(?:serial|sequential).{0,40}one-item waves?|one-item waves?.{0,40}(?:serial|sequential))" }
+      - { type: "output_contains", value: "coordinator" }
+    rubric:
+      - "Announces the rename and retains orchestrate-work-items ownership for a one-ready-item serial wave."
+    timeout: 420
+
+  - name: "Use canonical orchestration for an ordinary multi-item request"
+    prompt: "Coordinate this approved Controlled change with two isolated ready work items and serialized verified integration. Name the owning workflow; do not modify files."
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "orchestrate-work-items" }
+      - { type: "output_not_contains", value: "deprecated" }
+      - { type: "output_not_contains", value: "renamed" }
+    rubric:
+      - "Routes the unprefixed request to orchestrate-work-items without compatibility-alias noise."
+    timeout: 420

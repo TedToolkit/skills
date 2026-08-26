@@ -51,7 +51,7 @@ scenarios:
       - { type: "file_contains", path: "docs/changes/comment-cleanup/change.md", value: "<!-- change-status: candidate-ready -->" }
       - { type: "file_not_contains", path: "docs/changes/comment-cleanup/change.md", value: "<!-- candidate-binding: none -->" }
       - { type: "command", run: "test ! -e docs/changes/comment-cleanup/work-items.md" }
-      - { type: "output_contains", value: "review" }
+      - { type: "output_regex", pattern: "(?i)review|评审|审核" }
     rubric:
       - "Uses only the referenced persisted change and repository evidence, routes the approved single delivery directly to implement-change, and does not manufacture work items."
       - "Completes the structural proof, records candidate-ready rather than implemented, and stops before review until another explicit continuation."

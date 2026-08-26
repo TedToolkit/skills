@@ -20,15 +20,17 @@ namespace Weather;
 public readonly record struct Temperature(decimal Celsius);
 EOF
 
-cat > docs/changes/comment-cleanup/change.md <<EOF
+cat > docs/changes/comment-cleanup/change.md <<'EOF'
 # Correct the Temperature comment
 
 <!-- change-format: 3 -->
 <!-- workflow-profile: standard -->
 <!-- change-kind: maintenance -->
-<!-- change-status: $status -->
+<!-- change-status: __STATUS__ -->
 <!-- delivery-shape: single -->
-<!-- approval-source: $approval -->
+
+- Priority: P2
+<!-- approval-source: __APPROVAL__ -->
 <!-- candidate-binding: none -->
 
 <!-- section: goal-rationale -->
@@ -56,7 +58,10 @@ None.
 <!-- section: delivery-brief -->
 ## Delivery brief
 
-One bounded comment correction in `Temperature.cs`.
+- Target file: `Temperature.cs`.
+- Exact correction: replace `Represnts` with `Represents` in the existing comment.
+- No production symbol, signature, or behavior changes.
+- Verification command: `grep -Fq 'Represents' Temperature.cs && ! grep -Fq 'Represnts' Temperature.cs`.
 
 <!-- section: proof-plan -->
 ## Proof
@@ -71,6 +76,8 @@ One bounded comment correction in `Temperature.cs`.
 
 STR-01 passes and no production behavior changes.
 EOF
+
+sed -i "s/__STATUS__/$status/g; s/__APPROVAL__/$approval/g" docs/changes/comment-cleanup/change.md
 
 rm -f setup_fixture.sh
 git add -A
