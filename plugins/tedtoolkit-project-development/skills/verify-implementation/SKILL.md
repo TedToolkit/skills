@@ -12,11 +12,11 @@ description: >-
 Produce a candidate-bound verification result. This skill observes execution; `review-tests` judges
 whether tests are adequate and `review-implementation` owns the delivery conclusion.
 
-Read [testing-strategy.md](../../references/testing-strategy.md) for proof definitions and result
-requirements. Read repository guidance, CI configuration, the approved proof plan, and the exact
-candidate before running anything. Read
-[tool-state-layout.md](../../references/tool-state-layout.md) when the delivery owner has authorized
-persistent local verification state.
+Read [testing-strategy.md](../../references/workflow/testing-strategy.md) for proof definitions and
+result requirements. Read repository guidance, CI configuration, the approved proof plan, and the
+exact candidate before running anything. Read
+[tool-state-layout.md](../../references/orchestration/tool-state-layout.md) when the delivery owner
+has authorized persistent local verification state.
 
 ## Bind the candidate
 

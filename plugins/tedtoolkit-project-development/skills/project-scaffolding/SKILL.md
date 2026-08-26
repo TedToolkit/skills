@@ -35,8 +35,8 @@ boundaries. Read [solution-and-msbuild.md](references/solution-and-msbuild.md) b
 editing `.slnx`, `Directory.Build.props`, `Directory.Packages.props`, or shared `.props` files. Read
 [project-files-and-boundaries.md](references/project-files-and-boundaries.md) before naming or
 splitting a `.csproj`, adding project-root files, or changing project dependencies.
-Read [testing-strategy.md](../../references/testing-strategy.md) before mapping proof purposes
-and execution shapes to physical test projects.
+Read [testing-strategy.md](../../references/workflow/testing-strategy.md) before mapping proof
+purposes and execution shapes to physical test projects.
 ## Approval gate
 
 Present the proposed responsibility boundaries, paths, project and package dependencies, MSBuild
@@ -133,8 +133,8 @@ needs them.
 Read the **Documentation ownership and links** section of
 [repository-layout.md](references/repository-layout.md) before adding or moving documentation, and
 read [principles.md](references/principles.md) before creating or revising `docs/principles/`.
-Read [tool-state-layout.md](../../references/tool-state-layout.md) before adding or moving
-TedToolkit-owned repository state under `.tedtoolkit/`.
+Read [tool-state-layout.md](../../references/orchestration/tool-state-layout.md) before adding or
+moving TedToolkit-owned repository state under `.tedtoolkit/`.
 Create only locations whose owning record already exists or has been approved by its owning skill.
 Scaffolding supplies the location; `library-product-intent`, `design-principles`,
 `architecture-design`, `design-change`, `plan-work-items`, and `write-readme` supply the content.

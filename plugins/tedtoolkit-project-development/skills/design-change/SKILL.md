@@ -16,11 +16,11 @@ Turn one coherent candidate into the shortest safe implementation contract. This
 goal, behavior or invariant, scope, constraints, risk profile, change kind, proof, delivery shape,
 artifact, and first implementation authorization for exactly one change.
 
-Read [change-development-workflow.md](../../references/change-development-workflow.md) for the
-authoritative profile, kind, lifecycle, and approval rules. Read
-[requirements-clarification.md](../../references/requirements-clarification.md) in `contract` mode
-before interviewing. Read [testing-strategy.md](../../references/testing-strategy.md) before
-defining proof.
+Read [change-development-workflow.md](../../references/workflow/change-development-workflow.md) for
+the authoritative profile, kind, lifecycle, and approval rules. Read
+[requirements-clarification.md](../../references/workflow/requirements-clarification.md) in
+`contract` mode before interviewing. Read
+[testing-strategy.md](../../references/workflow/testing-strategy.md) before defining proof.
 
 ## 1. Validate the candidate
 

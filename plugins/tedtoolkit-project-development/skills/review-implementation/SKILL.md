@@ -15,9 +15,9 @@ start review by itself. Own the review plan and final conclusion. Use `review-co
 and `verify-implementation` as distinct professional lanes; do not collapse implementation
 correctness, test adequacy, and successful execution into one vague claim.
 
-Read [change-development-workflow.md](../../references/change-development-workflow.md),
-[testing-strategy.md](../../references/testing-strategy.md), and
-[agent-orchestration.md](../../references/agent-orchestration.md).
+Read [change-development-workflow.md](../../references/workflow/change-development-workflow.md),
+[testing-strategy.md](../../references/workflow/testing-strategy.md), and
+[agent-orchestration.md](../../references/orchestration/agent-orchestration.md).
 
 The coordinator remains non-writing: do not modify implementation/test artifacts, fix findings,
 approve a pull request, merge, or update delivery status. Specialist review lanes remain read-only.

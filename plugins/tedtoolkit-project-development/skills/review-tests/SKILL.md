@@ -14,11 +14,11 @@ description: >-
 Determine whether the tests would fail for a material wrong implementation, not merely whether test
 files and matching names exist. Return one specialist lane to `review-implementation`.
 
-Read [testing-strategy.md](../../references/testing-strategy.md) for proof purpose, execution shape,
-verification-result, and traceability rules. When the repository uses TUnit and `tunit-testing` is
-available, invoke it in review mode for framework-specific layout, lifecycle, parallelism,
-assertions, data sources, and mocks. Otherwise apply evidenced repository conventions and report
-framework mechanics that remain unreviewed.
+Read [testing-strategy.md](../../references/workflow/testing-strategy.md) for proof purpose,
+execution shape, verification-result, and traceability rules. When the repository uses TUnit and
+`tunit-testing` is available, invoke it in review mode for framework-specific layout, lifecycle,
+parallelism, assertions, data sources, and mocks. Otherwise apply evidenced repository conventions
+and report framework mechanics that remain unreviewed.
 
 ## Establish the review packet
 

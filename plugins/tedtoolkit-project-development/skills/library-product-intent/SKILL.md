@@ -14,8 +14,8 @@ try to solve. It is a durable input to design principles, architecture records, 
 not a marketing plan, API reference, or feature backlog.
 
 This skill owns only the library's purpose, consumers, value, and boundaries. Read
-[change-development-workflow.md](../../references/change-development-workflow.md) for its governing
-dependency direction. Invoke `design-principles` for recurring technical defaults,
+[change-development-workflow.md](../../references/workflow/change-development-workflow.md) for its
+governing dependency direction. Invoke `design-principles` for recurring technical defaults,
 `architecture-design` for enduring technical decisions, and `design-change` for a bounded delivery.
 
 ## Inspect and classify

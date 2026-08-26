@@ -10,8 +10,9 @@ description: >-
 # Implement a Change with Proportionate Proof
 
 Implement one approved delivery boundary and preserve its contract. Read
-[change-development-workflow.md](../../references/change-development-workflow.md) for profile,
-authorization, and escalation rules. Read [testing-strategy.md](../../references/testing-strategy.md)
+[change-development-workflow.md](../../references/workflow/change-development-workflow.md) for
+profile, authorization, and escalation rules. Read
+[testing-strategy.md](../../references/workflow/testing-strategy.md)
 for proof purpose, execution shape, and change-kind loops.
 
 Require both an approved boundary and an explicit current request to implement or continue.
@@ -80,6 +81,17 @@ the design with mechanically fewest lines. Before adding or retaining a producti
 abstraction, identify its present responsibility, caller, or boundary and compare it with a direct
 change to the existing design:
 
+When C# exception construction affects an evidenced hot path, an inline candidate, generated code
+size, repeated guard code, or an approved performance constraint, read
+[csharp-exception-paths.md](../../references/code-quality/csharp-exception-paths.md). Do not load or
+apply that guidance merely because the implementation uses C# or contains a direct `throw`.
+
+When the implementation adds or materially changes a production callable, or existing analysis
+reports cognitive complexity in the delivery boundary, read
+[cognitive-complexity.md](../../references/code-quality/cognitive-complexity.md). Apply its default
+maximum of `15`, measurement rules, behavior-preserving refactoring guidance, and explicit
+exception route.
+
 - Add a class, record, module, or similar type only when it owns a cohesive responsibility, state,
   lifecycle, policy, or boundary that does not fit an existing owner without materially weakening
   cohesion. Do not create a single-use wrapper or data carrier when the existing design already has
@@ -95,7 +107,7 @@ change to the existing design:
   belong to the approved contract; otherwise stop on the public-contract escalation trigger.
 
 After proof is Green, remove superseded helpers, forwarding layers, duplicated paths, and speculative
-extension points. Do not split or combine code to satisfy arbitrary size, type-count, or method-count
+extension points. Do not split or combine code solely to game raw size, type-count, or method-count
 thresholds.
 
 ## Use the change-kind loop
@@ -167,10 +179,10 @@ conventions, keep the proof framework-neutral, and report the missing specialist
 ## Work as an isolated parallel worker
 
 When dispatched by `orchestrate-work-items`, read
-[agent-orchestration.md](../../references/agent-orchestration.md) and
-[work-item-agent-protocol.md](../../references/work-item-agent-protocol.md), then obey their branch,
-worktree, baseline, context, and coordinator-ownership rules. Own one item only. Read prerequisites
-from the verified integration baseline, not another worker's message or branch.
+[agent-orchestration.md](../../references/orchestration/agent-orchestration.md) and
+[work-item-agent-protocol.md](../../references/orchestration/work-item-agent-protocol.md), then obey
+their branch, worktree, baseline, context, and coordinator-ownership rules. Own one item only. Read
+prerequisites from the verified integration baseline, not another worker's message or branch.
 
 In read-only preflight mode, return the loop, primary/conditional proof, anticipated artifacts,
 shared contracts/resources, commands, risks, and escalation blockers. In execute mode, require the

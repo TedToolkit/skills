@@ -14,8 +14,9 @@ description: >-
 Try to falsify the implementation's claim of correctness. Return one evidence-first specialist
 lane to `review-implementation`; do not duplicate test-quality review or final delivery synthesis.
 
-Read [change-development-workflow.md](../../references/change-development-workflow.md) for the
-approved boundary and [agent-orchestration.md](../../references/agent-orchestration.md) when a fresh
+Read [change-development-workflow.md](../../references/workflow/change-development-workflow.md) for
+the approved boundary and
+[agent-orchestration.md](../../references/orchestration/agent-orchestration.md) when a fresh
 review agent is used.
 
 ## Establish the review packet
@@ -68,6 +69,20 @@ approved contract as a design deviation. Report unnecessary structure only when 
 concrete cost such as extra public surface, duplicated paths, obscured ownership, navigation without
 separation, or additional state/lifecycle burden. Do not issue findings solely because a class or
 method is long, an interface has one implementation, or a personal count threshold was exceeded.
+
+When changed C# code adds or changes a framework guard, custom throwing helper, exception factory,
+or exception-path performance claim, read
+[csharp-exception-paths.md](../../references/code-quality/csharp-exception-paths.md). Check the
+caller-visible failure contract, target-framework compatibility, helper ownership, and evidence for
+any code-size, inlining, or performance claim. A direct `throw` is not a finding by itself.
+
+For each new or materially changed production callable, or when the review packet contains a
+cognitive-complexity result, read
+[cognitive-complexity.md](../../references/code-quality/cognitive-complexity.md). Treat `15` as the
+default maximum and a stricter repository threshold as authoritative. Cite analyzer evidence for a
+numeric violation; without it, report only the concrete control-flow burden and request the
+repository gate under `Verify`. Do not confuse this governing quality threshold with a personal
+method-length preference, and do not recommend fragmenting cohesive logic merely to reduce a score.
 
 ## Make findings falsifiable
 

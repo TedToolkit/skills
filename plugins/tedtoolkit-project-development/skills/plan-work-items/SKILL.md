@@ -15,11 +15,12 @@ Controlled change without reading the originating conversation. This skill owns 
 real prerequisites, delivery boundaries, primary proof, conditional proof, and done criteria. It
 does not change the approved behavioral contract or prescribe private implementation.
 
-Read [change-development-workflow.md](../../references/change-development-workflow.md) for profile,
-human-handoff, and approval rules. Read [testing-strategy.md](../../references/testing-strategy.md)
+Read [change-development-workflow.md](../../references/workflow/change-development-workflow.md) for
+profile, human-handoff, and approval rules. Read
+[testing-strategy.md](../../references/workflow/testing-strategy.md)
 for proof purpose and execution shape. Read
-[tool-state-layout.md](../../references/tool-state-layout.md) before persisting planning control
-state for recovery.
+[tool-state-layout.md](../../references/orchestration/tool-state-layout.md) before persisting planning
+control state for recovery.
 
 ## Confirm planning is justified
 

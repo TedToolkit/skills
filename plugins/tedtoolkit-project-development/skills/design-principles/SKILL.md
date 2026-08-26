@@ -14,7 +14,7 @@ follow them, and later layers may only make them more concrete. A principle is a
 recurring trade-off, not a retrospective description of code and not a substitute for an ADR.
 
 This skill owns recurring technical defaults. Read
-[change-development-workflow.md](../../references/change-development-workflow.md) before
+[change-development-workflow.md](../../references/workflow/change-development-workflow.md) before
 classifying another concern. Its governing dependency direction is authoritative; re-establish
 every principle from durable evidence. Invoke `architecture-design` for a one-off enduring
 technical decision and `design-change` for a bounded delivery contract.

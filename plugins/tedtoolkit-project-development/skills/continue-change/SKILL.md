@@ -13,9 +13,10 @@ description: >-
 Resume a persisted change without relying on the conversation that created it. This skill owns
 state resolution and the user-facing continuation gate; the routed skill still owns its phase.
 
-Read [change-development-workflow.md](../../references/change-development-workflow.md). Identify
-exactly one `change.md` from the user's explicit path, @-mention, or attached repository artifact.
-If no unique record can be established, ask for that path instead of guessing among changes.
+Read [change-development-workflow.md](../../references/workflow/change-development-workflow.md).
+Identify exactly one `change.md` from the user's explicit path, @-mention, or attached repository
+artifact. If no unique record can be established, ask for that path instead of guessing among
+changes.
 
 ## Reconstruct current state
 

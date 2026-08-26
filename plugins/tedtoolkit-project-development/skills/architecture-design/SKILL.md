@@ -21,10 +21,10 @@ belongs to delivery records, release or migration records, and repository eviden
 
 This skill owns current technical boundaries and enduring technical decisions. Before drafting or
 handing a decision to delivery, read
-[change-development-workflow.md](../../references/change-development-workflow.md) for its governing
-dependency direction and shared terms. Re-establish every enduring claim from durable evidence,
-then route delivery through `scope-changes` unless exactly one coherent change boundary is already
-established; only then invoke `design-change` directly.
+[change-development-workflow.md](../../references/workflow/change-development-workflow.md) for its
+governing dependency direction and shared terms. Re-establish every enduring claim from durable
+evidence, then route delivery through `scope-changes` unless exactly one coherent change boundary
+is already established; only then invoke `design-change` directly.
 
 ## Inspect the architecture
 

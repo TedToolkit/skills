@@ -13,12 +13,12 @@ Parallelize isolated item ownership and serialize verified integration. This ski
 worktree allocation, collision analysis, integration, central status, and combined verification. It
 does not implement production behavior or resolve semantic conflicts.
 
-Read [change-development-workflow.md](../../references/change-development-workflow.md),
-[testing-strategy.md](../../references/testing-strategy.md),
-[agent-orchestration.md](../../references/agent-orchestration.md), and
-[work-item-agent-protocol.md](../../references/work-item-agent-protocol.md). Read
-[tool-state-layout.md](../../references/tool-state-layout.md) before provisioning worktrees or
-persistent run state.
+Read [change-development-workflow.md](../../references/workflow/change-development-workflow.md),
+[testing-strategy.md](../../references/workflow/testing-strategy.md),
+[agent-orchestration.md](../../references/orchestration/agent-orchestration.md), and
+[work-item-agent-protocol.md](../../references/orchestration/work-item-agent-protocol.md). Read
+[tool-state-layout.md](../../references/orchestration/tool-state-layout.md) before provisioning
+worktrees or persistent run state.
 
 ## Confirm orchestration has value
 

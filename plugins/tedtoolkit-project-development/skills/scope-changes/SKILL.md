@@ -14,13 +14,14 @@ design. This skill owns intake, source-intent coverage, change boundaries, candi
 partition decisions, and the single user-dialogue channel while several designs are active. It does
 not own a candidate's behavior contract, workflow profile, proof, or implementation.
 
-Read [change-development-workflow.md](../../references/change-development-workflow.md) first. Read
-[requirements-clarification.md](../../references/requirements-clarification.md) in `scope` mode.
-Read [agent-orchestration.md](../../references/agent-orchestration.md) and
-[change-preparation-agent-protocol.md](../../references/change-preparation-agent-protocol.md) only
-when several bounded investigation or authoring lanes make coordination worthwhile. Read
-[tool-state-layout.md](../../references/tool-state-layout.md) before creating or resuming a
-persistent preparation.
+Read [change-development-workflow.md](../../references/workflow/change-development-workflow.md)
+first. Read [requirements-clarification.md](../../references/workflow/requirements-clarification.md)
+in `scope` mode.
+Read [agent-orchestration.md](../../references/orchestration/agent-orchestration.md) and
+[change-preparation-agent-protocol.md](../../references/orchestration/change-preparation-agent-protocol.md)
+only when several bounded investigation or authoring lanes make coordination worthwhile. Read
+[tool-state-layout.md](../../references/orchestration/tool-state-layout.md) before creating or
+resuming a persistent preparation.
 
 ## Establish the change set
 

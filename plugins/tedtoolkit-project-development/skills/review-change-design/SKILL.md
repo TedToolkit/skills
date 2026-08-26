@@ -12,9 +12,9 @@ description: >-
 Review whether the shortest safe contract is complete and usable by a human developer. Do not edit
 the draft, create work items, approve it, run tests, or begin implementation.
 
-Read [change-development-workflow.md](../../references/change-development-workflow.md),
-[testing-strategy.md](../../references/testing-strategy.md), and
-[agent-orchestration.md](../../references/agent-orchestration.md).
+Read [change-development-workflow.md](../../references/workflow/change-development-workflow.md),
+[testing-strategy.md](../../references/workflow/testing-strategy.md), and
+[agent-orchestration.md](../../references/orchestration/agent-orchestration.md).
 
 ## Set the boundary
 

@@ -7,8 +7,9 @@ the originating conversation.
 
 Read [testing-strategy.md](testing-strategy.md) when a change defines behavior or proof.
 Read [requirements-clarification.md](requirements-clarification.md) when user intent is incomplete.
-Read [agent-orchestration.md](agent-orchestration.md) whenever agents are considered.
-Read [tool-state-layout.md](tool-state-layout.md) before creating repository-local TedToolkit state.
+Read [agent-orchestration.md](../orchestration/agent-orchestration.md) whenever agents are considered.
+Read [tool-state-layout.md](../orchestration/tool-state-layout.md) before creating repository-local
+TedToolkit state.
 
 ## Human-readable delivery records
 
