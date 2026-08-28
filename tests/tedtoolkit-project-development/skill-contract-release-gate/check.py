@@ -5,6 +5,9 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
+import subprocess
+import tempfile
 from urllib.parse import unquote
 
 import yaml
@@ -194,7 +197,7 @@ def check_parseable_configs(root: Path) -> None:
         load_yaml(root, path)
 
 
-def check_repo(root: Path, alias_contract: Path | None = None) -> None:
+def _check_repo_tree(root: Path, alias_contract: Path | None = None) -> None:
     root = root.resolve()
     repository_alias_contract = (
         root / "tests" / "tedtoolkit-project-development"
@@ -208,6 +211,42 @@ def check_repo(root: Path, alias_contract: Path | None = None) -> None:
         check_skill(root, skill_path)
     check_aliases(root, alias_contract)
     check_parseable_configs(root)
+
+
+def git_tracked_paths(root: Path) -> set[str]:
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), "ls-files", "-z"],
+            check=True, capture_output=True)
+    except (OSError, subprocess.SubprocessError) as error:
+        raise ContractError("repository tracked-file inventory is unavailable") from error
+    return {entry.decode("utf-8").replace("\\", "/")
+            for entry in result.stdout.split(b"\0") if entry}
+
+
+def check_repo(root: Path, alias_contract: Path | None = None,
+               *, tracked_paths: set[str] | None = None) -> None:
+    """Validate a frozen view containing only Git-tracked repository inputs."""
+    root = root.resolve()
+    tracked = tracked_paths if tracked_paths is not None else git_tracked_paths(root)
+    alias_contract = alias_contract or (
+        root / "tests" / "tedtoolkit-project-development"
+        / "skill-contract-release-gate" / "aliases.yaml")
+    try:
+        alias_relative = alias_contract.resolve().relative_to(root).as_posix()
+    except ValueError as error:
+        raise ContractError("alias contract must be inside the repository") from error
+
+    with tempfile.TemporaryDirectory(prefix="skill-contract-release-") as temporary:
+        frozen = Path(temporary)
+        for relative_path in sorted(tracked):
+            source = root / relative_path
+            if not source.is_file():
+                continue
+            destination = frozen / relative_path
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, destination)
+        _check_repo_tree(frozen, frozen / alias_relative)
 
 
 def main() -> int:

@@ -374,6 +374,13 @@ def build_input_identity(roots: list[Path]) -> dict:
     }
 
 
+def input_identity_is_current(expected: dict, roots: list[Path]) -> bool:
+    """Return whether selected input bytes still match their pre-run identity."""
+    current = build_input_identity(roots)
+    return (current["file_count"] == expected["file_count"]
+            and current["sha256"] == expected["sha256"])
+
+
 def install_eval_plugin(plugin_dir: Path) -> tuple[Path, str, str]:
     """Install a copied plugin from a unique local marketplace for this run."""
     root = Path(tempfile.mkdtemp(prefix="codex-eval-marketplace-"))
@@ -591,6 +598,13 @@ def check_assertion(a: dict, workdir: Path, env: dict, result_text: str, exit_co
         label = f"output_not_contains: {value!r}"
         passed = value not in result_text
         evidence = "absent" if passed else "present in model output"
+
+    elif t == "output_count":
+        value, expected = a["value"], a["count"]
+        label = f"output_count: {value!r} == {expected}"
+        actual = sum(line == value for line in result_text.splitlines())
+        passed = isinstance(expected, int) and expected >= 0 and actual == expected
+        evidence = f"exact-line-count={actual}"
 
     elif t == "output_regex":
         pattern = a["pattern"]
@@ -1085,6 +1099,7 @@ def main() -> int:
 
     all_recs: list[dict] = []
     input_identities: dict[str, dict] = {}
+    input_roots: dict[str, list[Path]] = {}
     passed = total = 0
     plugins = [args.plugin] if args.plugin else eval_plugins()
 
@@ -1100,9 +1115,10 @@ def main() -> int:
             if not selected:
                 continue
 
-            input_identities[plugin] = build_input_identity(
-                [Path(__file__).resolve(), plugin_dir,
-                 *(eval_dir for _, eval_dir, _ in selected)])
+            roots = [Path(__file__).resolve(), plugin_dir,
+                     *(eval_dir for _, eval_dir, _ in selected)]
+            input_roots[plugin] = roots
+            input_identities[plugin] = build_input_identity(roots)
 
             load_plugin = selection_requires_codex(selected)
             require_codex = load_plugin
@@ -1130,6 +1146,9 @@ def main() -> int:
                 if (marketplace_root is not None and marketplace_name is not None
                         and eval_plugin_name is not None):
                     cleanup_eval_plugin(eval_plugin_name, marketplace_name, marketplace_root)
+            if not input_identity_is_current(input_identities[plugin], input_roots[plugin]):
+                raise RuntimeError(
+                    f"{plugin}: selected plugin, eval, or runner inputs changed during execution")
     except Exception as exc:
         print(f"Eval setup failed: {exc}", file=sys.stderr)
         return 2

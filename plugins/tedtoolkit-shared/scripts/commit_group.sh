@@ -16,7 +16,10 @@ set -euo pipefail
 # Require explicit paths: `git add -A` with none would stage the whole tree.
 [ "$#" -gt 0 ] || { echo "usage: commit_group.sh <file>... (message on stdin)" >&2; exit 1; }
 
-real_index=$(git rev-parse --git-path index)
+real_index=$(git rev-parse --path-format=absolute --git-path index)
+if command -v cygpath >/dev/null 2>&1; then
+    real_index=$(cygpath -u -- "$real_index")
+fi
 case "$real_index" in
     /*) ;;
     *) real_index="$(pwd)/$real_index" ;;

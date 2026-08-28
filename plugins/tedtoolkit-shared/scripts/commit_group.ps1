@@ -10,6 +10,11 @@ param(
 
 begin {
     $ErrorActionPreference = 'Stop'
+    $originalInputEncoding = [Console]::InputEncoding
+    $originalOutputEncoding = $OutputEncoding
+    $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+    [Console]::InputEncoding = $utf8NoBom
+    $OutputEncoding = $utf8NoBom
     $messageLines = [System.Collections.Generic.List[string]]::new()
     $canonical = Join-Path $PSScriptRoot 'commit_group.sh'
     if (-not (Test-Path -LiteralPath $canonical -PathType Leaf)) {
@@ -26,14 +31,16 @@ begin {
         $bash = $override
     } else {
         $candidates = [System.Collections.Generic.List[string]]::new()
-        $command = Get-Command bash.exe -ErrorAction SilentlyContinue
-        if ($command) { $candidates.Add($command.Source) }
         $git = Get-Command git.exe -ErrorAction SilentlyContinue
         if ($git) {
             $gitRoot = Split-Path (Split-Path $git.Source -Parent) -Parent
             $candidates.Add((Join-Path $gitRoot 'bin\bash.exe'))
         }
         if ($env:ProgramFiles) { $candidates.Add((Join-Path $env:ProgramFiles 'Git\bin\bash.exe')) }
+        $command = Get-Command bash.exe -ErrorAction SilentlyContinue
+        if ($command -and (Test-Path -LiteralPath (Join-Path (Split-Path $command.Source -Parent) 'cygpath.exe') -PathType Leaf)) {
+            $candidates.Add($command.Source)
+        }
         $bash = $candidates | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
     }
 
@@ -50,10 +57,16 @@ process {
 }
 
 end {
-    if ($messageLines.Count -gt 0) {
-        ($messageLines -join [Environment]::NewLine) | & $bash $canonical @Paths
-    } else {
-        & $bash $canonical @Paths
+    try {
+        if ($messageLines.Count -gt 0) {
+            ($messageLines -join [Environment]::NewLine) | & $bash $canonical @Paths
+        } else {
+            & $bash $canonical @Paths
+        }
+        $exitCode = $LASTEXITCODE
+    } finally {
+        [Console]::InputEncoding = $originalInputEncoding
+        $OutputEncoding = $originalOutputEncoding
     }
-    exit $LASTEXITCODE
+    exit $exitCode
 }

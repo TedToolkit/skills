@@ -100,6 +100,8 @@ scenarios:
     assertions:
       - { type: "exit_success" }
       - { type: "output_regex", pattern: "(?s)^.*# Job Match.*# Interview Pack.*$" }
+      - { type: "output_count", value: "# Job Match", count: 1 }
+      - { type: "output_count", value: "# Interview Pack", count: 1 }
       - { type: "output_not_contains", value: "# Resume Review" }
       - { type: "output_not_contains", value: "# Resume Strategy" }
     rubric:

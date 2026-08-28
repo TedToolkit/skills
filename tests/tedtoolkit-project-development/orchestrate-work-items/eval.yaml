@@ -178,7 +178,7 @@ scenarios:
     timeout: 1800
 
   - name: "Coordinate a sequential dependency chain through verified integration"
-    prompt: "Fully implement the approved dependent-chain Controlled change. Only CHAIN-001 is initially ready; keep one orchestration coordinator, run that wave serially, integrate and mark CHAIN-001 Verified before starting CHAIN-002, then integrate CHAIN-002, run bash verify-all.sh on the authoritative revision, and perform the final integrated-change review. Because every wave has exactly one writer, execute both small item slices directly in the authoritative worktree and do not create a worker, branch, or worktree. Do not bypass central work-items.md status."
+    prompt: "Fully implement the approved dependent-chain Controlled change. Only CHAIN-001 is initially ready; keep one orchestration coordinator, run that wave serially, integrate and mark CHAIN-001 Verified before starting CHAIN-002, then integrate CHAIN-002, run bash verify-all.sh on the authoritative revision, and perform the final integrated-change review. For each one-writer wave, create one disposable serial-candidate branch in the integration worktree, do not create a worker or additional worktree, keep main fixed until candidate proof and review pass, then fast-forward main and safely delete the reachable candidate branch. Do not bypass central work-items.md status."
     setup:
       copy_test_files: true
       commands:
@@ -220,8 +220,8 @@ scenarios:
       - { type: "output_regex", pattern: "(?i)integrated[- ]change|final integrated review" }
     rubric:
       - "Keeps one coordinator for the whole multi-item map even though each wave has only one ready item."
-      - "Runs each one-item wave in the clean authoritative integration worktree and does not create a worker branch or worktree when no concurrent writer needs isolation."
+      - "Runs each one-item wave on one disposable serial-candidate branch in the clean integration worktree without a worker or additional worktree, and keeps main fixed until candidate proof and review pass."
       - "Does not start CHAIN-002 until CHAIN-001 is present and Verified on the authoritative integration revision."
       - "Preserves identifiable item integration units and bases final readiness on the combined candidate."
-      - "Does not provision tool-state ignore rules or temporary Git resources for serial authoritative-worktree execution."
+      - "Does not provision worktree tool state for serial execution and safely removes each recorded reachable serial-candidate branch after fast-forwarding main."
     timeout: 1800

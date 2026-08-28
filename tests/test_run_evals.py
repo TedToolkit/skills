@@ -211,6 +211,30 @@ class AssertionHarnessTests(unittest.TestCase):
         self.assertEqual([source.resolve().as_posix()], before["roots"])
         self.assertNotEqual(before["sha256"], after["sha256"])
 
+    def test_input_identity_recheck_rejects_stale_source_bytes(self):
+        source = self.workdir / "source"
+        source.mkdir()
+        tracked = source / "input.txt"
+        tracked.write_text("before", encoding="utf-8")
+        identity = run_evals.build_input_identity([source])
+
+        self.assertTrue(run_evals.input_identity_is_current(identity, [source]))
+        tracked.write_text("after", encoding="utf-8")
+        self.assertFalse(run_evals.input_identity_is_current(identity, [source]))
+
+    def test_output_count_requires_exact_occurrences(self):
+        result = run_evals.check_assertion_safe(
+            {"type": "output_count", "value": "# Job Match", "count": 1},
+            self.workdir, os.environ.copy(), "# Job Match\n# Interview Pack", 0,
+            real_home=self.workdir, deadline=time.monotonic() + 10)
+        duplicate = run_evals.check_assertion_safe(
+            {"type": "output_count", "value": "# Job Match", "count": 1},
+            self.workdir, os.environ.copy(), "## Job Match\n# Job Match\n# Job Match", 0,
+            real_home=self.workdir, deadline=time.monotonic() + 10)
+
+        self.assertTrue(result["passed"])
+        self.assertFalse(duplicate["passed"])
+
     def test_static_tier_selects_only_static_scenarios(self):
         scenarios = [
             {"name": "offline", "mode": "static"},

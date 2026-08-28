@@ -149,7 +149,13 @@ scenarios:
     setup:
       copy_test_files: true
       commands:
-        - "for case in behavior-pass behavior-fail behavior-zero behavior-unexecuted; do mkdir \"$case\"; cp setup_fixture.sh \"$case/\"; (cd \"$case\" && bash setup_fixture.sh Documentations \"$case\"); done"
+        - >-
+          set -euo pipefail; mkdir -p .binstub; cp offline_dotnet.sh .binstub/dotnet;
+          chmod +x .binstub/dotnet; export PATH="$PWD/.binstub:$PATH";
+          for case in behavior-pass behavior-fail behavior-zero behavior-unexecuted; do
+          mkdir "$case"; cp setup_fixture.sh "$case/";
+          (cd "$case" && bash setup_fixture.sh Documentations "$case");
+          done
     assertions:
       - { type: "exit_success" }
       - { type: "file_contains", path: "behavior-pass/test-proof.txt", value: "Focused test exit: 0" }

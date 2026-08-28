@@ -25,13 +25,15 @@ worktrees or persistent run state.
 Require an approved Controlled change, at least two approved work items, a valid map, and an
 explicit current request to orchestrate or continue. Approval alone does not start workers. This
 skill retains coordinator ownership even when only one item is dependency-ready. Run a one-item wave
-serially in the clean authoritative integration worktree without creating a worker branch or
-worktree. Parallelize only when at least two ready bounded tasks, isolated agents/worktrees, and
+serially on one disposable candidate branch in the clean integration worktree without creating a
+worker or additional worktree. Keep the authoritative integration ref fixed until candidate proof
+and review pass. Parallelize only when at least two ready bounded tasks, isolated agents/worktrees, and
 plausible saved time or independent-review value exist. In a shared-worktree fallback, serialize
 writers while preserving the same authoritative integration and status path.
 
-For format 3, run `bash "${CLAUDE_PLUGIN_ROOT}"/scripts/validate-work-items.sh
-<parent-change-directory>`. Then run `bash "${CLAUDE_PLUGIN_ROOT}"/scripts/schedule-work-items.sh
+Set `plugin_root="${CLAUDE_PLUGIN_ROOT:-${TEDTOOLKIT_PLUGIN_ROOT:-}}"` once. Stop when it is empty;
+never guess a cache or developer checkout. For format 3, run `bash "$plugin_root"/scripts/validate-work-items.sh
+<parent-change-directory>`. Then run `bash "$plugin_root"/scripts/schedule-work-items.sh
 <parent-change-directory>`. For an explicit, already-approved `change-format: 2` embedded map,
 select the deprecated scheduler compatibility path and preserve its contract unchanged. Any scope,
 contract, proof, map, or renewed-approval change must migrate to format 3.
@@ -39,7 +41,7 @@ Establish one clean authoritative integration branch and full SHA. Preserve a di
 stop rather than stashing, committing, or mixing unrelated changes. Before the first worker
 worktree is created in a repository, provision the repository-local worktree root as defined by the
 work-item agent protocol by running `bash
-"${CLAUDE_PLUGIN_ROOT}"/scripts/ensure-tool-state.sh worktrees`. Record the namespace-local
+"$plugin_root"/scripts/ensure-tool-state.sh worktrees`. Record the namespace-local
 `.tedtoolkit/.gitignore` on the authoritative branch before pinning worker baselines; do not leave
 that coordinator-owned setup as an uncommitted change or modify the root `.gitignore` for this
 purpose.
@@ -74,9 +76,11 @@ approved item/map boundaries. Seek renewed approval only for a workflow escalati
 
 ## Execute isolated workers
 
-For a one-item group, pin the latest verified integration SHA and dispatch its bounded worker
-serially in the clean authoritative integration worktree; do not create temporary Git state merely
-for role separation. For a group with two or more concurrent writers, create one branch/worktree per
+For a one-item group, pin the latest verified integration SHA, create one exact recorded disposable
+candidate branch from it in the clean integration worktree, and execute the bounded slice serially
+without a worker or additional worktree. Commit, prove, and review that candidate while the
+authoritative integration ref remains fixed. Switch back and fast-forward the authoritative ref only
+after the candidate passes. For a group with two or more concurrent writers, create one branch/worktree per
 item from that exact baseline. Put every worker worktree under the repository root's ignored
 `.tedtoolkit/worktrees/` directory; do not scatter worker directories beside the repository or
 directly across its root. A worker owns only its item and invokes `implement-change` with the
@@ -147,7 +151,7 @@ At successful completion, remove every remaining clean worktree created by this 
 `git worktree prune`, and verify that none remains registered beneath `.tedtoolkit/worktrees/`.
 Then delete every worker or disposable candidate branch created by this orchestration whose tip is
 reachable from the authoritative integration ref and which is no longer checked out, using `bash
-"${CLAUDE_PLUGIN_ROOT}"/scripts/cleanup-temporary-branch.sh <authoritative-ref> <branch>` for each
+"$plugin_root"/scripts/cleanup-temporary-branch.sh <authoritative-ref> <branch>` for each
 exact recorded branch. This cleanup is part of the authorized temporary-resource lifecycle and
 needs no separate approval. Never pass a pre-existing or unrecorded branch. Retain a branch when the
 helper rejects it, and report its exact name and blocker; never force deletion or discard unique

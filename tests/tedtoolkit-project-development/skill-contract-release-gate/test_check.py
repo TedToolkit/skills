@@ -26,6 +26,8 @@ class SkillContractReleaseGateTests(unittest.TestCase):
         self.alias_contract = self.root / "tests/skill-contract-release-gate/aliases.yaml"
         self.alias_contract.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(Path(__file__).with_name("aliases.yaml"), self.alias_contract)
+        self.tracked = {path.relative_to(self.root).as_posix()
+                        for path in self.root.rglob("*") if path.is_file()}
 
     def tearDown(self) -> None:
         self.temp.cleanup()
@@ -39,12 +41,27 @@ class SkillContractReleaseGateTests(unittest.TestCase):
 
     def assert_contract_fails(self, expected: str) -> None:
         with self.assertRaisesRegex(ContractError, expected):
-            check_repo(self.root, self.alias_contract)
+            check_repo(self.root, self.alias_contract, tracked_paths=self.tracked)
 
     def test_valid_repository_passes_without_writes(self) -> None:
         before = self.digest()
-        check_repo(self.root, self.alias_contract)
+        check_repo(self.root, self.alias_contract, tracked_paths=self.tracked)
         self.assertEqual(before, self.digest())
+
+    def test_untracked_skill_cannot_create_failures(self) -> None:
+        path = self.root / "plugins/tedtoolkit-shared/skills/scratch/SKILL.md"
+        path.parent.mkdir(parents=True)
+        path.write_text("not frontmatter", encoding="utf-8")
+        check_repo(self.root, self.alias_contract, tracked_paths=self.tracked)
+
+    def test_untracked_link_target_cannot_satisfy_a_tracked_link(self) -> None:
+        skill = self.root / "plugins/tedtoolkit-shared/skills/tunit-unit-testing/SKILL.md"
+        skill.write_text(skill.read_text(encoding="utf-8").replace(
+            "../tunit-testing/SKILL.md", "../untracked-target/SKILL.md"), encoding="utf-8")
+        target = skill.parent.parent / "untracked-target/SKILL.md"
+        target.parent.mkdir(parents=True)
+        target.write_text("untracked", encoding="utf-8")
+        self.assert_contract_fails("relative link target is missing")
 
     def test_skill_name_mismatch_fails(self) -> None:
         path = self.root / "plugins/tedtoolkit-shared/skills/run-fix/SKILL.md"

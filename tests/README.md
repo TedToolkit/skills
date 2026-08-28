@@ -121,6 +121,7 @@ no rubric requested through `--judge`.
 | `file_not_contains` | `path`, `value`, `allow_no_match?`=false | at least one file matches and none contains it; set `allow_no_match` only when absence of the file is intentional |
 | `output_contains` | `value` | the model's final text contains it |
 | `output_not_contains` | `value` | the model's final text does not |
+| `output_count` | `value`, `count` | the model's final text contains exactly `count` lines equal to `value` |
 | `output_regex` | `pattern` | the model's final text matches the Python regular expression |
 | `output_contains_file` | `path` | the model's final text contains the non-empty content of a matching fixture file |
 | `tool_command_not_contains` | `value` | one or more recognized Codex shell-command inputs were captured and none contains the substring; command output is intentionally excluded |
