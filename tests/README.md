@@ -39,7 +39,9 @@ fails the scenario.
 
 Each scenario prints PASS/FAIL with per-assertion detail and wall-clock. A full run also writes
 `results.json` + `results.md` under a unique `tests/.results/<timestamp>-<run-id>/` directory. Exit
-code is 0 only if every scenario passed.
+code is 0 only if every scenario passed. Each result records the source HEAD plus a deterministic
+SHA-256 identity over the selected plugin, selected eval directories, and runner bytes, so a
+reviewer can independently bind archived evidence to the inputs that actually ran.
 
 > Codex scenarios cost tokens and take ~30s–3min (merge scenarios run a build). The runner is sequential.
 
@@ -51,7 +53,11 @@ For each scenario the runner:
    sibling files (the `setup_fixture.sh`, stubs) into it;
 2. runs `setup.commands` there via bash to build the fixture;
 3. prepends `<workdir>/.binstub` and Git's tool dirs to `PATH`, and applies `setup.env`;
-4. runs `codex exec` with the selected locally installed marketplace plugin from the work dir, or
+4. runs `codex exec --json` with the selected locally installed marketplace plugin from the work
+   dir, using non-interactive `approval=on-request` with automatic approval review, ignoring host
+   execpolicy rules, and granting `workspace-write` only to the fixture plus the ephemeral
+   candidate-plugin copy; it retains the final response separately and exposes command inputs to
+   audit assertions, or
    stops after setup commands for a `mode: static` scenario;
 5. checks the scenario's assertions and records the result;
 6. cleans up the work dir and any `cleanup_globs` (paths the fixture had to create outside it).
@@ -79,6 +85,8 @@ scenarios:
       - { type: file_contains,      path: "*.cs", value: "Foo" }
       - { type: file_not_contains,  path: "Geometry.cs", value: "<<<<<<<" }
       - { type: output_contains,    value: "feat" }
+      - { type: tool_command_not_contains, value: "private-canary.txt" }
+      - { type: tool_command_not_regex, pattern: "(?i)get-content.*untracked" }
       - { type: command, run: "git status --porcelain", stdout_empty: true }
     rubric:
       - "A criterion a human (or the --judge pass) checks."
@@ -104,7 +112,15 @@ no rubric requested through `--judge`.
 | `output_not_contains` | `value` | the model's final text does not |
 | `output_regex` | `pattern` | the model's final text matches the Python regular expression |
 | `output_contains_file` | `path` | the model's final text contains the non-empty content of a matching fixture file |
+| `tool_command_not_contains` | `value` | one or more recognized Codex shell-command inputs were captured and none contains the substring; command output is intentionally excluded |
+| `tool_command_not_regex` | `pattern` | one or more recognized Codex shell-command inputs were captured and none matches the Python regular expression; command output is intentionally excluded |
 | `command` | `run`, `expect_exit?`=0, `stdout_contains?`, `stdout_not_contains?`, `stdout_empty?`, `timeout?`=60 | the bounded bash command meets all stated checks |
+
+Set `setup.retain_tool_commands: true` only for synthetic fixtures whose command inputs are safe to
+store in ignored `results.json`; otherwise the runner records only the audited command count and
+assertion outcome. Command-audit assertions fail closed when JSON contains no recognized command
+inputs or mixes recognized commands with an unclassified command-like event, preventing full or
+partial event-schema drift from turning an incomplete audit green.
 
 All globs are rooted at the fixture and recurse only when `**` is explicit: `*.cs` checks the
 fixture root, while `**/*.cs` checks every level. Setup and command strings may use `${WORKDIR}`,

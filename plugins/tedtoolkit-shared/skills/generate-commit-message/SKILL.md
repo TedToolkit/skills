@@ -7,8 +7,8 @@ description: >-
 
 # Generate Commit Message
 
-Build an **atomic** plan from the whole worktree, show its exact messages and paths, then commit only
-when the request authorizes local commits. Read
+Build an **atomic** plan from the whole worktree, bind it to the inspected Git state, show its exact
+messages and paths, then commit only when the request authorizes local commits. Read
 [commit-style.md](../../references/commit-style.md) before drafting messages.
 
 Leave pre-merge and merge commits to `merge-default-branch`. Leave a verified repair commit to
@@ -25,17 +25,26 @@ Leave pre-merge and merge commits to `merge-default-branch`. Leave a verified re
 Run:
 
 ```sh
-git status --porcelain -uall
+git --no-optional-locks status --porcelain=v2 -z -uall
 git diff HEAD --stat
 git diff HEAD
+git diff --cached --binary
+git ls-files --stage
 ```
 
 Read both `XY` status columns so staged and unstaged edits to the same path remain one changed file.
-Keep both sides of a rename together. Inspect every untracked text file; use metadata and focused
-inspection for binary or large files.
+Keep both sides of a rename together. A general commit request authorizes inspection of tracked
+diffs, but untracked content is sensitive by default. Inventory only each untracked path and its
+status metadata, then name the path and obtain explicit authorization before reading it. Ask
+separately whether that path may be included unless the same response explicitly authorizes both
+inspection and inclusion. Do not print untracked content while requesting authorization.
 
-Complete when every staged, unstaged, renamed, deleted, and untracked path is accounted for. A clean
-tree is a terminal result: report it and stop.
+Complete when every staged, unstaged, renamed, deleted, and authorized untracked path is accounted
+for. An unapproved untracked path is a path-specific blocker, not permission to inspect, stage, or
+commit it. When blocked, the response must explicitly state that the general commit request does
+not authorize reading untracked content, list each blocked path without its contents, and ask
+whether each exact path may be inspected and included. A clean tree is a terminal result: report it
+and stop.
 
 ## 2. Form atomic groups
 
@@ -54,7 +63,14 @@ Complete when every changed path appears exactly once and each group has one log
 ## 3. Draft and present the plan
 
 Draft one complete message per group using the commit-style reference. Present every group in commit
-order with its exact paths and full message.
+order with its exact path list and full subject and body.
+
+Bind the plan to the current HEAD, complete path inventory, tracked worktree diff, index entry
+identities and modes, and the content identity of each authorized untracked path. Record deletions
+explicitly. Immediately before the first commit, repeat that inventory: a changed planned path or
+any added path invalidates the plan and requires reinspection and presentation. After each approved
+group commits, treat only that group and the resulting HEAD as the expected transition; recheck all
+remaining path and index identities before committing the next group.
 
 - In message-only mode, this presentation completes the task.
 - In commit mode, an explicit request to commit is approval after the plan is shown. Otherwise wait
@@ -63,10 +79,20 @@ order with its exact paths and full message.
 ## 4. Commit the approved groups
 
 For each group, run `commit_group.sh` exactly as specified in the commit-style reference. After each
-commit, verify its paths and message. Complete when every approved group has one commit and
-`git status` accounts for all remaining changes.
+commit, verify its paths and message. The helper commits from an isolated temporary index and
+advances only the approved group in the real index; do not reset, stash, or otherwise normalize the
+remaining state. Complete when every approved group has one commit and `git status` accounts for all
+remaining changes, including unchanged out-of-group staged and unstaged entries.
 
-Report the short hash and subject for every created commit.
+After the last commit, run `git --no-optional-locks status --porcelain=v1 -uall`. In the final
+response, use this evidence-complete shape for every created commit:
+
+- `<short hash>` — `<subject>`
+- Paths: every committed path
+- Body: the complete committed body, including what changed and why
+
+Then explicitly report whether the worktree is clean; otherwise list every remaining path and
+status.
 
 ## 5. Gate the push
 

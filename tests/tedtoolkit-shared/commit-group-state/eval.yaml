@@ -1,0 +1,12 @@
+scenarios:
+  - name: "Grouped commits preserve unrelated Git state transactionally"
+    mode: static
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash run.sh \"${REPO_ROOT}\""
+    assertions:
+      - type: "exit_success"
+      - type: "output_contains"
+        value: "commit-group state checks passed"
+    timeout: 120

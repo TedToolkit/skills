@@ -33,11 +33,14 @@ exists.
 When committing through `commit_group.sh`, pass the full message through a quoted heredoc:
 
 ```sh
-bash "${CLAUDE_PLUGIN_ROOT}"/scripts/commit_group.sh <files...> <<'MSG'
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-${TEDTOOLKIT_PLUGIN_ROOT:?plugin root unavailable}}"
+bash "$PLUGIN_ROOT/scripts/commit_group.sh" <files...> <<'MSG'
 <full message>
 MSG
 ```
 
-The script clears the index, stages exactly the supplied paths, and commits them. Verify the created
-commit and the remaining worktree after every invocation.
-
+The script builds the commit in a temporary index, commits exactly the supplied literal paths, then
+advances only those paths in the real index. It preserves every out-of-group staged and unstaged
+entry on success; if staging, commit creation, or final index synchronization fails, it restores the
+original index and removes any commit created by that invocation without resetting worktree bytes.
+Verify the created commit and the complete remaining Git state after every invocation.

@@ -26,6 +26,7 @@ import argparse
 import ctypes
 from ctypes import wintypes
 from datetime import datetime
+import hashlib
 import json
 import os
 import re
@@ -246,14 +247,146 @@ def codex_command(*args: str) -> list[str]:
     return [CODEX, *args]
 
 
-def install_eval_plugin(plugin_dir: Path) -> tuple[Path, str]:
+def codex_shell_environment_args(setup: dict, env: dict[str, str],
+                                 *, extra_names: tuple[str, ...] = ()) -> list[str]:
+    """Return config overrides for explicitly approved eval-only variables."""
+    names = list(setup.get("codex_shell_environment", []) or []) + list(extra_names)
+    args = ["-c", 'shell_environment_policy.inherit="core"',
+            "-c", "shell_environment_policy.ignore_default_excludes=false"]
+    for name in names:
+        if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", name):
+            raise ValueError(f"invalid codex shell environment name: {name!r}")
+        if name not in env:
+            raise ValueError(f"codex shell environment variable is not set: {name}")
+        args.extend(["-c", f"shell_environment_policy.set.{name}={json.dumps(env[name])}"])
+    return args
+
+
+def scenario_execution_path(workdir: Path, path_prefix: list[str], inherited: str) -> str:
+    """Build the deterministic post-setup PATH used by Codex and assertions."""
+    binstub = workdir / ".binstub"
+    parts = ([str(binstub)] if binstub.is_dir() else []) + path_prefix + [inherited]
+    return os.pathsep.join(parts)
+
+
+class ToolCommandCapture(list[str]):
+    """Recognized command inputs plus a completeness verdict for the JSON event schema."""
+
+    def __init__(self, commands=(), *, complete: bool = True, issues=()):
+        super().__init__(commands)
+        self.complete = complete
+        self.issues = tuple(issues)
+
+
+def extract_tool_commands(event_text: str) -> ToolCommandCapture | None:
+    """Extract shell command inputs from ``codex exec --json`` events.
+
+    Tool outputs are deliberately ignored: an inventory command may emit a sensitive path as
+    metadata without that path appearing in the command that Codex chose to execute.
+    """
+    commands: list[str] = []
+    incomplete_types: set[str] = set()
+    parsed_events = 0
+    for line in event_text.splitlines():
+        if not line.strip():
+            continue
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        parsed_events += 1
+        item = event.get("item") if isinstance(event, dict) else None
+        candidates = [event, item]
+        for candidate in candidates:
+            if not isinstance(candidate, dict):
+                continue
+            candidate_type = candidate.get("type")
+            if candidate_type not in {"command_execution", "shell_command", "exec_command"}:
+                looks_command_like = (
+                    "command" in candidate or "cmd" in candidate or
+                    isinstance(candidate_type, str) and
+                    re.search(r"(?:command|shell|exec)", candidate_type, re.IGNORECASE)
+                )
+                if looks_command_like:
+                    incomplete_types.add(str(candidate_type or "<missing type>"))
+                continue
+            command = candidate.get("command") or candidate.get("cmd")
+            if isinstance(command, str):
+                commands.append(command)
+            elif isinstance(command, list) and all(isinstance(part, str) for part in command):
+                commands.append(" ".join(command))
+            else:
+                incomplete_types.add(str(candidate_type))
+    if not parsed_events:
+        return None
+    return ToolCommandCapture(
+        commands,
+        complete=not incomplete_types,
+        issues=sorted(incomplete_types),
+    )
+
+
+def _identity_path(path: Path) -> str:
+    resolved = path.resolve()
+    try:
+        return resolved.relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        return resolved.as_posix()
+
+
+def build_input_identity(roots: list[Path]) -> dict:
+    """Hash the exact plugin, eval, and runner inputs selected for a run."""
+    normalized_roots = sorted({root.resolve() for root in roots}, key=lambda p: p.as_posix())
+    files: set[Path] = set()
+    for root in normalized_roots:
+        if root.is_file():
+            files.add(root)
+            continue
+        if root.is_dir():
+            files.update(path for path in root.rglob("*")
+                         if path.is_file() and "__pycache__" not in path.parts
+                         and path.suffix != ".pyc")
+
+    digest = hashlib.sha256()
+    for path in sorted(files, key=_identity_path):
+        content = path.read_bytes()
+        digest.update(_identity_path(path).encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(len(content).to_bytes(8, "big"))
+        digest.update(content)
+
+    head = None
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(REPO_ROOT), "rev-parse", "HEAD"],
+            capture_output=True, text=True, encoding="utf-8", errors="replace", check=True)
+        head = proc.stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        pass
+
+    return {
+        "algorithm": "sha256(path-utf8 + nul + uint64be-size + bytes)",
+        "source_head": head,
+        "roots": [_identity_path(root) for root in normalized_roots],
+        "file_count": len(files),
+        "sha256": digest.hexdigest(),
+    }
+
+
+def install_eval_plugin(plugin_dir: Path) -> tuple[Path, str, str]:
     """Install a copied plugin from a unique local marketplace for this run."""
     root = Path(tempfile.mkdtemp(prefix="codex-eval-marketplace-"))
     marketplace = f"eval-{uuid.uuid4().hex}"
-    plugin = plugin_dir.name
+    plugin = f"{plugin_dir.name}-eval-{uuid.uuid4().hex[:8]}"
     destination = root / "plugins" / plugin
     destination.parent.mkdir(parents=True)
     shutil.copytree(plugin_dir, destination)
+    for rel in ("plugin.json", ".codex-plugin/plugin.json", ".claude-plugin/plugin.json"):
+        manifest_path = destination / rel
+        if manifest_path.is_file():
+            manifest_data = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest_data["name"] = plugin
+            manifest_path.write_text(json.dumps(manifest_data), encoding="utf-8")
     # Codex CLI accepts Claude-compatible marketplace manifests for local
     # sources; this avoids relying on Windows' case-insensitive .codex path.
     manifest_dir = root / ".claude-plugin"
@@ -272,7 +405,7 @@ def install_eval_plugin(plugin_dir: Path) -> tuple[Path, str]:
     except Exception:
         cleanup_eval_plugin(plugin, marketplace, root)
         raise
-    return root, marketplace
+    return root, marketplace, plugin
 
 
 def cleanup_eval_plugin(plugin: str, marketplace: str, root: Path) -> None:
@@ -328,7 +461,8 @@ def _read(path: Path) -> str:
 
 
 def check_assertion(a: dict, workdir: Path, env: dict, result_text: str, exit_code: int,
-                    *, real_home: Path, deadline: float) -> dict:
+                    *, real_home: Path, deadline: float,
+                    tool_commands: list[str] | None = None) -> dict:
     """Return {label, passed, evidence}."""
     t = a.get("type")
     label = t
@@ -399,6 +533,41 @@ def check_assertion(a: dict, workdir: Path, env: dict, result_text: str, exit_co
         evidence = "file content present" if passed else (
             f"content from {len(matches)} file(s) absent" if matches else "no matching file")
 
+    elif t == "tool_command_not_contains":
+        value = a["value"]
+        label = f"tool_command_not_contains: {value!r}"
+        if tool_commands and not getattr(tool_commands, "complete", True):
+            evidence = ("command-event audit incomplete for type(s): " +
+                        ", ".join(tool_commands.issues))
+        elif not tool_commands:
+            evidence = ("Codex JSON event capture unavailable" if tool_commands is None else
+                        "no recognized command inputs; audit fails closed")
+        else:
+            hit = next((index for index, command in enumerate(tool_commands, 1)
+                        if value in command), None)
+            passed = hit is None
+            evidence = (f"absent from {len(tool_commands)} command input(s)" if passed else
+                        f"present in command input #{hit}")
+
+    elif t == "tool_command_not_regex":
+        pattern = a["pattern"]
+        label = f"tool_command_not_regex: {pattern!r}"
+        if tool_commands and not getattr(tool_commands, "complete", True):
+            evidence = ("command-event audit incomplete for type(s): " +
+                        ", ".join(tool_commands.issues))
+        elif not tool_commands:
+            evidence = ("Codex JSON event capture unavailable" if tool_commands is None else
+                        "no recognized command inputs; audit fails closed")
+        else:
+            try:
+                hit = next((index for index, command in enumerate(tool_commands, 1)
+                            if re.search(pattern, command)), None)
+                passed = hit is None
+                evidence = (f"absent from {len(tool_commands)} command input(s)" if passed else
+                            f"matched command input #{hit}")
+            except re.error as exc:
+                evidence = f"invalid regex: {exc}"
+
     elif t == "command":
         run = expand(a["run"], workdir, real_home)
         label = f"command: {run if len(run) <= 60 else run[:57] + '...'}"
@@ -438,11 +607,13 @@ def check_assertion(a: dict, workdir: Path, env: dict, result_text: str, exit_co
 
 
 def check_assertion_safe(a: dict, workdir: Path, env: dict, result_text: str, exit_code: int,
-                         *, real_home: Path, deadline: float) -> dict:
+                         *, real_home: Path, deadline: float,
+                         tool_commands: list[str] | None = None) -> dict:
     """Turn malformed assertion definitions into one failed assertion, not a crashed eval run."""
     try:
         return check_assertion(a, workdir, env, result_text, exit_code,
-                               real_home=real_home, deadline=deadline)
+                               real_home=real_home, deadline=deadline,
+                               tool_commands=tool_commands)
     except (KeyError, TypeError, ValueError) as exc:
         assertion_type = a.get("type") if isinstance(a, dict) else None
         return {"label": f"invalid:{assertion_type}", "passed": False,
@@ -459,7 +630,31 @@ def expand(value: str, workdir: Path, real_home: Path) -> str:
             .replace("${REPO_ROOT}", REPO_ROOT.as_posix()))
 
 
-def run_scenario(skill: str, eval_dir: Path, scen: dict, args) -> dict:
+def skill_execution_prompt(plugin: str, skill: str, prompt: str) -> str:
+    return f"Use ${plugin}:{skill} and follow it exactly.\n\nUser request:\n{prompt}"
+
+
+def scenario_codex_command(setup: dict, env: dict[str, str], result_path: Path,
+                           *, eval_plugin_root: Path | None) -> list[str]:
+    """Build a hermetic non-interactive command with the least writable roots."""
+    extra_env_names: tuple[str, ...] = ()
+    if eval_plugin_root is not None:
+        env["TEDTOOLKIT_PLUGIN_ROOT"] = str(eval_plugin_root)
+        extra_env_names = ("TEDTOOLKIT_PLUGIN_ROOT",)
+    command = codex_command(
+        *codex_shell_environment_args(setup, env, extra_names=extra_env_names),
+        "-a", "on-request", "-c", 'approvals_reviewer="auto_review"',
+        "exec", "--ephemeral", "--skip-git-repo-check",
+        "--ignore-rules", "--sandbox", "workspace-write", "--json",
+        "--output-last-message", str(result_path))
+    if eval_plugin_root is not None:
+        command.extend(["--add-dir", str(eval_plugin_root)])
+    return command
+
+
+def run_scenario(skill: str, eval_dir: Path, scen: dict, args,
+                 *, eval_plugin: str | None = None,
+                 eval_plugin_root: Path | None = None) -> dict:
     name = scen.get("name", "<unnamed>")
     mode = scen.get("mode", "codex")
     scenario_timeout = float(scen.get("timeout", 300))
@@ -467,6 +662,7 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args) -> dict:
     deadline = scenario_started + scenario_timeout
     workdir = Path(tempfile.mkdtemp(prefix=f"eval-{skill}-"))
     result_path: Path | None = None
+    event_path: Path | None = None
     setup = scen.get("setup", {}) or {}
     real_home = Path(os.environ.get("USERPROFILE") or os.path.expanduser("~"))
 
@@ -494,7 +690,6 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args) -> dict:
         # 2. build the subprocess env (shared by setup, Codex, and command asserts)
         env = os.environ.copy()
         path_prefix = git_bin_dirs(BASH)
-        binstub = workdir / ".binstub"
         for key, val in (setup.get("env") or {}).items():
             env[key] = expand(str(val), workdir, real_home)
 
@@ -526,9 +721,7 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args) -> dict:
                 record["assertions"] = [{"label": "setup", "passed": False, "evidence": record["error"]}]
                 return record
 
-        # .binstub may have been created by setup; it must shadow real tools.
-        path_parts = ([str(binstub)] if binstub.is_dir() else []) + path_prefix + [env["PATH"]]
-        env["PATH"] = os.pathsep.join(path_parts)
+        env["PATH"] = scenario_execution_path(workdir, path_prefix, env["PATH"])
 
         if mode == "static":
             result_text = "\n".join(setup_outputs)
@@ -555,12 +748,14 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args) -> dict:
         # 4. Invoke the selected marketplace plugin through Codex. Capture the
         # final response in a file so assertions do not depend on event schema.
         result_path = workdir.parent / f"{workdir.name}-codex-{uuid.uuid4().hex}.last-message.txt"
-        cmd = codex_command("exec", "--ephemeral", "--skip-git-repo-check",
-                            "--sandbox", "workspace-write", "--output-last-message",
-                            str(result_path))
+        event_path = workdir.parent / f"{workdir.name}-codex-{uuid.uuid4().hex}.events.jsonl"
+        cmd = scenario_codex_command(
+            setup, env, result_path, eval_plugin_root=eval_plugin_root)
         if getattr(args, "model", None):
             cmd += ["--model", args.model]
-        cmd.append(prompt_text)
+        execution_prompt = (skill_execution_prompt(eval_plugin, skill, prompt_text)
+                            if eval_plugin else prompt_text)
+        cmd.append(execution_prompt)
         timed_out = False
         stderr_text = ""
         remaining = deadline - time.monotonic()
@@ -570,9 +765,10 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args) -> dict:
                                      "evidence": record["error"]}]
             return record
         try:
-            proc = run_bounded(cmd, cwd=workdir, env=env, stdout=subprocess.DEVNULL,
-                               stderr=subprocess.PIPE, text=True, encoding="utf-8", errors="replace",
-                               stdin=subprocess.DEVNULL, timeout=remaining)
+            with event_path.open("w", encoding="utf-8", newline="\n") as event_file:
+                proc = run_bounded(cmd, cwd=workdir, env=env, stdout=event_file,
+                                   stderr=subprocess.PIPE, text=True, encoding="utf-8", errors="replace",
+                                   stdin=subprocess.DEVNULL, timeout=remaining)
             exit_code = proc.returncode
             stderr_text = proc.stderr or ""
         except subprocess.TimeoutExpired as exc:
@@ -580,6 +776,8 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args) -> dict:
             exit_code = -1
             stderr_text = exc.stderr if isinstance(exc.stderr, str) else ""
         result_text = _read(result_path) if result_path.is_file() else ""
+        event_text = _read(event_path) if event_path.is_file() else ""
+        tool_commands = extract_tool_commands(event_text)
         cost = None
         if not result_text.strip() and stderr_text.strip():
             result_text = stderr_text
@@ -587,6 +785,13 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args) -> dict:
         record["duration_s"] = round(time.monotonic() - scenario_started, 1)
         record["cost_usd"] = cost
         record["result_text"] = result_text
+        record["tool_command_count"] = len(tool_commands) if tool_commands is not None else None
+        record["tool_command_audit_complete"] = (
+            tool_commands.complete if tool_commands is not None else False)
+        if tool_commands is not None and tool_commands.issues:
+            record["tool_command_audit_issues"] = list(tool_commands.issues)
+        if setup.get("retain_tool_commands") and tool_commands is not None:
+            record["tool_commands"] = tool_commands
 
         if timed_out:
             record["error"] = f"scenario timed out after {scenario_timeout:g}s during Codex execution"
@@ -598,7 +803,7 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args) -> dict:
         for a in scen.get("assertions", []):
             record["assertions"].append(check_assertion_safe(
                 a, workdir, env, result_text, exit_code,
-                real_home=real_home, deadline=deadline))
+                real_home=real_home, deadline=deadline, tool_commands=tool_commands))
 
         # 6. optional rubric judge
         if args.judge and scen.get("rubric"):
@@ -649,6 +854,8 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args) -> dict:
                     target.unlink(missing_ok=True)
         if result_path is not None:
             result_path.unlink(missing_ok=True)
+        if event_path is not None:
+            event_path.unlink(missing_ok=True)
         if args.keep:
             record["kept"] = str(workdir)
         else:
@@ -741,14 +948,20 @@ def print_scenario(rec: dict) -> bool:
     return ok
 
 
-def write_results(all_recs: list[dict], passed: int, total: int) -> Path:
+def write_results(all_recs: list[dict], passed: int, total: int,
+                  input_identities: dict[str, dict]) -> Path:
     stamp = f"{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}-{uuid.uuid4().hex[:8]}"
     out = RESULTS_DIR / stamp
     out.mkdir(parents=True)
     (out / "results.json").write_text(
-        json.dumps({"passed": passed, "total": total, "scenarios": all_recs},
+        json.dumps({"passed": passed, "total": total, "inputs": input_identities,
+                    "scenarios": all_recs},
                    ensure_ascii=False, indent=2), encoding="utf-8")
     lines = [f"# Eval results — {stamp}", "", f"**{passed}/{total} scenarios passed**", ""]
+    for plugin, identity in input_identities.items():
+        lines.extend([f"- `{plugin}` input: `{identity['sha256']}` "
+                      f"({identity['file_count']} files at `{identity['source_head']}`)"])
+    lines.append("")
     for r in all_recs:
         ok = record_passes(r)
         lines.append(f"## {'✅' if ok else '❌'} {r['skill']} — {r['scenario']}")
@@ -792,6 +1005,7 @@ def main() -> int:
             pass
 
     all_recs: list[dict] = []
+    input_identities: dict[str, dict] = {}
     passed = total = 0
     plugins = [args.plugin] if args.plugin else eval_plugins()
 
@@ -810,6 +1024,10 @@ def main() -> int:
             if not selected:
                 continue
 
+            input_identities[plugin] = build_input_identity(
+                [Path(__file__).resolve(), plugin_dir,
+                 *(eval_dir for _, eval_dir, _ in selected)])
+
             load_plugin = any(
                 scen.get("mode", "codex") != "static"
                 for _, _, scenarios in selected
@@ -822,22 +1040,28 @@ def main() -> int:
             )
             preflight(plugin_dir, require_codex=require_codex)
 
-            marketplace_root = marketplace_name = None
+            marketplace_root = marketplace_name = eval_plugin_name = None
             try:
                 if load_plugin:
-                    marketplace_root, marketplace_name = install_eval_plugin(plugin_dir)
+                    marketplace_root, marketplace_name, eval_plugin_name = install_eval_plugin(plugin_dir)
                 print(f"\n{BOLD}{plugin}{RESET}")
                 for skill, eval_dir, scenarios in selected:
                     print(f"\n{BOLD}{skill}{RESET}  ({len(scenarios)} scenario(s))")
                     for scen in scenarios:
-                        rec = run_scenario(skill, eval_dir, scen, args)
+                        candidate_root = (marketplace_root / "plugins" / eval_plugin_name
+                                          if marketplace_root is not None
+                                          and eval_plugin_name is not None else None)
+                        rec = run_scenario(
+                            skill, eval_dir, scen, args, eval_plugin=eval_plugin_name,
+                            eval_plugin_root=candidate_root)
                         all_recs.append(rec)
                         total += 1
                         if print_scenario(rec):
                             passed += 1
             finally:
-                if marketplace_root is not None and marketplace_name is not None:
-                    cleanup_eval_plugin(plugin_dir.name, marketplace_name, marketplace_root)
+                if (marketplace_root is not None and marketplace_name is not None
+                        and eval_plugin_name is not None):
+                    cleanup_eval_plugin(eval_plugin_name, marketplace_name, marketplace_root)
     except Exception as exc:
         print(f"Eval setup failed: {exc}", file=sys.stderr)
         return 2
@@ -847,7 +1071,7 @@ def main() -> int:
         print(f"No eval scenarios matched {target}.", file=sys.stderr)
         return 2
 
-    out = write_results(all_recs, passed, total)
+    out = write_results(all_recs, passed, total, input_identities)
     color = GREEN if passed == total else RED
     print(f"\n{BOLD}{color}{passed}/{total} scenarios passed{RESET}")
     print(f"{DIM}results: {out}{RESET}")

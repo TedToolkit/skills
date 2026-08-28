@@ -3,7 +3,9 @@ name: merge-default-branch
 description: >-
   Integrate the remote default branch into the current branch while preserving local work,
   reconciling both sides of every conflict, and gating the merge commit on the repository's Release
-  verification. Use when the user asks to merge, sync, or update from origin's default branch.
+  verification. Use when the user asks to merge, sync, or update from origin's default branch. If
+  any local change exists, report path/status metadata and stop; never preserve it by committing,
+  staging, stashing, resetting, or fetching in the same invocation.
 ---
 
 # Merge Default Branch
@@ -11,24 +13,49 @@ description: >-
 **Integrate** both histories: preserve local work, explain each conflict resolution, and commit only
 a verified merged tree. Execute the steps in order.
 
-This skill owns pre-merge preservation and the merge commit. Invoke `generate-commit-message` only
-for a separate commit task requested by the user.
+## Mandatory entrypoint
+
+The first tool action for every invocation is the guard below. Before it, do not inspect another
+skill or reference and do not run any other Git, build, or filesystem command. Do not infer commit
+authorization from requests to preserve local work, bring a branch up to date, or complete the
+merge. Never invoke `generate-commit-message` from this workflow. A separately requested commit is
+a different invocation that must finish before the user asks to resume the merge.
 
 ## 1. Preserve local work
 
-Inspect `git status --porcelain -uall`. A clean tree advances to fetch. For a dirty tree, inspect
-every tracked and untracked change, read [commit-style.md](../../references/commit-style.md), and
-commit atomic local groups with `commit_group.sh`. The merge request authorizes these local
-pre-merge commits.
+Run the metadata-only guard before any other Git command:
 
-Complete when the worktree is clean and every pre-existing change is represented by a verified local
-commit.
+```sh
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-${TEDTOOLKIT_PLUGIN_ROOT:?plugin root unavailable}}"
+bash "$PLUGIN_ROOT/scripts/premerge_guard.sh"
+```
+
+`CLEAN_WORKTREE` with exit 0 is the only result that advances to fetch. `DIRTY_WORKTREE` with exit 20
+is a successful safety outcome and an expected terminal result, not an error to repair or bypass:
+present every returned status/path row, request the separate authorization below, and end the
+response without another tool call. Any other failure also stops before fetch or mutation and is
+reported as a guard failure.
+
+A merge or sync request
+does not authorize any pre-merge commit, stage, reset, stash, deletion, normalization, or untracked
+content read. For a dirty tree, read only status and path metadata, disclose the exact dirty paths
+and their staged, unstaged, deleted, renamed, or untracked states, and stop before fetch or build.
+Request either a separate exact-path commit authorization through `generate-commit-message` or a
+tree the user cleans outside this workflow. Name an untracked path without reading or printing its
+contents. A dirty tree is terminal for this invocation: do not call the commit skill or create a
+preservation commit in the same response. Even when the merge request mentions preserving local
+edits, that acknowledgment is not commit authorization. Staging alone is not a clean-tree
+substitute and never advances this gate.
+
+Complete when the worktree and index are clean. If a separately authorized commit task finishes,
+re-run the metadata-only inventory before continuing the requested merge.
 
 ## 2. Fetch and resolve the default branch
 
 ```sh
 git fetch origin --prune
-DEF="$(bash "${CLAUDE_PLUGIN_ROOT}"/scripts/default_branch.sh)"
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-${TEDTOOLKIT_PLUGIN_ROOT:?plugin root unavailable}}"
+DEF="$(bash "$PLUGIN_ROOT/scripts/default_branch.sh")"
 ```
 
 Complete when `origin/$DEF` resolves to the fetched default-branch tip.
@@ -101,7 +128,15 @@ MSG
 ```
 
 For every conflict, include the recorded intent and resolution in the body. Verify the commit, then
-report its hash and subject, conflict resolutions, integration fixes, and every verification result.
+run `git --no-optional-locks status --porcelain=v1 -uall`. Use this final report shape; do not omit a
+field:
+
+- Merge commit: `<short hash>` — `<complete subject>`
+- Conflict resolutions: for each file, state the purpose of ours, the purpose of theirs, and how the
+  result preserves or deliberately supersedes each behavior; say `none` when there were no conflicts
+- Integration fixes: each merge-introduced failure and root-cause fix, or `none`
+- Verification: every command and result
+- Worktree: `clean` only when the status output is empty; otherwise every remaining path and status
 
 ## 7. Gate the push
 
