@@ -3,12 +3,12 @@
 <!-- change-format: 3 -->
 <!-- workflow-profile: standard -->
 <!-- change-kind: bug-fix -->
-<!-- change-status: in-progress -->
+<!-- change-status: candidate-ready -->
 <!-- delivery-shape: single -->
 
 - Priority: P1
 <!-- approval-source: User explicitly approved all 12 reviewed optimization contracts in the Codex task on 2026-08-26. -->
-<!-- candidate-binding: none -->
+<!-- candidate-binding: commit:6ebb1182415ab2079a0a168efd55d6e6b6a06d96 -->
 
 <!-- section: goal-rationale -->
 ## Goal and rationale
