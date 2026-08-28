@@ -3,7 +3,7 @@
 <!-- change-format: 3 -->
 <!-- workflow-profile: controlled -->
 <!-- change-kind: behavior-preserving-refactor -->
-<!-- change-status: candidate-ready -->
+<!-- change-status: completed -->
 <!-- delivery-shape: single -->
 
 - Priority: P1
