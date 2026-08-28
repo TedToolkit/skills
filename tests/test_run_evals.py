@@ -222,6 +222,26 @@ class AssertionHarnessTests(unittest.TestCase):
         tracked.write_text("after", encoding="utf-8")
         self.assertFalse(run_evals.input_identity_is_current(identity, [source]))
 
+    def test_final_identity_recheck_catches_an_earlier_plugin_changed_later(self):
+        first = self.workdir / "first"
+        second = self.workdir / "second"
+        first.mkdir()
+        second.mkdir()
+        (first / "input.txt").write_text("first", encoding="utf-8")
+        (second / "input.txt").write_text("second", encoding="utf-8")
+        identities = {
+            "first": run_evals.build_input_identity([first]),
+            "second": run_evals.build_input_identity([second]),
+        }
+        roots = {"first": [first], "second": [second]}
+
+        run_evals.require_current_input_identities(
+            {"first": identities["first"]}, {"first": roots["first"]})
+        (first / "input.txt").write_text("changed during second", encoding="utf-8")
+
+        with self.assertRaisesRegex(RuntimeError, "first"):
+            run_evals.require_current_input_identities(identities, roots)
+
     def test_output_count_requires_exact_occurrences(self):
         result = run_evals.check_assertion_safe(
             {"type": "output_count", "value": "# Job Match", "count": 1},

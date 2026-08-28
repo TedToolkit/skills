@@ -36,9 +36,11 @@ make_repo "$bash_repo"
 make_repo "$pwsh_repo"
 make_repo "$legacy_repo"
 
-fake_bin="$fixture/fake-bin"
-mkdir "$fake_bin"
-cp "$(cygpath -u "$COMSPEC")" "$fake_bin/bash.exe"
+fake_bin="$fixture/cygwin64/bin"
+mkdir -p "$fake_bin"
+for decoy in bash.exe cygpath.exe git.exe; do
+    cp "$(cygpath -u "$COMSPEC")" "$fake_bin/$decoy"
+done
 
 bash_branch=$(cd "$bash_repo" && bash "$scripts/default_branch.sh")
 ps_launcher=$(cygpath -w "$scripts/default_branch.ps1")

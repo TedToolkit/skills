@@ -381,6 +381,16 @@ def input_identity_is_current(expected: dict, roots: list[Path]) -> bool:
             and current["sha256"] == expected["sha256"])
 
 
+def require_current_input_identities(
+        identities: dict[str, dict], roots_by_plugin: dict[str, list[Path]]) -> None:
+    """Reject any selected plugin whose inputs changed since its recorded identity."""
+    stale = [plugin for plugin, identity in identities.items()
+             if not input_identity_is_current(identity, roots_by_plugin[plugin])]
+    if stale:
+        raise RuntimeError(
+            f"{', '.join(sorted(stale))}: selected plugin, eval, or runner inputs changed during execution")
+
+
 def install_eval_plugin(plugin_dir: Path) -> tuple[Path, str, str]:
     """Install a copied plugin from a unique local marketplace for this run."""
     root = Path(tempfile.mkdtemp(prefix="codex-eval-marketplace-"))
@@ -1146,9 +1156,8 @@ def main() -> int:
                 if (marketplace_root is not None and marketplace_name is not None
                         and eval_plugin_name is not None):
                     cleanup_eval_plugin(eval_plugin_name, marketplace_name, marketplace_root)
-            if not input_identity_is_current(input_identities[plugin], input_roots[plugin]):
-                raise RuntimeError(
-                    f"{plugin}: selected plugin, eval, or runner inputs changed during execution")
+            require_current_input_identities(
+                {plugin: input_identities[plugin]}, {plugin: input_roots[plugin]})
     except Exception as exc:
         print(f"Eval setup failed: {exc}", file=sys.stderr)
         return 2
@@ -1156,6 +1165,12 @@ def main() -> int:
     if total == 0:
         target = f"plugin {args.plugin!r}" if args.plugin else "the requested filters"
         print(f"No eval scenarios matched {target}.", file=sys.stderr)
+        return 2
+
+    try:
+        require_current_input_identities(input_identities, input_roots)
+    except RuntimeError as exc:
+        print(f"Eval setup failed: {exc}", file=sys.stderr)
         return 2
 
     out = write_results(all_recs, passed, total, input_identities)

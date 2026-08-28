@@ -16,18 +16,26 @@ if ($override) {
     }
     $bash = $override
 } else {
-    $candidates = [System.Collections.Generic.List[string]]::new()
+    $roots = [System.Collections.Generic.List[string]]::new()
     $git = Get-Command git.exe -ErrorAction SilentlyContinue
     if ($git) {
-        $gitRoot = Split-Path (Split-Path $git.Source -Parent) -Parent
-        $candidates.Add((Join-Path $gitRoot 'bin\bash.exe'))
+        $roots.Add((Split-Path (Split-Path $git.Source -Parent) -Parent))
     }
-    if ($env:ProgramFiles) { $candidates.Add((Join-Path $env:ProgramFiles 'Git\bin\bash.exe')) }
+    if ($env:ProgramFiles) { $roots.Add((Join-Path $env:ProgramFiles 'Git')) }
     $command = Get-Command bash.exe -ErrorAction SilentlyContinue
-    if ($command -and (Test-Path -LiteralPath (Join-Path (Split-Path $command.Source -Parent) 'cygpath.exe') -PathType Leaf)) {
-        $candidates.Add($command.Source)
+    if ($command) {
+        $roots.Add((Split-Path (Split-Path $command.Source -Parent) -Parent))
     }
-    $bash = $candidates | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
+    $gitRoot = $roots | Where-Object {
+        (Test-Path -LiteralPath (Join-Path $_ 'bin\bash.exe') -PathType Leaf) -and
+        (Test-Path -LiteralPath (Join-Path $_ 'usr\bin\cygpath.exe') -PathType Leaf) -and
+        ((Test-Path -LiteralPath (Join-Path $_ 'mingw64\bin\git.exe') -PathType Leaf) -or
+         (Test-Path -LiteralPath (Join-Path $_ 'mingw32\bin\git.exe') -PathType Leaf))
+    } | Select-Object -First 1
+    if ($gitRoot) {
+        $bash = Join-Path $gitRoot 'bin\bash.exe'
+        $env:PATH = "$(Join-Path $gitRoot 'cmd');$(Join-Path $gitRoot 'bin');$env:PATH"
+    }
 }
 
 if (-not $bash) {
