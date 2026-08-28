@@ -36,8 +36,9 @@ remaining uncertainty needs user authority.
 ## Persist only useful control state
 
 Create `.tedtoolkit/preparations/<slug>/preparation.md` only after the user explicitly requests
-persistent preparation or approves that artifact. Provision it with `ensure-tool-state.sh
-preparations`. New records never use `docs/change-preparations/`; apply the legacy read/migrate rule
+persistent preparation or approves that artifact. Provision it with the state provisioner linked by
+`tool-state-layout.md`: `bash "<resolved ensure-tool-state.sh>" preparations`. New records never use
+`docs/change-preparations/`; apply the legacy read/migrate rule
 in the tool state layout when an existing preparation uses that path. The preparation contains:
 
 - repository baseline for technical investigation and the explicit human approval source;

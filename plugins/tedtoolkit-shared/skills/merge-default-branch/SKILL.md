@@ -25,17 +25,18 @@ a different invocation that must finish before the user asks to resume the merge
 
 Run the metadata-only guard before any other Git command:
 
+Resolve the [Bash guard](../../scripts/premerge_guard.sh) relative to this loaded `SKILL.md` source
+path, then invoke that exact resource:
+
 ```sh
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-${TEDTOOLKIT_PLUGIN_ROOT:?plugin root unavailable}}"
-bash "$PLUGIN_ROOT/scripts/premerge_guard.sh"
+bash "<resolved premerge_guard.sh>"
 ```
 
-On Windows PowerShell, use the packaged launcher instead:
+On Windows PowerShell, resolve the linked [packaged launcher](../../scripts/premerge_guard.ps1)
+relative to this `SKILL.md` instead:
 
 ```powershell
-$pluginRoot = $env:TEDTOOLKIT_PLUGIN_ROOT
-if (-not $pluginRoot) { throw 'plugin root unavailable' }
-& "$pluginRoot\scripts\premerge_guard.ps1"
+& '<resolved premerge_guard.ps1>'
 if ($LASTEXITCODE -notin 0, 20) { throw 'pre-merge guard failed' }
 ```
 
@@ -63,22 +64,21 @@ re-run the metadata-only inventory before continuing the requested merge.
 
 ```sh
 git fetch origin --prune
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-${TEDTOOLKIT_PLUGIN_ROOT:?plugin root unavailable}}"
-DEF="$(bash "$PLUGIN_ROOT/scripts/default_branch.sh")"
+DEF="$(bash "<resolved default_branch.sh>")"
 ```
 
-On Windows PowerShell, resolve the runtime-provided Codex plugin root and use the packaged launcher,
-which locates Git Bash without requiring it on `PATH`:
+Resolve the linked [Bash helper](../../scripts/default_branch.sh) or
+[PowerShell launcher](../../scripts/default_branch.ps1) relative to this `SKILL.md`. On Windows,
+the launcher locates Git Bash without requiring it on `PATH`:
 
 ```powershell
-$pluginRoot = $env:TEDTOOLKIT_PLUGIN_ROOT
-if (-not $pluginRoot) { throw 'plugin root unavailable' }
-$def = & "$pluginRoot\scripts\default_branch.ps1"
+$def = & '<resolved default_branch.ps1>'
 if ($LASTEXITCODE -ne 0) { throw 'default branch helper failed' }
 ```
 
-Do not guess the plugin location or reimplement default-branch selection inline. Either launcher
-must fail before merge mutation when its packaged canonical helper or required runtime is unusable.
+Do not require an installation-root variable, guess the installed location, search caches, or
+reimplement default-branch selection inline. A missing linked resource must fail before merge
+mutation.
 
 Complete when `origin/$DEF` resolves to the fetched default-branch tip.
 

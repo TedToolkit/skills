@@ -30,14 +30,14 @@ Format every message as:
 Output plain text without placeholder tags. Use the repository's established language where one
 exists.
 
-Resolve the installed plugin root only from a runtime-provided location. Use
-`TEDTOOLKIT_PLUGIN_ROOT` in Codex or `CLAUDE_PLUGIN_ROOT` in Claude Code; if neither is available,
-stop instead of guessing a cache or checkout path. On Bash, pass the full message to the canonical
-helper through a quoted heredoc:
+Resolve the canonical [Bash helper](../scripts/commit_group.sh) or
+[PowerShell launcher](../scripts/commit_group.ps1) relative to this loaded reference's source path.
+The host already supplies that source location when it loads the Skill resource. Do not require an
+installation-root variable, guess a cache or checkout path, or search the filesystem. On Bash, pass
+the full message through a quoted heredoc:
 
 ```sh
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-${TEDTOOLKIT_PLUGIN_ROOT:?plugin root unavailable}}"
-bash "$PLUGIN_ROOT/scripts/commit_group.sh" <files...> <<'MSG'
+bash "<resolved commit_group.sh>" <files...> <<'MSG'
 <full message>
 MSG
 ```
@@ -47,17 +47,15 @@ without requiring `bash` on `PATH`, forwards the same explicit path arguments an
 input, and returns the canonical helper's exit status:
 
 ```powershell
-$pluginRoot = $env:TEDTOOLKIT_PLUGIN_ROOT
-if (-not $pluginRoot) { throw 'plugin root unavailable' }
 @'
 <full message>
-'@ | & "$pluginRoot\scripts\commit_group.ps1" <files...>
+'@ | & '<resolved commit_group.ps1>' <files...>
 ```
 
 The script builds the commit in a temporary index, commits exactly the supplied literal paths, then
 advances only those paths in the real index. It preserves every out-of-group staged and unstaged
 entry on success; if staging, commit creation, or final index synchronization fails, it restores the
 original index and removes any commit created by that invocation without resetting worktree bytes.
-Do not reimplement either helper inline. A missing plugin root, launcher, canonical script, or Git
-Bash runtime is a non-mutating failure. Verify the created commit and the complete remaining Git
-state after every invocation.
+Do not reimplement either helper inline. A missing linked launcher, canonical script, or Git Bash
+runtime is a non-mutating failure. Verify the created commit and the complete remaining Git state
+after every invocation.

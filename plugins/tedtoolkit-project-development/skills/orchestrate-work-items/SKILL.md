@@ -31,23 +31,30 @@ and review pass. Parallelize only when at least two ready bounded tasks, isolate
 plausible saved time or independent-review value exist. In a shared-worktree fallback, serialize
 writers while preserving the same authoritative integration and status path.
 
-Set `plugin_root="${CLAUDE_PLUGIN_ROOT:-${TEDTOOLKIT_PLUGIN_ROOT:-}}"` once. Stop when it is empty;
-never guess a cache or developer checkout. For format 3, run `bash "$plugin_root"/scripts/validate-work-items.sh
-<parent-change-directory>`. Then run `bash "$plugin_root"/scripts/schedule-work-items.sh
-<parent-change-directory>`. For an explicit, already-approved `change-format: 2` embedded map,
+Resolve the packaged [work-item validator](../../scripts/validate-work-items.sh),
+[scheduler](../../scripts/schedule-work-items.sh),
+[acceptance validator](../../scripts/validate-acceptance-specification.sh),
+[state provisioner](../../scripts/ensure-tool-state.sh), and
+[branch cleanup helper](../../scripts/cleanup-temporary-branch.sh) relative to this loaded
+`SKILL.md` source path. Stop when a linked resource is missing; never require an installation-root
+variable or guess/search a cache or developer checkout. For format 3, run
+`bash "<resolved validate-work-items.sh>" <parent-change-directory>`. Then run
+`bash "<resolved schedule-work-items.sh>" <parent-change-directory>`. For an explicit,
+already-approved `change-format: 2` embedded map,
 select the deprecated scheduler compatibility path and preserve its contract unchanged. Any scope,
 contract, proof, map, or renewed-approval change must migrate to format 3.
 Establish one clean authoritative integration branch and full SHA. Preserve a dirty baseline and
 stop rather than stashing, committing, or mixing unrelated changes. Before the first worker
 worktree is created in a repository, provision the repository-local worktree root as defined by the
-work-item agent protocol by running `bash
-"$plugin_root"/scripts/ensure-tool-state.sh worktrees`. Record the namespace-local
+work-item agent protocol by running
+`bash "<resolved ensure-tool-state.sh>" worktrees`. Record the namespace-local
 `.tedtoolkit/.gitignore` on the authoritative branch before pinning worker baselines; do not leave
 that coordinator-owned setup as an uncommitted change or modify the root `.gitignore` for this
 purpose.
 
 Before dispatching the first writing worker, run the parent format-3 change through
-`validate-acceptance-specification.sh --require-ready --baseline <authoritative-integration-sha>`.
+`bash "<resolved validate-acceptance-specification.sh>" --require-ready --baseline
+<authoritative-integration-sha> <change.md>`.
 Cross-change readiness gates the whole parent change; item readiness cannot bypass it. Leave the
 parent approved and report the concrete unmet source outcome when this check is blocked.
 If the parent is an unchanged, tracked, active format-3 record that predates prerequisite markers,
@@ -150,8 +157,8 @@ post-merge `continue-change` cleanup as its next record-lifecycle action.
 At successful completion, remove every remaining clean worktree created by this orchestration, run
 `git worktree prune`, and verify that none remains registered beneath `.tedtoolkit/worktrees/`.
 Then delete every worker or disposable candidate branch created by this orchestration whose tip is
-reachable from the authoritative integration ref and which is no longer checked out, using `bash
-"$plugin_root"/scripts/cleanup-temporary-branch.sh <authoritative-ref> <branch>` for each
+reachable from the authoritative integration ref and which is no longer checked out, using
+`bash "<resolved cleanup-temporary-branch.sh>" <authoritative-ref> <branch>` for each
 exact recorded branch. This cleanup is part of the authorized temporary-resource lifecycle and
 needs no separate approval. Never pass a pre-existing or unrecorded branch. Retain a branch when the
 helper rejects it, and report its exact name and blocker; never force deletion or discard unique

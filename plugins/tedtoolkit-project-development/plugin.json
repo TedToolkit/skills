@@ -1,6 +1,6 @@
 {
   "name": "tedtoolkit-project-development",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "TedToolkit-style request scoping, risk-scaled change design and implementation, optional work-item orchestration, professional review, project scaffolding, README writing, and traceable architecture decisions.",
   "skills": ["./skills/"]
 }

@@ -7,10 +7,11 @@ deliverable paths.
 
 ## Provision the namespace
 
-Run:
+Resolve the packaged [state provisioner](../../scripts/ensure-tool-state.sh) relative to this loaded
+reference source, then run:
 
 ```bash
-bash "${CLAUDE_PLUGIN_ROOT}"/scripts/ensure-tool-state.sh <preparations|runs|worktrees>
+bash "<resolved ensure-tool-state.sh>" <preparations|runs|worktrees>
 ```
 
 The helper creates the requested directory and maintains the tracked `.tedtoolkit/.gitignore` with

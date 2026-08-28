@@ -97,8 +97,10 @@ narrower proof cannot establish. One test may serve Acceptance and regression pu
 
 ## Validate and approve
 
-Run `bash "${CLAUDE_PLUGIN_ROOT}"/scripts/validate-work-items.sh <parent-change-directory>` and
-resolve structural, ownership, dependency, and proof errors. Then apply the five-minute handoff
+Resolve the packaged [work-item validator](../../scripts/validate-work-items.sh) relative to this
+loaded `SKILL.md` source path, then run
+`bash "<resolved validate-work-items.sh>" <parent-change-directory>` and resolve structural,
+ownership, dependency, and proof errors. Then apply the five-minute handoff
 test to the parent and every item.
 
 Treat `work-items.md` as the only mutable item-status source. Approved item documents are stable

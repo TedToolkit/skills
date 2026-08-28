@@ -76,15 +76,13 @@ class AssertionHarnessTests(unittest.TestCase):
         args = run_evals.codex_shell_environment_args(
             {"codex_shell_environment": ["GIT_DIR", "GIT_WORK_TREE"]},
             {"GIT_DIR": r"C:\fixture\.repo-state", "GIT_WORK_TREE": r"C:\fixture",
-             "TEDTOOLKIT_PLUGIN_ROOT": r"C:\candidate", "API_TOKEN": "must-not-leak"},
-            extra_names=("TEDTOOLKIT_PLUGIN_ROOT",),
+             "API_TOKEN": "must-not-leak"},
         )
 
         rendered = " ".join(args)
         self.assertIn('shell_environment_policy.inherit="core"', rendered)
         self.assertIn("shell_environment_policy.set.GIT_DIR", rendered)
         self.assertIn("shell_environment_policy.set.GIT_WORK_TREE", rendered)
-        self.assertIn("shell_environment_policy.set.TEDTOOLKIT_PLUGIN_ROOT", rendered)
         self.assertNotIn("API_TOKEN", rendered)
         self.assertNotIn("must-not-leak", rendered)
 
@@ -97,19 +95,19 @@ class AssertionHarnessTests(unittest.TestCase):
         self.assertIn("User request:\nSync my branch.", prompt)
 
     def test_scenario_codex_command_is_hermetic_and_noninteractive(self):
-        plugin_root = self.workdir / "candidate-plugin"
+        candidate_plugin_dir = self.workdir / "candidate-plugin"
         result_path = self.workdir / "last-message.txt"
-        env = {"TEDTOOLKIT_PLUGIN_ROOT": "stale"}
+        env = {}
 
         command = run_evals.scenario_codex_command(
-            {}, env, result_path, eval_plugin_root=plugin_root)
+            {}, env, result_path, candidate_plugin_dir=candidate_plugin_dir)
         rendered = " ".join(str(part) for part in command)
 
         self.assertIn('-a on-request -c approvals_reviewer="auto_review" exec', rendered)
         self.assertIn("--ignore-rules", command)
         self.assertIn("--sandbox workspace-write", rendered)
-        self.assertIn(f"--add-dir {plugin_root}", rendered)
-        self.assertEqual(str(plugin_root), env["TEDTOOLKIT_PLUGIN_ROOT"])
+        self.assertIn(f"--add-dir {candidate_plugin_dir}", rendered)
+        self.assertEqual({}, env)
 
     def test_scenario_execution_path_prepends_fixture_binstub(self):
         (self.workdir / ".binstub").mkdir()

@@ -738,26 +738,22 @@ def skill_execution_prompt(plugin: str, skill: str, prompt: str) -> str:
 
 
 def scenario_codex_command(setup: dict, env: dict[str, str], result_path: Path,
-                           *, eval_plugin_root: Path | None) -> list[str]:
+                           *, candidate_plugin_dir: Path | None) -> list[str]:
     """Build a hermetic non-interactive command with the least writable roots."""
-    extra_env_names: tuple[str, ...] = ()
-    if eval_plugin_root is not None:
-        env["TEDTOOLKIT_PLUGIN_ROOT"] = str(eval_plugin_root)
-        extra_env_names = ("TEDTOOLKIT_PLUGIN_ROOT",)
     command = codex_command(
-        *codex_shell_environment_args(setup, env, extra_names=extra_env_names),
+        *codex_shell_environment_args(setup, env),
         "-a", "on-request", "-c", 'approvals_reviewer="auto_review"',
         "exec", "--ephemeral", "--skip-git-repo-check",
         "--ignore-rules", "--sandbox", "workspace-write", "--json",
         "--output-last-message", str(result_path))
-    if eval_plugin_root is not None:
-        command.extend(["--add-dir", str(eval_plugin_root)])
+    if candidate_plugin_dir is not None:
+        command.extend(["--add-dir", str(candidate_plugin_dir)])
     return command
 
 
 def run_scenario(skill: str, eval_dir: Path, scen: dict, args,
                  *, eval_plugin: str | None = None,
-                 eval_plugin_root: Path | None = None) -> dict:
+                 candidate_plugin_dir: Path | None = None) -> dict:
     name = scen.get("name", "<unnamed>")
     mode = scen.get("mode", "codex")
     scenario_timeout = float(scen.get("timeout", 300))
@@ -851,7 +847,7 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args,
         result_path = workdir.parent / f"{workdir.name}-codex-{uuid.uuid4().hex}.last-message.txt"
         event_path = workdir.parent / f"{workdir.name}-codex-{uuid.uuid4().hex}.events.jsonl"
         cmd = scenario_codex_command(
-            setup, env, result_path, eval_plugin_root=eval_plugin_root)
+            setup, env, result_path, candidate_plugin_dir=candidate_plugin_dir)
         if getattr(args, "model", None):
             cmd += ["--model", args.model]
         execution_prompt = (skill_execution_prompt(eval_plugin, skill, prompt_text)
@@ -1147,7 +1143,7 @@ def main() -> int:
                                           and eval_plugin_name is not None else None)
                         rec = run_scenario(
                             skill, eval_dir, scen, args, eval_plugin=eval_plugin_name,
-                            eval_plugin_root=candidate_root)
+                            candidate_plugin_dir=candidate_root)
                         all_recs.append(rec)
                         total += 1
                         if print_scenario(rec):

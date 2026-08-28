@@ -19,6 +19,9 @@ class SkillContractReleaseGateTests(unittest.TestCase):
         shutil.copytree(source / ".codex-plugin", self.root / ".codex-plugin")
         shutil.copytree(source / ".claude-plugin", self.root / ".claude-plugin")
         shutil.copytree(source / "plugins", self.root / "plugins")
+        shutil.copy2(source / "CLAUDE.md", self.root / "CLAUDE.md")
+        (self.root / "tests").mkdir()
+        shutil.copy2(source / "tests/run_evals.py", self.root / "tests/run_evals.py")
         for eval_path in source.glob("tests/**/eval.yaml"):
             target = self.root / eval_path.relative_to(source)
             target.parent.mkdir(parents=True, exist_ok=True)
@@ -72,6 +75,18 @@ class SkillContractReleaseGateTests(unittest.TestCase):
         path = self.root / "plugins/tedtoolkit-shared/skills/tunit-unit-testing/SKILL.md"
         path.write_text(path.read_text(encoding="utf-8").replace("../tunit-testing/SKILL.md", "../missing/SKILL.md"), encoding="utf-8")
         self.assert_contract_fails("relative link target is missing")
+
+    def test_broken_reference_resource_link_fails(self) -> None:
+        path = self.root / "plugins/tedtoolkit-shared/references/commit-style.md"
+        path.write_text(path.read_text(encoding="utf-8").replace(
+            "../scripts/commit_group.sh", "../scripts/missing.sh"), encoding="utf-8")
+        self.assert_contract_fails("relative link target is missing")
+
+    def test_plugin_install_root_dependency_fails(self) -> None:
+        path = self.root / "plugins/tedtoolkit-shared/skills/run-fix/SKILL.md"
+        path.write_text(path.read_text(encoding="utf-8") +
+                        "\nUse TEDTOOLKIT_PLUGIN_ROOT to locate helpers.\n", encoding="utf-8")
+        self.assert_contract_fails("forbidden plugin-install-root dependency")
 
     def test_marketplace_plugin_set_drift_fails(self) -> None:
         path = self.root / ".claude-plugin/marketplace.json"

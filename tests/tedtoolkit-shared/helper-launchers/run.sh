@@ -5,8 +5,6 @@ repo_root="${1:?usage: run.sh <repository-root>}"
 scripts="$repo_root/plugins/tedtoolkit-shared/scripts"
 fixture=$(mktemp -d "${TMPDIR:-/tmp}/helper-launchers.XXXXXX")
 trap 'rm -rf -- "$fixture"' EXIT
-unset CLAUDE_PLUGIN_ROOT TEDTOOLKIT_PLUGIN_ROOT
-
 fail() { echo "helper launcher check failed: $*" >&2; exit 1; }
 
 remote="$fixture/origin.git"

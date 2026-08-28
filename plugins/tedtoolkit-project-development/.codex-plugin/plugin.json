@@ -1,6 +1,6 @@
 {
   "name": "tedtoolkit-project-development",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "TedToolkit project development workflows.",
   "author": { "name": "TedToolkit" },
   "skills": "./skills/",

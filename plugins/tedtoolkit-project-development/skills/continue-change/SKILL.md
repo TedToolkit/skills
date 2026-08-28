@@ -25,14 +25,19 @@ documents, repository guidance, and only the current delivery evidence needed by
 phase. Do not require the originating conversation, copy conversation history into the record, or
 infer approval from a Git SHA, an existing Draft, or prior agent claims.
 
-Validate the change first, then resolve its phase:
+Resolve the packaged [acceptance validator](../../scripts/validate-acceptance-specification.sh),
+[work-item validator](../../scripts/validate-work-items.sh), and
+[phase resolver](../../scripts/resolve-change-step.sh) relative to this loaded `SKILL.md` source
+path. Do not require an installation-root variable or search for the plugin. Validate the change
+first, then resolve its phase:
 
 ```text
-bash "${CLAUDE_PLUGIN_ROOT}"/scripts/validate-acceptance-specification.sh <change.md>
-bash "${CLAUDE_PLUGIN_ROOT}"/scripts/resolve-change-step.sh <change.md>
+bash "<resolved validate-acceptance-specification.sh>" <change.md>
+bash "<resolved resolve-change-step.sh>" <change.md>
 ```
 
-When `work-items.md` exists, also run `validate-work-items.sh <change-directory>` before routing.
+When `work-items.md` exists, also run
+`bash "<resolved validate-work-items.sh>" <change-directory>` before routing.
 
 Treat a nonzero result, contradictory markers, a missing required map, or more than one candidate
 record as a blocker. The script derives the next action from persisted facts; never store a
@@ -88,11 +93,13 @@ Cleanup supports structurally valid format-3 records. It never infers authority 
 review, approval, or merge alone. Before deletion, name the exact directory, classify repository
 guidance as `cleanup` or `retain`, and confirm durable extraction as `captured` or `not needed`.
 `Completed` already guarantees the extraction gate; `Superseded` requires the explicit helper flag
-after the delivery owner establishes that disposition. Use:
+after the delivery owner establishes that disposition. Resolve the packaged
+[cleanup helper](../../scripts/cleanup-change.sh) relative to this loaded `SKILL.md` source path,
+then use:
 
 ```text
-bash "${CLAUDE_PLUGIN_ROOT}"/scripts/cleanup-change.sh --default-ref <authoritative-local-ref> --retention-policy cleanup [--durable-extraction-confirmed] <change.md>
-bash "${CLAUDE_PLUGIN_ROOT}"/scripts/cleanup-change.sh --default-ref <authoritative-local-ref> --retention-policy cleanup [--durable-extraction-confirmed] --delete <change.md>
+bash "<resolved cleanup-change.sh>" --default-ref <authoritative-local-ref> --retention-policy cleanup [--durable-extraction-confirmed] <change.md>
+bash "<resolved cleanup-change.sh>" --default-ref <authoritative-local-ref> --retention-policy cleanup [--durable-extraction-confirmed] --delete <change.md>
 ```
 
 The first command is the eligibility check; the second is allowed only by the explicit cleanup or

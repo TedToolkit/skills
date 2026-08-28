@@ -3,10 +3,11 @@
 This protocol coordinates an approved multi-item Controlled change. Read
 [agent-orchestration.md](agent-orchestration.md) first; its scheduling, context, ownership, review,
 and recovery rules are authoritative. Read [tool-state-layout.md](tool-state-layout.md) for the
-repository-local namespace, provisioning, and common cleanup rules.
-
-Set `plugin_root="${CLAUDE_PLUGIN_ROOT:-${TEDTOOLKIT_PLUGIN_ROOT:-}}"` once. Stop when it is empty;
-never guess a cache or developer checkout.
+repository-local namespace, provisioning, and common cleanup rules. Resolve the packaged
+[state provisioner](../../scripts/ensure-tool-state.sh) and
+[branch cleanup helper](../../scripts/cleanup-temporary-branch.sh) relative to this loaded reference
+source. Stop when a linked resource is missing; never require an installation-root variable or
+guess/search a cache or developer checkout.
 
 ## Boundary and authority
 
@@ -50,8 +51,8 @@ item.
 ### Repository-local worktree lifecycle
 
 Use `<repository-root>/.tedtoolkit/worktrees/<change-and-item-id>` for every worker worktree. Before
-the first `git worktree add`, provision the directory with `bash
-"$plugin_root"/scripts/ensure-tool-state.sh worktrees` and record the resulting tracked
+the first `git worktree add`, provision the directory with
+`bash "<resolved ensure-tool-state.sh>" worktrees` and record the resulting tracked
 `.tedtoolkit/.gitignore` on the authoritative integration branch before pinning worker baselines.
 The shared layout owns ignore-file contents and prevents root/global ignore pollution.
 
@@ -64,8 +65,8 @@ additional approval because it is part of the authorized worktree lifecycle. Nev
 dirty, blocked, stale, or sole-evidence worktree. Retain it and report its exact path and blocking
 reason so recovery remains possible. After removing and pruning worktrees, treat worker and
 disposable candidate branches created by the current orchestration as temporary execution state
-too. For each exact recorded branch, run `bash
-"$plugin_root"/scripts/cleanup-temporary-branch.sh <authoritative-integration-ref>
+too. For each exact recorded branch, run
+`bash "<resolved cleanup-temporary-branch.sh>" <authoritative-integration-ref>
 <temporary-branch>`. The helper deletes only a local branch that is no longer checked out and whose
 tip is reachable from the authoritative integration ref. This lifecycle cleanup needs no additional
 approval. Never pass a pre-existing or unrecorded branch, force deletion, or delete a branch with

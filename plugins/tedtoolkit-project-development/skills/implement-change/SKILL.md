@@ -41,8 +41,10 @@ Confirm:
 5. conditional boundary, migration, structural, or regression evidence follows actual risk; and
 6. implementation does not require a material escalation.
 
-For a format-3 multi-item change, run
-`bash "${CLAUDE_PLUGIN_ROOT}"/scripts/validate-work-items.sh <parent-change-directory>` and require
+Resolve the packaged [work-item validator](../../scripts/validate-work-items.sh) and
+[acceptance validator](../../scripts/validate-acceptance-specification.sh) relative to this loaded
+`SKILL.md` source path. For a format-3 multi-item change, run
+`bash "<resolved validate-work-items.sh>" <parent-change-directory>` and require
 completed integrated prerequisites. For an explicit, already-approved `change-format: 2` embedded
 map, select the deprecated compatibility path and preserve the contract unchanged. Any scope,
 contract, proof, map, or renewed-approval change must migrate to format 3.
@@ -53,7 +55,7 @@ For every format-3 implementation boundary, capture the full implementation base
 changing lifecycle status or target artifacts, then run:
 
 ```text
-bash "${CLAUDE_PLUGIN_ROOT}"/scripts/validate-acceptance-specification.sh \
+bash "<resolved validate-acceptance-specification.sh>" \
   --require-ready --baseline <full-implementation-baseline-sha> <change.md>
 ```
 

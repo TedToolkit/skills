@@ -16,7 +16,9 @@ Both marketplace manifests must declare the same plugins: `.codex-plugin/marketp
 - `plugins/<plugin>/scripts/` — helpers shared across the plugin's skills; single source of truth for strict, deterministic mechanics so a skill never retypes them by hand.
   - `default_branch.sh` and `commit_group.sh` are the canonical Git mechanics for Bash.
   - Their paired `.ps1` launchers locate packaged scripts through `$PSScriptRoot` and Git Bash without requiring `bash` on `PATH`; they do not duplicate Git policy.
-  - Skills resolve the installed root from `CLAUDE_PLUGIN_ROOT` (Claude Code) or `TEDTOOLKIT_PLUGIN_ROOT` (Codex). Missing runtime-provided location is a stop condition; never guess a cache version or developer checkout.
+  - Skills link every packaged helper explicitly and resolve it relative to the loaded `SKILL.md` or
+    reference source path supplied by the host. Missing linked resources are a stop condition; never
+    require an installation-root variable, guess a cache version, or search a developer checkout.
 - `plugins/<plugin>/hooks/hooks.json` + scripts — plugin-level hooks
 - `tests/` — custom Python eval harness (see Testing)
 

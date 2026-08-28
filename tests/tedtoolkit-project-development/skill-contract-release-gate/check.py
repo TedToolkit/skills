@@ -17,6 +17,12 @@ class ContractError(RuntimeError):
     pass
 
 
+FORBIDDEN_INSTALL_ROOT_NAMES = (
+    "CLAUDE_PLUGIN_ROOT",
+    "TEDTOOLKIT_PLUGIN_ROOT",
+)
+
+
 def relative(root: Path, path: Path) -> str:
     return path.resolve().relative_to(root.resolve()).as_posix()
 
@@ -69,6 +75,37 @@ def load_skill(root: Path, path: Path) -> tuple[str, dict]:
 
 def markdown_links(text: str) -> list[str]:
     return re.findall(r"\[[^\]]+\]\(([^)]+)\)", text)
+
+
+def check_markdown_resource_links(root: Path, path: Path, text: str | None = None) -> None:
+    text = path.read_text(encoding="utf-8") if text is None else text
+    label = relative(root, path)
+    repo = root.resolve()
+    for raw_link in markdown_links(text):
+        link = raw_link.strip().strip("<>")
+        if not link or link.startswith("#") or re.match(r"^[A-Za-z][A-Za-z0-9+.-]*:", link):
+            continue
+        path_text = unquote(link.split("#", 1)[0].split("?", 1)[0])
+        target = (path.parent / path_text).resolve()
+        require(target.is_relative_to(repo), f"{label}: relative link escapes repository: {raw_link}")
+        require(target.exists(), f"{label}: relative link target is missing: {raw_link}")
+
+
+def check_no_install_root_contract(root: Path) -> None:
+    text_suffixes = {".json", ".md", ".ps1", ".py", ".sh", ".yaml", ".yml"}
+    paths = [
+        root / "CLAUDE.md",
+        root / "tests" / "run_evals.py",
+        *(path for path in sorted((root / "plugins").glob("**/*"))
+          if path.is_file() and path.suffix.lower() in text_suffixes),
+    ]
+    for path in paths:
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8")
+        for name in FORBIDDEN_INSTALL_ROOT_NAMES:
+            require(name not in text,
+                    f"{relative(root, path)}: forbidden plugin-install-root dependency: {name}")
 
 
 def marketplace_plugins(root: Path, path: Path, *, codex: bool) -> dict[str, str]:
@@ -131,16 +168,7 @@ def check_skill(root: Path, skill_path: Path) -> None:
     label = relative(root, skill_path)
     require(frontmatter.get("name") == skill_dir.name,
             f"{label}: frontmatter name must equal directory name {skill_dir.name}")
-
-    repo = root.resolve()
-    for raw_link in markdown_links(text):
-        link = raw_link.strip().strip("<>")
-        if not link or link.startswith("#") or re.match(r"^[A-Za-z][A-Za-z0-9+.-]*:", link):
-            continue
-        path_text = unquote(link.split("#", 1)[0].split("?", 1)[0])
-        target = (skill_dir / path_text).resolve()
-        require(target.is_relative_to(repo), f"{label}: relative link escapes repository: {raw_link}")
-        require(target.exists(), f"{label}: relative link target is missing: {raw_link}")
+    check_markdown_resource_links(root, skill_path, text)
 
     agent_path = skill_dir / "agents" / "openai.yaml"
     agent = load_yaml(root, agent_path)
@@ -209,6 +237,9 @@ def _check_repo_tree(root: Path, alias_contract: Path | None = None) -> None:
     require(bool(skill_paths), "plugins: no Skill entrypoints found")
     for skill_path in skill_paths:
         check_skill(root, skill_path)
+    for reference_path in sorted((root / "plugins").glob("*/references/**/*.md")):
+        check_markdown_resource_links(root, reference_path)
+    check_no_install_root_contract(root)
     check_aliases(root, alias_contract)
     check_parseable_configs(root)
 

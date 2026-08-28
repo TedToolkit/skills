@@ -101,8 +101,11 @@ or `EXP-*` outcome, the supplied guarantee, and the readiness evidence required 
 baseline. Record an expected criterion, not a claim that it already passed. Keep the dependent
 change standalone and return an unscoped dependency or possible inseparability to `scope-changes`.
 
-Run `bash "${CLAUDE_PLUGIN_ROOT}"/scripts/validate-acceptance-specification.sh <change.md>` for a
-format-3 record. Invoke `architecture-design` when an enduring technical choice is required. Before
+Resolve the packaged
+[acceptance validator](../../scripts/validate-acceptance-specification.sh) relative to this loaded
+`SKILL.md` source path, then run
+`bash "<resolved validate-acceptance-specification.sh>" <change.md>` for a format-3 record. Invoke
+`architecture-design` when an enduring technical choice is required. Before
 Controlled approval, dispatch `review-change-design` in a fresh read-only context against the
 current Draft. If independence cannot be established, keep the change Draft and report the blocker.
 Resolve blocking findings before presenting approval.
