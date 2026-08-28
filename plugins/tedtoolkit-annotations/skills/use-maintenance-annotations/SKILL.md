@@ -34,8 +34,13 @@ record.
 
 ```csharp
 [TechnicalDebt(TechnicalDebtKind.PERFORMANCE,
-    "Replace the linear scan when the collection exceeds 1,000 items; tracked by #123.")]
+    "The tracked #123 linear scan is intentionally retained while collections remain small.",
+    RemoveWhen = "The collection can exceed 1,000 items.")]
 ```
+
+Keep the reason and objective trigger structurally separate: the constructor reason explains why
+the compromise exists and its cost; `RemoveWhen` states the observable condition that makes removal
+due. Do not bury both in one indefinite sentence.
 
 Use the annotation instead of an ownerless `TODO`, `FIXME`, or `HACK`. Define
 `ANNOTATIONS_MAINTENANCE` only when reflection or downstream tooling needs compiled metadata.

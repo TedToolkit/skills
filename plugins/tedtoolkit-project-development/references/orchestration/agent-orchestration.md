@@ -102,7 +102,7 @@ Contradiction or decision needed, or None
 Recommended next route
 ```
 
-A writer handoff adds the branch/worktree, candidate SHA, actual changed artifacts, exact verification
+A writer handoff adds the execution worktree and branch when one was created, candidate SHA, actual changed artifacts, exact verification
 commands and results, deviations or None, and remaining risks. The coordinator verifies the claimed
 artifact or revision before using it. Do not forward one worker's prose as another worker's context
 when the repository artifact or cited source is available.

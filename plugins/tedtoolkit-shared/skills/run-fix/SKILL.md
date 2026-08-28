@@ -11,8 +11,10 @@ description: >-
 **Reproduce** the failure, prove its root cause, gate the proposed edit, and finish with a clean
 Release verification. Keep the repair within the named project's failure boundary.
 
-When only compiler or analyzer diagnostics remain, invoke `fix-csharp-diagnostics` for that cleanup.
-This skill retains ownership of the observed failure and final Release verification.
+This skill owns every named project's observed build, run, or test failure, including the initial
+compiler diagnostics. When root-cause repair leaves a bounded diagnostics-only tail, invoke
+`fix-csharp-diagnostics` once with exact IDs and paths, then resume here; that specialist must not
+route back. This skill retains final Release verification.
 
 ## 1. Resolve and classify the project
 
@@ -112,6 +114,6 @@ instrumentation check.
 ## 7. Gate commit and push
 
 Offer to commit the verified fix. If approved, read
-[commit-style.md](../../references/commit-style.md), create the focused local commit with
-`commit_group.sh`, and report its hash. Ask separately before a normal push; the commit remains local
+[commit-style.md](../../references/commit-style.md), create the focused local commit with the
+host-appropriate packaged `commit_group` launcher, and report its hash. Ask separately before a normal push; the commit remains local
 without that approval.

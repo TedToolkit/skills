@@ -241,6 +241,9 @@ EOF
 EOF
     write_item "$change_dir" CHAIN-001 "Expose alpha" Approved None Registry.cs "Owns AC-01" "Set Registry.Alpha to the exact value ready. Prove with bash verify-registry.sh."
     write_item "$change_dir" CHAIN-002 "Consume alpha" Approved "CHAIN-001: verified alpha registry" Consumer.cs "Owns AC-02" "Return Registry.Alpha from Consumer.Read. Prove with bash verify-consumer.sh."
+    sed -i 's/shape=unit/shape=component/g' "$change_dir/change.md" "$change_dir/work-items/"*.md
+    sed -i 's/bash verify-item.sh/bash verify-registry.sh/' "$change_dir/work-items/CHAIN-001.md"
+    sed -i 's/bash verify-item.sh/bash verify-consumer.sh/' "$change_dir/work-items/CHAIN-002.md"
     cat > Registry.cs <<'EOF'
 namespace Fixture;
 
@@ -257,22 +260,45 @@ internal static class Consumer
     internal static string Read() => "pending";
 }
 EOF
+    cat > Fixture.csproj <<'EOF'
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+</Project>
+EOF
+    cat > Program.cs <<'EOF'
+using Fixture;
+
+return (args.Length == 1 ? args[0] : null) switch
+{
+    "registry" when Registry.Alpha == "ready" => 0,
+    "consumer" when Consumer.Read() == "ready" => 0,
+    "all" when Registry.Alpha == "ready" && Consumer.Read() == "ready" => 0,
+    _ => 1,
+};
+EOF
     cat > verify-registry.sh <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
-grep -Fq 'Alpha = "ready"' Registry.cs
+artifacts=$(mktemp -d "${TMPDIR:-/tmp}/fixture-registry.XXXXXX")
+trap 'rm -rf -- "$artifacts"' EXIT
+dotnet run --project Fixture.csproj --configuration Release --artifacts-path "$artifacts" -- registry
 EOF
     cat > verify-consumer.sh <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
-grep -Fq 'Read() => Registry.Alpha' Consumer.cs
-grep -Fq 'Alpha = "ready"' Registry.cs
+artifacts=$(mktemp -d "${TMPDIR:-/tmp}/fixture-consumer.XXXXXX")
+trap 'rm -rf -- "$artifacts"' EXIT
+dotnet run --project Fixture.csproj --configuration Release --artifacts-path "$artifacts" -- consumer
 EOF
     cat > verify-all.sh <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
-bash verify-registry.sh
-bash verify-consumer.sh
+artifacts=$(mktemp -d "${TMPDIR:-/tmp}/fixture-all.XXXXXX")
+trap 'rm -rf -- "$artifacts"' EXIT
+dotnet run --project Fixture.csproj --configuration Release --artifacts-path "$artifacts" -- all
 EOF
     chmod +x verify-registry.sh verify-consumer.sh verify-all.sh
     ;;
@@ -292,6 +318,9 @@ EOF
 EOF
     write_item "$change_dir" FLAG-001 "Enable alpha" Approved None Alpha.cs "Owns AC-01" "Enable alpha; prove with bash verify-alpha.sh."
     write_item "$change_dir" FLAG-002 "Enable beta" Approved None Beta.cs "Owns AC-02" "Enable beta; prove with bash verify-beta.sh."
+    sed -i 's/shape=unit/shape=component/g' "$change_dir/change.md" "$change_dir/work-items/"*.md
+    sed -i 's/bash verify-item.sh/bash verify-alpha.sh/' "$change_dir/work-items/FLAG-001.md"
+    sed -i 's/bash verify-item.sh/bash verify-beta.sh/' "$change_dir/work-items/FLAG-002.md"
     cat > Alpha.cs <<'EOF'
 namespace Fixture;
 
@@ -308,21 +337,45 @@ internal static class Beta
     internal const bool Enabled = false;
 }
 EOF
+    cat > Fixture.csproj <<'EOF'
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+</Project>
+EOF
+    cat > Program.cs <<'EOF'
+using Fixture;
+
+return (args.Length == 1 ? args[0] : null) switch
+{
+    "alpha" when Alpha.Enabled => 0,
+    "beta" when Beta.Enabled => 0,
+    "all" when Alpha.Enabled && Beta.Enabled => 0,
+    _ => 1,
+};
+EOF
     cat > verify-alpha.sh <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
-grep -Fq 'Enabled = true' Alpha.cs
+artifacts=$(mktemp -d "${TMPDIR:-/tmp}/fixture-alpha.XXXXXX")
+trap 'rm -rf -- "$artifacts"' EXIT
+dotnet run --project Fixture.csproj --configuration Release --artifacts-path "$artifacts" -- alpha
 EOF
     cat > verify-beta.sh <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
-grep -Fq 'Enabled = true' Beta.cs
+artifacts=$(mktemp -d "${TMPDIR:-/tmp}/fixture-beta.XXXXXX")
+trap 'rm -rf -- "$artifacts"' EXIT
+dotnet run --project Fixture.csproj --configuration Release --artifacts-path "$artifacts" -- beta
 EOF
     cat > verify-all.sh <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
-bash verify-alpha.sh
-bash verify-beta.sh
+artifacts=$(mktemp -d "${TMPDIR:-/tmp}/fixture-all.XXXXXX")
+trap 'rm -rf -- "$artifacts"' EXIT
+dotnet run --project Fixture.csproj --configuration Release --artifacts-path "$artifacts" -- all
 EOF
     chmod +x verify-alpha.sh verify-beta.sh verify-all.sh
     ;;

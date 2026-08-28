@@ -12,7 +12,7 @@ cat > docs/changes/ratio/change.md <<'EOF'
 # Safe ratio
 
 <!-- change-format: 3 -->
-<!-- workflow-profile: standard -->
+<!-- workflow-profile: controlled -->
 <!-- change-kind: behavior-change -->
 <!-- change-status: approved -->
 <!-- delivery-shape: single -->
@@ -20,6 +20,12 @@ cat > docs/changes/ratio/change.md <<'EOF'
 
 <!-- primary-proof: AC-01 purpose=acceptance shape=unit -->
 <!-- primary-proof: AC-02 purpose=acceptance shape=unit -->
+
+## Public contract
+
+Add only `public static bool TryDivide(decimal numerator, decimal denominator, out decimal result)`
+on `Ratio`. On failure, return `false` and set `result` to `default`. No supporting public types or
+extension policy surface are approved.
 
 <!-- acceptance-case: AC-01 -->
 - AC-01: A non-zero denominator whose quotient is representable returns the quotient.
@@ -34,12 +40,21 @@ namespace Numbers;
 public static class Ratio;
 EOF
 
+case "$scenario" in
+  quality-loose)
+    printf '%s\n' '# Quality policy' 'CI enforces a maximum Cognitive Complexity of 25 per production callable.' >QUALITY.md
+    ;;
+  quality-strict)
+    printf '%s\n' '# Quality policy' 'CI enforces a maximum Cognitive Complexity of 10 per production callable.' >QUALITY.md
+    ;;
+esac
+
 rm -f setup_fixture.sh
 git add -A
 git commit -qm "baseline"
 git tag eval-base
 
-if [[ $scenario == clean ]]; then
+if [[ $scenario == clean || $scenario == quality-loose || $scenario == quality-strict || $scenario == quality-absent ]]; then
 cat > Ratio.cs <<'EOF'
 namespace Numbers;
 

@@ -2,6 +2,9 @@ config:
   max_parallel_scenarios: 1
   max_parallel_runs: 1
 
+smoke_scenarios:
+  - "Fix a library that won't compile in Release"
+
 scenarios:
   - name: "Fix a library that won't compile in Release"
     prompt: "Build the MathLib project in Release and fix whatever's stopping it from compiling. You have my approval to apply the fix and verify it — don't stop to ask."

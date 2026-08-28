@@ -1,0 +1,14 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Validate Bash and Windows shared helper launchers offline"
+    mode: "static"
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash run.sh \"${REPO_ROOT}\""
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "helper launcher parity checks passed" }

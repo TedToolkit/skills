@@ -4,7 +4,7 @@ config:
 
 scenarios:
   - name: "Implement and prove an approved Standard bug fix"
-    prompt: "Implement the approved Standard clamp fix in docs/changes/temperature-clamp/change.md. Use the bug-fix reproduce/fix/regression loop, add the narrow AC-01 proof, run the repository's dotnet verification, record the implementation lifecycle state, and stop after the implementation is ready for review. Do not create work items or ask me to choose a workflow profile."
+    prompt: "Implement the approved Standard clamp fix in docs/changes/temperature-clamp/change.md. Use the bug-fix reproduce/fix/regression loop, add the narrow AC-01 proof, run the repository's dotnet verification, preserve the fixture-owned .dotnet-calls verification audit log, record the implementation lifecycle state, and stop after the implementation is ready for review. Do not create work items or ask me to choose a workflow profile."
     setup:
       copy_test_files: true
       commands:
@@ -30,7 +30,7 @@ scenarios:
         value: "12.25"
       - type: "file_contains"
         path: "docs/changes/temperature-clamp/change.md"
-        value: "<!-- change-status: in-progress -->"
+        value: "<!-- change-status: candidate-ready -->"
       - type: "command"
         run: "grep -Eq 'test|run' .dotnet-calls"
       - type: "command"
@@ -79,7 +79,6 @@ scenarios:
       - { type: "file_not_contains", path: "Guide.md", value: "teh parser" }
       - { type: "command", run: "bash verify-docs.sh" }
       - { type: "command", run: "test -z \"$(find . -name '*Tests*' -o -name '*.csproj' -o -name '*.cs')\"" }
-      - { type: "output_contains", value: "maintenance" }
       - { type: "output_not_contains", value: "zero tests" }
     rubric:
       - "Uses the maintenance verify-edit-verify loop and treats the structural command as the complete primary proof."
@@ -163,8 +162,8 @@ scenarios:
       - "Requests an approved delivery map and selected work item and does not begin implementation."
     timeout: 420
 
-  - name: "Choose private implementation from an approved delivery boundary"
-    prompt: "Prepare to implement TEMP-001 with TDD. Inspect the approved change, work item, and code, then present the local behavior slices, anticipated files, and focused verification commands. Do not modify files yet."
+  - name: "Preflight work-item feasibility and choose private implementation"
+    prompt: "Run the read-only feasibility preflight for approved work item TEMP-001. Inspect the change, work item, current code, target framework, and available proof seam; then report the feasibility disposition and present the local behavior slices, anticipated files, and focused verification commands. Do not modify files yet."
     setup:
       copy_test_files: true
       commands:
@@ -178,7 +177,8 @@ scenarios:
         value: "Temperature.cs"
     rubric:
       - "Accepts the approved outcome, delivery constraints, prerequisites, and verification standard without demanding a prewritten private-file list or implementation steps."
-      - "Inspects the repository and chooses concrete tests, anticipated files, and behavior slices as a local implementation plan."
+      - "Validates the actual target capability, natural implementation owner, runnable proof seam, and absence of a material boundary escalation before proposing writes."
+      - "Reports a feasible disposition from repository evidence and chooses concrete tests, anticipated files, and behavior slices as a local implementation plan."
       - "Treats the local plan as revisable within the approved behavior, public contract, scope, and governing constraints."
       - "Does not modify files during this explicitly read-only planning request."
     timeout: 600

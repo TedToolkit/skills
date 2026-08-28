@@ -14,8 +14,9 @@ Both marketplace manifests must declare the same plugins: `.codex-plugin/marketp
 - `plugins/<plugin>/plugin.json` — Claude Code compatibility manifest
 - `plugins/<plugin>/skills/<skill-name>/SKILL.md` — one skill per directory; **`name:` frontmatter must equal the directory name** (kebab-case)
 - `plugins/<plugin>/scripts/` — helpers shared across the plugin's skills; single source of truth for strict, deterministic mechanics so a skill never retypes them by hand.
-  - `*.sh` — bash helpers for git logic (`default_branch.sh`, `commit_group.sh`); invoked via `bash "${CLAUDE_PLUGIN_ROOT}"/scripts/<name>.sh`
-  - `${CLAUDE_PLUGIN_ROOT}` is substituted inline in skill content. No per-skill copies to mirror.
+  - `default_branch.sh` and `commit_group.sh` are the canonical Git mechanics for Bash.
+  - Their paired `.ps1` launchers locate packaged scripts through `$PSScriptRoot` and Git Bash without requiring `bash` on `PATH`; they do not duplicate Git policy.
+  - Skills resolve the installed root from `CLAUDE_PLUGIN_ROOT` (Claude Code) or `TEDTOOLKIT_PLUGIN_ROOT` (Codex). Missing runtime-provided location is a stop condition; never guess a cache version or developer checkout.
 - `plugins/<plugin>/hooks/hooks.json` + scripts — plugin-level hooks
 - `tests/` — custom Python eval harness (see Testing)
 
@@ -58,6 +59,8 @@ py -3.10 tests/test_run_evals.py                          # harness self-tests; 
 py -3.10 tests/run_evals.py                               # all scenarios
 py -3.10 tests/run_evals.py generate-commit-message      # one skill
 py -3.10 tests/run_evals.py --filter conflict            # scenarios matching substring
+py -3.10 tests/run_evals.py --tier static                 # all selected offline scenarios; no API
+py -3.10 tests/run_evals.py --tier smoke                  # static plus explicit reviewed smoke scenarios
 py -3.10 tests/run_evals.py --keep                       # keep work dirs for debugging
 py -3.10 tests/run_evals.py --judge                      # rubric failures fail the scenario
 py -3.10 tests/run_evals.py --plugin tedtoolkit-project-development design-change

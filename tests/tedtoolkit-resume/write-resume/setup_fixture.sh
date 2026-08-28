@@ -24,3 +24,10 @@ EOF
 rm -f setup_fixture.sh
 git add -A
 git commit -qm "fixture"
+
+if [[ "${1:-}" == "existing" ]]; then
+  printf '# Existing resume\n\nDo not replace me.\n' > resume.md
+  sha256sum resume.md | cut -d' ' -f1 > resume.sha256
+  git add resume.md resume.sha256
+  git commit -qm "existing resume"
+fi

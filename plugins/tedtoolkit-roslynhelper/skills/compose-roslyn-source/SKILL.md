@@ -15,7 +15,9 @@ Keep this skill as the owner of source composition. When available, let
 generator-test mechanics, and `fix-csharp-diagnostics` own a diagnostics-only cleanup phase.
 
 1. Inspect the active project, central package file, and reference graph. Continue only when
-   `TedToolkit.RoslynHelper` is available; otherwise report the failed package gate.
+   `TedToolkit.RoslynHelper` is available; otherwise report the failed package gate. Match examples
+   to the referenced package version; the composition path below is executable against `2026.7.15`
+   with its declared `Microsoft.CodeAnalysis.CSharp` `5.0.0` dependency.
 2. Read [usage-patterns.md](references/usage-patterns.md) and map every required declaration,
    member, statement, expression, symbol conversion, and preprocessor construct to a public syntax
    object. Complete when only genuinely unsupported fragments remain custom.
@@ -23,9 +25,11 @@ generator-test mechanics, and `fix-csharp-diagnostics` own a diagnostics-only cl
    Wait for explicit approval before editing generator code.
 4. Compose the file, namespace, declarations, members, and statements with syntax objects. Emit once
    through `ToCode()` or `SourceFile.Generate(...)`.
-5. Build the affected project and run generator or snapshot tests. Complete when generated source
-   compiles and preserves qualification, nullability, attributes, generic constraints, and
-   conditional compilation.
+5. Build the affected project, execute generation, and compile the emitted source (or run an
+   equivalent generator/snapshot test that performs both). Keyword or text-shape checks are
+   supplementary only. Complete when generator code and generated consumer source both compile and
+   preserve qualification, nullability, attributes, generic constraints, and conditional
+   compilation.
 
 ## Compose a source file
 

@@ -12,6 +12,10 @@ description: >-
 Create questions that test or rehearse relevant evidence fairly. Read
 [resume-integrity.md](../../references/resume-integrity.md) before designing the interview.
 
+This skill solely owns `# Interview Pack`. It may consume supporting analysis but emits no resume
+copy, `# Resume Review`, or `# Job Match` unless separately requested. Apply the shared artifact and
+legal-source gates to any requested destination or jurisdiction-dependent conclusion.
+
 ## Establish the interview brief
 
 Select exactly one mode:
@@ -25,6 +29,10 @@ Select exactly one mode:
 Infer the mode from the user's role. When wording is genuinely ambiguous, default to
 `Candidate practice` and state that default. Identify the role, seniority, stage, available time,
 target language, and desired depth from supplied context.
+
+An omitted role does not block a finished pack when the user supplies a concrete published
+job-related requirement such as an on-call schedule. In that case, do not ask for the role: scope
+the pack to that requirement, state the limitation, and use the normal defaults.
 
 Invoke `match-job-description` only when both candidate background/resume and a job description are
 supplied. With only a job description, derive competency coverage from the role. With only candidate

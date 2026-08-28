@@ -64,12 +64,44 @@ unsupported claim blocks that claim, not the rest of the artifact.
 - Do not infer sensitive or protected traits from names, photos, dates, locations, or affiliations.
 - Keep hiring analysis and interview questions tied to job-related evidence and published role
   requirements.
-- If the user requests jurisdiction-specific employment-law guidance, verify current authoritative
-  sources before answering.
+- Apply the legal-source boundary below before any jurisdiction-specific employment-law conclusion.
 
 For interview content, exclude non-job-related questions about protected traits, family status,
 health, religion, ethnicity, age, pregnancy, disability, or other sensitive personal matters.
 Replace them with a job-related way to assess the underlying published requirement when one exists.
+
+## Deliverable ownership and output authorization
+
+Each requested named deliverable has one owner. Supporting analysis may be consumed internally but
+must not emit another owner's report unless the user also requested it:
+
+| Deliverable | Sole owner | Named output |
+| --- | --- | --- |
+| New, revised, translated, shortened, or tailored resume Markdown | `write-resume` | Resume copy |
+| Findings or intrinsic critique without rewritten copy | `review-resume` | `# Resume Review` |
+| Candidate/job requirement comparison without copy or questions | `match-job-description` | `# Job Match` |
+| Interviewer or candidate-practice questions | `generate-interview-questions` | `# Interview Pack` |
+
+A compound request may sequence these owners, but emits each requested deliverable once and creates
+no undeclared report or companion file.
+
+A clear request for finished Markdown in the conversation authorizes that response immediately and
+authorizes no filesystem mutation. A clear request to create one named `.md` path authorizes only
+that creation when the path is absent. If it exists, require explicit permission to overwrite,
+replace, or update that exact path; preserve it byte-for-byte until then. An ambiguous destination
+or approval for one artifact never authorizes companion files.
+
+## Legal-source boundary
+
+For a jurisdiction-specific legal conclusion, identify the jurisdiction and verify a current
+official source applicable there, such as legislation, a regulator, or a court publication. Search
+summaries, model memory, and undated secondary guidance are insufficient. When jurisdiction or
+current authority is unavailable, state the limitation, make no legal conclusion, and invent no
+citation. Continue only separable neutral job-related editing, comparison, or question replacement;
+if the deliverable depends on deciding the law, stop that affected deliverable.
+
+Neutral fairness handling excludes or replaces non-job-related protected-trait content without
+claiming what any jurisdiction's law permits or forbids.
 
 ## Output discipline
 
@@ -78,8 +110,5 @@ Replace them with a job-related way to assess the underlying published requireme
   copy.
 - State material limitations when documents are incomplete or parsing is uncertain.
 - Do not claim a universal ATS score. If scoring is useful, disclose the rubric and evidence.
-- Before writing or overwriting a file, show the proposed content or change plan and obtain explicit
-  approval unless the user already approved that exact artifact and destination.
-- A direct request for finished conversational output authorizes producing that output when the
-  requested scope is clear; do not add a second approval gate merely because optional presentation
-  details were omitted. State reasonable defaults. This does not authorize a file write or overwrite.
+- Apply the artifact-specific creation and overwrite gates above; never infer filesystem authority
+  from conversational-output approval.

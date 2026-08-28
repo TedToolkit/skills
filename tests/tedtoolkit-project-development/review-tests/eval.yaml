@@ -34,7 +34,7 @@ scenarios:
     timeout: 360
 
   - name: "Pass adequate tests without manufacturing a missing partition"
-    prompt: "Use $review-tests as a fresh read-only test-only reviewer for eval-base..HEAD against docs/changes/parse/change.md. Audit adequacy without modifying or executing tests and do not issue the final merge conclusion."
+    prompt: "Use $review-tests as a fresh read-only test-only reviewer for eval-base..HEAD against docs/changes/parse/change.md. Audit proof-definition adequacy without modifying or executing tests and do not issue the final merge conclusion. Candidate execution is explicitly owned by verify-implementation; because this is the test-adequacy lane, do not turn the intentionally absent execution result into a test finding."
     setup:
       copy_test_files: true
       commands:

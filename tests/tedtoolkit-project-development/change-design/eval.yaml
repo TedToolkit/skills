@@ -17,17 +17,16 @@ scenarios:
       - "Uses the Fast maintenance path and produces no workflow artifact."
     timeout: 240
 
-  - name: "Ordinary change design uses the canonical skill without migration noise"
-    prompt: "Design one bounded reversible correction for an internal clamp helper. Name the selected workflow, classify the change, explain the lightest safe profile and decisive evidence, and stop before writing files."
+  - name: "Deprecated design alias completes canonical bug-fix classification"
+    prompt: "Design one bounded reversible correction for an internal clamp helper that currently rounds an in-range decimal 1.5 to 2 instead of preserving 1.5. Name the selected workflow, classify the change, explain the lightest safe profile and decisive evidence, and stop before writing files."
     assertions:
       - { type: "exit_success" }
       - { type: "output_contains", value: "design-change" }
       - { type: "output_contains", value: "bug-fix" }
       - { type: "output_regex", pattern: '(?i)\b(?:Fast|Standard)\b' }
       - { type: "output_regex", pattern: '(?i)\b(?:primary proof|verification)\b' }
-      - { type: "output_not_contains", value: "deprecated" }
       - { type: "output_not_contains", value: "renamed" }
       - { type: "command", run: "test -z \"$(find . -mindepth 1 -not -name .git -print -quit)\"" }
     rubric:
-      - "Routes the natural-language request to design-change rather than the deprecated alias."
+      - "The explicit compatibility alias completes the canonical design-change classification and proof planning."
     timeout: 240

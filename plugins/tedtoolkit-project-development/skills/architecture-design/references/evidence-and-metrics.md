@@ -8,6 +8,13 @@ Prefer, in order: reproducible production data; reproducible PoC or benchmark; p
 
 Record median and tail measurements (for example P50/P95/P99), distribution spread, error rate, throughput, and resource use where relevant. Use equivalent data, versions, host capacity, duration, and warm-up conditions. Report a result as directional rather than conclusive when the workload is synthetic, repetitions are insufficient, or candidates were not comparable.
 
+Choose the execution shape at the boundary that can falsify the claim. Use BenchmarkDotNet for an
+isolated managed operation only when it represents the decision. Use representative load or soak
+tests for service and queue capacity, database workloads for query or transaction behavior, network
+tests for transport effects, profilers for process bottlenecks, and production telemetry when only
+real topology and traffic expose the relevant interaction. Preserve workload, environment,
+distribution, error, resource, and validity limits for every shape.
+
 ## Common criteria
 
 Select only criteria that change the decision.

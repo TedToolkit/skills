@@ -576,6 +576,15 @@ internal sealed class TemperatureTests
     }
 }
 EOF
+    if [[ "$scenario" == "ready-final-change" ]]; then
+      mkdir -p docs/api
+      cat > docs/api/temperature-parsing.md <<'EOF'
+# Temperature parsing
+
+`Temperature.TryParse` accepts invariant-culture decimal Celsius text. It rejects values below
+`-273.15`, returns `false` without throwing for rejected input, and sets the output to `default`.
+EOF
+    fi
     ;;
   *) echo "unknown scenario: $scenario" >&2; exit 1 ;;
 esac
@@ -596,6 +605,19 @@ fi
 if [[ "$scenario" == "blocked-cross-change" ]]; then
   candidate="$(git rev-parse HEAD)"
   git notes add -m "Independent review packet for exact candidate $candidate. Fresh code reviewer: PreferencesScreen.cs is only a placeholder and does not implement AC-01. Fresh test reviewer: no test or procedure proves AC-01. Independent verification executor: no implementation command was runnable. Each lane reviewed the raw contract and candidate without sibling conclusions."
+fi
+
+if [[ "$scenario" == "conflicting-lanes" ]]; then
+  candidate="$(git rev-parse HEAD)"
+  cat > review-packet/code.md <<EOF
+Independent fresh code lane for $candidate: pass.
+EOF
+  cat > review-packet/tests.md <<EOF
+Independent fresh test lane for $candidate: AC-02 weak because the test does not assert false or the default value.
+EOF
+  cat > review-packet/verification.md <<EOF
+Independent executor for $candidate: command passed, 1 discovered, 1 passed, 0 failed, 0 skipped.
+EOF
 fi
 
 if [[ "$scenario" == "undocumented-behavior-change" ]]; then

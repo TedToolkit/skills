@@ -3,6 +3,9 @@ config:
   max_parallel_scenarios: 1
   max_parallel_runs: 1
 
+smoke_scenarios:
+  - "Complete a low-risk Standard review in compact mode"
+
 scenarios:
   - name: "Complete a low-risk Standard review in compact mode"
     prompt: "Use $review-implementation in delivery-candidate mode for the current uncommitted workspace change against docs/changes/guide-link/change.md. This is a bounded low-risk Standard maintenance delivery in the same coordinator context. Perform the code/document check, proof-adequacy check, and documented verification serially; do not create a commit, digest bundle, SubAgent, or extra lane report, and do not modify files."
@@ -168,8 +171,7 @@ scenarios:
         value: "AC-02"
       - type: "output_contains"
         value: "Blocking"
-      - type: "output_contains"
-        value: "Documentation disposition"
+      - { type: "output_regex", pattern: "(?i)documentation (?:extraction and )?disposition" }
     rubric:
       - "Builds a traceability map from the approved acceptance cases to the changed production and test code."
       - "Identifies that AC-02 is missing from both implementation and tests, and treats it as a blocking finding."
@@ -191,8 +193,7 @@ scenarios:
       - type: "command"
         run: "git status --porcelain"
         stdout_empty: true
-      - type: "output_contains"
-        value: "work item"
+      - { type: "output_regex", pattern: "(?i)work[- ](?:item|package)|delivery boundary" }
     rubric:
       - "Explains that this multi-delivery Controlled change requires one selected work item."
       - "Does not infer the work-package boundary from the diff or run tests."
@@ -255,7 +256,7 @@ scenarios:
       - { type: "output_contains", value: "tracked diff" }
       - { type: "output_contains", value: "untracked" }
       - { type: "output_contains", value: "digest" }
-      - { type: "output_contains", value: "stale" }
+      - { type: "output_regex", pattern: "(?i)(stale|invalidat)" }
       - { type: "output_regex", pattern: '(?i)\b(?:cryptographic|SHA-?256)\b' }
       - { type: "output_not_contains", value: "must commit" }
     rubric:

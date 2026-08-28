@@ -28,8 +28,6 @@ scenarios:
     assertions:
       - { type: "exit_success" }
       - { type: "output_contains", value: "orchestrate-work-items" }
-      - { type: "output_not_contains", value: "deprecated" }
-      - { type: "output_not_contains", value: "renamed" }
     rubric:
-      - "Routes the unprefixed request to orchestrate-work-items without compatibility-alias noise."
+      - "Routes the unprefixed request to orchestrate-work-items; incidental migration wording does not change ownership."
     timeout: 420

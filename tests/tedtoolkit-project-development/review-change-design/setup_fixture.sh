@@ -28,7 +28,11 @@ EOF
 
 Approved product request. Several callers duplicate invariant-Celsius parsing and accept impossible
 values. Before the next ingestion API release, provide one additive, non-throwing parsing contract;
-formatting and Fahrenheit support remain out of scope.
+formatting and Fahrenheit support remain out of scope. Product has approved the exact accepted
+grammar `[+-]?[0-9]+(\.[0-9]+)?`: accept signed zero and exactly `-273.15`, reject whitespace,
+partial decimals, grouping, exponents, overflow, lower values, and precision that would require
+rounding. Existing construction behavior must remain source-compatible; binary compatibility is
+not a release claim for this pre-release package.
 EOF
     cat > docs/changes/P1-temperature-parse/change.md <<'EOF'
 # Temperature parsing
@@ -37,32 +41,41 @@ EOF
 <!-- workflow-profile: controlled -->
 <!-- change-kind: behavior-change -->
 <!-- change-status: draft -->
-<!-- delivery-shape: multi-item -->
+<!-- delivery-shape: single -->
 <!-- approval-source: none -->
+<!-- candidate-binding: none -->
 
 <!-- section: goal-rationale -->
 ## Goal and rationale
 
-Before the next ingestion API release, callers use one additive non-throwing invariant-Celsius
-parser instead of duplicated parsing that accepts impossible values. Source: `docs/requests/PR-17.md`.
+Before the next ingestion API release, the library provides one additive non-throwing
+invariant-Celsius parser instead of leaving callers to duplicate parsing that accepts impossible
+values. Source: `docs/requests/PR-17.md`.
 
 <!-- section: scope -->
 ## Scope and non-goals
 
-- In scope: invariant decimal Celsius parsing through an additive public API.
+- In scope: `public static bool TryParse(string? text, out Temperature result)` accepting
+  `[+-]?[0-9]+(\.[0-9]+)?` invariant Celsius text at or above `-273.15` only when the value is
+  exactly representable by `decimal` without rounding.
 - Non-goals: formatting, Fahrenheit input, localization, migration, or rollout.
-- Preserved: existing construction behavior and binary compatibility.
+- Preserved: existing construction behavior and source compatibility. Binary compatibility is not
+  claimed for this pre-release package.
 
 <!-- section: behavior-contract -->
 ## Behavior contract
 
 <!-- behavior-change: OB-01 -->
-Current callers duplicate parsing. Expected behavior is one compatible public parser.
+Current callers duplicate parsing. Expected behavior is one compatible public parser. Signed zero
+and exactly `-273.15` are accepted. Leading/trailing whitespace, `.5`, `1.`, a sign without digits,
+group separators, exponent notation, lower values, decimal overflow, and excess precision that
+would require rounding are rejected.
 
 <!-- acceptance-case: AC-01 -->
-- AC-01: valid invariant decimal Celsius text succeeds with the corresponding value.
+- AC-01: valid invariant decimal Celsius text succeeds and returns the exact corresponding value.
 <!-- acceptance-case: AC-02 -->
-- AC-02: null, whitespace, invalid text, and below-absolute-zero values fail without throwing.
+- AC-02: null, whitespace, invalid, grouped, exponent, overflow, and below-absolute-zero values
+  return false, set `result` to `default`, and do not throw.
 
 ## Constraints and risks
 
@@ -89,17 +102,55 @@ the Temperature implementation and its existing test project; private parsing st
 <!-- primary-proof: AC-02 purpose=acceptance shape=unit -->
 | Contract | Role | Observable assertion | Command |
 | --- | --- | --- | --- |
-| AC-01 | Primary | Valid input returns its Celsius value | Repository test command |
-| AC-02 | Primary | Acceptance and regression | Unit | Invalid and impossible input returns false without throwing | Repository test command |
+| AC-01 | Primary | Valid exactly representable input returns its exact Celsius value, including signed zero and `-273.15` | `dotnet test --configuration Release --project Weather.Tests.csproj`; require non-zero AC-01 discovery |
+| AC-02 | Primary | Every rejected grammar, boundary, overflow, and excess-precision partition returns false with default output and no exception | Same command; require non-zero AC-02 discovery |
+| Existing constructor and source compatibility | Conditional | Existing constructor call sites still compile and the focused constructor regression passes | Same command; compilation of `TemperatureTests.cs` and the passing constructor test are the bounded procedure and observable pass condition |
 
 <!-- section: completion-criteria -->
 ## Completion
 
-Both acceptance cases and the affected regression pass with compatibility preserved.
+Both acceptance cases and the affected constructor regression pass with source compatibility
+preserved; no binary-compatibility claim is in scope.
+EOF
+    cat > Temperature.cs <<'EOF'
+namespace Weather;
+
+public readonly record struct Temperature(decimal Celsius);
+EOF
+    cat > Weather.Tests.csproj <<'EOF'
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="TUnit" Version="1.61.35" />
+  </ItemGroup>
+</Project>
+EOF
+    cat > TemperatureTests.cs <<'EOF'
+using TUnit.Assertions;
+using TUnit.Core;
+
+namespace Weather.Tests;
+
+internal sealed class TemperatureTests
+{
+    [Test]
+    public async Task Existing_constructor_preserves_value()
+    {
+        await Assert.That(new Temperature(12.5m).Celsius).IsEqualTo(12.5m);
+    }
+}
+EOF
+    cat > CLAUDE.md <<'EOF'
+# Repository guidance
+
+Use `dotnet test --configuration Release --project Weather.Tests.csproj` for the authoritative focused proof.
 EOF
     ;;
   planned-prerequisite)
-    mkdir -p docs/changes/settings-store
+    mkdir -p docs/changes/settings-store docs/changes/preferences-screen
     cat > docs/changes/settings-store/change.md <<'EOF'
 # Provide a settings store
 <!-- change-format: 3 -->
@@ -135,7 +186,7 @@ One bounded delivery.
 ## Completion
 AC-01 passes.
 EOF
-    cat > docs/changes/P1-temperature-parse/change.md <<'EOF'
+    cat > docs/changes/preferences-screen/change.md <<'EOF'
 # Add a preferences screen
 <!-- change-format: 3 -->
 <!-- workflow-profile: controlled -->

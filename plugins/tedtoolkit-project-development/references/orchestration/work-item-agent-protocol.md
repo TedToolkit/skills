@@ -9,7 +9,7 @@ repository-local namespace, provisioning, and common cleanup rules.
 
 | Role | Owns | Does not own |
 | --- | --- | --- |
-| Integration coordinator | Ready queue, worktrees, runtime collisions, integration, `work-items.md` status, and combined verification | Production semantics or independent review |
+| Integration coordinator | Ready queue, temporary Git state, runtime collisions, integration, `work-items.md` status, and combined verification | Production semantics or independent review |
 | Implementation worker | One approved item on one branch and worktree | Other items, integration branch, or map status |
 | Review specialist | Code correctness, test adequacy, or both as distinct judgments for one exact candidate | Implementation, status, merge, or approval |
 | Verification executor | Candidate-bound command/procedure results | Test adequacy, fixes, merge conclusion, or approval |
@@ -19,8 +19,9 @@ repository-local namespace, provisioning, and common cleanup rules.
 contracts; workers record candidate verification results in their handoff or coordinator-owned control state,
 not by racing to update shared status.
 
-The integration coordinator is the sole writer of the authoritative integration branch and delivery map. A
-worker owns one item, branch, and worktree. Dependents consume prerequisites only from a verified
+The integration coordinator is the sole lifecycle and delivery-map owner for the authoritative
+integration branch. A serial worker may write its one dispatched item directly in that clean
+worktree; a concurrent worker owns one item, branch, and worktree. Dependents consume prerequisites only from a verified
 integration SHA, never another worker's message or unintegrated branch.
 The integration coordinator also advances the parent change from `approved` to `in-progress`, `implemented`,
 and `completed` at the lifecycle gates defined by the shared workflow.
@@ -36,7 +37,8 @@ generated output, shared public contracts, and exclusive test resources. Connect
 separate execution groups; this ordering does not create a logical prerequisite.
 
 Parallelize only collision-free items in isolated worktrees. A one-item ready wave remains under the
-same coordinator and runs serially. If isolation is unavailable, serialize writes. Keep one
+same coordinator and runs serially in the clean authoritative integration worktree without creating
+a temporary branch or worktree. If isolation is unavailable, serialize writes there. Keep one
 coordinator slot free and prefer breadth across distinct items over duplicate perspectives on one
 item.
 
@@ -55,7 +57,14 @@ parent completion, remove every remaining clean worktree created for the change,
 `git worktree prune`, and verify none is registered below `.tedtoolkit/worktrees/`. Cleanup needs no
 additional approval because it is part of the authorized worktree lifecycle. Never force-remove a
 dirty, blocked, stale, or sole-evidence worktree. Retain it and report its exact path and blocking
-reason so recovery remains possible. Do not delete temporary branches unless separately authorized.
+reason so recovery remains possible. After removing and pruning worktrees, treat worker and
+disposable candidate branches created by the current orchestration as temporary execution state
+too. For each exact recorded branch, run `bash
+"${CLAUDE_PLUGIN_ROOT}"/scripts/cleanup-temporary-branch.sh <authoritative-integration-ref>
+<temporary-branch>`. The helper deletes only a local branch that is no longer checked out and whose
+tip is reachable from the authoritative integration ref. This lifecycle cleanup needs no additional
+approval. Never pass a pre-existing or unrecorded branch, force deletion, or delete a branch with
+unique commits; retain rejected branches and report their exact names and blockers.
 
 ## Dispatch and handoff
 
@@ -64,7 +73,7 @@ Every worker packet follows the shared context schema and adds:
 ```text
 Parent change and selected work item
 Verified integration baseline SHA
-Worker branch and worktree
+Authoritative integration worktree for a serial wave, or worker branch and worktree for concurrent isolation
 Owned and supported contract IDs
 Known runtime collisions or exclusive resources
 Approved implementation boundary and escalation triggers

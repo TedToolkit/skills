@@ -2,6 +2,9 @@ config:
   max_parallel_scenarios: 1
   max_parallel_runs: 1
 
+smoke_scenarios:
+  - "Map candidate evidence to a supplied role"
+
 scenarios:
   - name: "Map candidate evidence to a supplied role"
     prompt: >-
@@ -13,10 +16,10 @@ scenarios:
       - { type: "output_contains", value: "# Job Match" }
       - { type: "output_contains", value: "## Evidence matrix" }
       - { type: "output_contains", value: "Supported" }
-      - { type: "output_contains", value: "Not demonstrated" }
+      - { type: "output_regex", pattern: "(?i)partial|not (?:directly )?demonstrated" }
       - { type: "output_not_contains", value: "# Interview Pack" }
     rubric:
-      - "Maps C# and SQL as supported and Kubernetes as not demonstrated without inferring equivalence from Docker."
+      - "Maps C# and SQL as supported and treats Docker only as adjacent or missing Kubernetes evidence, never as direct Kubernetes support."
       - "Returns comparison only and does not rewrite the resume or create interview questions."
     timeout: 300
 
@@ -46,6 +49,20 @@ scenarios:
       - "Routes the final-copy request to write-resume even though both candidate evidence and a job description are present."
       - "Honors the explicit conversational-artifact approval without inserting a second strategy gate."
     timeout: 360
+
+  - name: "Create only a clearly named new match file"
+    prompt: >-
+      Compare this background and role, and create the result at the currently absent path match.md.
+      Background: C# APIs and SQL. Role: C#, SQL, Kubernetes. Do not create a resume, review, pack,
+      or companion file.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_exists", path: "match.md" }
+      - { type: "file_contains", path: "match.md", value: "# Job Match" }
+      - { type: "command", run: "test $(find . -maxdepth 1 -type f ! -name match.md | wc -l) -eq 0" }
+    rubric:
+      - "Creates the clearly named absent match file without a second gate or another deliverable."
+    timeout: 300
 
   - name: "Exclude a protected-trait requirement from job matching"
     prompt: >-

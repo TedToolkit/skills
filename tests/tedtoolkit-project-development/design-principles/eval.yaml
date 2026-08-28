@@ -4,7 +4,7 @@ config:
 
 scenarios:
   - name: "Create an approved principle set"
-    prompt: "I approve creation of a compact repository design-principle set in English. Establish dependency direction, compatibility, testability, and observability defaults with owners, review triggers, strengths, and exception routes. The repository is small and all principles have the same owner and revision cadence. Do not modify production code."
+    prompt: "I approve creation of a compact repository design-principle set in English. Establish dependency direction, compatibility, testability, and observability defaults with owners, review triggers, strengths, and exception routes. The repository is small: use Repository maintainers as the shared owner and review annually plus whenever product intent, public compatibility, architecture boundaries, or operational requirements materially change. Do not modify production code."
     setup:
       copy_test_files: true
       commands:

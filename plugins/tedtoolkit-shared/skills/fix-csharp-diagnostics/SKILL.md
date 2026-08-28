@@ -1,9 +1,10 @@
 ---
 name: fix-csharp-diagnostics
 description: >-
-  Eliminate C# and .NET compiler, nullable, obsolete-API, analyzer, and style diagnostics at their
-  root cause. Use when an in-scope project or solution must reach a zero-warning, zero-error Release
-  build, including a diagnostics-only tail reached from another repair workflow.
+  Eliminate explicitly requested C# and .NET compiler, nullable, obsolete-API, analyzer, and style
+  diagnostics at their root cause. Use for a diagnostic-ID or warning-clean cleanup boundary,
+  including a diagnostics-only tail delegated by another repair workflow; do not own a named
+  project's observed build, run, or test failure.
 ---
 
 # Fix Csharp Diagnostics
@@ -12,8 +13,10 @@ Drive one Release command to **zero warnings and zero errors**. Treat suppressio
 exception. Keep submodules, vendored source, and independently maintained nested repositories
 outside the repair boundary.
 
-When the command also exposes failing assertions or runtime behavior, invoke `run-fix` for that
-behavioral failure.
+When the user names a project whose build, run, or tests are failing, `run-fix` owns reproduction,
+root-cause repair, and final verification. Accept only a bounded diagnostics-only tail from it and
+return the result to that owner; do not invoke it recursively. When this workflow independently
+exposes assertions or runtime behavior, stop and route that new failure to `run-fix`.
 
 ## 1. Resolve the exact build target and verification command
 
@@ -28,10 +31,10 @@ Identify the narrowest target that satisfies the request:
 - During discovery, identify Git submodules and independently maintained nested repositories, then
   exclude their projects from the candidate repair scope unless the user explicitly names one.
 
-Prefer Release verification:
+Prefer fresh Release verification:
 
 ```sh
-dotnet build -c Release <target>
+dotnet build -c Release --no-incremental <target>
 ```
 
 Use `dotnet test -c Release <target>` when the user requests tests or the repository defines it as
@@ -60,14 +63,18 @@ after this plan is shown.
 
 ## 4. Apply built-in code fixes first when available
 
-For diagnostics with known Roslyn or analyzer code fixes, try the built-in fix route before writing
-manual patches. Typical options include:
+For observed diagnostics with known Roslyn or analyzer code fixes, use the built-in route only when
+both the diagnostic IDs and approved paths can be bounded. Snapshot the complete Git status plus
+the byte identity of unrelated dirty paths before running it. A typical bounded command is:
 
-- `dotnet format analyzers <target>`
-- `dotnet format analyzers --diagnostics <ID1,ID2,...> <target>`
-- IDE/Roslyn-backed fixers when the environment exposes them
+```sh
+dotnet format analyzers <target> --diagnostics <ID1> <ID2> --include <path1> <path2> --no-restore
+```
 
-Keep only fixes whose diff preserves intent. Correct unrelated fixer output before moving on.
+Do not run an unbounded whole-target fixer as a trial. If the available fixer cannot limit both IDs
+and paths, skip it and patch manually. Afterward, compare the full diff and unrelated byte
+identities. If pre-existing user work cannot be distinguished from fixer output, stop; never revert,
+normalize, or accept unrelated changes on the user's behalf.
 
 ## 5. Fix remaining diagnostics one root cause at a time
 
@@ -86,7 +93,9 @@ diagnostic-backed boundary.
 
 ## 6. Rebuild repeatedly until the target is clean
 
-After each meaningful batch of fixes, rerun the same Release command. Keep iterating until:
+After each meaningful batch of fixes, rerun the same Release command. The final command must include
+`--no-incremental` (or a stricter repository-authoritative clean analysis gate) so up-to-date output
+cannot hide diagnostics. Keep iterating until:
 
 - the command exits successfully, and
 - the output contains **no warnings** and **no errors**

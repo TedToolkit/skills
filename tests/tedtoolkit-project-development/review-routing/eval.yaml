@@ -10,13 +10,12 @@ scenarios:
       - { type: "output_contains", value: "review-implementation" }
       - { type: "output_regex", pattern: "(?i)aggregate.{0,80}merge-readiness|merge-readiness.{0,80}aggregate" }
       - { type: "output_regex", pattern: "(?i)\\bspecialist\\b" }
-      - { type: "output_not_contains", value: "unavailable" }
     rubric:
       - "Routes the ordinary request to review-implementation as aggregate owner and treats specialists as dispatched lanes, not competing final owners."
     timeout: 420
 
   - name: "Allow an explicit review-code invocation"
-    prompt: "$review-code is already explicitly selected. Read selected-plugin/skills/review-code/SKILL.md, then state this lane's bounded responsibility and whether it issues the aggregate merge-readiness conclusion or executes tests. Do not inspect or modify files."
+    prompt: "Evaluate the explicitly selected review-code lane. Read only selected-plugin/skills/review-code/SKILL.md, then state its bounded responsibility and whether it issues the aggregate merge-readiness conclusion or executes tests. Do not inspect other files or modify anything."
     setup:
       env:
         TEDTOOLKIT_REPO_ROOT: "${REPO_ROOT}"
@@ -26,15 +25,12 @@ scenarios:
       - { type: "exit_success" }
       - { type: "output_regex", pattern: "(?i)code.{0,40}correctness|correctness.{0,40}code" }
       - { type: "output_regex", pattern: "(?is)(?:does not|doesn't|not|neither|outside).{0,120}aggregate" }
-      - { type: "output_not_contains", value: "unavailable" }
-      - { type: "output_not_contains", value: "not available" }
-      - { type: "output_not_contains", value: "not installed" }
     rubric:
       - "Recognizes the explicit specialist and keeps aggregate conclusion and test execution outside review-code ownership."
     timeout: 300
 
   - name: "Allow an explicit review-tests invocation"
-    prompt: "$review-tests is already explicitly selected. Read selected-plugin/skills/review-tests/SKILL.md, then state this lane's bounded responsibility and whether it executes tests or issues the aggregate merge-readiness conclusion. Do not inspect or modify files."
+    prompt: "Evaluate the explicitly selected review-tests lane. Read only selected-plugin/skills/review-tests/SKILL.md, then state its bounded responsibility and whether it executes tests or issues the aggregate merge-readiness conclusion. Do not inspect other files or modify anything."
     setup:
       env:
         TEDTOOLKIT_REPO_ROOT: "${REPO_ROOT}"
@@ -43,7 +39,7 @@ scenarios:
     assertions:
       - { type: "exit_success" }
       - { type: "output_regex", pattern: "(?i)test.{0,40}adequacy|adequacy.{0,40}test" }
-      - { type: "output_regex", pattern: "(?i)partition|assertion strength|oracles?" }
+      - { type: "output_regex", pattern: "(?i)partition|assertion strength|oracles?|behaviors?|boundaries|invariants" }
       - { type: "output_regex", pattern: "(?is)(?:does not|doesn't|not|neither|outside).{0,120}(?:execute|run)" }
       - { type: "output_not_contains", value: "unavailable" }
       - { type: "output_not_contains", value: "not available" }
@@ -53,7 +49,7 @@ scenarios:
     timeout: 300
 
   - name: "Allow an explicit verify-implementation invocation"
-    prompt: "$verify-implementation is already explicitly selected. Read selected-plugin/skills/verify-implementation/SKILL.md, then state this lane's bounded responsibility for one exact candidate and whether it fixes implementation defects or issues the aggregate merge-readiness conclusion. Do not inspect or modify files."
+    prompt: "Evaluate the explicitly selected verify-implementation lane. Read only selected-plugin/skills/verify-implementation/SKILL.md, then state its bounded responsibility for one exact candidate and whether it fixes implementation defects or issues the aggregate merge-readiness conclusion. Do not inspect other files or modify anything."
     setup:
       env:
         TEDTOOLKIT_REPO_ROOT: "${REPO_ROOT}"

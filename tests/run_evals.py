@@ -32,6 +32,7 @@ import os
 import re
 import signal
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -417,7 +418,7 @@ def cleanup_eval_plugin(plugin: str, marketplace: str, root: Path) -> None:
                             encoding="utf-8", errors="replace")
             except (OSError, subprocess.SubprocessError):
                 pass
-    shutil.rmtree(root, ignore_errors=True)
+    _rmtree_best_effort(root)
 
 
 # ---------------------------------------------------------------------------
@@ -428,7 +429,7 @@ def eval_plugins() -> list[str]:
     return sorted(
         path.name
         for path in TESTS_DIR.iterdir()
-        if path.is_dir() and any(path.rglob("eval.yaml"))
+        if path.is_dir() and not path.name.startswith(".") and any(path.rglob("eval.yaml"))
     )
 
 
@@ -445,6 +446,56 @@ def discover(plugin: str, skill_filters: list[str]):
         yield skill, path.parent, spec
 
 
+def select_scenarios(spec: dict, *, tier: str,
+                     name_filter: str | None = None) -> list[dict]:
+    """Apply cost-tier and name selectors as a strict intersection."""
+    if tier not in {"static", "smoke", "full"}:
+        raise ValueError(f"unsupported eval tier: {tier!r}")
+    if not isinstance(spec, dict):
+        raise ValueError("eval specification must be a mapping")
+
+    scenarios = spec.get("scenarios", [])
+    if not isinstance(scenarios, list) or any(not isinstance(item, dict) for item in scenarios):
+        raise ValueError("eval 'scenarios' must be a list of mappings")
+    names = [scenario.get("name") for scenario in scenarios]
+    if any(not isinstance(name, str) or not name.strip() for name in names):
+        raise ValueError("every eval scenario must have a non-empty string name")
+    if len(names) != len(set(names)):
+        raise ValueError("eval scenario names must be unique within one eval.yaml")
+
+    smoke_names = spec.get("smoke_scenarios", [])
+    if not isinstance(smoke_names, list) or any(
+            not isinstance(name, str) or not name.strip() for name in smoke_names):
+        raise ValueError("eval 'smoke_scenarios' must be a list of non-empty scenario names")
+    if len(smoke_names) != len(set(smoke_names)):
+        raise ValueError("eval 'smoke_scenarios' must not contain duplicates")
+    unknown = sorted(set(smoke_names) - set(names))
+    if unknown:
+        raise ValueError(f"smoke_scenarios references unknown scenario(s): {', '.join(unknown)}")
+
+    smoke_set = set(smoke_names)
+    selected = scenarios
+    if tier == "static":
+        selected = [scenario for scenario in selected if scenario.get("mode", "codex") == "static"]
+    elif tier == "smoke":
+        selected = [scenario for scenario in selected
+                    if scenario.get("mode", "codex") == "static"
+                    or scenario["name"] in smoke_set]
+    if name_filter:
+        needle = name_filter.lower()
+        selected = [scenario for scenario in selected if needle in scenario["name"].lower()]
+    return selected
+
+
+def selection_requires_codex(selected: list[tuple[str, Path, list[dict]]]) -> bool:
+    """Return whether any selected scenario can invoke Codex."""
+    return any(
+        scenario.get("mode", "codex") != "static"
+        for _, _, scenarios in selected
+        for scenario in scenarios
+    )
+
+
 # ---------------------------------------------------------------------------
 # Assertions
 # ---------------------------------------------------------------------------
@@ -458,6 +509,34 @@ def _glob(workdir: Path, pattern: str) -> list[Path]:
 
 def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
+
+
+def _unlink_best_effort(path: Path, *, attempts: int = 3, delay_s: float = 0.05) -> None:
+    """Remove a transient file without letting a short Windows sharing lock fail the eval run."""
+    for attempt in range(attempts):
+        try:
+            path.unlink(missing_ok=True)
+            return
+        except OSError:
+            if attempt + 1 < attempts:
+                time.sleep(delay_s)
+
+
+def _rmtree_best_effort(path: Path, *, attempts: int = 5, delay_s: float = 0.05) -> None:
+    """Remove a transient tree after short-lived Windows descendant handles are released."""
+    def remove_readonly(function, target, _exc_info):
+        os.chmod(target, stat.S_IWRITE)
+        function(target)
+
+    for attempt in range(attempts):
+        try:
+            shutil.rmtree(path, onerror=remove_readonly)
+            return
+        except FileNotFoundError:
+            return
+        except OSError:
+            if attempt + 1 < attempts:
+                time.sleep(delay_s * (2 ** attempt))
 
 
 def check_assertion(a: dict, workdir: Path, env: dict, result_text: str, exit_code: int,
@@ -667,7 +746,8 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args,
     real_home = Path(os.environ.get("USERPROFILE") or os.path.expanduser("~"))
 
     record = {"skill": skill, "scenario": name, "prompt": scen.get("prompt", ""),
-              "rubric": scen.get("rubric", []), "assertions": [], "workdir": str(workdir)}
+              "rubric": [] if mode == "static" else scen.get("rubric", []),
+              "assertions": [], "workdir": str(workdir)}
 
     try:
         if mode not in {"codex", "static"}:
@@ -730,9 +810,6 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args,
             for a in scen.get("assertions", []):
                 record["assertions"].append(check_assertion_safe(
                     a, workdir, env, result_text, 0, real_home=real_home, deadline=deadline))
-            if args.judge and scen.get("rubric"):
-                record["rubric_grades"] = judge_rubric(
-                    scen, result_text, workdir, env, args, deadline=deadline)
             record["duration_s"] = round(time.monotonic() - scenario_started, 1)
             return record
 
@@ -849,17 +926,17 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args,
         for rel in setup.get("cleanup_globs", []):
             for target in real_home.glob(rel):
                 if target.is_dir():
-                    shutil.rmtree(target, ignore_errors=True)
+                    _rmtree_best_effort(target)
                 else:
                     target.unlink(missing_ok=True)
         if result_path is not None:
-            result_path.unlink(missing_ok=True)
+            _unlink_best_effort(result_path)
         if event_path is not None:
-            event_path.unlink(missing_ok=True)
+            _unlink_best_effort(event_path)
         if args.keep:
             record["kept"] = str(workdir)
         else:
-            shutil.rmtree(workdir, ignore_errors=True)
+            _rmtree_best_effort(workdir)
 
 
 def judge_rubric(scen: dict, result_text: str, workdir: Path, env: dict, args,
@@ -990,6 +1067,8 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Run TedToolkit plugin skill evals.")
     ap.add_argument("skills", nargs="*", help="skill names to run (default: all)")
     ap.add_argument("--filter", help="only run scenarios whose name contains this substring")
+    ap.add_argument("--tier", choices=("static", "smoke", "full"), default="full",
+                    help="eval cost tier (default: full)")
     ap.add_argument("--keep", action="store_true", help="keep work dirs for debugging")
     ap.add_argument("--judge", action="store_true",
                     help="grade rubric points with Codex and fail scenarios on any failed grade")
@@ -1014,10 +1093,7 @@ def main() -> int:
             plugin_dir = REPO_ROOT / "plugins" / plugin
             selected = []
             for skill, eval_dir, spec in discover(plugin, args.skills):
-                scenarios = spec.get("scenarios", [])
-                if args.filter:
-                    scenarios = [s for s in scenarios
-                                 if args.filter.lower() in s.get("name", "").lower()]
+                scenarios = select_scenarios(spec, tier=args.tier, name_filter=args.filter)
                 if scenarios:
                     selected.append((skill, eval_dir, scenarios))
 
@@ -1028,16 +1104,8 @@ def main() -> int:
                 [Path(__file__).resolve(), plugin_dir,
                  *(eval_dir for _, eval_dir, _ in selected)])
 
-            load_plugin = any(
-                scen.get("mode", "codex") != "static"
-                for _, _, scenarios in selected
-                for scen in scenarios
-            )
-            require_codex = load_plugin or any(
-                args.judge and scen.get("rubric")
-                for _, _, scenarios in selected
-                for scen in scenarios
-            )
+            load_plugin = selection_requires_codex(selected)
+            require_codex = load_plugin
             preflight(plugin_dir, require_codex=require_codex)
 
             marketplace_root = marketplace_name = eval_plugin_name = None

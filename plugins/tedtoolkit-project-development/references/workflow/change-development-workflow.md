@@ -1,9 +1,7 @@
 # Change-development workflow
 
-This reference defines the path from one raw development request through a scoped change set and
-risk-scaled delivery. It
-also defines the human handoff boundary: workflow records must help a developer act without reading
-the originating conversation.
+This reference defines the path from one raw request through scoped, risk-scaled delivery. Records
+must let a developer continue without the originating conversation.
 
 Read [testing-strategy.md](testing-strategy.md) when a change defines behavior or proof.
 Read [requirements-clarification.md](requirements-clarification.md) when user intent is incomplete.
@@ -13,82 +11,49 @@ TedToolkit state.
 
 ## Human-readable delivery records
 
-`change.md` and work-item files are written for human developers. They contain the current approved
-truth, not the transcript or machinery that produced it.
+`change.md` and work-item files contain current approved truth, not transcripts or workflow
+machinery. Keep stable machine markers; put scheduling, leases, receipts, and other control state in
+the prescribed tool-state artifact. Include only implementation-, proof-, review-, release-, or
+risk-relevant facts. Likely touchpoints may be non-binding; private files, types, algorithms, and
+test organization remain open. Prefer the shortest complete record: Standard changes commonly fit
+40–100 lines and focused items 40–80, but completeness controls.
 
-- Include only information that affects implementation, verification, review, release, or risk.
-- Omit agent scheduling, writer leases, receipts, transaction envelopes, repeated rationale,
-  superseded answers, and empty template sections from the main document.
-- Keep machine-readable profile, kind, status, section, and identity markers stable even when the
-  visible headings are translated. Put detailed orchestration state in a preparation or other
-  separate control artifact using the tool state layout.
-- Give likely code or component touchpoints when evidence supports them and label them non-binding;
-  a human should not need to rediscover the whole repository, but remains free to choose private
-  files, types, algorithms, and test organization inside the approved boundary.
-- Prefer the shortest record that preserves the contract. Length is a review signal, not a hard
-  validator limit: a Standard change normally fits in roughly 40–100 lines and a focused work item
-  in roughly 40–80 lines.
-
-Apply the **five-minute handoff test**. A developer who has not seen the conversation must be able to
-identify, without consulting agent history:
-
-1. why the change exists and what outcome completes it;
-2. current, expected, and deliberately preserved behavior;
-3. scope and non-goals;
-4. public contracts, governing constraints, and material risks;
-5. real prerequisites and supplied inputs;
-6. the primary proof and required conditional proof; and
-7. which private implementation choices remain open.
-
-If information is missing, add the smallest decision-relevant statement. If the answers are buried
-in process tables, remove or relocate the process detail.
+Apply the **five-minute handoff test**: a new developer can find the goal; current, expected, and
+preserved behavior; scope/non-goals; contracts/constraints/risks; real prerequisites and supplied
+inputs; primary and conditional proof; and open private choices. Add missing facts and remove or
+relocate process detail that hides them.
 
 ## Scope the request in `scope-changes`
 
-`scope-changes` is the default routing owner for a new development request whose change boundaries
-have not already been established. It maps every material part of the request exactly once to zero,
-one, or several candidate changes, an explicit deferral, or an evidenced no-change disposition.
-
-It asks only questions that can change candidate count, ownership, independence, dependency,
-priority, release/recovery grouping, or partition authorization. One coherent candidate takes the
-no-artifact fast path directly to `design-change`; several candidates use partition control only
-when it adds material value. Detailed behavior and proof questions belong to `design-change`.
+`scope-changes` owns new requests without established boundaries. It maps every material part
+exactly once to candidates, explicit deferral, or evidenced no-change. Ask only what can change
+candidate count, ownership, independence, dependency, priority, release/recovery grouping, or
+partition authority. Route one coherent candidate directly to `design-change`; use partition
+control for several only when useful. Detailed behavior and proof belong to `design-change`.
 
 ## Classify one change in `design-change`
 
-`design-change` owns exactly one coherent candidate. It decides the profile and delivery shape from
-repository evidence and contract clarification. Never ask the user to choose Fast, Standard, or
-Controlled. Classify before creating a workflow document and state the profile, change kind,
-evidence, artifacts, approval gate, and escalation triggers. Choose the lightest profile whose
-conditions are evidenced; uncertainty about a material risk moves upward, never downward.
+`design-change` owns one candidate and classifies it from repository evidence; never ask the user to
+choose a profile. State profile, kind, evidence, artifacts, gate, and escalation triggers before
+creating the record. Choose the lightest evidenced profile; material uncertainty moves upward.
 
 | Profile | Use when | Main artifact | Required gate |
 | --- | --- | --- | --- |
-| Fast | One local, reversible outcome; no public contract, persistence, security, migration, architecture, or external-operation risk; verification is known; cross-conversation recovery is not required. | No `docs/changes/` record by default. | One concise pre-write plan, explicit approval, then explicit continuation. |
-| Standard | One goal and one independently implementable, bounded, reversible delivery of any change kind; no Controlled trigger; also use when an otherwise Fast delivery must be @-addressable or recoverable across conversations. | One concise `change.md` with an embedded delivery brief. | Approval records the contract; a separate or combined explicit continuation starts implementation. |
-| Controlled | Public API/protocol/data-format compatibility, security/compliance, migration/rollback, difficult reversal, cross-cutting delivery, material architecture, or two or more necessary delivery boundaries. | Full `change.md`; work items only when more than one delivery is required. | Independent design review; explicit approval and continuation at each required contract or map gate. |
+| Fast | One local reversible result; known proof; no public contract, persistence, security, migration, architecture, external operation, or recovery requirement. | No record by default. | Concise plan, explicit approval, explicit continuation. |
+| Standard | One bounded reversible delivery with no Controlled trigger, including otherwise-Fast work needing cross-context recovery. | Concise `change.md` with embedded delivery. | Approval records the contract; continuation starts work. |
+| Controlled | Public API/protocol/data compatibility, security/compliance, migration/rollback, difficult reversal, cross-cutting delivery, material architecture, or at least two necessary delivery boundaries. | Full `change.md`; items only for multiple deliveries. | Independent design review and approval/continuation at each contract or map gate. |
 
-Profile expresses delivery risk, not agent count. After classification, select a separate delivery
-shape:
+Profile is risk, not agent count. Delivery shape is separately `single` (one Fast plan or embedded
+delivery) or `multi-item` (one Controlled change with at least two necessary, independently
+verifiable items). Several standalone changes remain a change set, not one umbrella delivery.
 
-- `single`: one Fast plan or one embedded Standard/Controlled delivery;
-- `multi-item`: one Controlled change with two or more necessary independently verifiable items.
+A cross-change prerequisite is valid only when the source retains independent value and supplies
+one concrete completed contract. The dependent restates it with source path and contract ID;
+priority, preferred order, or status alone is not dependency. Keep inseparable outcomes together.
 
-Several independently valuable changes form a change set owned by `scope-changes`; they are not a
-delivery shape of one change.
-
-Separate changes may have a directed prerequisite when the source outcome retains independent
-value and the dependent change consumes one concrete completed contract. The dependent record
-restates the supplied guarantee with a repository-relative source path and contract ID; it never
-depends on priority, preferred order, or change status alone. If the outcomes cannot be approved,
-proved, released, and recovered independently, keep them inseparable instead of adding an edge.
-
-One delivery coordinator owns every approved multi-item Controlled change through authoritative
-integration, even when only one item is ready. Execution is sequential by default.
-`multi-item-parallel` is an optional wave strategy only when at least two dependency-ready,
-collision-free items and isolated workers provide material benefit. It never changes the workflow
-profile, approval contract, status owner, or integration path. Serialize a one-item wave, collisions,
-or environments without isolation; do not route them around the coordinator.
+One coordinator owns every multi-item Controlled change through integration. Execution is serial by
+default; `multi-item-parallel` applies only to at least two ready, collision-free isolated items with
+material benefit and never changes profile, approval, status owner, or integration path.
 
 ### Change kinds
 
@@ -131,24 +96,20 @@ constraint it consumes instead of making a human reopen every upstream document.
 
 ## Terms
 
-| Term | Meaning | Not this |
-| --- | --- | --- |
-| Change set | The zero, one, or several coherent changes that exactly cover one source request and its explicit dispositions. | One umbrella change, a cross-change work-item map, or a reason to create orchestration state. |
-| Change design | One approved goal, behavior, invariant, or experiment contract, scope, constraints, proof, and completion boundary. | An agent transcript, exhaustive file list, or task sequence. |
-| Change prerequisite | One concrete `AC-*`, `INV-*`, `STR-*`, or `EXP-*` outcome supplied by another standalone change and required on an explicit Git baseline before dependent implementation. | Priority, preferred sequence, a cross-change work-item, or an upstream status without its contract. |
-| Embedded delivery brief | The one Standard or single-delivery Controlled implementation boundary inside `change.md`. | A hidden second work item or multi-delivery map. |
-| Work item | One independently verifiable delivery inside one Controlled change, with a bounded outcome, real prerequisites, constraints, primary proof, and done criteria. | Research, approval, external operation, or private implementation script. |
-| Delivery owner | The user-facing implementation coordinator for one delivery, or integration coordinator for a multi-item change; the only role that updates lifecycle/status. | The review coordinator or a specialist reviewer. |
-| Proof definition | The contract-bound test, command, assertion, or bounded procedure expected to demonstrate one approved behavior, invariant, experiment claim, or risk. | A claim that it already ran or passed. |
-| Proof role | `Primary` directly demonstrates one approved contract row; `Conditional` addresses an additional applicable risk. | A proof purpose or execution shape. |
-| Proof purpose | Acceptance, regression, boundary, structural, journey, or decision evidence: why the evidence exists. | Primary versus conditional role. |
-| Execution shape | Unit, Component, Contract, Integration, End-to-end, Benchmark, or Manual: how the evidence runs. | A status hierarchy. |
-| Verification result | The observed command/procedure outcome, counts, environment, and limitations bound to one exact candidate. | Test source, an unbound worker success message, or a claim that the scope was sufficient. |
-| Traceability | The review mapping from approved contract through implementation and proof definition to the candidate-bound verification result. | A requirement to embed temporary change IDs or run results in long-lived test source. |
-| Review independence | `independent`, `compact`, or `not-established`, based on fresh context, implementation separation, read-only ownership, and exact revision binding. | The number of agents used or a reviewer calling itself independent. |
-| Workflow escalation trigger | New or changed observable behavior or invariant, scope, public or persisted contract, security, migration or recovery, real dependency, concurrency or shared boundary, difficult reversal, enduring technical direction, destructive action, or external side effect. | A private file, symbol, algorithm, test organization, collision order, or edit-sequence choice inside the approved boundary. |
-| Target delivery artifact | Version-controlled code, test, configuration, build, or user/maintainer documentation changed to achieve the goal. | Change records, work-item status, approvals, or review reports. |
-| Operational handoff | Release, deployment, permission, manual production configuration, or stakeholder communication tracked with an owner and closure evidence. | A development work item. |
+| Term | Contract |
+| --- | --- |
+| Change set | Complete partition of one request into standalone changes and explicit dispositions; never an umbrella change or cross-change item map. |
+| Change design | Approved goal, behavior/invariant/experiment, scope, constraints, proof, and completion boundary—not a transcript or exhaustive task list. |
+| Change prerequisite | One concrete `AC-*`, `INV-*`, `STR-*`, or `EXP-*` supplied by a standalone change on an explicit baseline—not priority, order, or status alone. |
+| Embedded delivery | The sole Standard or single-delivery Controlled implementation boundary. |
+| Work item | Independently verifiable delivery within one Controlled change; not research, approval, external operation, or private steps. |
+| Delivery owner | User-facing implementation/integration coordinator and sole lifecycle writer; never a reviewer. |
+| Proof definition/result | Definition is the expected contract-bound assertion/procedure; result is observed counts, outcome, environment, and limits on an exact candidate. |
+| Proof role/purpose/shape | `Primary` directly proves one contract row; `Conditional` covers applicable extra risk. Purpose is why evidence exists; shape is how it runs. |
+| Traceability | Mapping from approved contract through implementation and proof to candidate-bound result; never transient IDs/results embedded in long-lived tests. |
+| Review independence | `independent`, `compact`, or `not-established`, based on fresh context, separation, read-only ownership, and exact binding—not agent count. |
+| Workflow escalation trigger | New/changed behavior, invariant, scope, public/persisted contract, security, migration/recovery, real dependency, concurrency/shared boundary, difficult reversal, architecture, destructive action, or external effect—not private choices inside contract. |
+| Target artifact / operational handoff | Versioned deliverable versus owned release, deployment, permission, production configuration, or stakeholder action. |
 
 ## Gates and lifecycle
 

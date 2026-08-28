@@ -1,0 +1,18 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Keep every representative workflow closure below its exact audit baseline"
+    mode: "static"
+    setup:
+      copy_test_files: true
+      commands:
+        - "python test_measure.py"
+        - "python measure.py --repo ${REPO_ROOT}"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "scope-changes: 32457 ->" }
+      - { type: "output_contains", value: "total: 278545 ->" }
+      - { type: "output_not_contains", value: "did not shrink" }
+    timeout: 60

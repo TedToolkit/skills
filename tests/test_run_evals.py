@@ -1,7 +1,9 @@
 import os
+import stat
 import tempfile
 import time
 import unittest
+from unittest import mock
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -208,6 +210,132 @@ class AssertionHarnessTests(unittest.TestCase):
         self.assertEqual(1, before["file_count"])
         self.assertEqual([source.resolve().as_posix()], before["roots"])
         self.assertNotEqual(before["sha256"], after["sha256"])
+
+    def test_static_tier_selects_only_static_scenarios(self):
+        scenarios = [
+            {"name": "offline", "mode": "static"},
+            {"name": "model", "mode": "codex"},
+        ]
+
+        selected = run_evals.select_scenarios(
+            {"scenarios": scenarios, "smoke_scenarios": ["model"]}, tier="static")
+
+        self.assertEqual(["offline"], [scenario["name"] for scenario in selected])
+
+    def test_smoke_tier_is_static_plus_explicit_members(self):
+        scenarios = [
+            {"name": "model-b", "mode": "codex"},
+            {"name": "offline", "mode": "static"},
+            {"name": "model-a", "mode": "codex"},
+        ]
+
+        selected = run_evals.select_scenarios(
+            {"scenarios": scenarios, "smoke_scenarios": ["model-a"]}, tier="smoke")
+
+        self.assertEqual(["offline", "model-a"], [scenario["name"] for scenario in selected])
+
+    def test_full_tier_preserves_declared_scenario_order(self):
+        scenarios = [{"name": "second"}, {"name": "first", "mode": "static"}]
+
+        selected = run_evals.select_scenarios({"scenarios": scenarios}, tier="full")
+
+        self.assertEqual(scenarios, selected)
+
+    def test_tier_and_name_filter_intersect_without_widening(self):
+        spec = {
+            "scenarios": [
+                {"name": "offline", "mode": "static"},
+                {"name": "model-smoke", "mode": "codex"},
+                {"name": "other", "mode": "codex"},
+            ],
+            "smoke_scenarios": ["model-smoke"],
+        }
+
+        selected = run_evals.select_scenarios(
+            spec, tier="smoke", name_filter="other")
+
+        self.assertEqual([], selected)
+
+    def test_invalid_smoke_metadata_fails_closed(self):
+        with self.assertRaisesRegex(ValueError, "unknown scenario"):
+            run_evals.select_scenarios(
+                {"scenarios": [{"name": "known"}], "smoke_scenarios": ["missing"]},
+                tier="smoke")
+
+    def test_static_scenario_never_invokes_rubric_judge(self):
+        eval_dir = self.workdir / "eval"
+        eval_dir.mkdir()
+        scenario = {
+            "name": "offline with descriptive rubric",
+            "mode": "static",
+            "rubric": ["Must remain offline"],
+            "assertions": [{"type": "exit_success"}],
+        }
+
+        with mock.patch.object(run_evals, "judge_rubric") as judge:
+            record = run_evals.run_scenario(
+                "offline", eval_dir, scenario, SimpleNamespace(judge=True, keep=False))
+
+        judge.assert_not_called()
+        self.assertTrue(run_evals.record_passes(record))
+
+    def test_static_selection_with_rubric_does_not_require_codex(self):
+        selected = [("offline", self.workdir, [{
+            "name": "static",
+            "mode": "static",
+            "rubric": ["Descriptive only"],
+        }])]
+
+        self.assertFalse(run_evals.selection_requires_codex(selected))
+
+    def test_transient_file_cleanup_retries_windows_sharing_lock(self):
+        path = mock.Mock()
+        path.unlink.side_effect = [PermissionError("busy"), None]
+
+        with mock.patch.object(run_evals.time, "sleep") as sleep:
+            run_evals._unlink_best_effort(path)
+
+        self.assertEqual(2, path.unlink.call_count)
+        sleep.assert_called_once_with(0.05)
+
+    def test_transient_file_cleanup_never_masks_eval_result(self):
+        path = mock.Mock()
+        path.unlink.side_effect = PermissionError("still busy")
+
+        with mock.patch.object(run_evals.time, "sleep"):
+            run_evals._unlink_best_effort(path)
+
+        self.assertEqual(3, path.unlink.call_count)
+
+    def test_transient_tree_cleanup_retries_windows_sharing_lock(self):
+        path = self.workdir / "tree"
+        with mock.patch.object(run_evals.shutil, "rmtree",
+                               side_effect=[PermissionError("busy"), None]) as remove:
+            with mock.patch.object(run_evals.time, "sleep") as sleep:
+                run_evals._rmtree_best_effort(path)
+
+        self.assertEqual(2, remove.call_count)
+        sleep.assert_called_once_with(0.05)
+
+    def test_transient_tree_cleanup_never_masks_eval_result(self):
+        path = self.workdir / "tree"
+        with mock.patch.object(run_evals.shutil, "rmtree",
+                               side_effect=PermissionError("still busy")) as remove:
+            with mock.patch.object(run_evals.time, "sleep"):
+                run_evals._rmtree_best_effort(path)
+
+        self.assertEqual(5, remove.call_count)
+
+    def test_transient_tree_cleanup_removes_readonly_git_content(self):
+        tree = self.workdir / "readonly-tree"
+        tree.mkdir()
+        locked = tree / "object"
+        locked.write_text("fixture", encoding="utf-8")
+        locked.chmod(stat.S_IREAD)
+
+        run_evals._rmtree_best_effort(tree)
+
+        self.assertFalse(tree.exists())
 
 
 if __name__ == "__main__":

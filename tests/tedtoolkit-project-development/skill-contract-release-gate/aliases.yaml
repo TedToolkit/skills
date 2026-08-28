@@ -1,0 +1,16 @@
+aliases:
+  - plugin: tedtoolkit-project-development
+    alias: change-design
+    canonical: design-change
+  - plugin: tedtoolkit-project-development
+    alias: implement-change-tdd
+    canonical: implement-change
+  - plugin: tedtoolkit-project-development
+    alias: prepare-change
+    canonical: scope-changes
+  - plugin: tedtoolkit-project-development
+    alias: implement-change-work-items
+    canonical: orchestrate-work-items
+  - plugin: tedtoolkit-shared
+    alias: tunit-unit-testing
+    canonical: tunit-testing

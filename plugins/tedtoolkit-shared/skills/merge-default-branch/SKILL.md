@@ -30,6 +30,15 @@ PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-${TEDTOOLKIT_PLUGIN_ROOT:?plugin root unavail
 bash "$PLUGIN_ROOT/scripts/premerge_guard.sh"
 ```
 
+On Windows PowerShell, use the packaged launcher instead:
+
+```powershell
+$pluginRoot = $env:TEDTOOLKIT_PLUGIN_ROOT
+if (-not $pluginRoot) { throw 'plugin root unavailable' }
+& "$pluginRoot\scripts\premerge_guard.ps1"
+if ($LASTEXITCODE -notin 0, 20) { throw 'pre-merge guard failed' }
+```
+
 `CLEAN_WORKTREE` with exit 0 is the only result that advances to fetch. `DIRTY_WORKTREE` with exit 20
 is a successful safety outcome and an expected terminal result, not an error to repair or bypass:
 present every returned status/path row, request the separate authorization below, and end the
@@ -57,6 +66,19 @@ git fetch origin --prune
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-${TEDTOOLKIT_PLUGIN_ROOT:?plugin root unavailable}}"
 DEF="$(bash "$PLUGIN_ROOT/scripts/default_branch.sh")"
 ```
+
+On Windows PowerShell, resolve the runtime-provided Codex plugin root and use the packaged launcher,
+which locates Git Bash without requiring it on `PATH`:
+
+```powershell
+$pluginRoot = $env:TEDTOOLKIT_PLUGIN_ROOT
+if (-not $pluginRoot) { throw 'plugin root unavailable' }
+$def = & "$pluginRoot\scripts\default_branch.ps1"
+if ($LASTEXITCODE -ne 0) { throw 'default branch helper failed' }
+```
+
+Do not guess the plugin location or reimplement default-branch selection inline. Either launcher
+must fail before merge mutation when its packaged canonical helper or required runtime is unusable.
 
 Complete when `origin/$DEF` resolves to the fetched default-branch tip.
 

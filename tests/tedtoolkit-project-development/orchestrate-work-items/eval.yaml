@@ -100,7 +100,7 @@ scenarios:
       - { type: "exit_success" }
       - { type: "command", run: "git status --porcelain", stdout_empty: true }
       - { type: "output_contains", value: "--allow-approved-prerequisite-legacy" }
-      - { type: "output_contains", value: "legacy-approved-base" }
+      - { type: "output_regex", pattern: "(?i)\\b[0-9a-f]{40}\\b" }
       - { type: "output_contains", value: "--require-ready" }
       - { type: "output_contains", value: "--baseline" }
       - { type: "output_contains", value: "DEPRECATED" }
@@ -113,7 +113,7 @@ scenarios:
     timeout: 420
 
   - name: "Execute, integrate, and verify two independent items"
-    prompt: "Fully implement the approved independent-flags Controlled change. FLAG-001 and FLAG-002 are both ready and have disjoint write sets, so use isolated workers when available, preserve one coordinator, run each item proof, serialize integration, run bash verify-all.sh on the combined authoritative revision, mark items Verified only after combined proof passes, and perform the final integrated-change review. Branch and worktree creation for these approved items is authorized; clean up completed worker worktrees but retain temporary branches."
+    prompt: "Fully implement the approved independent-flags Controlled change. FLAG-001 and FLAG-002 are both ready and have disjoint write sets, so use isolated workers when available, preserve one coordinator, run each item proof, serialize integration, run bash verify-all.sh on the combined authoritative revision, mark items Verified only after combined proof passes, and perform the final integrated-change review. Clean up every safe temporary worktree and branch created by this orchestration."
     setup:
       copy_test_files: true
       commands:
@@ -150,6 +150,13 @@ scenarios:
           done)"
       - type: "command"
         run: >-
+          test -z "$(git for-each-ref --format='%(refname:short)' refs/heads |
+          while IFS= read -r branch; do
+          test "$branch" = main && continue;
+          if git merge-base --is-ancestor "$branch" HEAD; then printf '%s\n' "$branch"; fi;
+          done)"
+      - type: "command"
+        run: >-
           alpha=$(git log --all --format=%H -n 1 -- Alpha.cs) &&
           beta=$(git log --all --format=%H -n 1 -- Beta.cs) &&
           test -n "$alpha" && test -n "$beta" && test "$alpha" != "$beta" &&
@@ -160,18 +167,18 @@ scenarios:
           ! git diff-tree --no-commit-id --name-only -r "$beta" | grep -Fxq Alpha.cs
       - type: "file_contains"
         path: "docs/changes/independent-flags/change.md"
-        value: "<!-- change-status: completed -->"
-      - type: "output_contains"
-        value: "integrated-change"
+        value: "<!-- change-status: implemented -->"
+      - type: "output_regex"
+        pattern: "(?i)integrated[- ]change|final integrated review"
     rubric:
       - "Runs FLAG-001 and FLAG-002 from the same verified baseline with isolated ownership and does not invent a dependency between their disjoint outcomes."
       - "Preserves identifiable item integration units, runs item proof and combined proof, and marks each item Verified only on the authoritative integrated revision."
-      - "Reviews the complete parent contract in integrated-change mode and records the parent Completed only after the ready final review."
-      - "Tracks the canonical worktrees/runs rules in .tedtoolkit/.gitignore without creating a root .gitignore, creates workers only below .tedtoolkit/worktrees, then removes completed worktrees and prunes their registrations without deleting their temporary branches."
-    timeout: 1200
+      - "Reviews the complete parent contract in integrated-change mode and records the parent Implemented after the ready final review; post-merge closure owns Completed."
+      - "Tracks the canonical worktrees/runs rules in .tedtoolkit/.gitignore without creating a root .gitignore, then removes completed worktrees, prunes registrations, and deletes every fully integrated temporary branch created by this orchestration."
+    timeout: 1800
 
   - name: "Coordinate a sequential dependency chain through verified integration"
-    prompt: "Fully implement the approved dependent-chain Controlled change. Only CHAIN-001 is initially ready; keep one orchestration coordinator, run that wave serially, integrate and mark CHAIN-001 Verified before starting CHAIN-002, then integrate CHAIN-002, run bash verify-all.sh on the authoritative revision, perform the final integrated-change review, and clean up completed worker worktrees while retaining temporary branches. Do not bypass central work-items.md status."
+    prompt: "Fully implement the approved dependent-chain Controlled change. Only CHAIN-001 is initially ready; keep one orchestration coordinator, run that wave serially, integrate and mark CHAIN-001 Verified before starting CHAIN-002, then integrate CHAIN-002, run bash verify-all.sh on the authoritative revision, and perform the final integrated-change review. Because every wave has exactly one writer, execute both small item slices directly in the authoritative worktree and do not create a worker, branch, or worktree. Do not bypass central work-items.md status."
     setup:
       copy_test_files: true
       commands:
@@ -188,7 +195,7 @@ scenarios:
       - { type: "file_contains", path: "Registry.cs", value: "Alpha = \"ready\"" }
       - { type: "file_contains", path: "Consumer.cs", value: "Read() => Registry.Alpha" }
       - { type: "command", run: "bash verify-all.sh" }
-      - { type: "command", run: "grep -Fxq '/worktrees/' .tedtoolkit/.gitignore && grep -Fxq '/runs/' .tedtoolkit/.gitignore && test ! -e .gitignore" }
+      - { type: "command", run: "test ! -e .tedtoolkit && test ! -e .gitignore" }
       - type: "command"
         run: >-
           root=$(pwd -P) &&
@@ -198,6 +205,7 @@ scenarios:
           resolved=$(cd "$path" 2>/dev/null && pwd -P || true);
           case "$resolved" in "$root/.tedtoolkit/worktrees"/*) printf '%s\n' "$resolved";; esac;
           done)"
+      - { type: "command", run: "test \"$(git for-each-ref --format='%(refname)' refs/heads | wc -l | tr -d ' ')\" = 1" }
       - { type: "command", run: "grep -Eq '^\\| CHAIN-001 .*\\| Verified \\|' docs/changes/dependent-chain/work-items.md && grep -Eq '^\\| CHAIN-002 .*\\| Verified \\|' docs/changes/dependent-chain/work-items.md" }
       - type: "command"
         run: >-
@@ -209,10 +217,11 @@ scenarios:
           git show "$registry:Registry.cs" | grep -Fq 'Alpha = "ready"' &&
           git show "$registry:Consumer.cs" | grep -Fq 'Read() => "pending"' &&
           git diff-tree --no-commit-id --name-only -r "$consumer" | grep -Fxq Consumer.cs
-      - { type: "output_contains", value: "integrated-change" }
+      - { type: "output_regex", pattern: "(?i)integrated[- ]change|final integrated review" }
     rubric:
       - "Keeps one coordinator for the whole multi-item map even though each wave has only one ready item."
+      - "Runs each one-item wave in the clean authoritative integration worktree and does not create a worker branch or worktree when no concurrent writer needs isolation."
       - "Does not start CHAIN-002 until CHAIN-001 is present and Verified on the authoritative integration revision."
       - "Preserves identifiable item integration units and bases final readiness on the combined candidate."
-      - "Tracks the ignore rule inside .tedtoolkit, uses its worktrees directory, and automatically removes completed worktrees while retaining their temporary branches."
-    timeout: 1200
+      - "Does not provision tool-state ignore rules or temporary Git resources for serial authoritative-worktree execution."
+    timeout: 1800

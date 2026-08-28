@@ -110,8 +110,9 @@ git -C "$repo_root" cat-file -e "$default_ref:$change_rel" 2>/dev/null ||
 git -C "$repo_root" diff --quiet "$default_ref" -- "$change_dir_rel" ||
     fail "target subtree differs from the authoritative default-branch ref: $default_ref"
 
-while IFS= read -r dependent; do
-    [[ -n $dependent && $dependent != "$change_rel" ]] || continue
+while IFS= read -r -d '' dependent_abs; do
+    dependent=${dependent_abs#"$repo_root"/}
+    [[ $dependent != "$change_rel" ]] || continue
     while IFS= read -r source; do
         [[ -n $source ]] || continue
         source_abs=$(realpath -m -- "$repo_root/$(dirname "$dependent")/$source")
@@ -122,15 +123,16 @@ while IFS= read -r dependent; do
             value=substr($0, RSTART + 7, RLENGTH - 7)
             print value
         }
-    ' "$repo_root/$dependent")
-done < <(git -C "$repo_root" ls-files 'docs/changes/*/change.md')
+    ' "$dependent_abs")
+done < <(find "$changes_root" -mindepth 2 -maxdepth 2 -type f -name change.md -print0)
 
-while IFS= read -r preparation; do
-    [[ -n $preparation ]] || continue
-    if grep -Fq "$change_rel" "$repo_root/$preparation"; then
+preparations_root="$repo_root/.tedtoolkit/preparations"
+while IFS= read -r -d '' preparation_abs; do
+    preparation=${preparation_abs#"$repo_root"/}
+    if grep -Fq "$change_rel" "$preparation_abs"; then
         fail "change is still referenced by preparation record $preparation"
     fi
-done < <(git -C "$repo_root" ls-files '.tedtoolkit/preparations')
+done < <(if [[ -d $preparations_root ]]; then find "$preparations_root" -type f -print0; fi)
 
 if (( delete == 0 )); then
     printf 'ELIGIBLE: %s can be removed after explicit cleanup authorization\n' "$change_dir_rel"

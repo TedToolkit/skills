@@ -78,8 +78,9 @@ remaining path and index identities before committing the next group.
 
 ## 4. Commit the approved groups
 
-For each group, run `commit_group.sh` exactly as specified in the commit-style reference. After each
-commit, verify its paths and message. The helper commits from an isolated temporary index and
+For each group, run the host-appropriate packaged `commit_group` launcher exactly as specified in
+the commit-style reference. Do not guess the plugin root or reproduce the helper's Git mechanics
+inline. After each commit, verify its paths and message. The canonical helper commits from an isolated temporary index and
 advances only the approved group in the real index; do not reset, stash, or otherwise normalize the
 remaining state. Complete when every approved group has one commit and `git status` accounts for all
 remaining changes, including unchanged out-of-group staged and unstaged entries.

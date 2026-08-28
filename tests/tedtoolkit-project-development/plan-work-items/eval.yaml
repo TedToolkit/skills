@@ -30,7 +30,7 @@ scenarios:
       - type: "command"
         run: "test ! -d docs/changes/temperature-clamp/work-items"
       - type: "output_contains"
-        value: "Delivery brief"
+        value: "implement-change"
       - type: "command"
         run: "git status --porcelain"
         stdout_empty: true

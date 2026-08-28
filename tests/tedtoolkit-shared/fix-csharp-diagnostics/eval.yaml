@@ -1,0 +1,49 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+smoke_scenarios:
+  - "Bound analyzer fixes by diagnostic and path"
+
+scenarios:
+  - name: "Bound analyzer fixes by diagnostic and path"
+    prompt: "Use $fix-csharp-diagnostics to remove the observed CA2000 warning from src/InScope.cs in App.csproj. unrelated/Outside.cs contains pre-existing user work and is outside the approved boundary. Use the available analyzer fixer only if it can be limited to CA2000 and src/InScope.cs. This request approves that bounded edit. Prove the final Release diagnostic state by actually executing the exact commands and report them; dotnet-commands.log is the fixture-owned execution audit, so preserve it and do not edit it directly."
+    setup:
+      copy_test_files: true
+      commands: ["bash setup_fixture.sh"]
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_not_contains", path: "src/InScope.cs", value: "CA2000" }
+      - { type: "file_contains", path: "dotnet-commands.log", value: "format analyzers App.csproj --diagnostics CA2000 --include src/InScope.cs --no-restore" }
+      - { type: "file_contains", path: "dotnet-commands.log", value: "build -c Release --no-incremental App.csproj" }
+      - { type: "command", run: "test \"$(sha256sum unrelated/Outside.cs | cut -d' ' -f1)\" = \"$(cat outside.sha256)\"" }
+      - { type: "output_regex", pattern: '(?i)(?:zero|0) warning(?:s|\(s\))?' }
+      - { type: "output_regex", pattern: '(?i)(?:zero|0) error(?:s|\(s\))?' }
+    rubric:
+      - "Treats the explicit diagnostics-only request as owned here without invoking run-fix."
+      - "Reports the bounded formatter command and fresh non-incremental Release proof."
+
+  - name: "Keep a named failing project under run-fix ownership"
+    prompt: "A user says App.csproj fails its Release build with CS1002 and asks to fix the project. Explain which workflow owns the observed failure and when this diagnostics skill may participate. Do not modify files or invoke another skill."
+    setup:
+      copy_test_files: true
+      commands: ["bash setup_fixture.sh"]
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "run-fix" }
+      - { type: "output_contains", value: "diagnostics-only tail" }
+    rubric:
+      - "Assigns the named failing project to run-fix and permits only one bounded non-recursive diagnostics tail."
+
+  - name: "Validate bounded analyzer and fresh-build command contract offline"
+    mode: "static"
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh && PATH=\"$PWD/.binstub:$PATH\" dotnet format analyzers App.csproj --diagnostics CA2000 --include src/InScope.cs --no-restore && PATH=\"$PWD/.binstub:$PATH\" dotnet build -c Release --no-incremental App.csproj"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_not_contains", path: "src/InScope.cs", value: "CA2000" }
+      - { type: "file_contains", path: "dotnet-commands.log", value: "format analyzers App.csproj --diagnostics CA2000 --include src/InScope.cs --no-restore" }
+      - { type: "file_contains", path: "dotnet-commands.log", value: "build -c Release --no-incremental App.csproj" }
+      - { type: "command", run: "test \"$(sha256sum unrelated/Outside.cs | cut -d' ' -f1)\" = \"$(cat outside.sha256)\"" }

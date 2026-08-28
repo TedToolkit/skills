@@ -13,6 +13,10 @@ Review how well claims are supported by the text actually present; do not treat 
 assertion as independently verified. Read
 [resume-integrity.md](../../references/resume-integrity.md) before evaluating.
 
+This skill solely owns `# Resume Review`. It may consume supporting analysis but emits no rewritten
+resume, `# Job Match`, or `# Interview Pack` unless separately requested. Apply the shared artifact
+and legal-source gates to any requested destination or jurisdiction-dependent conclusion.
+
 ## Set the review frame
 
 Identify the resume's intended role, seniority, locale, and audience when known. A review without a
@@ -30,6 +34,18 @@ Inspect:
 - factual clarity, chronology, scope, and internal consistency;
 - evidence of ownership, action, scale, and outcomes;
 - relevance and prioritization for the stated target;
+- whether every retained project visibly supports a material target requirement or differentiator;
+- whether project outcomes use measured, delivered, reused, regression-proven, or bounded-state
+  evidence instead of implementation-only claims;
+- whether the first pass works for a recruiter and the same bullets contain enough proof for a
+  technical reader;
+- whether an evidence-backed technical signature makes the candidate distinctive without generic
+  personality adjectives or slogans;
+- repository-context leakage: bullets that depend on private project names, file paths, class or
+  method names, issue numbers, or unexplained internal architecture before the reader can understand
+  the engineering problem and result;
+- whether each technical bullet can be paraphrased by an unfamiliar recruiter as “what was improved”
+  and by an engineer as “how and under what constraint” without reading the source repository;
 - duplication, vagueness, jargon, unsupported superlatives, and keyword stuffing;
 - section hierarchy, length, scanability, grammar, tense, and locale consistency;
 - parsing risks such as information conveyed only through graphics or complex layout.

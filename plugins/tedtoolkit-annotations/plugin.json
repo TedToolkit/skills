@@ -1,6 +1,6 @@
 {
   "name": "tedtoolkit-annotations",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Skills for writing clear C# comments and annotations.",
   "skills": ["./skills/"]
 }

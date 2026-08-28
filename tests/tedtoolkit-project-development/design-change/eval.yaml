@@ -2,6 +2,9 @@ config:
   max_parallel_scenarios: 1
   max_parallel_runs: 1
 
+smoke_scenarios:
+  - "Profile routing keeps mechanical maintenance fast"
+
 scenarios:
   - name: "Profile routing keeps mechanical maintenance fast"
     prompt: "Use $design-change to classify a comment spelling correction and whitespace-only cleanup in Temperature.cs. There is one local, reversible outcome, no observable behavior change, no public contract, migration, security, or external operation. Show the human-readable implementation plan and stop before modifying files."
@@ -25,7 +28,7 @@ scenarios:
     timeout: 300
 
   - name: "Profile routing creates one concise Standard handoff"
-    prompt: "Use $design-change to design a fix for the internal Temperature.Clamp helper: values already inside the valid range must be returned unchanged, but the current implementation rounds them. This is one local, reversible behavior fix, changes no public API or persistence format, needs no migration or architecture decision, and can be proven through the existing public Temperature.Normalize behavior. Write the human-readable change design only; do not modify production code or tests."
+    prompt: "Use $design-change to create an @-addressable change.md for cross-conversation recovery of a fix for the internal Temperature.Clamp helper: values already inside the valid range must be returned unchanged, but the current implementation rounds them. This is one local, reversible behavior fix, changes no public API or persistence format, needs no migration or architecture decision, and can be proven through the existing public Temperature.Normalize behavior. This request pre-approves creating the Draft after you show the bounded plan. Write the human-readable change design only; do not modify production code or tests."
     setup:
       copy_test_files: true
       commands:
@@ -75,7 +78,7 @@ scenarios:
     timeout: 420
 
   - name: "Create an approval-ready change design"
-    prompt: "Design a P1 change that adds a TryParse(string?, out Temperature) API to the existing Temperature value object. Library callers currently duplicate inconsistent parsing and some accept impossible temperatures, causing incorrect domain values at API boundaries; this change is needed now before a new ingestion API makes that duplication public. It must accept invariant-culture decimal Celsius input, reject null, whitespace, invalid text, and values below absolute zero. Existing callers must remain compatible. Write the change design only; do not create work items, production code, or tests."
+    prompt: "Use $design-change to create the P1 change design at docs/changes/temperature-tryparse/change.md for adding a TryParse(string?, out Temperature) API to the existing Temperature value object. Library callers currently duplicate inconsistent parsing and some accept impossible temperatures, causing incorrect domain values at API boundaries; this change is needed now before a new ingestion API makes that duplication public. It must accept invariant-culture decimal Celsius input using an optional sign, digits, and an optional `.` fractional part; reject null, whitespace-only, invalid text, group separators, exponent notation, values with leading or trailing whitespace, and values below absolute zero. On every failure it must return false and set the out value to default; existing callers must remain source- and binary-compatible. This request pre-approves creating the Draft after you show the bounded plan. Write the repository change design only; do not create work items, production code, or tests."
     setup:
       copy_test_files: true
       commands:
@@ -235,8 +238,8 @@ scenarios:
       - type: "file_not_contains"
         path: "docs/changes/compatibility/change.md"
         value: "Clarification and decision log"
-      - type: "output_contains"
-        value: "updated"
+      - type: "output_regex"
+        pattern: "(?i)updated"
     rubric:
       - "Updates the implementation-facing compatibility truth before performing another clarification or investigation."
       - "Does not add conversation history, a receipt, or an agent-oriented decision ledger to the human handoff."

@@ -65,14 +65,13 @@ Use the lightest evidence that can justify the decision. Existing code, incident
 documentation, or a focused proof of concept may be enough. When the decision compares a language,
 framework, library, database, service, vendor, build tool, or other technology, read
 [technology-selection.md](references/technology-selection.md). Read
-[benchmarkdotnet.md](references/benchmarkdotnet.md) before creating a benchmark project or running
-BenchmarkDotNet.
-
-When a performance claim, a performance-sensitive workload, or cross-TFM performance determines
-which option is "better", a representative BenchmarkDotNet run is required evidence. Benchmark only
-the affected consumer TFMs that every compared option supports; do not infer a production workload
-from a toy benchmark. Performance evidence is unnecessary when it cannot change a decision governed
-solely by another hard constraint, such as license or compliance.
+[evidence-and-metrics.md](references/evidence-and-metrics.md) when performance can affect the
+decision. Use [benchmarkdotnet.md](references/benchmarkdotnet.md) only when an isolated managed
+in-process operation credibly represents the decision-relevant CPU, throughput, allocation, or
+cross-TFM boundary. For services, databases, networks, queues, or distributed systems, measure the
+real boundary with representative load, tail latency, throughput, errors, resource use, profiling,
+or production telemetry; do not create a BenchmarkDotNet project merely because performance
+matters. Performance evidence is unnecessary when another hard constraint alone decides the issue.
 
 ## Record an ADR when needed
 

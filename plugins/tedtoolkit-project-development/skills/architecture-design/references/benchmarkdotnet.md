@@ -1,8 +1,10 @@
 # BenchmarkDotNet evidence
 
-Use this reference when a technology selection or architecture decision needs measured performance
-evidence. Create and run a real BenchmarkDotNet project; do not substitute estimates, unit-test
-durations, or a handwritten loop timer.
+Use this reference only when equivalent managed in-process operations represent the
+decision-relevant CPU, throughput, allocation, or cross-TFM claim. Create and run a real
+BenchmarkDotNet project; do not substitute estimates, unit-test durations, or a handwritten loop
+timer. When queuing, remote dependencies, concurrency, capacity, failure rate, or end-to-end latency
+can determine the result, return to `evidence-and-metrics.md` and measure that outer boundary instead.
 
 ## Create the benchmark project
 

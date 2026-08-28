@@ -20,9 +20,9 @@ This skill retains the prose.
 1. Read repository guidance and resolve the prose language from the user's request or `CLAUDE.md`.
    Use the nearest established documentation language only when guidance is silent; ask when it
    remains ambiguous.
-2. Inspect every in-scope declaration, implementation, caller-visible path, and existing comment.
-   Complete when each public, protected, and internal member is classified as accurate, missing,
-   stale, or redundant.
+2. Resolve the documentation surface from the user's explicit request and the nearest applicable
+   repository guidance. Inspect only those declarations, their implementation and caller-visible
+   paths, and comments needed to keep that surface accurate. Visibility alone does not expand scope.
 3. Draft only facts a caller cannot safely infer. Show the complete proposal and wait for explicit
    approval before modifying source.
 4. After approval, update comments and applicable annotations together. Complete when every XML tag
@@ -49,10 +49,13 @@ This skill retains the prose.
 
 ## Rules
 
-- Document every `public`, `protected`, and `internal` type and member. Cover classes, structs,
-  records, interfaces, enums, delegates, constructors, methods, properties, indexers, events, fields,
-  and constants. Document a `private` member only for a non-obvious invariant, compatibility rule,
-  performance limit, ownership rule, or concurrency rule.
+- Document every declaration placed in scope by the request or nearest repository policy. When a
+  policy requires complete documentation for a changed public, protected, or internal surface,
+  cover the relevant types, constructors, methods, properties, indexers, events, fields, constants,
+  enums and members, and delegates; state that policy-driven expansion in the proposal. Otherwise,
+  omit unrelated declarations even when they share a file. Document a `private` member only when it
+  is in scope and carries a non-obvious invariant, compatibility rule, performance limit, ownership
+  rule, or concurrency rule.
 - Start type summaries with `Represents ...`; use a third-person verb for members, such as `Gets ...`,
   `Creates ...`, `Adds ...`, or `Returns ...`.
 - For a type, document what it represents plus material invariants, thread model, or lifecycle. For an
@@ -84,10 +87,10 @@ This skill retains the prose.
 
 ## Examples
 
-- Default to at least one `<example>` for every public, protected, or internal method or function that
-  has a meaningful caller-facing invocation. Also provide examples for constructors when construction
-  is part of the caller contract. Omit an example only when no correct, useful invocation can be shown,
-  such as a purely inherited member whose contract owner already contains the example.
+- Add `<example>` only when it changes caller understanding: setup is non-obvious, lifecycle or
+  disposal matters, effects or ordering are easy to misuse, or a realistic edge case prevents a
+  likely mistake. Do not force examples for routine calls whose summary, parameters, and return
+  contract already make correct use clear. Apply the same test to constructors.
 - Make every `<example>` practically usable and correct. The code must call real accessible APIs, use
   current parameter names and overloads, include required setup such as `await`, `using`, cancellation
   tokens, disposal, or dependency creation, and match actual return values, exceptions, and side
@@ -102,7 +105,8 @@ This skill retains the prose.
 
 ## Review before proposing changes
 
-For every method or function, account for inputs, null and empty results, exceptions, cancellation,
-observable state or I/O, threading or blocking, resource ownership, and a realistic example when
-applicable. Prefer a smaller proven contract over speculative detail; ask for the intended contract
-when behavior remains ambiguous.
+For every in-scope method or function, account for inputs, null and empty results, exceptions,
+cancellation, observable state or I/O, threading or blocking, resource ownership, and an example
+only when it materially clarifies one of those contracts. Confirm that unrelated declarations were
+not pulled into the proposal unless repository policy required them. Prefer a smaller proven
+contract over speculative detail; ask for the intended contract when behavior remains ambiguous.

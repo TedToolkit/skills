@@ -42,6 +42,11 @@ fi
 exit 0
 EOF
 chmod +x .binstub/dotnet
+cat > .binstub/dotnet.cmd <<'EOF'
+@echo off
+bash "%~dp0dotnet" %*
+exit /b %ERRORLEVEL%
+EOF
 
 if [[ $scenario == success ]]; then
   : > .verification-success

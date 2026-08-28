@@ -48,7 +48,7 @@ scenarios:
     timeout: 420
 
   - name: "Create isolated drafts from an approved partition"
-    prompt: "Continue $scope-changes from .tedtoolkit/preparations/account-request/preparation.md. Its exact two-change partition is approved. Create the two listed change Drafts through separate bounded $design-change authors, copy only each candidate's relevant evidence and lineage, then stop before questions, reviews, approvals, planning, or implementation."
+    prompt: "Continue $scope-changes from .tedtoolkit/preparations/account-request/preparation.md. Its exact two-change partition is approved. Create the two listed change Drafts through separate bounded $design-change authors, preserving each candidate's exact relevant evidence-ID token and lineage while withholding sibling evidence, then stop before questions, reviews, approvals, planning, or implementation."
     setup:
       copy_test_files: true
       commands:
@@ -186,13 +186,12 @@ scenarios:
     assertions:
       - type: "exit_success"
       - type: "command"
-        run: "git status --porcelain"
-        stdout_empty: true
-      - type: "output_contains"
-        value: "implement-change"
+        run: "git diff --exit-code && test ! -s docs/changes/P1-temperature-parse/work-items/TEMP-001-parse.md"
+      - type: "output_regex"
+        pattern: "(?i)implementation"
     rubric:
       - "Recognizes one already approved bounded goal and one delivery, so scope-changes and plan-work-items add no value."
-      - "Routes the approved change directly to implement-change and does not populate the legacy one-row work item."
+      - "Routes the approved legacy format-2 change through continue-change for normalization and does not populate the legacy one-row work item."
     timeout: 420
 
   - name: "Reject legacy one-row planning machinery"

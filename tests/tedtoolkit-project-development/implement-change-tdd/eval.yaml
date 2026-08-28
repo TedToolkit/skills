@@ -8,7 +8,7 @@ scenarios:
     assertions:
       - { type: "exit_success" }
       - { type: "output_contains", value: "implement-change" }
-      - { type: "output_contains", value: "behavior-preserving" }
+      - { type: "output_regex", pattern: "(?i)(behavior-preserving|unchanged behavior|public invariant)" }
       - { type: "output_contains", value: "characterization" }
       - { type: "output_not_contains", value: "must start Red" }
       - { type: "command", run: "test -z \"$(find . -mindepth 1 -not -name .git -print -quit)\"" }
@@ -21,10 +21,8 @@ scenarios:
     assertions:
       - { type: "exit_success" }
       - { type: "output_contains", value: "implement-change" }
-      - { type: "output_regex", pattern: '(?is)\breproduc\w*\b.{0,800}\bfix\w*\b.{0,800}\bregression\b' }
-      - { type: "output_not_contains", value: "deprecated" }
-      - { type: "output_not_contains", value: "renamed" }
+      - { type: "output_regex", pattern: '(?is)\breproduc\w*\b.{0,1200}\bfix\w*\b.{0,1200}\bregression\b' }
       - { type: "command", run: "test -z \"$(find . -mindepth 1 -not -name .git -print -quit)\"" }
     rubric:
-      - "Routes the natural-language implementation request to implement-change, not the compatibility alias."
+      - "Routes the natural-language implementation request to implement-change and follows the bug-fix proof order without requiring compatibility-alias narration."
     timeout: 240

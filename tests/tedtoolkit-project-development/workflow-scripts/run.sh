@@ -48,6 +48,38 @@ if (cd "$state_repo" && bash "$scripts/ensure-tool-state.sh" unknown >/dev/null 
     exit 1
 fi
 
+branch_repo="$fixture/branch-cleanup-repo"
+mkdir -p "$branch_repo"
+git -C "$branch_repo" init -q -b main
+git -C "$branch_repo" config user.name "Workflow fixture"
+git -C "$branch_repo" config user.email "workflow@example.com"
+printf 'baseline\n' >"$branch_repo/baseline.txt"
+git -C "$branch_repo" add baseline.txt
+git -C "$branch_repo" commit -qm "fixture: baseline"
+git -C "$branch_repo" branch integrated-worker
+(
+    cd "$branch_repo"
+    bash "$scripts/cleanup-temporary-branch.sh" main integrated-worker >/dev/null
+)
+test -z "$(git -C "$branch_repo" branch --list integrated-worker)"
+
+git -C "$branch_repo" branch checked-out-worker
+git -C "$branch_repo" worktree add -q "$fixture/checked-out-worker" checked-out-worker
+checked_output=$(cd "$branch_repo" && bash "$scripts/cleanup-temporary-branch.sh" main checked-out-worker 2>&1 || true)
+grep -Fq 'still checked out' <<<"$checked_output"
+test -n "$(git -C "$branch_repo" branch --list checked-out-worker)"
+git -C "$branch_repo" worktree remove "$fixture/checked-out-worker"
+git -C "$branch_repo" branch -D checked-out-worker >/dev/null
+
+git -C "$branch_repo" switch -qc unique-worker
+printf 'unique\n' >"$branch_repo/unique.txt"
+git -C "$branch_repo" add unique.txt
+git -C "$branch_repo" commit -qm "fixture: unique worker evidence"
+git -C "$branch_repo" switch -q main
+unique_output=$(cd "$branch_repo" && bash "$scripts/cleanup-temporary-branch.sh" main unique-worker 2>&1 || true)
+grep -Fq 'commits not reachable' <<<"$unique_output"
+test -n "$(git -C "$branch_repo" branch --list unique-worker)"
+
 change_dir="$fixture/docs/changes/temperature-ingestion"
 mkdir -p "$change_dir/work-items"
 
@@ -931,6 +963,26 @@ if ln -s completed-change "$cleanup_repo/docs/changes/alias-change" 2>/dev/null 
     rm "$cleanup_repo/docs/changes/alias-change"
 fi
 
+mkdir -p "$cleanup_repo/docs/changes/untracked-dependent"
+cat >"$cleanup_repo/docs/changes/untracked-dependent/change.md" <<'EOF'
+# Untracked dependent fixture
+<!-- change-format: 3 -->
+<!-- workflow-profile: standard -->
+<!-- change-kind: maintenance -->
+<!-- change-status: approved -->
+<!-- delivery-shape: single -->
+<!-- approval-source: Workflow fixture -->
+<!-- candidate-binding: none -->
+<!-- section: start-conditions -->
+<!-- change-prerequisite: PRE-01 source=../completed-change/change.md contract=STR-01 -->
+EOF
+untracked_dependent_output=$(cd "$cleanup_repo" && bash "$cleanup_script" "${cleanup_args[@]}" "$cleanup_target" 2>&1 || true)
+if ! grep -Fq 'referenced by prerequisite marker' <<<"$untracked_dependent_output"; then
+    echo "cleanup accepted a target referenced by an untracked dependent" >&2
+    exit 1
+fi
+rm -rf -- "$cleanup_repo/docs/changes/untracked-dependent"
+
 mkdir -p "$cleanup_repo/docs/changes/dependent-change"
 cat >"$cleanup_repo/docs/changes/dependent-change/change.md" <<'EOF'
 # Dependent fixture
@@ -971,6 +1023,15 @@ rm -rf -- "$cleanup_repo/.tedtoolkit/preparations/request"
 git -C "$cleanup_repo" add -A .tedtoolkit/preparations
 git -C "$cleanup_repo" commit -qm "fixture: remove preparation reference"
 git -C "$cleanup_repo" update-ref refs/remotes/origin/main HEAD
+
+mkdir -p "$cleanup_repo/.tedtoolkit/preparations/untracked-request"
+printf '%s\n' 'Candidate: docs/changes/completed-change/change.md' >"$cleanup_repo/.tedtoolkit/preparations/untracked-request/preparation.md"
+untracked_preparation_output=$(cd "$cleanup_repo" && bash "$cleanup_script" "${cleanup_args[@]}" "$cleanup_target" 2>&1 || true)
+if ! grep -Fq 'referenced by preparation record' <<<"$untracked_preparation_output"; then
+    echo "cleanup accepted a target referenced by an untracked preparation" >&2
+    exit 1
+fi
+rm -rf -- "$cleanup_repo/.tedtoolkit/preparations/untracked-request"
 
 git -C "$cleanup_repo" switch -qc unmerged-cleanup
 printf 'merged-only work item\n' >"$cleanup_repo/docs/changes/completed-change/work-item.md"

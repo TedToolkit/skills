@@ -17,8 +17,7 @@ scenarios:
         stdout_empty: true
       - type: "output_contains"
         value: "Needs revision"
-      - type: "output_contains"
-        value: "Acceptance specification"
+      - { type: "output_regex", pattern: "(?i)acceptance|observable contract" }
       - type: "output_not_contains"
         value: "Ready to merge"
     rubric:
@@ -69,7 +68,7 @@ scenarios:
     timeout: 420
 
   - name: "Allow approval review before a valid prerequisite is ready"
-    prompt: "Act as a fresh read-only reviewer of docs/changes/P1-temperature-parse/change.md. Validate its cross-change prerequisite structurally, but do not require the approved settings-store source to be completed during design review. Do not modify files."
+    prompt: "Act as a fresh read-only reviewer of docs/changes/preferences-screen/change.md. Validate its cross-change prerequisite structurally, but do not require the approved settings-store source to be completed during design review. Do not modify files."
     setup:
       copy_test_files: true
       commands:

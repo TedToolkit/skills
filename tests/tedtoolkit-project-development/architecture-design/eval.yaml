@@ -2,6 +2,9 @@ config:
   max_parallel_scenarios: 1
   max_parallel_runs: 1
 
+smoke_scenarios:
+  - "Choose service performance evidence at the real boundary"
+
 scenarios:
   - name: "Create an architecture record and traceable ADR"
     prompt: "Design the configuration-store architecture and create an ADR for the accepted decision to use SQLite for embedded configuration. The service requires local persistence without operating a server. Record the status, decision owner as Platform Team, the alternatives PostgreSQL and JSON files, their relevant trade-offs, current architecture boundary, downstream delivery constraints, and review triggers. Do not modify production code or packages."
@@ -48,8 +51,24 @@ scenarios:
       - "The durable architecture record and ADR do not reference or depend on the temporary docs/changes artifact."
     timeout: 420
 
+  - name: "Choose service performance evidence at the real boundary"
+    prompt: "Do not modify files. Plan the decision evidence for choosing between two remotely hosted configuration services. The decisive risks are concurrent request queuing, database saturation, dependency failures, and end-to-end P95/P99 latency under representative traffic. State the measurement shape and why BenchmarkDotNet is or is not the primary evidence."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh remote-services"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "P95" }
+      - { type: "output_contains", value: "P99" }
+      - { type: "output_contains", value: "load" }
+      - { type: "output_contains", value: "BenchmarkDotNet" }
+    rubric:
+      - "Selects representative service-boundary load and tail-latency evidence including saturation, failures, throughput, and resource use."
+      - "Rejects an in-process BenchmarkDotNet project as the primary evidence because it cannot represent remote queuing and dependency behavior."
+
   - name: "Keep ADR benchmark source and catalog outside the primary solution"
-    prompt: "I approve the architecture design and an ADR-specific BenchmarkDotNet experiment to decide between two serialization libraries. Create the ADR evidence structure, the benchmark project in its ADR benchmark directory, and docs/adr/Benchmark.slnx. Do not modify Sample.slnx, production code, or CI."
+    prompt: "I approve the architecture design and an ADR-specific BenchmarkDotNet experiment to decide between System.Text.Json and Newtonsoft.Json. Create the ADR evidence structure, the benchmark project in its ADR benchmark directory, and docs/adr/Benchmark.slnx. Do not modify Sample.slnx, production code, or CI."
     setup:
       copy_test_files: true
       commands:

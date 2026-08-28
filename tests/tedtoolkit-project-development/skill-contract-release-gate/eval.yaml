@@ -1,0 +1,17 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Validate repository Skill release contracts offline"
+    mode: "static"
+    setup:
+      copy_test_files: true
+      env:
+        TEDTOOLKIT_REPO_ROOT: "${REPO_ROOT}"
+      commands:
+        - "py -3.10 check.py --repo-root \"${REPO_ROOT}\""
+        - "py -3.10 -m unittest -v test_check.py"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "OK: repository Skill release contract" }

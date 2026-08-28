@@ -66,13 +66,50 @@ returns the exact unmet source contract to `scope-changes` or `design-change`. N
 uncommitted upstream status edit, another worker's message, priority, or preferred sequence as
 readiness evidence.
 
-Inspect the code and choose concrete tests, files, private symbols, algorithms, and behavior slices.
-Treat evidence-backed likely touchpoints as helpful, non-binding orientation. Prefer repository
-conventions and the smallest design that satisfies the approved result.
+## Run a feasibility preflight
 
-Present a concise local plan containing the loop, primary proof, conditional gates, likely files,
-shared resources, and risks. After implementation was already authorized, this preflight is
-informative: continue without another approval unless it reveals a workflow escalation trigger.
+Before target writes or lifecycle mutation, validate the approved boundary against the actual
+implementation baseline. Scale the depth to evidenced uncertainty and risk. Ordinary repository
+inspection is the preflight, not a separate research project or work item.
+
+Confirm:
+
+- the required language, target-framework, dependency, and API capabilities exist on the supported
+  targets;
+- the current design has a credible owner and integration seam without an unapproved public or
+  shared boundary;
+- the primary proof is runnable and can observe the approved result, with conditional gates and
+  required resources available;
+- environment, tooling, permissions, generated inputs, and external dependencies needed for the
+  delivery are available or have an approved owner;
+- the work can preserve compatibility, exception and cancellation semantics, resource ownership,
+  concurrency, migration, security, and operational constraints that actually apply; and
+- a selected work item remains independently deliverable on the verified baseline without an
+  undisclosed prerequisite, shared-file collision, or sibling contract change.
+
+Use read-only evidence and bounded non-production probes. Do not start an open-ended research wave,
+modify target artifacts merely to discover the problem, or create a research work item. When
+dispatched as an isolated work-item worker, do not fan out; return missing evidence to the
+coordinator.
+
+Classify the result:
+
+- `feasible`: proceed to implementation design;
+- `feasible-with-private-adjustments`: revise only the local algorithm, private symbols, likely
+  files, tests, or edit sequence and proceed without renewed approval;
+- `boundary-invalid`: stop before writes and return the exact contract, architecture, prerequisite,
+  ownership, or delivery-boundary mismatch to `design-change`, `architecture-design`, or
+  `plan-work-items`; or
+- `evidence-missing`: stop when the unresolved question could change behavior, architecture, proof,
+  or delivery risk, and route a bounded `experiment` through `design-change` instead of guessing
+  during implementation.
+
+For a feasible result, inspect the code and choose concrete tests, files, private symbols,
+algorithms, and behavior slices. Treat evidenced likely touchpoints as helpful, non-binding
+orientation. Present a concise local plan containing the disposition, change-kind loop, primary
+proof, conditional gates, likely files, shared resources, and risks. After implementation was
+already authorized, this preflight is informative: continue without another approval unless it
+reveals a workflow escalation trigger.
 
 ## Justify the implementation shape
 
@@ -88,9 +125,10 @@ apply that guidance merely because the implementation uses C# or contains a dire
 
 When the implementation adds or materially changes a production callable, or existing analysis
 reports cognitive complexity in the delivery boundary, read
-[cognitive-complexity.md](../../references/code-quality/cognitive-complexity.md). Apply its default
-maximum of `15`, measurement rules, behavior-preserving refactoring guidance, and explicit
-exception route.
+[cognitive-complexity.md](../../references/code-quality/cognitive-complexity.md). Apply its policy
+precedence, measurement rules, behavior-preserving refactoring guidance, and exception route. An
+explicit repository threshold is authoritative in either direction; with no repository threshold,
+`15` is advisory and an unmeasured score must not be invented.
 
 - Add a class, record, module, or similar type only when it owns a cohesive responsibility, state,
   lifecycle, policy, or boundary that does not fit an existing owner without materially weakening

@@ -2,6 +2,9 @@ config:
   max_parallel_scenarios: 1
   max_parallel_runs: 2
 
+smoke_scenarios:
+  - "Message-only request must not commit"
+
 scenarios:
   - name: "Split a dirty tree into atomic commits"
     prompt: "Commit my changes. You may inspect and include the untracked paths src/Notifier.cs and tests/NotifierTests.cs."

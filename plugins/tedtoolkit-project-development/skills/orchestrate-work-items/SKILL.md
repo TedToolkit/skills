@@ -25,7 +25,8 @@ worktrees or persistent run state.
 Require an approved Controlled change, at least two approved work items, a valid map, and an
 explicit current request to orchestrate or continue. Approval alone does not start workers. This
 skill retains coordinator ownership even when only one item is dependency-ready. Run a one-item wave
-serially. Parallelize only when at least two ready bounded tasks, isolated agents/worktrees, and
+serially in the clean authoritative integration worktree without creating a worker branch or
+worktree. Parallelize only when at least two ready bounded tasks, isolated agents/worktrees, and
 plausible saved time or independent-review value exist. In a shared-worktree fallback, serialize
 writers while preserving the same authoritative integration and status path.
 
@@ -73,8 +74,10 @@ approved item/map boundaries. Seek renewed approval only for a workflow escalati
 
 ## Execute isolated workers
 
-For each group, pin the latest verified integration SHA and create one branch/worktree per item from
-that exact baseline. Put every worker worktree under the repository root's ignored
+For a one-item group, pin the latest verified integration SHA and dispatch its bounded worker
+serially in the clean authoritative integration worktree; do not create temporary Git state merely
+for role separation. For a group with two or more concurrent writers, create one branch/worktree per
+item from that exact baseline. Put every worker worktree under the repository root's ignored
 `.tedtoolkit/worktrees/` directory; do not scatter worker directories beside the repository or
 directly across its root. A worker owns only its item and invokes `implement-change` with the
 approved contract. Set the parent change `in-progress` when the first writing worker starts. Workers
@@ -142,8 +145,13 @@ Completion does not itself authorize deleting the parent record; report eligibil
 post-merge `continue-change` cleanup as its next record-lifecycle action.
 At successful completion, remove every remaining clean worktree created by this orchestration, run
 `git worktree prune`, and verify that none remains registered beneath `.tedtoolkit/worktrees/`.
-Report retained temporary branches separately; worktree cleanup does not by itself authorize branch
-deletion.
+Then delete every worker or disposable candidate branch created by this orchestration whose tip is
+reachable from the authoritative integration ref and which is no longer checked out, using `bash
+"${CLAUDE_PLUGIN_ROOT}"/scripts/cleanup-temporary-branch.sh <authoritative-ref> <branch>` for each
+exact recorded branch. This cleanup is part of the authorized temporary-resource lifecycle and
+needs no separate approval. Never pass a pre-existing or unrecorded branch. Retain a branch when the
+helper rejects it, and report its exact name and blocker; never force deletion or discard unique
+commits merely to finish cleanup.
 
 Complete when dependency order is respected, combined proof passes at the authoritative SHA,
 central status matches repository evidence, and remaining risks/control artifacts are reported.

@@ -2,6 +2,9 @@ config:
   max_parallel_scenarios: 1
   max_parallel_runs: 1
 
+smoke_scenarios:
+  - "Review naturally without rewriting"
+
 scenarios:
   - name: "Review naturally without rewriting"
     prompt: >-
@@ -18,6 +21,24 @@ scenarios:
       - { type: "output_not_contains", value: "# Job Match" }
     rubric:
       - "Identifies that the candidate-asserted expertise, ownership, and performance labels lack visible support in the excerpt and gives a focused correction direction without calling them false or rewriting the full resume."
+    timeout: 300
+
+  - name: "Flag weak target mapping and unsupported personality copy"
+    prompt: >-
+      Review this resume for a senior C# equipment software role; findings only. It lists three
+      projects: a WPF inspection client with device-disconnect regression tests, a generic website
+      with no stated relevance, and a game skin tool. The summary says 'creative technology
+      rockstar' but gives no evidence. It names implementation tasks but no delivery, reuse, defect,
+      test, or current-state outcomes for the latter two projects.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "# Resume Review" }
+      - { type: "output_contains", value: "rockstar" }
+      - { type: "output_contains", value: "relevance" }
+      - { type: "output_contains", value: "outcome" }
+    rubric:
+      - "Prioritizes the unsupported personality label, off-target projects, and implementation-only project claims."
+      - "Explains how to preserve the inspection client's recruiter-readable result and technical regression proof without rewriting the resume."
     timeout: 300
 
   - name: "Limit a review when no job description is supplied"
@@ -80,4 +101,33 @@ scenarios:
     rubric:
       - "Leaves the supplied resume unchanged and returns findings only."
       - "Treats the self-description as candidate-asserted rather than independently corroborated and masks private contact values."
+    timeout: 300
+
+  - name: "Create only a clearly named new review file"
+    prompt: >-
+      Review this excerpt and create the findings at the currently absent path review.md: 'Expert
+      engineer responsible for everything.' Do not rewrite the resume or create companion files.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_exists", path: "review.md" }
+      - { type: "file_contains", path: "review.md", value: "# Resume Review" }
+      - { type: "command", run: "test $(find . -maxdepth 1 -type f ! -name review.md | wc -l) -eq 0" }
+    rubric:
+      - "Creates the clearly named absent review file without a second gate or another deliverable."
+    timeout: 300
+
+  - name: "Flag repository-context leakage"
+    prompt: >-
+      Review only, do not rewrite. The target is a C# equipment-software role. Resume excerpt:
+      'In Repo-X, changed FooManager, IBarHandler, BazContextRepository and issue #136. Added
+      WidgetGenerator and FixedThingAttribute. Result: merged to branch feature/x.' The claims may
+      be true, but the recruiter and engineer have never seen the repository.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "# Resume Review" }
+      - { type: "output_contains", value: "repository" }
+      - { type: "output_contains", value: "result" }
+    rubric:
+      - "Identifies that private symbols and merge-state language do not communicate the system problem, personal engineering contribution, or hiring-relevant result."
+      - "Recommends translating evidence into recognizable domain context, action, technical method, and supported outcome without performing a full rewrite."
     timeout: 300

@@ -23,10 +23,14 @@ py -3.10 tests/test_run_evals.py                          # harness self-tests; 
 py -3.10 tests/run_evals.py                               # every eval
 py -3.10 tests/run_evals.py generate-commit-message      # one skill
 py -3.10 tests/run_evals.py --filter "conflict"          # scenarios whose name contains "conflict"
+py -3.10 tests/run_evals.py --tier static                 # every selected offline scenario; no Codex call
+py -3.10 tests/run_evals.py --tier smoke                  # static plus explicitly reviewed smoke scenarios
+py -3.10 tests/run_evals.py --tier full                   # every selected scenario; legacy default
 py -3.10 tests/run_evals.py --keep                       # keep work dirs to inspect on failure
 py -3.10 tests/run_evals.py --judge                      # rubric failures also fail the run
 py -3.10 tests/run_evals.py --plugin tedtoolkit-project-development design-change
 py -3.10 tests/run_evals.py --plugin tedtoolkit-project-development workflow-scripts
+py -3.10 tests/run_evals.py --plugin tedtoolkit-project-development skill-contract-release-gate --tier static
 py -3.10 tests/run_evals.py --plugin tedtoolkit-annotations annotation-skills
 py -3.10 tests/run_evals.py --plugin tedtoolkit-roslynhelper compose-roslyn-source
 ```
@@ -36,6 +40,12 @@ turn. With `--plugin`, it discovers scenarios only below that plugin's test dire
 execution such as `workflow-scripts` invokes no model and incurs no API cost. Other scenarios make
 real Codex calls; `--judge` judges any present rubric with Codex and any failed or invalid grade
 fails the scenario.
+
+Tier selection intersects with `--plugin`, positional skill names, and `--filter`; it never widens
+another selector. `static` selects only `mode: static`. `smoke` selects every matching static
+scenario plus only the names declared in that eval file's top-level `smoke_scenarios` list. `full`
+preserves declared scenario order and is the default. Invalid tier metadata or a selection with no
+matching scenarios exits non-zero. Static scenarios never invoke Codex, including with `--judge`.
 
 Each scenario prints PASS/FAIL with per-assertion detail and wall-clock. A full run also writes
 `results.json` + `results.md` under a unique `tests/.results/<timestamp>-<run-id>/` directory. Exit
@@ -69,6 +79,7 @@ if the right skill both triggers and does the job.
 
 ```yaml
 config: { max_parallel_scenarios: 1, max_parallel_runs: 1 }   # informational
+smoke_scenarios: ["Human-readable scenario name"]             # explicit; never inferred
 scenarios:
   - name: "Human-readable scenario name"
     mode: "codex"                    # default; use "static" for an offline command suite

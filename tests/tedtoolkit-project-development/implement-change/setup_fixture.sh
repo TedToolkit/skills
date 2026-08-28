@@ -125,6 +125,11 @@ grep -Fq '12.25' TemperatureTests.cs || {
 echo "1 discovered, 1 passed, 0 failed, 0 skipped"
 EOF
       chmod +x .binstub/dotnet
+      cat > .binstub/dotnet.cmd <<'EOF'
+@echo off
+bash "%~dp0dotnet" %*
+exit /b %ERRORLEVEL%
+EOF
     fi
     ;;
   structural-maintenance)

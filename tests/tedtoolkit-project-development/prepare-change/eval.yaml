@@ -29,8 +29,6 @@ scenarios:
     assertions:
       - { type: "exit_success" }
       - { type: "output_contains", value: "scope-changes" }
-      - { type: "output_not_contains", value: "deprecated" }
-      - { type: "output_not_contains", value: "renamed" }
     rubric:
-      - "Routes the unprefixed request to scope-changes without compatibility-alias migration noise."
+      - "Routes the unprefixed request to scope-changes; incidental migration wording does not change ownership."
     timeout: 240

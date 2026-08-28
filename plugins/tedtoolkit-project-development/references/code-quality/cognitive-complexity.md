@@ -1,9 +1,12 @@
 # Cognitive complexity
 
-Use cognitive complexity as a maintainability gate for each new or materially changed production
-function, method, accessor, local function, or equivalent callable. The default maximum is `15`.
-A stricter repository-configured threshold wins. A looser analyzer setting does not silently relax
-this default; exceeding `15` requires an approved repository-principle or delivery exception.
+Use cognitive complexity as a maintainability signal for each new or materially changed production
+function, method, accessor, local function, or equivalent callable. First resolve the repository's
+authoritative threshold from analyzer configuration, quality profile, repository guidance, or CI.
+An explicit repository value is authoritative whether stricter or looser than `15`; cite its source
+and measured result. If authoritative sources disagree, report a policy blocker instead of choosing.
+When no numeric repository policy exists, use `15` only as an advisory starting point, not a hard
+gate or a repository exception the project never adopted.
 
 ## Establish the score and scope
 
@@ -44,17 +47,20 @@ without the explicit exception route required by the repository and delivery wor
 ## Verify implementation and review findings
 
 During implementation, rerun the existing analyzer or quality command after refactoring and require
-every in-scope callable to be at or below the applicable threshold. Record the exact command and
-result; an analyzer that reports only violations may establish the gate through a clean result.
+every in-scope callable to satisfy the explicit repository threshold when one exists. Record the
+source, exact command, and result; an analyzer that reports only violations may establish the gate
+through a clean result. Without a repository policy or measurable analyzer, report the limitation,
+use `15` only to guide maintainability discussion, and never invent a score.
 
 During read-only code review, cite an existing analyzer result when claiming that a callable exceeds
 the numeric threshold. Without such evidence, describe the observed control-flow burden and its
 concrete maintenance or correctness impact, then request the repository's cognitive-complexity gate
 under `Verify`; do not present a guessed number as fact.
 
-An over-threshold callable may remain only when the approved repository principle or delivery
-record states the reason, scope, owner, and review or removal trigger. Keep the exception narrow and
-visible; approval of the surrounding feature alone is not approval of the complexity exception.
+When an explicit repository threshold is exceeded, a callable may remain only through that
+repository's approved exception route. Keep the exception narrow and visible; approval of the
+surrounding feature alone is not approval of a complexity exception. Advisory `15` alone does not
+create an exception requirement.
 
 ## Primary source
 

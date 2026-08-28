@@ -2,6 +2,9 @@ config:
   max_parallel_scenarios: 1
   max_parallel_runs: 1
 
+smoke_scenarios:
+  - "Honor a looser explicit repository complexity threshold"
+
 scenarios:
   - name: "Find a failure-semantic defect without reviewing tests"
     prompt: "Use $review-code as a fresh read-only reviewer for eval-base..HEAD against docs/changes/ratio/change.md. Do not modify files, run tests, judge test adequacy, or issue a final merge conclusion."
@@ -27,7 +30,7 @@ scenarios:
     timeout: 360
 
   - name: "Pass a clean code-only correctness lane without inventing findings"
-    prompt: "Use $review-code as a fresh read-only code-only reviewer for eval-base..HEAD against docs/changes/ratio/change.md. Check implementation correctness only; do not review tests, run commands, modify files, or issue a final merge conclusion."
+    prompt: "Use $review-code as a fresh read-only code-only reviewer for eval-base..HEAD against docs/changes/ratio/change.md. Use read-only inspection commands as needed and check implementation correctness only; do not review tests, run builds or tests, modify files, or issue a final merge conclusion."
     setup:
       copy_test_files: true
       commands:
@@ -61,3 +64,46 @@ scenarios:
       - "Bases the finding on the approved contract and actual candidate rather than a class-count, method-length, or one-implementation rule."
       - "Remains a read-only code-correctness lane and does not assess tests or announce merge readiness."
     timeout: 360
+
+  - name: "Honor a looser explicit repository complexity threshold"
+    prompt: "Use $review-code as a fresh read-only reviewer for eval-base..HEAD against docs/changes/ratio/change.md. Inspect QUALITY.md and the candidate read-only. The existing CI analyzer reports Cognitive Complexity 20 for the changed callable. Review the numeric policy result without running builds or tests, modifying files, or issuing merge readiness."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh quality-loose"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "25" }
+      - { type: "output_contains", value: "20" }
+      - { type: "output_regex", pattern: '(?mi)^## Lane conclusion[ \t]*\r?\n(?:[ \t]*\r?\n)?pass[ \t]*$' }
+      - { type: "output_not_contains", value: "exceeds 15" }
+    rubric:
+      - "Applies the explicit repository maximum of 25 and does not impose a separate hard limit of 15."
+
+  - name: "Honor a stricter explicit repository complexity threshold"
+    prompt: "Use $review-code as a fresh read-only reviewer for eval-base..HEAD against docs/changes/ratio/change.md. Inspect QUALITY.md and the candidate read-only. The existing CI analyzer reports Cognitive Complexity 12 for the changed callable. Review the numeric policy result without running builds or tests, modifying files, or issuing merge readiness."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh quality-strict"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "10" }
+      - { type: "output_contains", value: "12" }
+      - { type: "output_regex", pattern: '(?mi)^## Lane conclusion[ \t]*\r?\n(?:[ \t]*\r?\n)?findings[ \t]*$' }
+    rubric:
+      - "Applies the explicit repository maximum of 10 and cites the supplied measured result of 12."
+
+  - name: "Keep fifteen advisory when no complexity policy exists"
+    prompt: "Use $review-code as a fresh read-only reviewer for eval-base..HEAD against docs/changes/ratio/change.md. Inspect the repository and candidate read-only. The repository has no Cognitive Complexity configuration and the packet contains no measured score. Assess maintainability and state explicitly whether the documented default 15 is controlling or advisory. Do not run builds or tests, modify files, or issue merge readiness."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh quality-absent"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "15" }
+      - { type: "output_regex", pattern: '(?i)advisory|starting point' }
+      - { type: "output_regex", pattern: '(?i)not measured|unverified|no .*measured score' }
+    rubric:
+      - "Treats 15 as advisory, does not invent a score, and does not demand a repository exception."

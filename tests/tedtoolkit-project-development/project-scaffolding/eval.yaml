@@ -15,9 +15,9 @@ scenarios:
         run: "git status --porcelain"
         stdout_empty: true
       - type: "output_contains"
-        value: "tests/Sample.Tests"
+        value: "Sample.Tests"
     rubric:
-      - "Recommends one tests/Sample.Tests project because all evidence has the same execution profile."
+      - "Recommends one Sample.Tests project, following the fixture's existing root-level layout because all evidence has the same execution profile."
       - "Does not manufacture .Unit, .Integration, or .Acceptance projects merely to represent evidence purposes."
       - "Keeps production-to-test dependency direction acyclic and does not modify the repository."
     timeout: 300

@@ -2,6 +2,10 @@ config:
   max_parallel_scenarios: 1
   max_parallel_runs: 1
 
+smoke_scenarios:
+  - "Document a tested exceptional behavior case"
+  - "Keep a bounded comment request inside its named surface"
+
 scenarios:
   - name: "Draft useful documentation for a type, property, and method"
     prompt: "Review Sample.cs without modifying it. Draft clear XML documentation for Sample, MaxConcurrency, and Create, then propose contract annotations only where the referenced package supports them."
@@ -18,16 +22,18 @@ scenarios:
       - "Does not propose annotations from packages absent from the fixture."
 
   - name: "Document a tested exceptional behavior case"
-    prompt: "Review Sample.cs and SampleTests.cs without modifying them. The existing focused test Create_negative_count_throws_before_allocating passes and asserts ArgumentOutOfRangeException before any allocation. Draft the XML exception documentation and the exact Documentation annotations for BatchFactory.Create. Do not claim test coverage unless the existing test warrants it."
+    prompt: "Review Sample.cs, SampleTests.cs, and test-proof.txt without modifying them. Draft the XML exception documentation and exact Documentation annotation for BatchFactory.Create. Set hasUnitTest from the recorded focused execution only, report its exit and Tests/Passed/Failed/Skipped counts, and identify the exception-before-allocation branch proved."
     setup:
       copy_test_files: true
-      commands: ["bash setup_fixture.sh Documentations behavior-case"]
+      commands: ["bash setup_fixture.sh Documentations behavior-pass"]
     assertions:
       - { type: "exit_success" }
       - { type: "output_contains", value: "BehaviorCase<ArgumentOutOfRangeException>" }
       - { type: "output_contains", value: "hasUnitTest: true" }
       - { type: "output_contains", value: "<exception" }
       - { type: "output_contains", value: "ArgumentOutOfRangeException" }
+      - { type: "output_contains", value: "Exit: `0`" }
+      - { type: "output_contains", value: "Tests: `1`" }
     rubric:
       - "Uses a typed BehaviorCase for the negative-count branch and describes the observable exception outcome."
       - "Treats hasUnitTest as a declaration justified by the supplied passing test, rather than as a substitute for a test."
@@ -52,7 +58,7 @@ scenarios:
     prompt: "The project already uses TedToolkit.Annotations.Documentations and has BehaviorCase attributes. We are adding reflection-based test discovery that must read those attributes from the compiled assembly. Show the smallest csproj change required, and explain whether this is needed merely for source analysis. Do not modify files."
     setup:
       copy_test_files: true
-      commands: ["bash setup_fixture.sh Documentations behavior-case"]
+      commands: ["bash setup_fixture.sh Documentations behavior-pass"]
     assertions:
       - { type: "exit_success" }
       - { type: "output_contains", value: "ANNOTATIONS_BEHAVIOR_CASE" }
@@ -65,7 +71,7 @@ scenarios:
     prompt: "Review Sample.cs without modifying it. A value is intentionally boxed for an object-based cache. Draft the smallest code change that makes that allocation explicit."
     setup:
       copy_test_files: true
-      commands: ["bash setup_fixture.sh Boxing"]
+      commands: ["bash setup_fixture.sh Boxing boxing"]
     assertions:
       - { type: "exit_success" }
       - { type: "output_contains", value: "Boxer.Box" }
@@ -92,8 +98,65 @@ scenarios:
       - { type: "exit_success" }
       - { type: "output_contains", value: "TechnicalDebt" }
       - { type: "output_contains", value: "#123" }
+      - { type: "output_contains", value: "RemoveWhen" }
     rubric:
       - "Records the reason and removal condition instead of creating a bare TODO."
+
+  - name: "Keep behavior-case coverage false when the test was not executed"
+    prompt: "Review Sample.cs, SampleTests.cs, and test-proof.txt without modifying them. Draft the Documentation BehaviorCase for the negative-count branch. Report the recorded proof and do not claim executed test coverage."
+    setup:
+      copy_test_files: true
+      commands: ["bash setup_fixture.sh Documentations behavior-unexecuted"]
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "hasUnitTest: false" }
+      - { type: "output_regex", pattern: "(?i)focused (?:test )?command: not executed" }
+      - { type: "output_not_contains", value: "hasUnitTest: true" }
+
+  - name: "Keep behavior-case coverage false when the focused test fails"
+    prompt: "Review Sample.cs, SampleTests.cs, and test-proof.txt without modifying them. Draft the Documentation BehaviorCase for the negative-count branch. Report the recorded proof and do not claim passing test coverage."
+    setup:
+      copy_test_files: true
+      commands: ["bash setup_fixture.sh Documentations behavior-fail"]
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "hasUnitTest: false" }
+      - { type: "output_contains", value: "Failed: 1" }
+      - { type: "output_not_contains", value: "hasUnitTest: true" }
+
+  - name: "Keep behavior-case coverage false after zero discovery"
+    prompt: "Review Sample.cs, SampleTests.cs, and test-proof.txt without modifying them. Draft the Documentation BehaviorCase for the negative-count branch. Report the recorded proof and do not claim test coverage when no intended test was discovered."
+    setup:
+      copy_test_files: true
+      commands: ["bash setup_fixture.sh Documentations behavior-zero"]
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "hasUnitTest: false" }
+      - { type: "output_regex", pattern: "(?i)tests(?: discovered)?:?[^0-9]{0,8}0" }
+      - { type: "output_not_contains", value: "hasUnitTest: true" }
+
+  - name: "Compile supported Documentation and Maintenance contracts"
+    mode: "static"
+    setup:
+      copy_test_files: true
+      commands: ["bash setup_fixture.sh Contracts compile-contracts"]
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_contains", path: "compile-proof.txt", value: "ANNOTATION_CONTRACTS_COMPILE" }
+
+  - name: "Validate executable behavior-case proof fixtures offline"
+    mode: "static"
+    setup:
+      copy_test_files: true
+      commands:
+        - "for case in behavior-pass behavior-fail behavior-zero behavior-unexecuted; do mkdir \"$case\"; cp setup_fixture.sh \"$case/\"; (cd \"$case\" && bash setup_fixture.sh Documentations \"$case\"); done"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_contains", path: "behavior-pass/test-proof.txt", value: "Focused test exit: 0" }
+      - { type: "file_contains", path: "behavior-pass/test-proof.txt", value: "Passed: 1" }
+      - { type: "file_contains", path: "behavior-fail/test-proof.txt", value: "Failed: 1" }
+      - { type: "file_contains", path: "behavior-zero/test-proof.txt", value: "Tests: 0" }
+      - { type: "file_contains", path: "behavior-unexecuted/test-proof.txt", value: "Focused test command: not executed" }
 
   - name: "Draft an ownership contract"
     prompt: "Review Sample.cs without modifying it. Draft documentation and an annotation for a method that returns a shared stream which the caller must not dispose."
@@ -123,3 +186,44 @@ scenarios:
       - "Allows visible Unicode, including Chinese and ordinary full-width punctuation, in Attribute text."
       - "Prohibits non-printing or invisible characters, including control or format characters, U+0085, U+2028/U+2029, and unpaired surrogates because Rider may escape them."
       - "Allows XML documentation to use Unicode normally while requiring well-formed XML."
+
+  - name: "Keep a bounded comment request inside its named surface"
+    prompt: "Review Sample.cs without modifying it. Draft XML documentation only for Calculator.Add. There is no repository policy requiring broader coverage. Do not document or discuss unrelated declarations."
+    setup:
+      copy_test_files: true
+      commands: ["bash setup_fixture.sh Documentations comment-scope"]
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "Add" }
+      - { type: "output_contains", value: "<summary>" }
+      - { type: "output_not_contains", value: "Unrelated" }
+      - { type: "output_not_contains", value: "OpenLease" }
+    rubric:
+      - "Documents only Calculator.Add and does not expand scope because other declarations are public."
+
+  - name: "Expand comment scope only when repository policy requires it"
+    prompt: "Review AGENTS.md and Sample.cs without modifying them. Draft the XML documentation required for a change to Calculator.Add, and state why any declaration beyond Add is included."
+    setup:
+      copy_test_files: true
+      commands: ["bash setup_fixture.sh Documentations comment-policy"]
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "Add" }
+      - { type: "output_contains", value: "Unrelated" }
+      - { type: "output_contains", value: "OpenLease" }
+      - { type: "output_contains", value: "policy" }
+    rubric:
+      - "Expands only to the public declarations required by the nearest repository policy and explains that expansion."
+
+  - name: "Use examples only when they change caller understanding"
+    prompt: "Review Sample.cs without modifying it. Draft XML documentation for Calculator.Add and Calculator.OpenLease. Add an example only where it teaches non-obvious lifecycle or misuse behavior. Explicitly report `Example omitted: Add` when no Add example is warranted."
+    setup:
+      copy_test_files: true
+      commands: ["bash setup_fixture.sh Documentations comment-examples"]
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "Example omitted: Add" }
+      - { type: "output_contains", value: "<example>" }
+      - { type: "output_contains", value: "OpenLease" }
+    rubric:
+      - "Omits a routine Add example while giving OpenLease a small usable lifecycle/disposal example."

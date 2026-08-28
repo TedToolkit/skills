@@ -25,8 +25,10 @@ behavior contract.
 3. Read [annotation-catalog.md](references/annotation-catalog.md) for each relevant contract family
    and [attribute-arguments.md](../../references/attribute-arguments.md) before drafting text.
 4. Choose the narrowest target and one attribute per independent rule. Draft equivalent XML
-   documentation and a focused test for each `BehaviorCase`; keep `hasUnitTest: false` until its test
-   passes.
+   documentation and a focused test for each `BehaviorCase`; keep `hasUnitTest: false` until the
+   exact intended test has executed successfully with non-zero discovery and reported
+   passed/failed/skipped counts. A test name, source inspection, prompt claim, skipped run, failing
+   run, or zero-discovery result is not proof.
    When that test project uses TUnit and `tunit-testing` is available, invoke it for the test
    expression while this skill retains ownership of the `BehaviorCase` contract.
 5. Show the complete proposal and wait for explicit approval before modifying source or tests.
@@ -40,9 +42,12 @@ For each annotation, require the following paired evidence:
 
 - typed `Precondition` and `BehaviorCase<TException>` agree with `<exception>`;
 - `Postcondition`, `Invariant`, and `StateTransition` say exactly when their guarantee holds;
-- `ThreadSafety`, `ThreadAffinity`, and `MayBlock` name conditions and boundaries;
+- `ThreadSafety`, `ThreadAffinity`, and `MayBlock` name conditions and boundaries. Emit one
+  `MayBlock` per independently applicable wait category: synchronous I/O is
+  `MayBlockKind.INPUT_OUTPUT` even when the same method also waits for synchronization;
 - every `SideEffect` names the affected state, external system, resource, or recipient; and
-- every behavior case has a passing focused test before it claims coverage.
+- every behavior case has a fresh passing focused-test result, including non-zero discovery and
+  passed/failed/skipped counts, before it claims coverage.
 
 A contract that is not observable, specific, and durable remains XML documentation or a focused
 implementation comment rather than an annotation.

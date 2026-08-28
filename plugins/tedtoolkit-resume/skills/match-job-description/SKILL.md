@@ -12,6 +12,10 @@ description: >-
 Compare requirements with demonstrated evidence, not with assumptions. Read
 [resume-integrity.md](../../references/resume-integrity.md) first.
 
+This skill solely owns `# Job Match`. It may consume supporting analysis but emits no resume copy,
+`# Resume Review`, or `# Interview Pack` unless separately requested. Apply the shared artifact and
+legal-source gates to any requested destination or jurisdiction-dependent conclusion.
+
 Require both candidate evidence and a job description. When either side is absent, return
 `Cannot assess: candidate evidence missing` or `Cannot assess: job description missing`, ask for the
 missing source, and stop without producing a fit rating.

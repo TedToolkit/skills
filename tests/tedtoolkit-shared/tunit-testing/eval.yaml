@@ -14,12 +14,9 @@ scenarios:
       - type: "command"
         run: "git status --porcelain"
         stdout_empty: true
-      - type: "output_contains"
-        value: "Proof role: Primary"
-      - type: "output_contains"
-        value: "Proof purpose: Acceptance"
-      - type: "output_contains"
-        value: "Execution shape: Unit"
+      - { type: "output_regex", pattern: "(?i)proof role:\\s*\\*{0,2}primary" }
+      - { type: "output_regex", pattern: "(?i)proof purpose:\\s*\\*{0,2}acceptance" }
+      - { type: "output_regex", pattern: "(?i)execution shape:\\s*\\*{0,2}unit" }
       - type: "output_contains"
         value: "Geometry.Tests.csproj"
     rubric:
@@ -65,8 +62,8 @@ scenarios:
         value: "dotnet test"
       - type: "output_contains"
         value: "dotnet test"
-      - type: "output_contains"
-        value: "Passed: 1"
+      - type: "output_regex"
+        pattern: "(?i)(passed:\\s*1|1\\s+passed)"
     rubric:
       - "Recognizes that both TUnit command paths are valid and follows the repository's documented command."
       - "Uses `dotnet test --configuration Release --project Geometry.Tests.csproj` as the verification command."
@@ -139,8 +136,7 @@ scenarios:
         value: "=> value * value;"
       - type: "command"
         run: "test $(grep -c '^dotnet test' .command-log.txt) -ge 2"
-      - type: "output_contains"
-        value: "Workflow owner: run-fix"
+      - { type: "output_regex", pattern: "(?i)workflow owner:\\s*`?run-fix`?" }
       - type: "output_contains"
         value: "Proof role: Primary"
       - type: "output_contains"
@@ -198,3 +194,28 @@ scenarios:
       - "Places GetTotalTests.cs and GetTotalTests under the PricingServiceTests directory."
       - "Preserves the repository's XML summary, naming, and documented Release command conventions."
     timeout: 420
+
+  - name: "Use the canonical skill for an ordinary natural-language TUnit request"
+    prompt: "A deterministic public Angle.Normalize behavior needs a Primary proof serving Acceptance and Regression purposes with TUnit. The repository already has Geometry.Tests.csproj. Classify the proof role, purpose, and execution shape, and explain where the focused test belongs. Do not modify files or run tests."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh tunit-command-selection"
+    assertions:
+      - type: "exit_success"
+      - type: "command"
+        run: "git status --porcelain"
+        stdout_empty: true
+      - { type: "output_regex", pattern: "(?i)proof role:\\s*\\*{0,2}\\s*primary" }
+      - { type: "output_regex", pattern: "(?i)proof purpose:\\s*\\*{0,2}\\s*acceptance" }
+      - { type: "output_regex", pattern: "(?i)execution shape:\\s*\\*{0,2}\\s*unit" }
+      - type: "output_contains"
+        value: "Geometry.Tests.csproj"
+      - type: "output_not_contains"
+        value: "tunit-unit-testing"
+      - type: "output_not_contains"
+        value: "deprecated"
+    rubric:
+      - "Selects canonical tunit-testing behavior for ordinary natural-language TUnit work."
+      - "Does not surface or route through the deprecated explicit-only alias."
+    timeout: 240

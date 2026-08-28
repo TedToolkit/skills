@@ -1,0 +1,57 @@
+{
+  "baseline_ref": "d3ddb70db54ba3d78a848e995b940f944a6cc7d6",
+  "routes": {
+    "scope-changes": {
+      "baseline_bytes": 32457,
+      "files": [
+        "plugins/tedtoolkit-project-development/skills/scope-changes/SKILL.md",
+        "plugins/tedtoolkit-project-development/references/workflow/change-development-workflow.md",
+        "plugins/tedtoolkit-project-development/references/workflow/requirements-clarification.md"
+      ]
+    },
+    "design-change": {
+      "baseline_bytes": 45575,
+      "files": [
+        "plugins/tedtoolkit-project-development/skills/design-change/SKILL.md",
+        "plugins/tedtoolkit-project-development/references/workflow/change-development-workflow.md",
+        "plugins/tedtoolkit-project-development/references/workflow/requirements-clarification.md",
+        "plugins/tedtoolkit-project-development/references/workflow/testing-strategy.md"
+      ]
+    },
+    "implement-change": {
+      "baseline_bytes": 48170,
+      "files": [
+        "plugins/tedtoolkit-project-development/skills/implement-change/SKILL.md",
+        "plugins/tedtoolkit-project-development/references/workflow/change-development-workflow.md",
+        "plugins/tedtoolkit-project-development/references/workflow/testing-strategy.md"
+      ]
+    },
+    "continue-change": {
+      "baseline_bytes": 28740,
+      "files": [
+        "plugins/tedtoolkit-project-development/skills/continue-change/SKILL.md",
+        "plugins/tedtoolkit-project-development/references/workflow/change-development-workflow.md"
+      ]
+    },
+    "orchestrate-work-items": {
+      "baseline_bytes": 67552,
+      "files": [
+        "plugins/tedtoolkit-project-development/skills/orchestrate-work-items/SKILL.md",
+        "plugins/tedtoolkit-project-development/references/workflow/change-development-workflow.md",
+        "plugins/tedtoolkit-project-development/references/workflow/testing-strategy.md",
+        "plugins/tedtoolkit-project-development/references/orchestration/agent-orchestration.md",
+        "plugins/tedtoolkit-project-development/references/orchestration/work-item-agent-protocol.md",
+        "plugins/tedtoolkit-project-development/references/orchestration/tool-state-layout.md"
+      ]
+    },
+    "review-implementation": {
+      "baseline_bytes": 56051,
+      "files": [
+        "plugins/tedtoolkit-project-development/skills/review-implementation/SKILL.md",
+        "plugins/tedtoolkit-project-development/references/workflow/change-development-workflow.md",
+        "plugins/tedtoolkit-project-development/references/workflow/testing-strategy.md",
+        "plugins/tedtoolkit-project-development/references/orchestration/agent-orchestration.md"
+      ]
+    }
+  }
+}

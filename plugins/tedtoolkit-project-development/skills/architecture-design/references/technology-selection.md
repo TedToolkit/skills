@@ -30,9 +30,12 @@ evidence for each material claim. For an evidence-backed ADR, copy
 [ecosystem-analysis-template.md](../assets/ecosystem-analysis-template.md) only when that analysis
 materially affects the choice.
 
-When a performance claim determines which candidate is better, BenchmarkDotNet evidence is required;
-read [benchmarkdotnet.md](benchmarkdotnet.md). Do not let a faster microbenchmark override a hard
-compatibility, security, or operational constraint.
+When performance determines which candidate is better, first identify the observable bottleneck and
+decision threshold. Read [benchmarkdotnet.md](benchmarkdotnet.md) only for representative managed
+in-process comparisons. For service, database, network, queue, or distributed behavior, select
+representative load, tail-latency, throughput, error, resource, profiling, or production-telemetry
+evidence instead. Do not let a faster microbenchmark override a hard compatibility, security, or
+operational constraint.
 
 ## Plan a benchmark only when it can decide the issue
 

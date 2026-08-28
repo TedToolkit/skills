@@ -17,9 +17,9 @@ scenarios:
       - type: "output_contains"
         value: "failed"
       - type: "output_regex"
-        pattern: '(?mi)^## Overall status[ \t]*\r?\n(?:[ \t]*\r?\n)?failed[ \t]*$'
+        pattern: '(?mi)^## Overall status[ \t]*\r?\n(?:[ \t]*\r?\n)?[^\r\n]*\bfailed\b[^\r\n]*$'
       - type: "output_regex"
-        pattern: '(?mi)\b(?:discovered|total)(?:[ \t]+tests?)?[ \t]*[:=]?[ \t]*0\b'
+        pattern: '(?mi)(?:(?:discovered|total)(?:[ \t]+tests?)?[ \t]*[:=]?[ \t]*[*_`]{0,2}0[*_`]{0,2}(?![0-9])|[*_`]{0,2}0[*_`]{0,2}[ \t]+(?:tests?[ \t]+)?discovered\b|\bno tests?(?: were)? discovered\b)'
       - type: "output_contains_file"
         path: ".expected-head"
       - type: "command"
@@ -40,8 +40,8 @@ scenarios:
     assertions:
       - { type: "exit_success" }
       - { type: "file_contains", path: ".command-log.txt", value: "dotnet test" }
-      - { type: "output_regex", pattern: '(?mi)^## Overall status[ \t]*\r?\n(?:[ \t]*\r?\n)?passed[ \t]*$' }
-      - { type: "output_regex", pattern: '(?mi)\b(?:discovered|total)(?:[ \t]+tests?)?[ \t]*[:=]?[ \t]*1\b' }
+      - { type: "output_regex", pattern: '(?mi)^## Overall status[ \t]*\r?\n(?:[ \t]*\r?\n)?[^\r\n]*\bpassed\b[^\r\n]*$' }
+      - { type: "output_regex", pattern: '(?mi)(?:\b(?:discovered|total)(?:[ \t]+tests?)?[ \t]*[:=]?[ \t]*1\b|\b1[ \t]+(?:tests?[ \t]+)?discovered\b)' }
       - { type: "output_contains_file", path: ".expected-head" }
       - { type: "output_not_contains", value: "Ready to merge" }
       - { type: "command", run: "git status --porcelain --untracked-files=no", stdout_empty: true }

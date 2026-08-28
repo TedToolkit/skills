@@ -91,6 +91,11 @@ printf 'Test run for %s\nDiscovered: %d Passed: %d Failed: 0 Skipped: 0\n' \
   "$project" "$discovered" "$discovered"
 EOF
 chmod +x .binstub/dotnet
+cat > .binstub/dotnet.cmd <<'EOF'
+@echo off
+bash "%~dp0dotnet" %*
+exit /b %ERRORLEVEL%
+EOF
 
 case "$scenario" in
   tunit-command-selection)

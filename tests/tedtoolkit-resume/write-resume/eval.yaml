@@ -2,6 +2,9 @@ config:
   max_parallel_scenarios: 1
   max_parallel_runs: 1
 
+smoke_scenarios:
+  - "Write an approved conversational resume artifact"
+
 scenarios:
   - name: "Write an approved conversational resume artifact"
     prompt: >-
@@ -18,6 +21,33 @@ scenarios:
     rubric:
       - "Routes the natural final-copy request to write-resume and produces the approved artifact without a redundant strategy gate."
       - "Uses only the supplied scope and does not invent scale, impact, or metrics."
+    timeout: 360
+
+  - name: "Tailor an experienced technical resume for recruiter and engineer readers"
+    prompt: >-
+      Write the finished two-page-target Markdown resume now; this exact conversational artifact is
+      approved. Target: senior C# equipment software engineer. Job priorities: WPF desktop software,
+      multithreading, native device SDK integration, unit tests, and field defect repair. Evidence:
+      Project Atlas shipped a WPF inspection client, used CancellationToken for long scans, wrapped a
+      vendor SDK with SafeHandle, and added regression tests for a device disconnect defect. Project
+      Forge built a reusable Roslyn analyzer used by two internal libraries. Project GameSkin changed
+      game textures and has no connection to the target. No metrics beyond the stated reuse were
+      supplied. Make the candidate distinctive through supported engineering choices, not hobbies or
+      personality adjectives.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "Project Atlas" }
+      - { type: "output_contains", value: "CancellationToken" }
+      - { type: "output_contains", value: "SafeHandle" }
+      - { type: "output_contains", value: "Project Forge" }
+      - { type: "output_not_contains", value: "Project GameSkin" }
+      - { type: "output_not_contains", value: "rockstar" }
+      - { type: "output_not_contains", value: "50%" }
+    rubric:
+      - "Keeps only projects with visible relevance to the equipment-software target and omits the unrelated portfolio item."
+      - "Makes role fit and outcomes legible to a recruiter while preserving enough implementation proof for a technical reader."
+      - "Surfaces a supported technical signature such as stabilizing integration boundaries or converting defects into regression proof without inventing personality traits or metrics."
+      - "Uses a deliberate two-page information budget for the experienced technical target without padding weak evidence."
     timeout: 360
 
   - name: "Keep truthful ongoing evidence and reject an unsupported metric"
@@ -86,9 +116,9 @@ scenarios:
 
   - name: "Write only the exact approved resume destination"
     prompt: >-
-      Read candidate-notes.md and write the finished resume to resume.md. I approve that exact
-      artifact and destination. Do not create any companion file; report unresolved questions after
-      the artifact in your response, not inside resume.md.
+      Read candidate-notes.md and create the finished resume at the currently absent path resume.md.
+      Do not create any companion file; report unresolved questions after the artifact in your
+      response, not inside resume.md.
     setup:
       copy_test_files: true
       commands:
@@ -106,4 +136,46 @@ scenarios:
       - "Writes only resume.md because the user approved that exact artifact and destination."
       - "Keeps unresolved questions and revision notes outside the saved resume artifact."
       - "Uses candidate-asserted evidence without inventing absent metrics, dates, title, employer, or contact details."
+    timeout: 360
+
+  - name: "Protect an existing resume without overwrite authority"
+    prompt: >-
+      Read candidate-notes.md and write the finished resume to resume.md. Do not create a companion
+      file. I have not said to overwrite, replace, or update an existing file.
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh existing"
+    assertions:
+      - { type: "exit_success" }
+      - type: "command"
+        run: "test \"$(sha256sum resume.md | cut -d' ' -f1)\" = \"$(cat resume.sha256)\""
+      - type: "output_regex"
+        pattern: "(?i)overwrite|replace|update"
+      - { type: "command", run: "git status --porcelain", stdout_empty: true }
+    rubric:
+      - "Leaves the existing destination byte-identical and asks for explicit authority for resume.md."
+    timeout: 300
+
+  - name: "Translate private repository evidence for unfamiliar hiring readers"
+    prompt: >-
+      Write the approved final Markdown resume excerpt for a C# equipment-software role. Raw Git
+      evidence says: in repository WeldCore, I added Id<T>, DomainObjectResolver,
+      RecordEnumValueGenerator, and changed WorkpieceManagerBase; in NativeBridge, I added
+      INativeObject, NativeArray<T>, and PooledProtobufBuffer plus release-path tests. The reader has
+      never seen either repository. Preserve the supported technical depth and results, but do not
+      make internal symbols or repository knowledge necessary to understand the work. No metrics
+      were supplied.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "C#" }
+      - { type: "output_contains", value: "native" }
+      - { type: "output_not_contains", value: "DomainObjectResolver" }
+      - { type: "output_not_contains", value: "RecordEnumValueGenerator" }
+      - { type: "output_not_contains", value: "WorkpieceManagerBase" }
+      - { type: "output_not_contains", value: "50%" }
+    rubric:
+      - "Translates private types into recognizable outcomes such as strongly typed domain identities, compile-time validation/code generation, and managed native-memory ownership."
+      - "Makes the system problem, personal action, relevant C# mechanism, and supported delivery/test result understandable without repository context."
+      - "Does not invent performance, adoption, production, or scale metrics."
     timeout: 360

@@ -78,11 +78,13 @@ any code-size, inlining, or performance claim. A direct `throw` is not a finding
 
 For each new or materially changed production callable, or when the review packet contains a
 cognitive-complexity result, read
-[cognitive-complexity.md](../../references/code-quality/cognitive-complexity.md). Treat `15` as the
-default maximum and a stricter repository threshold as authoritative. Cite analyzer evidence for a
-numeric violation; without it, report only the concrete control-flow burden and request the
-repository gate under `Verify`. Do not confuse this governing quality threshold with a personal
-method-length preference, and do not recommend fragmenting cohesive logic merely to reduce a score.
+[cognitive-complexity.md](../../references/code-quality/cognitive-complexity.md). Treat `15` as an
+advisory starting point only when the repository defines no numeric policy. Any explicit repository
+threshold is authoritative whether stricter or looser. Cite its source and analyzer evidence for a
+numeric violation; without measurable evidence, report only the concrete control-flow burden and
+request the repository gate under `Verify`, never an invented score or mandatory exception. Do not
+confuse this quality signal with a personal method-length preference, and do not recommend
+fragmenting cohesive logic merely to reduce a score.
 
 ## Make findings falsifiable
 

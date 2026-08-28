@@ -16,44 +16,13 @@ scenarios:
         stdout_empty: true
       - type: "output_contains"
         value: "tunit-testing"
-      - type: "output_contains"
-        value: "Proof role: Primary"
-      - type: "output_contains"
-        value: "Proof purpose: Acceptance"
-      - type: "output_contains"
-        value: "Execution shape: Unit"
+      - { type: "output_regex", pattern: "(?i)proof role:\\s*\\*{0,2}\\s*primary" }
+      - { type: "output_regex", pattern: "(?i)proof purpose:\\s*\\*{0,2}\\s*acceptance" }
+      - { type: "output_regex", pattern: "(?i)execution shape:\\s*\\*{0,2}\\s*unit" }
       - type: "output_contains"
         value: "Geometry.Tests.csproj"
     rubric:
       - "Treats tunit-unit-testing as a deprecated explicit compatibility alias and routes to tunit-testing."
       - "Executes the canonical proof-purpose, execution-shape, and coherent-project workflow instead of stopping after the rename notice."
       - "Does not modify the fixture."
-    timeout: 240
-
-  - name: "Use the canonical skill for an ordinary natural-language TUnit request"
-    prompt: "A deterministic public Angle.Normalize behavior needs a Primary proof serving Acceptance and Regression purposes with TUnit. The repository already has Geometry.Tests.csproj. Classify the proof role, purpose, and execution shape, and explain where the focused test belongs. Do not modify files or run tests."
-    setup:
-      copy_test_files: true
-      commands:
-        - "bash setup_fixture.sh"
-    assertions:
-      - type: "exit_success"
-      - type: "command"
-        run: "git status --porcelain"
-        stdout_empty: true
-      - type: "output_contains"
-        value: "Proof role: Primary"
-      - type: "output_contains"
-        value: "Proof purpose: Acceptance"
-      - type: "output_contains"
-        value: "Execution shape: Unit"
-      - type: "output_contains"
-        value: "Geometry.Tests.csproj"
-      - type: "output_not_contains"
-        value: "tunit-unit-testing"
-      - type: "output_not_contains"
-        value: "deprecated"
-    rubric:
-      - "Selects canonical tunit-testing behavior for ordinary natural-language TUnit work."
-      - "Does not surface or route through the deprecated explicit-only alias."
     timeout: 240

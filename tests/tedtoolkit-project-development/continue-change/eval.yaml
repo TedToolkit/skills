@@ -2,6 +2,9 @@ config:
   max_parallel_scenarios: 1
   max_parallel_runs: 1
 
+smoke_scenarios:
+  - "Cross-conversation continuation implements one approved single delivery"
+
 scenarios:
   - name: "Continue on a Draft requests approval without mutating delivery"
     prompt: "Use $continue-change for @docs/changes/comment-cleanup/change.md. 继续下一步. Do not infer any approval I did not state."
@@ -32,7 +35,7 @@ scenarios:
       - { type: "file_contains", path: "docs/changes/comment-cleanup/change.md", value: "<!-- change-status: approved -->" }
       - { type: "file_not_contains", path: "docs/changes/comment-cleanup/change.md", value: "<!-- approval-source: none -->" }
       - { type: "file_contains", path: "Temperature.cs", value: "Represnts" }
-      - { type: "output_contains", value: "继续" }
+      - { type: "output_contains", value: "implement-change" }
     rubric:
       - "Persists explicit human approval in the referenced change and stops."
       - "Reports direct implementation as the single derived next phase but does not execute it without a continuation request."
