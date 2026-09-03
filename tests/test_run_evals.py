@@ -379,6 +379,24 @@ class AssertionHarnessTests(unittest.TestCase):
 
         self.assertFalse(tree.exists())
 
+    def test_eval_plugin_cleanup_reports_nonzero_commands_without_skipping_remaining_cleanup(self):
+        marketplace_root = self.workdir / "marketplace"
+        marketplace_root.mkdir()
+        results = [
+            SimpleNamespace(returncode=1, stderr="plugin cache is locked", stdout=""),
+            SimpleNamespace(returncode=0, stderr="", stdout=""),
+        ]
+
+        with mock.patch.object(run_evals, "CODEX", "codex"):
+            with mock.patch.object(run_evals, "run_bounded", side_effect=results) as run:
+                warnings = run_evals.cleanup_eval_plugin(
+                    "candidate", "eval-marketplace", marketplace_root)
+
+        self.assertEqual(2, run.call_count)
+        self.assertEqual(1, len(warnings))
+        self.assertIn("plugin cache is locked", warnings[0])
+        self.assertFalse(marketplace_root.exists())
+
 
 if __name__ == "__main__":
     unittest.main()

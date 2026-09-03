@@ -421,21 +421,28 @@ def install_eval_plugin(plugin_dir: Path) -> tuple[Path, str, str]:
             if result.returncode:
                 raise RuntimeError((result.stderr or result.stdout).strip())
     except Exception:
-        cleanup_eval_plugin(plugin, marketplace, root)
+        for warning in cleanup_eval_plugin(plugin, marketplace, root):
+            print(f"Eval plugin cleanup warning: {warning}", file=sys.stderr)
         raise
     return root, marketplace, plugin
 
 
-def cleanup_eval_plugin(plugin: str, marketplace: str, root: Path) -> None:
+def cleanup_eval_plugin(plugin: str, marketplace: str, root: Path) -> list[str]:
+    """Remove eval registration and temporary files, reporting every cleanup failure."""
+    warnings = []
     if CODEX:
         for command in (codex_command("plugin", "remove", f"{plugin}@{marketplace}"),
                         codex_command("plugin", "marketplace", "remove", marketplace)):
             try:
-                run_bounded(command, timeout=30, capture_output=True, text=True,
-                            encoding="utf-8", errors="replace")
-            except (OSError, subprocess.SubprocessError):
-                pass
+                result = run_bounded(command, timeout=30, capture_output=True, text=True,
+                                     encoding="utf-8", errors="replace")
+                if result.returncode:
+                    detail = (result.stderr or result.stdout or "unknown error").strip()[:200]
+                    warnings.append(f"{command!r} exit {result.returncode}: {detail}")
+            except (OSError, subprocess.SubprocessError) as exc:
+                warnings.append(f"{command!r} raised {exc}")
     _rmtree_best_effort(root)
+    return warnings
 
 
 # ---------------------------------------------------------------------------
@@ -1149,9 +1156,15 @@ def main() -> int:
                         if print_scenario(rec):
                             passed += 1
             finally:
+                cleanup_warnings = []
                 if (marketplace_root is not None and marketplace_name is not None
                         and eval_plugin_name is not None):
-                    cleanup_eval_plugin(eval_plugin_name, marketplace_name, marketplace_root)
+                    cleanup_warnings = cleanup_eval_plugin(
+                        eval_plugin_name, marketplace_name, marketplace_root)
+                    for warning in cleanup_warnings:
+                        print(f"Eval plugin cleanup warning: {warning}", file=sys.stderr)
+            if cleanup_warnings:
+                raise RuntimeError("eval plugin cleanup failed; stale registrations or cache may remain")
             require_current_input_identities(
                 {plugin: input_identities[plugin]}, {plugin: input_roots[plugin]})
     except Exception as exc:
