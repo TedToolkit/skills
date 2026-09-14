@@ -53,10 +53,10 @@
       "category": "Productivity"
     },
     {
-      "name": "tedtoolkit-resume",
+      "name": "tedtoolkit-career",
       "source": {
         "source": "local",
-        "path": "./plugins/tedtoolkit-resume"
+        "path": "./plugins/tedtoolkit-career"
       },
       "policy": {
         "installation": "AVAILABLE",

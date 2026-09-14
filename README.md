@@ -21,9 +21,10 @@ After installing or updating a plugin, start a new task so Codex loads its curre
 | [`tedtoolkit-annotations`](plugins/tedtoolkit-annotations/) | C# XML comments and explicit contracts using TedToolkit annotations for boxing, constness, documentation, maintenance, and ownership. |
 | [`tedtoolkit-roslynhelper`](plugins/tedtoolkit-roslynhelper/) | Generating C# source with `TedToolkit.RoslynHelper`. |
 | [`tedtoolkit-project-development`](plugins/tedtoolkit-project-development/) | Request scoping, risk-scaled change design and implementation, optional work-item orchestration, design-principle governance, ADRs, professional review, project scaffolding, and README writing. |
-| [`tedtoolkit-resume`](plugins/tedtoolkit-resume/) | Factual resume generation, revision and review, job-description matching, and structured interview-question design. |
+| [`tedtoolkit-career`](plugins/tedtoolkit-career/) | Local factual career profiles, resume writing and review, job-description matching, candidate preparation, and interviewer design. |
 
 `tedtoolkit-project-development` replaces the former `tedtoolkit-project-scaffolding` plugin. Install the new plugin name if you previously used the old one.
+`tedtoolkit-career` replaces the former `tedtoolkit-resume` plugin, retains its resume workflows, and separates candidate preparation from interviewer design.
 `tunit-testing` is the canonical TUnit skill; the former explicit name `tunit-unit-testing` remains
 as a deprecated compatibility alias for one migration release.
 `design-change` and `implement-change` are the canonical change skills; explicit invocations of
@@ -79,7 +80,7 @@ lifecycle, cadence, isolation, or ownership boundaries.
 | Document | Owns | Completion handling |
 | --- | --- | --- |
 | `.tedtoolkit/preparations/` | One source request's tracked temporary evidence index, partition, and active lanes | Delete after all resulting changes no longer need coordination and no tracked workflow record references it; retain only when explicit repository policy requires it. |
-| `docs/changes/` | One delivery's behavior contract and work items | Delete a completed or superseded record after it is present on the default branch, durable extraction is complete or not needed, and no tracked workflow record references it; retain only when explicit repository policy requires it. |
+| `docs/changes/` | One delivery's behavior contract and work items | Delete a completed or superseded record after its exact clean directory is present in Git history on any branch, durable extraction is complete or not needed, and no tracked workflow record references it; retain only when explicit repository policy requires it. |
 | `docs/adr/` | Enduring, material decision rationale and trade-offs | Retain; supersede with a new ADR when the decision changes. |
 | `docs/architecture/` | Current system boundaries and cross-cutting semantics | Update when the current system changes. |
 | `docs/principles/` | Default rules for recurring design trade-offs | Maintain as durable guidance. |

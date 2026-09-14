@@ -25,9 +25,9 @@
       "description": "Request scoping, risk-scaled change design and implementation, optional work-item orchestration, repository structure, README writing, and architecture decisions."
     },
     {
-      "name": "tedtoolkit-resume",
-      "source": "./plugins/tedtoolkit-resume",
-      "description": "Skills for factual resume creation, revision, review, job matching, and interview-question design."
+      "name": "tedtoolkit-career",
+      "source": "./plugins/tedtoolkit-career",
+      "description": "Skills for local career profiles, factual resumes, job matching, candidate preparation, and interviewer design."
     }
   ]
 }

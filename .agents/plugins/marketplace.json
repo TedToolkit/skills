@@ -27,6 +27,12 @@
       "source": { "source": "local", "path": "./plugins/tedtoolkit-project-development" },
       "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
       "category": "Developer Tools"
+    },
+    {
+      "name": "tedtoolkit-career",
+      "source": { "source": "local", "path": "./plugins/tedtoolkit-career" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Productivity"
     }
   ]
 }

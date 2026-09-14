@@ -1,20 +1,23 @@
 ---
 name: match-job-description
 description: >-
-  Compare supplied candidate evidence with a supplied job description and return an evidence matrix
-  for each material requirement without rewriting the resume. Use for role-fit analysis, requirement
-  coverage, evidence gaps, or truthful terminology opportunities when both sides are available. Do
-  not use for final resume copy, intrinsic resume critique, or interview-question packs.
+  Compare a supplied career profile, resume, or other candidate evidence with a supplied job
+  description and return an evidence matrix for each material requirement without rewriting career
+  materials. Use for role-fit analysis, requirement coverage, evidence gaps, or truthful terminology
+  opportunities when both sides are available. Do not use for final resume copy, intrinsic resume
+  critique, or interview preparation and design.
 ---
 
 # Match Job Description
 
 Compare requirements with demonstrated evidence, not with assumptions. Read
-[resume-integrity.md](../../references/resume-integrity.md) first.
+[career-integrity.md](../../references/career-integrity.md) first. When a local career profile is
+supplied, read [career-profile-schema.md](../../references/career-profile-schema.md) before using it.
 
 This skill solely owns `# Job Match`. It may consume supporting analysis but emits no resume copy,
-`# Resume Review`, or `# Interview Pack` unless separately requested. Apply the shared artifact and
-legal-source gates to any requested destination or jurisdiction-dependent conclusion.
+career-profile update, `# Resume Review`, `# Interview Preparation`, or `# Interview Plan` unless
+separately requested. Apply the shared artifact and legal-source gates to any requested destination
+or jurisdiction-dependent conclusion.
 
 Require both candidate evidence and a job description. When either side is absent, return
 `Cannot assess: candidate evidence missing` or `Cannot assess: job description missing`, ask for the
@@ -73,5 +76,5 @@ If the user wants a numerical score, disclose the weighting and calculate it onl
 matrix. Do not let repeated keywords outweigh required capabilities.
 
 For a tailored rewrite, route to `write-resume`; the final-copy request belongs there even when a job
-description is supplied. For interview coverage, route to `generate-interview-questions`; do not
-turn the evidence matrix itself into an interview pack.
+description is supplied. Route candidate practice to `prepare-for-interview` and interviewer plan
+design to `design-interview`; do not turn the evidence matrix itself into either interview artifact.

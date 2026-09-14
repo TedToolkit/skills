@@ -1,0 +1,4 @@
+interface:
+  display_name: "Maintain Career Profile"
+  short_description: "Maintain a factual local career knowledge base"
+  default_prompt: "Use $maintain-career-profile to create or update this person's local career profile from the evidence I supply."

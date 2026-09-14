@@ -3,20 +3,21 @@ name: write-resume
 description: >-
   Create or revise final resume copy in Markdown. Use when the requested deliverable is a new,
   tailored, shortened, translated, or restructured resume, including a resume targeted to a supplied
-  job description. Do not use for feedback-only review, a resume-to-job evidence comparison without
-  rewritten copy, or interview questions. Produces Markdown, not PDF or DOCX.
+  job description and one sourced from a local career profile. Do not use for maintaining the
+  profile, feedback-only review, a resume-to-job comparison without rewritten copy, or interview
+  preparation. Produces Markdown, not PDF or DOCX.
 ---
 
 # Write Resume
 
 Create a concise resume whose target fit is clear and whose claims are defensible. Read
-[resume-integrity.md](../../references/resume-integrity.md) and
+[career-integrity.md](../../references/career-integrity.md) and
 [resume-standard.md](references/resume-standard.md). Use
 [resume-template.md](assets/resume-template.md) as a flexible starting point.
 
-This skill solely owns final resume copy. Emit no `# Resume Review`, `# Job Match`, or `# Interview
-Pack` unless the user separately requested that deliverable; apply the shared conversation,
-new-file, overwrite, companion-file, and legal-source gates exactly once.
+This skill solely owns final resume copy. Emit no career-profile update, `# Resume Review`,
+`# Job Match`, `# Interview Preparation`, or `# Interview Plan` unless the user separately requested
+that deliverable; apply the shared conversation, file, and legal-source gates exactly once.
 
 ## Establish the assignment
 
@@ -32,13 +33,19 @@ one page for early-career or evidence-limited candidates. Never pad weak evidenc
 count or compress strong evidence into vague claims merely to force one page.
 
 Ask one focused question only when the answer would materially change positioning or make the
-requested copy unsafe to produce under the shared integrity rules. Route feedback-only requests to
-`review-resume`, comparison-only requests to `match-job-description`, and interview preparation to
-`generate-interview-questions`.
+requested copy unsafe to produce under the shared integrity rules. Route career-history recording
+to `maintain-career-profile`, feedback-only requests to `review-resume`, comparison-only requests to
+`match-job-description`, candidate interview preparation to `prepare-for-interview`, and interviewer
+plan design to `design-interview`.
 
 ## Build an evidence ledger
 
-Read all supplied sources and build the claim ledger defined by `resume-integrity.md`. Track source,
+Read all supplied sources and build the claim ledger defined by `career-integrity.md`. When a local
+career profile is supplied, read
+[career-profile-schema.md](../../references/career-profile-schema.md), then use its relevant work and
+education records plus any inline provenance needed to resolve uncertainty. Read optional private
+contact and portrait-path data only when the requested resume needs it and the user authorized that
+source. Track source,
 provenance/support class, role, dates, contribution ownership, context, constraints, deliverable or
 current state, observable result, metric, target relevance, and the material requirement or
 positioning theme the evidence supports. When both candidate evidence and a job description are

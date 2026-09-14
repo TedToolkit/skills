@@ -2,20 +2,21 @@
 name: review-resume
 description: >-
   Audit an existing resume and return findings without rewriting it. Use for feedback, critique,
-  grading, intrinsic ATS-readability review, credibility issues, or a prioritized improvement list.
-  Do not use when the deliverable is revised resume copy, a requirement-by-requirement comparison
-  with a job description, or interview questions.
+  grading, intrinsic ATS-readability review, credibility issues, comparison with a supplied career
+  profile, or a prioritized improvement list. Do not use when the deliverable is revised resume
+  copy, a requirement-by-requirement comparison with a job description, or interview materials.
 ---
 
 # Review Resume
 
 Review how well claims are supported by the text actually present; do not treat a candidate-authored
-assertion as independently verified. Read
-[resume-integrity.md](../../references/resume-integrity.md) before evaluating.
+assertion or career-profile entry as independently verified. Read
+[career-integrity.md](../../references/career-integrity.md) before evaluating.
 
 This skill solely owns `# Resume Review`. It may consume supporting analysis but emits no rewritten
-resume, `# Job Match`, or `# Interview Pack` unless separately requested. Apply the shared artifact
-and legal-source gates to any requested destination or jurisdiction-dependent conclusion.
+resume, career-profile update, `# Job Match`, `# Interview Preparation`, or `# Interview Plan` unless
+separately requested. Apply the shared artifact and legal-source gates to any requested destination
+or jurisdiction-dependent conclusion.
 
 ## Set the review frame
 
@@ -23,6 +24,13 @@ Identify the resume's intended role, seniority, locale, and audience when known.
 job description assesses intrinsic quality; label role fit `Not assessed` rather than guessing. If
 the primary request is requirement-by-requirement role fit and both artifacts are supplied, route to
 `match-job-description`. Route requests for edited copy to `write-resume`.
+Route requests to record or correct the underlying career history to `maintain-career-profile`.
+
+When a local career profile is supplied as review evidence, read
+[career-profile-schema.md](../../references/career-profile-schema.md). Use relevant records and
+their inline provenance where present to check factual alignment and identify important supported
+evidence omitted from the resume. Do not treat profile content as independently verified or read
+unrelated private data.
 
 If extraction or formatting obscures text, state the limitation and apply the shared integrity
 rules to every claim.
@@ -32,6 +40,7 @@ rules to every claim.
 Inspect:
 
 - factual clarity, chronology, scope, and internal consistency;
+- consistency with supplied career-profile evidence and material supported omissions;
 - evidence of ownership, action, scale, and outcomes;
 - relevance and prioritization for the stated target;
 - whether every retained project visibly supports a material target requirement or differentiator;

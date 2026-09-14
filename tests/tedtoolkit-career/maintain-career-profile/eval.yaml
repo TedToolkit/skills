@@ -1,0 +1,81 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+smoke_scenarios:
+  - "Create one person's authorized local career profile"
+
+scenarios:
+  - name: "Create one person's authorized local career profile"
+    prompt: >-
+      Create Alice Chen's factual career profile at the currently absent path
+      career-profiles/alice. Alice has worked as a backend engineer at Northwind from January 2022
+      to the present, where she personally built a C# order API. She has studied part-time at
+      Fabrikam University for an MSc in software engineering since September 2023 and has
+      independently maintained an open-source parser as a weekend project since March 2024. No
+      outcomes or metrics were supplied. Write the profile now and do not create a resume.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_exists", path: "career-profiles/alice/profile.md" }
+      - { type: "command", run: "test $(find career-profiles/alice/work -mindepth 2 -type f -name '*.md' | wc -l) -eq 1" }
+      - { type: "command", run: "test $(find career-profiles/alice/education -mindepth 2 -type f -name '*.md' | wc -l) -eq 1" }
+      - { type: "command", run: "test $(find career-profiles/alice/personal -mindepth 2 -type f -name '*.md' | wc -l) -eq 1" }
+      - { type: "command", run: "test $(find career-profiles/alice/work career-profiles/alice/personal -type f -name '*.md' -exec grep -l '^record_type: project$' {} + | wc -l) -eq 2" }
+      - { type: "command", run: "test ! -d career-profiles/alice/private" }
+      - { type: "command", run: "test ! -e career-profiles/alice/timeline.md && test ! -e career-profiles/alice/skills.md && test ! -d career-profiles/alice/projects && test ! -d career-profiles/alice/activities && test ! -d career-profiles/alice/learning && test ! -d career-profiles/alice/evidence && test ! -e career-profiles/alice/sources.md" }
+      - { type: "command", run: "test -z \"$(find career-profiles/alice -type f ! -name '*.md' -print -quit)\"" }
+      - { type: "command", run: "! grep -R -Fq '50%' career-profiles/alice" }
+    rubric:
+      - "Creates only Alice's authorized profile tree, groups employment under Northwind, the independent project under personal, and education under Fabrikam University."
+      - "Every work or personal Markdown file represents exactly one project; no role-summary or multi-project file is created."
+      - "Makes each project record independently understandable from the supplied context, role, concrete contribution, deliverable or current state, and technologies rather than reducing it to resume-style promotion."
+      - "Records the supplied contribution while placing missing outcomes and metrics in short, answerable To Confirm questions instead of inventing them or adding an evaluation."
+      - "Keeps profile.md limited to durable person-level facts and stores each career fact once without creating timeline, skill, project, activity, learning, evidence, or source indexes."
+    timeout: 360
+
+  - name: "Update the identified profile without touching unrelated private data"
+    prompt: >-
+      Update the existing career-profiles/sam profile with this candidate statement: Sam joined
+      Contoso as a Senior Backend Engineer in July 2022 and still works there; he personally led the
+      migration of one .NET service, but no result or metric was supplied. Preserve the previous
+      Northwind history and all unrelated files. Do not write a resume or interview material.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_exists", path: "career-profiles/sam/work/northwind/2020-01--2022-06-order-api.md" }
+      - { type: "command", run: "test $(find career-profiles/sam/work -mindepth 2 -type f -name '*.md' | wc -l) -eq 2" }
+      - { type: "command", run: "test $(find career-profiles/sam/work -type f -name '*.md' -exec grep -l '^record_type: project$' {} + | wc -l) -eq 2" }
+      - { type: "command", run: "test \"$(sha256sum career-profiles/sam/private/contact.md | cut -d' ' -f1)\" = \"$(cat contact.sha256)\"" }
+      - { type: "command", run: "test -z \"$(find career-profiles/sam -type f ! -name '*.md' -print -quit)\"" }
+      - { type: "command", run: "test ! -e career-profiles/sam/timeline.md && test ! -e career-profiles/sam/skills.md && test ! -d career-profiles/sam/evidence && test ! -e career-profiles/sam/sources.md" }
+      - { type: "command", run: "! grep -R -Fq '50%' career-profiles/sam" }
+    rubric:
+      - "Adds one dated Contoso work record and preserves both prior work and byte-identical private contact data."
+      - "Keeps personal ownership distinct from the service and company context, and keeps the missing migration result explicit under To Confirm rather than inventing impact or judging the work."
+      - "Does not copy the new role narrative into profile.md or create derived index or source-registry files."
+    timeout: 360
+
+  - name: "Request the company before placing an employment project"
+    prompt: >-
+      Update the existing career-profiles/sam profile with a project I completed at work from
+      January through June 2025. I built a C# scheduling service, but I have not said which company
+      employed me for it. Record the project now without guessing the company.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_regex", pattern: "(?i)company|employer|organization" }
+      - { type: "command", run: "test ! -d career-profiles/sam/work/unknown" }
+      - { type: "command", run: "test $(find career-profiles/sam/work -type f -name '*.md' | wc -l) -eq 1" }
+    rubric:
+      - "Asks one focused question for the missing company and does not write or move the project into a guessed or unknown organization directory."
+    timeout: 240
+
+  - name: "Request a destination before creating personal files"
+    prompt: >-
+      Build a local career profile for Li from these notes: two years of Java API work and an
+      evening cloud-computing course. I have not selected or authorized a filesystem location yet.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_regex", pattern: "(?i)career-profiles|location|path|destination" }
+      - { type: "command", run: "test ! -e career-profiles/li" }
+    rubric:
+      - "Proposes a concrete default destination and waits for authorization without creating Li's personal files."
+    timeout: 240

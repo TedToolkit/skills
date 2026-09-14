@@ -17,7 +17,8 @@ scenarios:
       - { type: "output_contains", value: "## Evidence matrix" }
       - { type: "output_contains", value: "Supported" }
       - { type: "output_regex", pattern: "(?i)partial|not (?:directly )?demonstrated" }
-      - { type: "output_not_contains", value: "# Interview Pack" }
+      - { type: "output_not_contains", value: "# Interview Preparation" }
+      - { type: "output_not_contains", value: "# Interview Plan" }
     rubric:
       - "Maps C# and SQL as supported and treats Docker only as adjacent or missing Kubernetes evidence, never as direct Kubernetes support."
       - "Returns comparison only and does not rewrite the resume or create interview questions."

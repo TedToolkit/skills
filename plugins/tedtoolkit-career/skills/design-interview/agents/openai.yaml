@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design Interview"
+  short_description: "Design a fair evidence-based interviewer plan"
+  default_prompt: "Use $design-interview to create a structured interview plan for this role and candidate evidence."

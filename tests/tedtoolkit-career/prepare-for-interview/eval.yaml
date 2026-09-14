@@ -1,0 +1,66 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+smoke_scenarios:
+  - "Create candidate preparation from background only"
+
+scenarios:
+  - name: "Create candidate preparation from background only"
+    prompt: >-
+      I am preparing for my own backend interview. My background says I led a three-person team that
+      migrated a .NET service, but I have no job description yet. Give me the finished preparation
+      now; use reasonable defaults for anything optional.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "# Interview Preparation" }
+      - { type: "output_contains", value: "30 minutes" }
+      - { type: "output_contains", value: "8 questions" }
+      - { type: "output_contains", value: "individual contribution" }
+      - { type: "output_not_contains", value: "Score 1:" }
+      - { type: "output_not_contains", value: "# Interview Plan" }
+    rubric:
+      - "Uses the candidate defaults and creates a finished preparation pack without adding another approval gate."
+      - "Uses the collective claim as a practice topic and includes a probe that separates personal contribution from team outcome."
+    timeout: 300
+
+  - name: "Sequence a requested match and candidate preparation once each"
+    prompt: >-
+      Compare my background with the role, then prepare me for the interview. I explicitly want both
+      named deliverables and no resume rewrite or review. Background: C# APIs and SQL. Role: C#, SQL,
+      and Kubernetes.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_regex", pattern: "(?s)^.*# Job Match.*# Interview Preparation.*$" }
+      - { type: "output_count", value: "# Job Match", count: 1 }
+      - { type: "output_count", value: "# Interview Preparation", count: 1 }
+      - { type: "output_not_contains", value: "# Resume Review" }
+      - { type: "output_not_contains", value: "# Interview Plan" }
+    rubric:
+      - "Emits one Job Match followed by one candidate preparation artifact and no undeclared deliverable."
+    timeout: 360
+
+  - name: "Route interviewer work to interview design"
+    prompt: >-
+      I am the interviewer. Design questions and scoring anchors for evaluating another candidate
+      against a senior backend role. This is not preparation for my own interview.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "# Interview Plan" }
+      - { type: "output_not_contains", value: "# Interview Preparation" }
+    rubric:
+      - "Routes interviewer-owned work to design-interview instead of producing candidate preparation."
+    timeout: 300
+
+  - name: "Create only an authorized candidate-preparation file"
+    prompt: >-
+      Create my finished candidate preparation at the currently absent path interview-prep.md.
+      Background: two years of C# API work. Use documented defaults and create no companion file.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_exists", path: "interview-prep.md" }
+      - { type: "file_contains", path: "interview-prep.md", value: "# Interview Preparation" }
+      - { type: "command", run: "test $(find . -maxdepth 1 -type f ! -name interview-prep.md | wc -l) -eq 0" }
+    rubric:
+      - "Creates only the clearly authorized candidate-preparation file."
+    timeout: 300

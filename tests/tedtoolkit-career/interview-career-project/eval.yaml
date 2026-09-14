@@ -1,0 +1,77 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+smoke_scenarios:
+  - "Write one answer before asking the next question"
+
+scenarios:
+  - name: "Start with one question and no unsupported write"
+    prompt: >-
+      Use $interview-career-project with profile root career-profiles/sam. Interview only the
+      existing project record
+      career-profiles/sam/work/northwind/2024-01--present-order-orchestration.md. Ask one question at
+      a time and update that record after each answer. Start now; I have not answered a project
+      question yet.
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_regex", pattern: "\\?" }
+      - type: "command"
+        run: "test \"$(sha256sum career-profiles/sam/work/northwind/2024-01--present-order-orchestration.md | cut -d' ' -f1)\" = \"$(cat target.sha256)\""
+      - type: "command"
+        run: "test \"$(sha256sum career-profiles/sam/work/contoso/2023-01--2023-12-inventory-dashboard.md | cut -d' ' -f1)\" = \"$(cat unselected.sha256)\""
+      - type: "command"
+        run: "test \"$(sha256sum career-profiles/sam/private/contact.md | cut -d' ' -f1)\" = \"$(cat contact.sha256)\""
+    rubric:
+      - "Reads the selected project, asks exactly one focused high-value question, and makes no write before receiving an answer."
+      - "Does not inspect or modify the unselected project or private contact record."
+    timeout: 300
+
+  - name: "Write one answer before asking the next question"
+    prompt: >-
+      Use $interview-career-project to continue the selected existing record
+      career-profiles/sam/work/northwind/2024-01--present-order-orchestration.md under profile root
+      career-profiles/sam. My answer to the delivery question is: I personally handled the rollout
+      to our internal production environment in July 2025, and three operations teams used it.
+      Write these facts now, briefly tell me what you wrote, and then ask exactly one next question.
+      Do not read or modify any other profile record.
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh"
+    assertions:
+      - { type: "exit_success" }
+      - type: "command"
+        run: "grep -Eqi 'three|3' career-profiles/sam/work/northwind/2024-01--present-order-orchestration.md"
+      - type: "command"
+        run: "grep -Eqi '2025-07|July 2025' career-profiles/sam/work/northwind/2024-01--present-order-orchestration.md"
+      - type: "command"
+        run: "grep -Eqi 'rollout|deploy|production' career-profiles/sam/work/northwind/2024-01--present-order-orchestration.md"
+      - type: "command"
+        run: "test \"$(sha256sum career-profiles/sam/work/contoso/2023-01--2023-12-inventory-dashboard.md | cut -d' ' -f1)\" = \"$(cat unselected.sha256)\""
+      - type: "command"
+        run: "test \"$(sha256sum career-profiles/sam/private/contact.md | cut -d' ' -f1)\" = \"$(cat contact.sha256)\""
+      - { type: "output_regex", pattern: "\\?" }
+      - { type: "output_not_contains", value: "# Resume" }
+      - { type: "output_not_contains", value: "# Interview Preparation" }
+    rubric:
+      - "Writes every clear supplied fact to the selected project before asking one concise next question."
+      - "Preserves personal rollout ownership separately from the supported team adoption outcome, updates the answered To Confirm item, and invents no metric or impact."
+      - "Leaves the unselected project and private contact record byte-identical."
+    timeout: 360
+
+  - name: "Require an explicit project boundary"
+    prompt: >-
+      Use $interview-career-project to improve my career profile by interviewing me one question at
+      a time, but I have not supplied a profile root or selected any project records yet.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_regex", pattern: "(?i)profile|project|record|path" }
+      - { type: "command", run: "test ! -e career-profiles" }
+    rubric:
+      - "Asks one focused question for the missing profile and project boundary without scanning or writing a profile."
+    timeout: 240
