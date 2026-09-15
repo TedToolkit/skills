@@ -34,6 +34,24 @@ Every record is UTF-8 Markdown. Use YAML frontmatter for identifiers and provena
 single H1. Omit unknown optional values rather than inserting placeholders. Dates use `YYYY-MM-DD`;
 use the actual current date only for a record created or updated in the current task.
 
+Every canonical record has exactly one H1 and these required frontmatter fields:
+
+| Kind | Required fields and path agreement | Fixed H1 |
+| --- | --- | --- |
+| Company | `company_id`, `updated`; ID equals `<company-id>` | Supplied company name |
+| Role | `company_id`, `role_id`, `updated`; IDs equal its canonical path | Supplied role title |
+| Candidate | `company_id`, `candidate_id`, `updated`; IDs equal its canonical path | Supplied candidate display name |
+| Normalized resume | `company_id`, `candidate_id`, `source`, `updated`; IDs equal its canonical path and filename begins with a valid date | `# Normalized Resume` |
+| Application | `company_id`, `role_id`, `candidate_id`, `evidence`, `updated`; IDs equal its canonical path | `# Application` |
+| Assessment | Same application IDs and exact `evidence` list, plus `updated` | `# Candidate Assessment` |
+| Interview plan | Same application IDs and exact `evidence` list, `assessment`, and `updated` | `# Interview Plan` |
+
+`evidence` is a non-empty, duplicate-free list. A workspace-internal evidence pointer may identify
+only a canonical normalized resume under the same company and candidate. External immutable source
+pointers are allowed when the application already selected their exact paths. Reject absolute,
+traversal, wildcard, cross-company, cross-candidate, and cross-application pointers before opening
+any evidence.
+
 Store sanitized relative source pointers when practical. Never embed source-file contents merely to
 preserve provenance. References must stay inside the selected company/application boundary unless
 the user explicitly selected an external read-only source.

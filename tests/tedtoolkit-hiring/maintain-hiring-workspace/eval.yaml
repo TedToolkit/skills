@@ -32,6 +32,20 @@ scenarios:
       - { type: "file_exists", path: "hiring-workspace/companies/northwind/applications/platform/avery/application.md" }
       - { type: "file_exists", path: "hiring-workspace/companies/northwind/applications/data/avery/application.md" }
       - { type: "file_exists", path: "hiring-workspace/companies/northwind/applications/data/blake/application.md" }
+      - type: "command"
+        run: >-
+          py -3.10 "${REPO_ROOT}/plugins/tedtoolkit-hiring/scripts/validate_hiring_records.py"
+          --workspace-root hiring-workspace
+          --record hiring-workspace/companies/northwind/company.md
+          --record hiring-workspace/companies/northwind/roles/platform/role.md
+          --record hiring-workspace/companies/northwind/roles/data/role.md
+          --record hiring-workspace/companies/northwind/candidates/avery/candidate.md
+          --record hiring-workspace/companies/northwind/candidates/avery/resumes/2026-09-15-resume.md
+          --record hiring-workspace/companies/northwind/candidates/blake/candidate.md
+          --record hiring-workspace/companies/northwind/candidates/blake/resumes/2026-09-15-resume.md
+          --record hiring-workspace/companies/northwind/applications/platform/avery/application.md
+          --record hiring-workspace/companies/northwind/applications/data/avery/application.md
+          --record hiring-workspace/companies/northwind/applications/data/blake/application.md
       - { type: "command", run: "test $(find hiring-workspace -type f -name '*.md' | wc -l) -eq 10" }
       - { type: "command", run: "sha256sum -c avery-source.sha256 && sha256sum -c blake-source.sha256" }
       - { type: "command", run: "! grep -R -Ei 'nationality|Exampleland|religion|Example Faith' hiring-workspace" }

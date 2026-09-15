@@ -22,6 +22,21 @@ Require one selected root, company ID, role ID, candidate ID, and application. R
 role, candidate, application, and application-selected evidence paths. Ask for a missing boundary;
 never infer it from sibling records or a similarly named candidate.
 
+Before opening any evidence, read only the selected `application.md` and validate that its
+`company_id`, `role_id`, and `candidate_id` exactly match both the request and its canonical path.
+Then validate every `evidence` pointer without dereferencing it:
+
+- reject absolute, traversal, wildcard, missing, or ambiguous pointers;
+- for a pointer inside the selected workspace, require the exact canonical normalized-resume path
+  beneath this company and this candidate;
+- reject pointers into another company, candidate, role, application, assessment, interview plan,
+  or any other workspace location; and
+- for an external immutable source, require the exact path already selected by this application.
+
+If any identity or pointer fails, stop before reading evidence and emit no assessment. Report only
+the invalid pointer category and route correction to `maintain-hiring-workspace`; do not inspect the
+forbidden target to diagnose it.
+
 Read only:
 
 - `companies/<company-id>/company.md` when relevant;
@@ -30,7 +45,9 @@ Read only:
 - `companies/<company-id>/applications/<role-id>/<candidate-id>/application.md`; and
 - evidence already listed in that application's `evidence` frontmatter.
 
-Do not enumerate, read, or compare sibling candidates or applications. Source resumes and personal
+Use literal reads of the exact validated allowlist only; never use globs, recursive listing, broad
+search, or an alternate reader to widen it. Do not enumerate, read, or compare sibling companies,
+roles, candidates, or applications. Source resumes and personal
 profiles are immutable. Conversation output is immediate when requested; writing requires the exact
 canonical `assessment.md` destination to be absent or separately authorized for overwrite.
 Evidence newly named in the assessment request is not selected evidence: do not read or use it.

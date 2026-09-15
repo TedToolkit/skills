@@ -30,6 +30,21 @@ newly named in the interview request is not selected evidence: do not read or us
 `maintain-hiring-workspace` for a bounded, explicitly authorized application update before interview
 design continues.
 
+Before opening any evidence or assessment, read only the selected `application.md`. Validate that
+its `company_id`, `role_id`, and `candidate_id` exactly match the request and canonical path, then
+validate every evidence pointer without dereferencing it. Reject absolute, traversal, wildcard,
+missing, or ambiguous pointers. A workspace-internal pointer must be the exact canonical normalized
+resume beneath this company and candidate; reject another company, candidate, role, application,
+assessment, interview plan, or any other workspace location. An external immutable source must be
+the exact path already selected by this application. When an assessment is selected, require the
+canonical `assessment.md` in this same application and validate its three IDs and evidence list
+before reading its body.
+
+Fail closed on any mismatch: read no evidence or assessment, write no plan, and route the bounded
+application correction to `maintain-hiring-workspace` without inspecting a forbidden target. Use
+literal reads of the resulting exact allowlist only; never use globs, recursive listing, broad
+search, or an alternate reader to widen it.
+
 Identify the stage, available time, language, desired depth, role requirements, and selected
 candidate evidence. For a direct finished request, default to 30 minutes and five primary questions
 at medium difficulty in the source language. Ask one focused question when the explicit application
