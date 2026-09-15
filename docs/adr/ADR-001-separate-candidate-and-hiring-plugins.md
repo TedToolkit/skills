@@ -71,7 +71,7 @@ shared runtime capability.
 
 - [`tedtoolkit-career` manifest](../../plugins/tedtoolkit-career/.codex-plugin/plugin.json)
 - [Candidate preparation Skill](../../plugins/tedtoolkit-career/skills/prepare-for-interview/SKILL.md)
-- [Current interviewer-design Skill](../../plugins/tedtoolkit-career/skills/design-interview/SKILL.md)
+- [Hiring interviewer-design Skill](../../plugins/tedtoolkit-hiring/skills/design-interview/SKILL.md)
 - [Current career-profile schema](../../plugins/tedtoolkit-career/references/career-profile-schema.md)
 
 ## Consequences and accepted trade-offs

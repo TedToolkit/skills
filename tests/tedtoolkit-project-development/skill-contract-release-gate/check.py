@@ -216,8 +216,9 @@ def check_breaking_migrations(root: Path) -> None:
     for obsolete_path, old_entry, replacement in BREAKING_SKILL_MIGRATIONS:
         require(not (root / obsolete_path).exists(),
                 f"{obsolete_path}: obsolete Skill path remains")
+        required_mapping = f"replace `{old_entry}` with `{replacement}`"
         for label, text in guidance.items():
-            require(old_entry in text and replacement in text,
+            require(required_mapping in text,
                     f"{label}: missing replacement guidance for {old_entry} -> {replacement}")
 
 

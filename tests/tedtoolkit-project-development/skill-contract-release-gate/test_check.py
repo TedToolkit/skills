@@ -177,6 +177,24 @@ class SkillContractReleaseGateTests(unittest.TestCase):
                     finally:
                         path.write_text(original, encoding="utf-8")
 
+    def test_swapped_replacement_mappings_fail_with_all_tokens_present(self) -> None:
+        first = "`tedtoolkit-hiring/design-interview`"
+        second = "`tedtoolkit-career/enrich-career-project`"
+        for guide in ("README.md", "CLAUDE.md"):
+            with self.subTest(guide=guide):
+                path = self.root / guide
+                original = path.read_text(encoding="utf-8")
+                swapped = original.replace(first, "`temporary-replacement`", 1)
+                swapped = swapped.replace(second, first, 1)
+                swapped = swapped.replace("`temporary-replacement`", second, 1)
+                self.assertIn(first, swapped)
+                self.assertIn(second, swapped)
+                path.write_text(swapped, encoding="utf-8")
+                try:
+                    self.assert_contract_fails("missing replacement guidance")
+                finally:
+                    path.write_text(original, encoding="utf-8")
+
     def test_missing_agent_metadata_fails(self) -> None:
         path = self.root / "plugins/tedtoolkit-shared/skills/run-fix/agents/openai.yaml"
         path.unlink()
