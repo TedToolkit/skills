@@ -52,11 +52,18 @@ pointers are allowed when the application already selected their exact paths. Re
 traversal, wildcard, cross-company, cross-candidate, and cross-application pointers before opening
 any evidence.
 
+Resolve every record and pointer to its final filesystem target before comparing identity or
+containment, and normalize the resolved identity using the host platform's path-case rules. Treat a
+case variant, symlink, junction, or reparse point as the identity of its resolved target. Apply the
+company, candidate, application, and workspace boundaries to that normalized identity rather than
+the pointer spelling.
+
 Validate provenance against the current request, not merely path shape: each normalized resume's
 `source` must equal the exact immutable source selected for that record, and each application's
 ordered `evidence` list must equal the exact selection authorized for that application. A
 normalized-resume `source` may never point to any canonical hiring-workspace record, including
-itself or another candidate's normalized resume.
+itself or another candidate's normalized resume, even through a case variant, symlink, junction, or
+reparse point.
 
 Store sanitized relative source pointers when practical. Never embed source-file contents merely to
 preserve provenance. References must stay inside the selected company/application boundary unless

@@ -26,6 +26,11 @@ Before opening any evidence, read only the selected `application.md` and validat
 `company_id`, `role_id`, and `candidate_id` exactly match both the request and its canonical path.
 Then validate every `evidence` pointer without dereferencing it:
 
+- resolve the application and pointers to their final filesystem targets, normalize identity using
+  the host platform's path-case rules, and apply all equality and containment checks to those
+  normalized identities; a symlink, junction, reparse point, or case variant cannot bypass a
+  boundary;
+
 - reject absolute, traversal, wildcard, missing, or ambiguous pointers;
 - for a pointer inside the selected workspace, require the exact canonical normalized-resume path
   beneath this company and this candidate;
@@ -69,6 +74,8 @@ Exclude protected traits, sensitive values, unrelated personal facts, and non-jo
 requirements from the matrix and any score. Do not repeat excluded values. Do not strengthen resume
 claims or treat `Not demonstrated` as inability. If a numeric score is requested, show the
 job-related weights and calculation and label it decision support, not a decision.
+Do not emit protected-trait questions. When availability is a published role requirement, replace
+such a request only with a neutral question about ability to participate in the stated schedule.
 
 ## Write the assessment
 

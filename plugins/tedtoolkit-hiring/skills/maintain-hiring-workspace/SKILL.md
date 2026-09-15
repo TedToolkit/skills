@@ -32,6 +32,11 @@ Read only the selected records and explicitly supplied source files. Never enume
 sibling companies or candidates to infer missing facts. Treat all source resumes and personal
 profiles as immutable.
 
+Resolve every selected source and destination to its final filesystem target before containment or
+identity checks. Normalize resolved identities with the host platform's path-case rules. A symlink,
+junction, reparse point, or case variant does not create a different identity. Reject a normalized
+resume `source` whose resolved target is anywhere inside the canonical hiring workspace.
+
 ## Normalize the supplied evidence
 
 Create only the requested records using the schema. Keep one candidate record per company and link

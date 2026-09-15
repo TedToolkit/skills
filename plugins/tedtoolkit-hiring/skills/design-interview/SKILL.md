@@ -40,6 +40,12 @@ the exact path already selected by this application. When an assessment is selec
 canonical `assessment.md` in this same application and validate its three IDs and evidence list
 before reading its body.
 
+Resolve the application, assessment, and every pointer to its final filesystem target before any
+identity or containment comparison. Normalize resolved identities using the host platform's
+path-case rules. Treat case variants, symlinks, junctions, and reparse points as the same resolved
+identity; they cannot move evidence or an assessment across company, candidate, or application
+boundaries.
+
 Fail closed on any mismatch: read no evidence or assessment, write no plan, and route the bounded
 application correction to `maintain-hiring-workspace` without inspecting a forbidden target. Use
 literal reads of the resulting exact allowlist only; never use globs, recursive listing, broad
@@ -61,6 +67,9 @@ Exclude protected-trait or otherwise non-job-related requests. Label the omitted
 only when a selected published role requirement supplies a legitimate assessment target. Require a
 jurisdiction and current authoritative source for jurisdiction-specific legal conclusions; continue
 any separable neutral work.
+Never include a question about age or date of birth, nationality or religion, pregnancy, disability
+or health, marital or family status, or another protected trait. For a published on-call or schedule
+requirement, ask only a neutral availability question about participation in that stated schedule.
 
 ## Write the interview plan
 

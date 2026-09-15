@@ -55,7 +55,7 @@ scenarios:
     mode: "static"
     setup:
       commands:
-        - 'py -3.10 "${REPO_ROOT}/plugins/tedtoolkit-hiring/scripts/validate_hiring_eval_audits.py" "${REPO_ROOT}/tests/tedtoolkit-hiring/maintain-hiring-workspace/eval.yaml"'
+        - 'py -3.10 "${REPO_ROOT}/tests/tedtoolkit-hiring/helpers/validate_hiring_eval_audits.py" "${REPO_ROOT}/tests/tedtoolkit-hiring/maintain-hiring-workspace/eval.yaml"'
     assertions:
       - { type: "exit_success" }
       - { type: "output_contains", value: "2 command policies passed:" }
@@ -94,7 +94,7 @@ scenarios:
       - { type: "file_exists", path: "hiring-workspace/companies/northwind/applications/data/blake/application.md" }
       - type: "command"
         run: >-
-          py -3.10 "${REPO_ROOT}/plugins/tedtoolkit-hiring/scripts/validate_hiring_records.py"
+          py -3.10 "${REPO_ROOT}/tests/tedtoolkit-hiring/helpers/validate_hiring_records.py"
           --workspace-root hiring-workspace
           --record hiring-workspace/companies/northwind/company.md
           --record hiring-workspace/companies/northwind/roles/platform/role.md

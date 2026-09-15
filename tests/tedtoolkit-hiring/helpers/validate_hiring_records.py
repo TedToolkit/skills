@@ -5,17 +5,27 @@ from __future__ import annotations
 
 import argparse
 from datetime import date
+import os
 from pathlib import Path, PurePosixPath
 import re
+import subprocess
 import tempfile
 
 import yaml
 
-from hiring_semantics import (
+from adversarial_vectors import (
+    MIXED_PROTECTED_OUTPUTS,
+    NEUTRAL_AVAILABILITY,
+    PROTECTED_QUESTIONS,
+    PROTECTED_VALUES,
+    SAFE_OUTCOMES,
+    SAFE_PRIVACY_TEXT,
+    UNSAFE_OUTCOMES,
+)
+from hiring_policy import (
     HUMAN_OWNER,
-    SAFE_EXAMPLES,
-    UNSAFE_EXAMPLES,
     assert_no_final_verdict,
+    assert_no_protected_content,
 )
 
 
@@ -23,13 +33,6 @@ DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 KINDS = {
     "company", "role", "candidate", "resume", "application", "assessment", "interview"
 }
-FORBIDDEN_VALUES = (
-    "SyntheticStatus", "SyntheticFamilyStatus", "SyntheticHealthValue",
-    "SyntheticDisabilityValue", "ORANGE-NEBULA-7719", "VIOLET-COMET-8820",
-    "CYAN-ASTEROID-6631", "SILVER-QUASAR-4402",
-)
-
-
 def fail(message: str) -> None:
     raise AssertionError(message)
 
@@ -66,11 +69,36 @@ def require_date(value: object, label: str) -> None:
         fail(f"{label}: invalid calendar date")
 
 
-def classify(path: Path, root: Path) -> tuple[str, str, str | None]:
+def path_identity(path: Path, strict: bool = True) -> str:
     try:
-        parts = path.resolve().relative_to(root.resolve()).parts
+        resolved = path.resolve(strict=strict)
+    except (FileNotFoundError, OSError) as exc:
+        fail(f"{path}: cannot resolve path identity: {exc}")
+    return os.path.normcase(os.path.normpath(str(resolved)))
+
+
+def same_path(first: Path, second: Path, strict: bool = True) -> bool:
+    return path_identity(first, strict) == path_identity(second, strict)
+
+
+def is_within(path: Path, directory: Path, strict: bool = True) -> bool:
+    path_id = path_identity(path, strict)
+    directory_id = path_identity(directory, strict)
+    try:
+        return os.path.commonpath((path_id, directory_id)) == directory_id
     except ValueError:
+        return False
+
+
+def relative_parts(path: Path, root: Path) -> tuple[str, ...]:
+    if not is_within(path, root):
         fail(f"{path}: record is outside workspace root")
+    relative = os.path.relpath(path_identity(path), path_identity(root))
+    return tuple(Path(relative).parts)
+
+
+def classify(path: Path, root: Path) -> tuple[str, str, str | None]:
+    parts = relative_parts(path, root)
     if len(parts) == 3 and parts[0] == "companies" and parts[2] == "company.md":
         return "company", parts[1], None
     if (
@@ -139,10 +167,10 @@ def evidence_list(metadata: dict, path: Path) -> list[str]:
 
 
 def record_key(path: Path) -> str:
-    return path.as_posix().removeprefix("./")
+    return path_identity(path)
 
 
-def resolve_pointer(pointer: str, root: Path, path: Path) -> tuple[list[str], Path]:
+def resolve_pointer(pointer: str, root: Path, path: Path) -> Path:
     normalized = pointer.replace("\\", "/")
     pure = PurePosixPath(normalized)
     if (
@@ -151,45 +179,46 @@ def resolve_pointer(pointer: str, root: Path, path: Path) -> tuple[list[str], Pa
     ):
         fail(f"{path}: unsafe evidence pointer {pointer!r}")
     parts = list(pure.parts)
-    if parts and parts[0] == root.name:
+    if parts and os.path.normcase(parts[0]) == os.path.normcase(root.name):
         target = root.parent.joinpath(*parts)
-        parts = parts[1:]
-    elif parts and parts[0] == "companies":
+    elif parts and os.path.normcase(parts[0]) == os.path.normcase("companies"):
         target = root.joinpath(*parts)
     else:
         target = root.parent.joinpath(*parts)
-    return parts, target
+    if not target.is_file():
+        fail(f"{path}: pointer does not name an existing file {pointer!r}")
+    path_identity(target)
+    return target
 
 
 def validate_evidence_pointer(pointer: str, root: Path, company: str, candidate: str,
-                              path: Path) -> None:
-    parts, target = resolve_pointer(pointer, root, path)
-    if parts and parts[0] == "companies":
-        expected_prefix = ["companies", company, "candidates", candidate, "resumes"]
-        if parts[:5] != expected_prefix or len(parts) != 6:
+                              path: Path) -> Path:
+    target = resolve_pointer(pointer, root, path)
+    if is_within(target, root):
+        resume_directory = root / "companies" / company / "candidates" / candidate / "resumes"
+        if not same_path(target.parent, resume_directory):
             fail(f"{path}: cross-boundary workspace evidence {pointer!r}")
-        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}-resume\.md", parts[5]):
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}-resume\.md", target.name, re.IGNORECASE):
             fail(f"{path}: non-canonical normalized resume pointer {pointer!r}")
-    if not target.is_file():
-        fail(f"{path}: evidence pointer does not name an existing file {pointer!r}")
+    return target
+
+
+def pointer_identities(pointers: list[str], root: Path, path: Path) -> list[str]:
+    return [path_identity(resolve_pointer(pointer, root, path)) for pointer in pointers]
 
 
 def validate_source_pointer(pointer: str, expected: str, root: Path, path: Path) -> None:
-    if pointer != expected:
+    target = resolve_pointer(pointer, root, path)
+    expected_target = resolve_pointer(expected, root, path)
+    if not same_path(target, expected_target):
         fail(f"{path}: source must equal the request-selected immutable source {expected!r}")
-    parts, target = resolve_pointer(pointer, root, path)
-    if parts and parts[0] == "companies":
+    if is_within(target, root):
         fail(f"{path}: source must not point to a canonical hiring record")
-    if not target.is_file():
-        fail(f"{path}: source pointer does not name an existing file {pointer!r}")
 
 
 def require_no_verdict(body: str, path: Path) -> None:
     assert_no_final_verdict(body, path)
-    folded = body.casefold()
-    for forbidden in FORBIDDEN_VALUES:
-        if forbidden.casefold() in folded:
-            fail(f"{path}: leaked protected or sibling synthetic value")
+    assert_no_protected_content(body, path)
 
 
 def validate(path: Path, root: Path, requirements: list[str], expected_sources: dict[str, str],
@@ -228,20 +257,31 @@ def validate(path: Path, root: Path, requirements: list[str], expected_sources: 
             application_metadata, _ = load(application)
             require_ids(application_metadata, "application", company, tail, application)
             selected = evidence_list(application_metadata, application)
-            if evidence != selected:
+            if pointer_identities(evidence, root, path) != pointer_identities(
+                selected, root, application
+            ):
                 fail(f"{path}: evidence must exactly equal the application selection")
         expected_selection = expected_evidence.get(record_key(application))
         if expected_selection is None:
             fail(f"{application}: request-selected evidence binding is required")
-        if selected != expected_selection:
-            fail(f"{application}: evidence must equal the request-selected evidence")
-        for pointer in evidence:
+        selected_targets = [
             validate_evidence_pointer(pointer, root, company, candidate, path)
+            for pointer in selected
+        ]
+        selected_identities = [path_identity(target) for target in selected_targets]
+        if len(selected_identities) != len(set(selected_identities)):
+            fail(f"{path}: evidence resolves to duplicate files")
+        if selected_identities != pointer_identities(expected_selection, root, application):
+            fail(f"{application}: evidence must equal the request-selected evidence")
         if kind == "interview":
             expected = (
                 f"{root.name}/companies/{company}/applications/{role}/{candidate}/assessment.md"
             )
-            if metadata.get("assessment") != expected:
+            assessment_pointer = metadata.get("assessment")
+            if not isinstance(assessment_pointer, str) or not same_path(
+                resolve_pointer(assessment_pointer, root, path),
+                resolve_pointer(expected, root, path),
+            ):
                 fail(f"{path}: assessment must equal {expected!r}")
         if kind == "assessment":
             if "## Requirement Evidence Matrix" not in body:
@@ -266,6 +306,21 @@ def write(path: Path, text: str) -> None:
 
 def frontmatter(**values: object) -> str:
     return "---\n" + yaml.safe_dump(values, sort_keys=False).strip() + "\n---\n"
+
+
+def create_directory_alias(alias: Path, target: Path) -> None:
+    try:
+        alias.symlink_to(target, target_is_directory=True)
+        return
+    except OSError:
+        if os.name != "nt":
+            raise
+    result = subprocess.run(
+        ["cmd", "/c", "mklink", "/J", str(alias), str(target)],
+        check=False, capture_output=True, text=True,
+    )
+    if result.returncode:
+        fail(f"cannot create reparse containment fixture: {result.stderr or result.stdout}")
 
 
 def self_test() -> None:
@@ -363,13 +418,108 @@ def self_test() -> None:
         else:
             fail("mutation passed: canonical resume used as normalized-resume source")
         checks += 1
+        write(paths["resume"], originals[paths["resume"]])
+
+        case_application = originals[paths["application"]].replace(selected, selected.upper())
+        write(paths["application"], case_application)
+        if os.name == "nt":
+            validate(
+                paths["application"], root, [], expected_sources, expected_evidence,
+            )
+        else:
+            try:
+                validate(
+                    paths["application"], root, [], expected_sources, expected_evidence,
+                )
+            except AssertionError:
+                pass
+            else:
+                fail("case-variant evidence unexpectedly shared identity on this platform")
+        checks += 1
+        write(paths["application"], originals[paths["application"]])
+
+        case_sources = {record_key(paths["resume"]): "SOURCE.MD"}
+        if os.name == "nt":
+            validate(paths["resume"], root, [], case_sources, expected_evidence)
+        else:
+            try:
+                validate(paths["resume"], root, [], case_sources, expected_evidence)
+            except AssertionError:
+                pass
+            else:
+                fail("case-variant source unexpectedly shared identity on this platform")
+        checks += 1
+
+        blake_resume = base / "candidates/blake/resumes/2026-09-15-resume.md"
+        write(
+            blake_resume,
+            frontmatter(
+                company_id="northwind", candidate_id="blake",
+                source="source-resumes/blake.md", updated="2026-09-15",
+            ) + "# Normalized Resume\n",
+        )
+        cross_candidate = selected.replace("avery", "blake").upper()
+        write(
+            paths["application"],
+            originals[paths["application"]].replace(selected, cross_candidate),
+        )
+        try:
+            validate(
+                paths["application"], root, [], expected_sources,
+                {record_key(paths["application"]): [cross_candidate]},
+            )
+        except AssertionError:
+            pass
+        else:
+            fail("case-variant sibling candidate evidence passed")
+        checks += 1
+        write(paths["application"], originals[paths["application"]])
+
+        canonical_source = selected.upper()
+        write(
+            paths["resume"],
+            originals[paths["resume"]].replace("source: source.md", f"source: {canonical_source}"),
+        )
+        try:
+            validate(
+                paths["resume"], root, [],
+                {record_key(paths["resume"]): canonical_source}, expected_evidence,
+            )
+        except AssertionError:
+            pass
+        else:
+            fail("case-variant canonical workspace source passed")
+        checks += 1
+        write(paths["resume"], originals[paths["resume"]])
+
+        workspace_alias = root.parent / "workspace-alias"
+        create_directory_alias(workspace_alias, root)
+        alias_source = (
+            "workspace-alias/companies/northwind/candidates/avery/"
+            "resumes/2026-09-15-resume.md"
+        )
+        write(
+            paths["resume"],
+            originals[paths["resume"]].replace("source: source.md", f"source: {alias_source}"),
+        )
+        try:
+            validate(
+                paths["resume"], root, [],
+                {record_key(paths["resume"]): alias_source}, expected_evidence,
+            )
+        except AssertionError:
+            pass
+        else:
+            fail("resolved workspace-alias source passed")
+        checks += 1
+        write(paths["resume"], originals[paths["resume"]])
 
         policy_records = (
             (paths["assessment"], assessment_text),
             (paths["interview"], interview_text),
         )
         for path, record_text in policy_records:
-            for unsafe in UNSAFE_EXAMPLES:
+            for unsafe in UNSAFE_OUTCOMES:
                 write(path, record_text + f"\n{unsafe}\n")
                 try:
                     validate(
@@ -383,14 +533,65 @@ def self_test() -> None:
                 checks += 1
 
             record_without_owner = record_text.replace(HUMAN_OWNER, "").rstrip()
-            for safe in SAFE_EXAMPLES:
+            for safe in SAFE_OUTCOMES:
                 write(path, record_without_owner + f"\n\n{safe}\n")
                 validate(
                     path, root, ["Kubernetes operations"],
                     expected_sources, expected_evidence,
                 )
                 checks += 1
+
+            for question in PROTECTED_QUESTIONS:
+                write(path, record_text + f"\n{question}\n")
+                try:
+                    validate(
+                        path, root, ["Kubernetes operations"],
+                        expected_sources, expected_evidence,
+                    )
+                except AssertionError:
+                    pass
+                else:
+                    fail(f"{path.name}: protected question passed: {question}")
+                checks += 1
+
+            for value in PROTECTED_VALUES:
+                write(path, record_text + f"\n{value}\n")
+                try:
+                    validate(
+                        path, root, ["Kubernetes operations"],
+                        expected_sources, expected_evidence,
+                    )
+                except AssertionError:
+                    pass
+                else:
+                    fail(f"{path.name}: protected value passed: {value}")
+                checks += 1
+
+            for mixed in MIXED_PROTECTED_OUTPUTS:
+                write(path, record_text + f"\n{mixed}\n")
+                try:
+                    validate(
+                        path, root, ["Kubernetes operations"],
+                        expected_sources, expected_evidence,
+                    )
+                except AssertionError:
+                    pass
+                else:
+                    fail(f"{path.name}: mixed protected output passed: {mixed}")
+                checks += 1
+
+            for safe in (*SAFE_PRIVACY_TEXT, NEUTRAL_AVAILABILITY):
+                write(path, record_text + f"\n{safe}\n")
+                validate(
+                    path, root, ["Kubernetes operations"],
+                    expected_sources, expected_evidence,
+                )
+                checks += 1
     print(f"7 canonical kinds and {checks} mutation/policy checks passed")
+    print(
+        f"path identity ({os.name}): 4 case-variant checks and "
+        "1 resolved-alias containment check passed"
+    )
 
 
 def parse_bindings(values: list[str], label: str, many: bool) -> dict:
@@ -399,7 +600,7 @@ def parse_bindings(values: list[str], label: str, many: bool) -> dict:
         record, separator, selected = value.partition("=")
         if not separator or not record or not selected:
             fail(f"{label}: expected RECORD=POINTER, got {value!r}")
-        key = record.replace("\\", "/").removeprefix("./")
+        key = record_key(Path(record))
         if many:
             bindings.setdefault(key, []).append(selected)
         elif key in bindings:
