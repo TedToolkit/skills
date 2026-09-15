@@ -99,8 +99,31 @@ evidence:
 - Candidate: <candidate-id>
 ```
 
-`assessment.md` and `interview-plan.md` use the same three identifiers in frontmatter and cite only
-evidence selected by that application. They never become canonical candidate facts.
+`assessment.md` and `interview-plan.md` begin with YAML frontmatter before their sole H1. Their
+`company_id`, `role_id`, and `candidate_id` values exactly equal the selected application's values;
+their `evidence` list exactly repeats that application's selected evidence paths. An interview plan
+that consumed the application assessment also records its canonical path in `assessment`:
+
+```md
+---
+company_id: <company-id>
+role_id: <role-id>
+candidate_id: <candidate-id>
+updated: YYYY-MM-DD
+evidence:
+  - <path selected by application.md>
+assessment: <canonical assessment.md path, interview-plan.md only when consumed>
+---
+
+# Candidate Assessment
+```
+
+Use `# Interview Plan` instead for `interview-plan.md`; these are the only H1 values and each file
+contains exactly one H1.
+
+Do not add newly supplied evidence directly to either output. Update the application's `evidence`
+list through `maintain-hiring-workspace` first. These derived outputs never become canonical
+candidate facts.
 
 ## Updates
 

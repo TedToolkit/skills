@@ -22,8 +22,9 @@ contradictions and material unknowns visible rather than resolving them by infer
 ## Candidate isolation and minimization
 
 - Select one company, role, candidate, and role application before assessment or interview design.
-- Read only that company's selected role, selected candidate, selected application, and explicitly
-  selected evidence. Do not scan sibling companies, candidates, applications, or private files.
+- Read only that company's selected role, selected candidate, selected application, and evidence
+  already selected by that application. Do not scan sibling companies, roles, candidates,
+  applications, or private files.
 - Keep one canonical candidate record per company. Reuse its identifier through explicit role
   applications; never copy assessments or interview plans into the candidate record.
 - Do not merge similarly named candidates or reuse a company-scoped candidate record in another
@@ -73,6 +74,11 @@ exact company, role, candidate, application, and destination file. A clear reque
 identifiers and asks to create their canonical absent records authorizes only those calculated
 paths. Otherwise ask for the missing boundary or authorization. Never infer authority for a sibling
 candidate, another role application, a broad workspace rewrite, or an existing-file overwrite.
+
+Evidence named after an application was established is not selected merely because it is supplied
+in the assessment or interview request. Route it to `maintain-hiring-workspace` for an explicitly
+authorized, bounded update of that application's `evidence` list before either downstream skill
+reads or uses it.
 
 Write only UTF-8 Markdown under the selected workspace root. Do not create databases, JSON, YAML,
 indexes, caches, hidden state, or companion reports. Preserve unrelated files byte-for-byte.

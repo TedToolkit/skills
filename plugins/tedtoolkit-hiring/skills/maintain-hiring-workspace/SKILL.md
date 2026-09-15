@@ -37,6 +37,9 @@ profiles as immutable.
 Create only the requested records using the schema. Keep one candidate record per company and link
 it from any number of explicit role applications. A second role creates another application, not a
 duplicate candidate. Keep assessments and interview plans out of canonical candidate records.
+When the user authorizes newly supplied evidence for an existing application, update only that
+application's exact `evidence` list; this bounded update must occur before assessment or interview
+design uses the new source.
 
 For an authorized normalized resume record:
 

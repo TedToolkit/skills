@@ -28,11 +28,14 @@ Read only:
 - `companies/<company-id>/roles/<role-id>/role.md`;
 - `companies/<company-id>/candidates/<candidate-id>/candidate.md`;
 - `companies/<company-id>/applications/<role-id>/<candidate-id>/application.md`; and
-- evidence explicitly named by that application or by the user.
+- evidence already listed in that application's `evidence` frontmatter.
 
 Do not enumerate, read, or compare sibling candidates or applications. Source resumes and personal
 profiles are immutable. Conversation output is immediate when requested; writing requires the exact
 canonical `assessment.md` destination to be absent or separately authorized for overwrite.
+Evidence newly named in the assessment request is not selected evidence: do not read or use it.
+Route it to `maintain-hiring-workspace` for a bounded, explicitly authorized update of this
+application before assessment continues.
 
 ## Compare requirements to evidence
 
@@ -55,14 +58,23 @@ job-related weights and calculation and label it decision support, not a decisio
 Use this stable opening:
 
 ```md
+---
+company_id: <exact selected company-id>
+role_id: <exact selected role-id>
+candidate_id: <exact selected candidate-id>
+updated: YYYY-MM-DD
+evidence:
+  - <every and only path selected by application.md>
+---
+
 # Candidate Assessment
-- Scope: <company-id> / <role-id> / <candidate-id>
-- Evidence: <selected source paths>
 ```
 
-Include the evidence matrix, material contradictions or unknowns, privacy and fairness exclusions,
-and bounded interview focuses. Finish with: `Decision owner: the accountable human hiring team.`
-Never rank candidates or recommend hire, reject, advance, or eliminate.
+Use exactly one H1. Include `## Requirement Evidence Matrix` with one structured row for every
+job-related role requirement, followed by material contradictions or unknowns, privacy and fairness
+exclusions, and bounded interview focuses. Finish with:
+`Decision owner: the accountable human hiring team.` Never rank candidates, choose an outcome, or
+recommend hire, reject, advance, proceed, move forward, select, or eliminate.
 
 Return the assessment in the conversation or write only the exact authorized application file.
 Never modify source evidence, canonical candidate facts, or another application.
