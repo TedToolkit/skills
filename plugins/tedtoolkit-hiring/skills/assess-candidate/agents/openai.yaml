@@ -1,0 +1,4 @@
+interface:
+  display_name: "Assess Candidate"
+  short_description: "Assess one role application from evidence"
+  default_prompt: "Use $assess-candidate to compare this candidate's selected evidence with one explicit role application."

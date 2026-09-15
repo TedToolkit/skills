@@ -1,0 +1,6 @@
+{
+  "name": "tedtoolkit-hiring",
+  "version": "0.1.0",
+  "description": "Company-scoped hiring records, candidate assessment, and fair interviewer planning.",
+  "skills": ["./skills/"]
+}

@@ -1,0 +1,63 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+smoke_scenarios:
+  - "Create isolated candidates and three role applications"
+
+scenarios:
+  - name: "Create isolated candidates and three role applications"
+    prompt: >-
+      At the selected root hiring-workspace, create the absent canonical records now for synthetic
+      company Northwind (company id northwind); roles Platform Engineer (platform) requiring
+      incident response and Kubernetes operations, and Data Engineer (data) requiring SQL and data
+      quality; candidates Avery (avery) and Blake (blake). Normalize the immutable supplied resumes
+      source-resumes/avery.md and source-resumes/blake.md to each candidate's dated 2026-09-15
+      canonical resume path. Create Avery applications to platform and data, and Blake's application
+      only to data, with those normalized records as their selected evidence. These exact absent
+      canonical destinations are authorized. Do not assess either candidate or create interview
+      plans.
+    setup:
+      copy_test_files: true
+      commands: ["bash setup_fixture.sh multi-role"]
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_exists", path: "hiring-workspace/companies/northwind/company.md" }
+      - { type: "file_exists", path: "hiring-workspace/companies/northwind/roles/platform/role.md" }
+      - { type: "file_exists", path: "hiring-workspace/companies/northwind/roles/data/role.md" }
+      - { type: "file_exists", path: "hiring-workspace/companies/northwind/candidates/avery/candidate.md" }
+      - { type: "file_exists", path: "hiring-workspace/companies/northwind/candidates/blake/candidate.md" }
+      - { type: "file_exists", path: "hiring-workspace/companies/northwind/candidates/avery/resumes/2026-09-15-resume.md" }
+      - { type: "file_exists", path: "hiring-workspace/companies/northwind/candidates/blake/resumes/2026-09-15-resume.md" }
+      - { type: "file_exists", path: "hiring-workspace/companies/northwind/applications/platform/avery/application.md" }
+      - { type: "file_exists", path: "hiring-workspace/companies/northwind/applications/data/avery/application.md" }
+      - { type: "file_exists", path: "hiring-workspace/companies/northwind/applications/data/blake/application.md" }
+      - { type: "command", run: "test $(find hiring-workspace -type f -name '*.md' | wc -l) -eq 10" }
+      - { type: "command", run: "sha256sum -c avery-source.sha256 && sha256sum -c blake-source.sha256" }
+      - { type: "command", run: "! grep -R -Ei 'nationality|Exampleland|religion|Example Faith' hiring-workspace" }
+      - { type: "command", run: "! grep -R -Fq 'Blake' hiring-workspace/companies/northwind/applications/platform/avery hiring-workspace/companies/northwind/applications/data/avery" }
+      - { type: "command", run: "! grep -R -Fq 'Avery' hiring-workspace/companies/northwind/applications/data/blake" }
+      - { type: "command", run: 'test -z "$(find hiring-workspace -type f \( -name "assessment.md" -o -name "interview-plan.md" \) -print -quit)"' }
+    rubric:
+      - "Creates one company-scoped canonical record per candidate and distinct application records for each explicit role-candidate pair without duplicating candidates."
+      - "Keeps source resumes byte-identical, excludes protected traits from normalized records, and writes only the ten authorized canonical Markdown files."
+      - "Does not assess, rank, or design an interview while maintaining workspace records."
+    timeout: 420
+
+  - name: "Refuse to overwrite an existing normalized resume without exact authorization"
+    prompt: >-
+      Import source-resumes/avery-new.md into the selected hiring-workspace for Northwind candidate
+      avery as the 2026-09-15 normalized resume. The canonical destination already exists. I have not
+      authorized overwriting it. Preserve both files and tell me what exact authorization is needed.
+    setup:
+      copy_test_files: true
+      commands: ["bash setup_fixture.sh existing-resume"]
+    assertions:
+      - { type: "exit_success" }
+      - { type: "command", run: "sha256sum -c source.sha256 && sha256sum -c destination.sha256" }
+      - { type: "output_regex", pattern: "(?i)overwrite|existing|exact.*authorization" }
+      - { type: "command", run: "test $(find hiring-workspace -type f -name '*.md' | wc -l) -eq 1" }
+    rubric:
+      - "Stops before overwriting and identifies the exact existing canonical destination requiring authorization."
+      - "Leaves the immutable supplied source and existing normalized record byte-identical."
+    timeout: 300

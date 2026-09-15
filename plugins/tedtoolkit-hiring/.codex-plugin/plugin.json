@@ -1,0 +1,22 @@
+{
+  "name": "tedtoolkit-hiring",
+  "version": "0.1.0",
+  "description": "Company-scoped hiring records, candidate assessment, and fair interviewer planning.",
+  "author": {
+    "name": "TedToolkit"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "TedToolkit Hiring",
+    "shortDescription": "Organize hiring evidence and interviewer plans",
+    "longDescription": "Privacy-preserving workflows for company-scoped roles, canonical candidate records, role applications, evidence-based assessments, and fair interviewer plans.",
+    "developerName": "TedToolkit",
+    "category": "Productivity",
+    "capabilities": ["Interactive", "Write"],
+    "defaultPrompt": [
+      "Maintain isolated company, role, candidate, resume, and application records.",
+      "Assess one candidate for one explicit role application from immutable supplied evidence.",
+      "Design a fair interviewer plan without making the hiring decision."
+    ]
+  }
+}

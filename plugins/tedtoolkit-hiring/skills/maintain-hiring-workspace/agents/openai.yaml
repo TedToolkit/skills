@@ -1,0 +1,4 @@
+interface:
+  display_name: "Maintain Hiring Workspace"
+  short_description: "Organize isolated company hiring records"
+  default_prompt: "Use $maintain-hiring-workspace to organize these supplied roles, candidates, resumes, and applications."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design Interview"
+  short_description: "Design a fair application-scoped interview"
+  default_prompt: "Use $design-interview to create a fair interviewer plan for this explicit role application."
