@@ -67,5 +67,6 @@ the workspace.
 ## Deliver
 
 Report the exact created or updated paths, immutable sources consulted, excluded categories without
-repeating sensitive values, and unresolved conflicts. Emit no candidate assessment, interview plan,
-ranking, or final hiring verdict.
+repeating sensitive values, and unresolved conflicts. Do not repeat protected-trait questions or
+values in English or Chinese, including synthetic source values. Emit no candidate assessment,
+interview plan, ranking, or final hiring verdict.

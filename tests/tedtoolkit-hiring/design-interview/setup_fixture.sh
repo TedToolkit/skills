@@ -91,17 +91,16 @@ evidence:
   - hiring-workspace/companies/northwind/candidates/avery/resumes/2026-09-15-resume.md
   - source-resumes/avery.md
   - personal-profiles/avery/profile.md
+decision_owner: accountable-human-hiring-team
 ---
 # Candidate Assessment
 
 ## Requirement Evidence Matrix
 
-| Requirement | Evidence state |
-| --- | --- |
-| Production incident response | Demonstrated |
-| Kubernetes operations | Not demonstrated |
-
-Decision owner: the accountable human hiring team.
+| Requirement | Evidence state | Citation | Limitation | Interview focus |
+| --- | --- | --- | --- | --- |
+| Production incident response | Demonstrated | resume record | scope unclear | incident ownership |
+| Kubernetes operations | Not demonstrated | resume record | no example | cluster operations |
 EOF
 
 cat > hiring-workspace/companies/northwind/applications/data/avery/application.md <<'EOF'

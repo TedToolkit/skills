@@ -217,6 +217,41 @@ evidence:
 EOF
 fi
 
+create_directory_reparse() {
+  local alias_path="$1"
+  local target_path="$2"
+  if command -v cmd.exe >/dev/null 2>&1 && command -v cygpath >/dev/null 2>&1; then
+    MSYS2_ARG_CONV_EXCL="*" cmd.exe /d /c mklink /J \
+      "$(cygpath -aw "$alias_path")" "$(cygpath -aw "$target_path")" >/dev/null
+  else
+    ln -s "$(realpath "$target_path")" "$alias_path"
+  fi
+}
+
+case "${1:-standard}" in
+  junction-candidate)
+    mv hiring-workspace/companies/northwind/candidates/avery \
+      hiring-workspace/companies/northwind/candidates/.avery-target
+    create_directory_reparse \
+      hiring-workspace/companies/northwind/candidates/avery \
+      hiring-workspace/companies/northwind/candidates/.avery-target
+    ;;
+  junction-application)
+    mv hiring-workspace/companies/northwind/applications/platform/avery \
+      hiring-workspace/companies/northwind/applications/platform/.avery-target
+    create_directory_reparse \
+      hiring-workspace/companies/northwind/applications/platform/avery \
+      hiring-workspace/companies/northwind/applications/platform/.avery-target
+    ;;
+  junction-resume)
+    mv hiring-workspace/companies/northwind/candidates/avery/resumes \
+      hiring-workspace/companies/northwind/candidates/avery/.resumes-target
+    create_directory_reparse \
+      hiring-workspace/companies/northwind/candidates/avery/resumes \
+      hiring-workspace/companies/northwind/candidates/avery/.resumes-target
+    ;;
+esac
+
 sha256sum source-resumes/avery.md > source.sha256
 sha256sum personal-profiles/avery/profile.md > profile.sha256
 sha256sum hiring-workspace/companies/northwind/candidates/avery/candidate.md > candidate.sha256

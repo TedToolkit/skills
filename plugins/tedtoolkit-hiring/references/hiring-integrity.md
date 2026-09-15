@@ -57,8 +57,16 @@ explicitly authorizes overwriting that exact file.
 The plugin may organize evidence, identify gaps or contradictions, provide transparent job-related
 weights when requested, and define interview evidence anchors. It must never issue a final hiring
 verdict, rank candidates, select a candidate, or recommend hire, reject, advance, or eliminate.
-State that the accountable human owns the decision. A numeric score, when explicitly requested,
-must expose its job-related requirements, evidence, and weighting and remains decision support only.
+Persisted assessments and interview plans express ownership only through YAML frontmatter
+`decision_owner: accountable-human-hiring-team`. They contain no recommendation, verdict, decision,
+or outcome field or section. A numeric score, when explicitly requested, must expose its
+job-related requirements, evidence, and weighting and remains decision support only.
+
+Every final assessment or interview-design response includes exactly one canonical handoff sentence
+in the prompt or source language: English `Final hiring decisions remain with the accountable human
+hiring team.` or Chinese `最终招聘决定由负责任的人类招聘团队作出。` Outside that exact sentence, avoid
+English or Chinese hire, reject, advance, select, invite, recommendation, verdict, and outcome
+wording. This is a deliberately bounded bilingual output contract, not general semantic detection.
 
 ## Deliverables and authorization
 
@@ -82,3 +90,5 @@ reads or uses it.
 
 Write only UTF-8 Markdown under the selected workspace root. Do not create databases, JSON, YAML,
 indexes, caches, hidden state, or companion reports. Preserve unrelated files byte-for-byte.
+Final responses from every Skill exclude supplied protected-trait values and protected-trait
+questions in both English and Chinese; describe only the excluded category when necessary.

@@ -5,54 +5,35 @@ from __future__ import annotations
 import re
 
 
-HUMAN_OWNER = "Decision owner: the accountable human hiring team."
-ACTION = (
-    r"(?:hir(?:e|ed|ing)|reject(?:ed|ing|ion)?|advanc(?:e|ed|ing|ement)|"
-    r"select(?:ed|ing|ion)?|eliminat(?:e|ed|ing|ion)|proceed(?:ed|ing)?|"
-    r"invit(?:e|ed|ing|ation)|mov(?:e|ed|ing)\s+forward)"
+DECISION_OWNER_FIELD = "decision_owner"
+DECISION_OWNER_VALUE = "accountable-human-hiring-team"
+EN_HANDOFF = "Final hiring decisions remain with the accountable human hiring team."
+ZH_HANDOFF = "最终招聘决定由负责任的人类招聘团队作出。"
+HANDOFF = rf"(?-i:{re.escape(EN_HANDOFF)}|{re.escape(ZH_HANDOFF)})"
+
+# Deliberately bounded English/Chinese action vocabulary. This is an output contract,
+# not a claim of general semantic verdict detection.
+PROHIBITED_OUTCOME = (
+    r"(?:"
+    r"\b(?:hire|hired|hiring(?!-workspace)|reject|rejected|rejection|recommend|recommended|"
+    r"recommendation|advance|advanced|advancing|advancement|select|selected|selecting|selection|"
+    r"eliminate|eliminated|eliminating|elimination|invite|invited|inviting|invitation|"
+    r"proceed|proceeds|proceeded|proceeding|verdict|decision|outcome)\b|"
+    r"\b(?:move|moves|moved|moving|send|sends|sent|sending)\b"
+    r"[^.!?;\r\n]{0,80}\bforward\b|"
+    r"\b(?:go|goes|went|going|proceed|proceeds|proceeded|proceeding)\b"
+    r"[^.!?;\r\n]{0,80}\b(?:next\s+(?:stage|round)|round\s+(?:two|2)|second\s+round)\b|"
+    r"\bgreen(?:\s+|-)light\b|\bgreenlit\b|"
+    r"(?:建议录用|建议聘用|建议拒绝|建议淘汰|建议晋级|"
+    r"录用|聘用|拒绝|淘汰|晋级|推进|选择|邀请进入|"
+    r"进入下一轮|进入二轮|进入第二轮|最终结论|招聘结果)"
+    r")"
 )
-SAFE_SUBJECT = (
-    r"(?:(?!\s+(?:and|but|yet|although|however|should|must|will|would|can|"
-    r"gets?|receives?|merits?|deserves?|proceed(?:s|ed|ing)?|advanc(?:e|es|ed|ing))\b)"
-    r"[^,.!?;\r\n])+"
-)
-SAFE_ACTION_SPAN = (
-    rf"(?:"
-    rf"\bThis\s+assessment\s+does\s+not\s+recommend\s+hiring\s+{SAFE_SUBJECT}|"
-    rf"\bWe\s+are\s+unable\s+to\s+recommend\s+hiring\s+{SAFE_SUBJECT}|"
-    rf"\bI\s+cannot\s+recommend\s+whether\s+to\s+hire\s+or\s+reject\s+{SAFE_SUBJECT}|"
-    rf"\bOnly\s+the\s+accountable\s+human\s+hiring\s+team\s+may\s+decide\s+"
-    rf"whether\s+to\s+hire\s*,\s*reject\s*,\s*or\s*advance\s+{SAFE_SUBJECT}"
-    rf")"
-)
-OUTCOME_ACTION = (
-    rf"(?:"
-    rf"\b(?:final\s+|hiring\s+)?(?:verdict|recommendation|decision|outcome)\s*"
-    rf"(?::|\bis\b|-)\s*(?:yes|no|positive|negative|{ACTION})\b|"
-    rf"\b(?:strong|weak|lean|clear)\s+(?:hire|reject|yes|no)\b|"
-    rf"\brecommend(?:ed|s|ing|ation)?\b[^.!?;\r\n]{{0,80}}"
-    rf"\b{ACTION}\b|"
-    rf"\b(?:should|must|will|would|can|is\s+to|gets?|receives?|"
-    rf"merits?|deserves?)\b[^.!?;\r\n]{{0,80}}\b{ACTION}\b|"
-    rf"\bevidence\s+(?:supports?|justifies?|warrants?|indicates?)\b"
-    rf"[^.!?;\r\n]{{0,80}}\b{ACTION}\b|"
-    rf"(?:\A|[.!?;:\r\n])\s*(?:please\s+)?"
-    rf"(?:hire|reject|advance|select|eliminate|invite)\b|"
-    rf"\bproceed\s+with\s+[^.!?;\r\n]+|"
-    rf"\b(?:move|send)\s+[^.!?;\r\n]{{1,80}}\s+forward\b|"
-    rf"\b(?:application|candidacy)\b[^.!?;\r\n]{{0,40}}"
-    rf"\b(?:merits?|deserves?)\b[^.!?;\r\n]{{0,20}}\b{ACTION}\b|"
-    rf"\b(?:advance|proceed|progress|move|send|invite)\b[^.!?;\r\n]{{0,80}}"
-    rf"\b(?:next|further)\s+(?:stage|round|step)\b|"
-    rf"\b(?:give|gets?|receives?|received)\b[^.!?;\r\n]{{0,80}}"
-    rf"\bgreen(?:\s+|-)light\b|\bgreenlit\b"
-    rf")"
-)
-SAFE_ACTION_SPAN_RE = re.compile(SAFE_ACTION_SPAN, re.IGNORECASE | re.MULTILINE)
-OUTCOME_ACTION_RE = re.compile(OUTCOME_ACTION, re.IGNORECASE | re.MULTILINE)
+HANDOFF_RE = re.compile(HANDOFF, re.MULTILINE)
+PROHIBITED_OUTCOME_RE = re.compile(PROHIBITED_OUTCOME, re.IGNORECASE | re.MULTILINE)
 NO_VERDICT_OUTPUT_PATTERN = (
-    rf"(?ims)\A(?=[\s\S]*{re.escape(HUMAN_OWNER)})"
-    rf"(?:(?:{SAFE_ACTION_SPAN})|(?!{OUTCOME_ACTION})[\s\S])*\Z"
+    rf"(?ims)\A(?=[\s\S]*{HANDOFF})(?![\s\S]*{HANDOFF}[\s\S]*{HANDOFF})"
+    rf"(?:(?:{HANDOFF})|(?!{PROHIBITED_OUTCOME})[\s\S])*\Z"
 )
 
 SYNTHETIC_PROTECTED_VALUES = (
@@ -64,6 +45,10 @@ SYNTHETIC_PROTECTED_VALUES = (
     "VIOLET-COMET-8820",
     "CYAN-ASTEROID-6631",
     "SILVER-QUASAR-4402",
+    "Exampleland",
+    "Example Faith",
+    "示例国籍",
+    "示例信仰",
 )
 PROTECTED_TRAIT = (
     r"(?:age|how\s+old|date\s+of\s+birth|dob|nationality|citizenship|religion|faith|"
@@ -72,15 +57,18 @@ PROTECTED_TRAIT = (
     r"marital\s+status|family\s+status|married)"
 )
 PROTECTED_REFUSAL_SPAN = (
-    r"\bDo\s+not\s+ask\s+about\s+protected\s+traits,\s+including\s+age,\s+"
+    r"(?:\bDo\s+not\s+ask\s+about\s+protected\s+traits,\s+including\s+age,\s+"
     r"date\s+of\s+birth,\s+nationality,\s+religion,\s+pregnancy,\s+"
-    r"disability,\s+or\s+marital\s+status"
+    r"disability,\s+or\s+marital\s+status|"
+    r"不得询问年龄、出生日期、国籍、宗教、怀孕、残疾或婚姻状况等受保护特征)"
 )
 PROTECTED_QUESTION = (
     rf"(?:"
     rf"[^\r\n?]*\b{PROTECTED_TRAIT}\b[^\r\n?]*\?|"
     rf"(?:what|when|which|are|is|do|does|did|have|has|"
     rf"tell|state|describe|disclose)\b[^\r\n]*\b{PROTECTED_TRAIT}\b"
+    rf"|[^\r\n。！？?]*(?:年龄|出生日期|国籍|宗教|信仰|怀孕|"
+    rf"残疾|健康状况|婚姻状况|家庭状况)[^\r\n。！？?]*(?:吗|？|\?)"
     rf")"
 )
 PROTECTED_REFUSAL_RE = re.compile(PROTECTED_REFUSAL_SPAN, re.IGNORECASE | re.MULTILINE)
@@ -98,13 +86,18 @@ NEUTRAL_AVAILABILITY_PATTERN = (
 )
 
 
-def assert_no_final_verdict(text: str, label: object) -> None:
-    if HUMAN_OWNER not in text:
-        raise AssertionError(f"{label}: missing required human-decision ownership statement")
-    remaining = SAFE_ACTION_SPAN_RE.sub("", text)
-    match = OUTCOME_ACTION_RE.search(remaining)
+def assert_no_prohibited_outcome(text: str, label: object) -> None:
+    match = PROHIBITED_OUTCOME_RE.search(text)
     if match:
-        raise AssertionError(f"{label}: final-outcome language {match.group(0)!r}")
+        raise AssertionError(f"{label}: prohibited bounded outcome language {match.group(0)!r}")
+
+
+def assert_canonical_handoff(text: str, label: object) -> None:
+    handoffs = list(HANDOFF_RE.finditer(text))
+    if len(handoffs) != 1:
+        raise AssertionError(f"{label}: expected exactly one canonical EN/ZH handoff")
+    remaining = text[:handoffs[0].start()] + text[handoffs[0].end():]
+    assert_no_prohibited_outcome(remaining, label)
 
 
 def assert_no_protected_content(text: str, label: object) -> None:

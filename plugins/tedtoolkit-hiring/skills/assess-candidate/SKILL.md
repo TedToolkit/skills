@@ -66,7 +66,7 @@ each requirement record:
 
 - priority or weight only when supplied or explicitly requested;
 - `Demonstrated`, `Partially demonstrated`, `Not demonstrated`, or `Conflicting`;
-- a concise selected-source citation and what it actually supports;
+- a concise application-evidence citation and what it actually supports;
 - the limitation, contradiction, or evidence question that remains; and
 - a neutral interview focus when additional evidence would materially help.
 
@@ -89,16 +89,22 @@ candidate_id: <exact selected candidate-id>
 updated: YYYY-MM-DD
 evidence:
   - <every and only path selected by application.md>
+decision_owner: accountable-human-hiring-team
 ---
 
 # Candidate Assessment
 ```
 
-Use exactly one H1. Include `## Requirement Evidence Matrix` with one structured row for every
-job-related role requirement, followed by material contradictions or unknowns, privacy and fairness
-exclusions, and bounded interview focuses. Finish with:
-`Decision owner: the accountable human hiring team.` Never rank candidates, choose an outcome, or
-recommend hire, reject, advance, proceed, move forward, select, or eliminate.
+Use exactly one H1. `## Requirement Evidence Matrix` is a Markdown table with one distinct row per
+job-related role requirement and exactly these required fields: `Requirement`, `Evidence state`,
+`Citation`, `Limitation`, and `Interview focus`. Never combine requirements in one row or place
+coverage only in prose. Do not add a recommendation, verdict, decision, or outcome field or section.
+
+End the final response with exactly one language-matched handoff sentence: English `Final hiring
+decisions remain with the accountable human hiring team.` or Chinese
+`最终招聘决定由负责任的人类招聘团队作出。` Use no other English or Chinese hire, reject, advance, select,
+invite, recommendation, verdict, decision, or outcome wording. This is a bounded bilingual output
+contract, not a general semantic classifier.
 
 Return the assessment in the conversation or write only the exact authorized application file.
 Never modify source evidence, canonical candidate facts, or another application.

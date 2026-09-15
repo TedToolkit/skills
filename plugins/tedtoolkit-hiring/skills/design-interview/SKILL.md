@@ -85,21 +85,23 @@ updated: YYYY-MM-DD
 evidence:
   - <every and only path selected by application.md>
 assessment: <canonical assessment.md path when consumed>
+decision_owner: accountable-human-hiring-team
 ---
 
 # Interview Plan
 ```
 
-Use exactly one H1. Add the brief and a structured `## Requirement Coverage` section that maps every
-job-related role requirement to primary questions or a stated alternate. For every primary question
-provide its selected role requirement or candidate claim, the question, neutral probes, strong
-job-related evidence, material job-related warning signs, and `Score 1:`, `Score 3:`, and `Score 5:`
-anchors when evaluation guidance is requested. Include a probe separating individual contribution
-from team outcome when applicable. Keep `Not demonstrated` distinct from inability.
+Use exactly one H1. `## Requirement Coverage` is a Markdown table with one distinct row per
+job-related role requirement and exactly these required fields: `Requirement`, `Question mapping`,
+`Evidence anchor`, and `Scoring anchors`. Every row supplies `Score 1`, `Score 3`, and `Score 5`;
+never combine requirements into one row or place coverage only in prose. Include neutral probes and
+evidence guidance outside the table as needed. Keep `Not demonstrated` distinct from inability.
 
-Finish with a coverage and timing check plus privacy, fairness, and source-integrity checks. State
-`Decision owner: the accountable human hiring team.` Never rank candidates, choose an outcome, or
-recommend hire, reject, advance, proceed, move forward, select, or eliminate.
+Do not add a recommendation, verdict, decision, or outcome field or section. End the final response
+with exactly one language-matched handoff sentence: English `Final hiring decisions remain with the
+accountable human hiring team.` or Chinese `最终招聘决定由负责任的人类招聘团队作出。` Use no other English or
+Chinese hire, reject, advance, select, invite, recommendation, verdict, decision, or outcome
+wording. This is a bounded bilingual output contract, not a general semantic classifier.
 
 Return the plan in the conversation or write only the exact authorized application file. Never
 modify source evidence, candidate facts, assessments, or another application.

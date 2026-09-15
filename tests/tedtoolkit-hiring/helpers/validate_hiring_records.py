@@ -19,13 +19,13 @@ from adversarial_vectors import (
     NEUTRAL_AVAILABILITY,
     PROTECTED_QUESTIONS,
     PROTECTED_VALUES,
-    SAFE_OUTCOMES,
     SAFE_PRIVACY_TEXT,
     UNSAFE_OUTCOMES,
 )
 from hiring_policy import (
-    HUMAN_OWNER,
-    assert_no_final_verdict,
+    DECISION_OWNER_FIELD,
+    DECISION_OWNER_VALUE,
+    assert_no_prohibited_outcome,
     assert_no_protected_content,
 )
 
@@ -158,17 +158,17 @@ def classify(path: Path, root: Path) -> tuple[str, str, str | None]:
     parts = relative_parts(path, root)
     folded = tuple(os.path.normcase(part) for part in parts)
     if len(parts) == 3 and folded[0] == "companies" and folded[2] == "company.md":
-        return "company", folded[1], None
+        return "company", parts[1], None
     if (
         len(parts) == 5 and folded[0] == "companies" and folded[2] == "roles"
         and folded[4] == "role.md"
     ):
-        return "role", folded[1], folded[3]
+        return "role", parts[1], parts[3]
     if (
         len(parts) == 5 and folded[0] == "companies" and folded[2] == "candidates"
         and folded[4] == "candidate.md"
     ):
-        return "candidate", folded[1], folded[3]
+        return "candidate", parts[1], parts[3]
     if (
         len(parts) == 7 and folded[0] == "companies" and folded[2] == "candidates"
         and folded[4] == "resumes" and re.fullmatch(r"\d{4}-\d{2}-\d{2}-resume\.md", folded[5])
@@ -179,7 +179,7 @@ def classify(path: Path, root: Path) -> tuple[str, str, str | None]:
         len(parts) == 6 and folded[0] == "companies" and folded[2] == "candidates"
         and folded[4] == "resumes" and re.fullmatch(r"\d{4}-\d{2}-\d{2}-resume\.md", folded[5])
     ):
-        return "resume", folded[1], folded[3]
+        return "resume", parts[1], parts[3]
     if (
         len(parts) == 6 and folded[0] == "companies" and folded[2] == "applications"
         and folded[5] in {"application.md", "assessment.md", "interview-plan.md"}
@@ -189,7 +189,7 @@ def classify(path: Path, root: Path) -> tuple[str, str, str | None]:
             "assessment.md": "assessment",
             "interview-plan.md": "interview",
         }[folded[5]]
-        return kind, folded[1], f"{folded[3]}/{folded[4]}"
+        return kind, parts[1], f"{parts[3]}/{parts[4]}"
     fail(f"{path}: not a canonical hiring record path")
 
 
@@ -203,7 +203,11 @@ def require_ids(metadata: dict, kind: str, company: str, tail: str | None, path:
         role, candidate = str(tail).split("/", 1)
         expected.update(role_id=role, candidate_id=candidate)
     for key, value in expected.items():
-        if metadata.get(key) != value:
+        observed = metadata.get(key)
+        if (
+            not isinstance(observed, str)
+            or os.path.normcase(observed) != os.path.normcase(str(value))
+        ):
             fail(f"{path}: {key} must equal canonical path value {value!r}")
     for key in {"company_id", "role_id", "candidate_id"} - expected.keys():
         if key in metadata:
@@ -237,8 +241,12 @@ def resolve_pointer(pointer: str, root: Path, path: Path) -> Path:
     ):
         fail(f"{path}: unsafe evidence pointer {pointer!r}")
     parts = list(pure.parts)
-    if parts and os.path.normcase(parts[0]) == os.path.normcase(root.name):
-        target = root.parent.joinpath(*parts)
+    workspace_names = {
+        os.path.normcase(root.name),
+        os.path.normcase(root.resolve(strict=True).name),
+    }
+    if parts and os.path.normcase(parts[0]) in workspace_names:
+        target = root.joinpath(*parts[1:])
     elif parts and os.path.normcase(parts[0]) == os.path.normcase("companies"):
         target = root.joinpath(*parts)
     else:
@@ -279,28 +287,84 @@ def validate_source_pointer(pointer: str, expected: str, root: Path, path: Path)
         fail(f"{path}: source must not point to a canonical hiring record")
 
 
-def require_no_verdict(body: str, path: Path) -> None:
-    assert_no_final_verdict(body, path)
+def require_decision_owner(metadata: dict, body: str, path: Path) -> None:
+    if metadata.get(DECISION_OWNER_FIELD) != DECISION_OWNER_VALUE:
+        fail(f"{path}: {DECISION_OWNER_FIELD} must equal {DECISION_OWNER_VALUE!r}")
+    forbidden_key = re.compile(
+        r"(?:recommend(?:ation)?|verdict|decision|outcome|建议|结论|决定|结果)",
+        re.IGNORECASE,
+    )
+    for key in metadata:
+        if key != DECISION_OWNER_FIELD and forbidden_key.search(str(key)):
+            fail(f"{path}: prohibited recommendation/verdict frontmatter field {key!r}")
+    if re.search(
+        r"(?im)^#{2,6}\s+(?:recommendation|verdict|decision|outcome|建议|结论|决定|结果)\s*$",
+        body,
+    ):
+        fail(f"{path}: prohibited recommendation/verdict section")
+    policy_metadata = yaml.safe_dump(
+        {key: value for key, value in metadata.items() if key != DECISION_OWNER_FIELD},
+        allow_unicode=True,
+    )
+    assert_no_prohibited_outcome(policy_metadata, path)
+    assert_no_protected_content(policy_metadata, path)
+    assert_no_prohibited_outcome(body, path)
     assert_no_protected_content(body, path)
 
 
 def require_structured_requirements(body: str, heading: str, requirements: list[str],
-                                    path: Path) -> None:
+                                    required_fields: tuple[str, ...], path: Path) -> None:
     match = re.search(
         rf"(?ms)^##\s+{re.escape(heading)}\s*$\n(.*?)(?=^#{{1,2}}\s|\Z)", body,
     )
     if not match:
         fail(f"{path}: missing structured {heading.casefold()} section")
-    structured_lines = []
-    for line in match.group(1).splitlines():
-        stripped = line.strip()
-        if re.match(r"^(?:[-*+]\s+|\d+[.)]\s+|\|)", stripped):
-            if re.fullmatch(r"\|?[\s:|-]+\|?", stripped):
-                continue
-            structured_lines.append(stripped.casefold())
+    table_lines = [line.strip() for line in match.group(1).splitlines()
+                   if line.strip().startswith("|")]
+    if len(table_lines) < 3:
+        fail(f"{path}: {heading!r} must contain a Markdown table with data rows")
+
+    def cells(line: str) -> list[str]:
+        return [cell.strip() for cell in line.strip("|").split("|")]
+
+    headers = [cell.casefold() for cell in cells(table_lines[0])]
+    if len(headers) != len(set(headers)):
+        fail(f"{path}: duplicate fields in {heading!r}")
+    for field in required_fields:
+        if field.casefold() not in headers:
+            fail(f"{path}: missing required field {field!r} in {heading!r}")
+    if not all(re.fullmatch(r":?-{3,}:?", cell.strip()) for cell in cells(table_lines[1])):
+        fail(f"{path}: malformed table separator in {heading!r}")
+    rows = []
+    for line in table_lines[2:]:
+        values = cells(line)
+        if len(values) != len(headers):
+            fail(f"{path}: malformed structured row in {heading!r}")
+        row = dict(zip(headers, values))
+        for field in required_fields:
+            if not row[field.casefold()].strip():
+                fail(f"{path}: empty required field {field!r} in {heading!r}")
+        rows.append(row)
+
+    requirement_field = required_fields[0].casefold()
     for requirement in requirements:
-        if not any(requirement.casefold() in line for line in structured_lines):
-            fail(f"{path}: {requirement!r} is not a structured item in {heading!r}")
+        matching = [row for row in rows
+                    if row[requirement_field].casefold() == requirement.casefold()]
+        if len(matching) != 1:
+            fail(f"{path}: {requirement!r} must have one distinct row in {heading!r}")
+    if heading == "Requirement Evidence Matrix":
+        allowed_states = {
+            "demonstrated", "partially demonstrated", "not demonstrated", "conflicting",
+            "已证明", "部分证明", "未证明", "存在矛盾",
+        }
+        for row in rows:
+            if row["evidence state"].casefold() not in allowed_states:
+                fail(f"{path}: invalid evidence state in {heading!r}")
+    else:
+        for row in rows:
+            scoring = row["scoring anchors"].casefold()
+            if not all(f"score {score}" in scoring for score in (1, 3, 5)):
+                fail(f"{path}: scoring anchors must include Score 1, Score 3, and Score 5")
 
 
 def validate(path: Path, root: Path, requirements: list[str], expected_sources: dict[str, str],
@@ -377,12 +441,18 @@ def validate(path: Path, root: Path, requirements: list[str], expected_sources: 
                 fail(f"{path}: assessment must equal {expected!r}")
         if kind == "assessment":
             require_structured_requirements(
-                body, "Requirement Evidence Matrix", requirements, path,
+                body, "Requirement Evidence Matrix", requirements,
+                ("Requirement", "Evidence state", "Citation", "Limitation", "Interview focus"),
+                path,
             )
-            require_no_verdict(body, path)
+            require_decision_owner(metadata, body, path)
         elif kind == "interview":
-            require_structured_requirements(body, "Requirement Coverage", requirements, path)
-            require_no_verdict(body, path)
+            require_structured_requirements(
+                body, "Requirement Coverage", requirements,
+                ("Requirement", "Question mapping", "Evidence anchor", "Scoring anchors"),
+                path,
+            )
+            require_decision_owner(metadata, body, path)
     return kind
 
 
@@ -434,10 +504,32 @@ def self_test() -> None:
         write(paths["candidate"], frontmatter(company_id="northwind", candidate_id="avery", updated="2026-09-15") + "# Avery\n")
         write(paths["resume"], frontmatter(company_id="northwind", candidate_id="avery", source="source.md", updated="2026-09-15") + "# Normalized Resume\n")
         write(paths["application"], frontmatter(company_id="northwind", role_id="platform", candidate_id="avery", updated="2026-09-15", evidence=[selected]) + "# Application\n")
-        assessment_text = frontmatter(company_id="northwind", role_id="platform", candidate_id="avery", updated="2026-09-15", evidence=[selected]) + "# Candidate Assessment\n\n## Requirement Evidence Matrix\n\n| Kubernetes operations | Not demonstrated |\n\nDecision owner: the accountable human hiring team.\n"
+        assessment_text = frontmatter(
+            company_id="northwind", role_id="platform", candidate_id="avery",
+            updated="2026-09-15", evidence=[selected],
+            decision_owner=DECISION_OWNER_VALUE,
+        ) + (
+            "# Candidate Assessment\n\n## Requirement Evidence Matrix\n\n"
+            "| Requirement | Evidence state | Citation | Limitation | Interview focus |\n"
+            "| --- | --- | --- | --- | --- |\n"
+            "| Production incident response | Demonstrated | Resume record | Scope unclear | Incident ownership |\n"
+            "| Kubernetes operations | Not demonstrated | Resume record | No example | Cluster operations |\n"
+        )
         write(paths["assessment"], assessment_text)
-        interview_text = frontmatter(company_id="northwind", role_id="platform", candidate_id="avery", updated="2026-09-15", evidence=[selected], assessment="hiring-workspace/companies/northwind/applications/platform/avery/assessment.md") + "# Interview Plan\n\n## Requirement Coverage\n\n- Kubernetes operations: Question 1\n\nDecision owner: the accountable human hiring team.\n"
+        interview_text = frontmatter(
+            company_id="northwind", role_id="platform", candidate_id="avery",
+            updated="2026-09-15", evidence=[selected],
+            assessment="hiring-workspace/companies/northwind/applications/platform/avery/assessment.md",
+            decision_owner=DECISION_OWNER_VALUE,
+        ) + (
+            "# Interview Plan\n\n## Requirement Coverage\n\n"
+            "| Requirement | Question mapping | Evidence anchor | Scoring anchors |\n"
+            "| --- | --- | --- | --- |\n"
+            "| Production incident response | Question 1 | Role requirement | Score 1 / Score 3 / Score 5 |\n"
+            "| Kubernetes operations | Question 2 | Evidence gap | Score 1 / Score 3 / Score 5 |\n"
+        )
         write(paths["interview"], interview_text)
+        requirements = ["Production incident response", "Kubernetes operations"]
 
         expected_sources = {record_key(paths["resume"]): "source.md"}
         expected_evidence = {record_key(paths["application"]): [selected]}
@@ -449,7 +541,7 @@ def self_test() -> None:
         observed = {
             validate(
                 path, root,
-                ["Kubernetes operations"] if kind in {"assessment", "interview"} else [],
+                requirements if kind in {"assessment", "interview"} else [],
                 expected_sources, expected_evidence, expected_h1,
             )
             for kind, path in paths.items()
@@ -476,7 +568,14 @@ def self_test() -> None:
             ("advance verdict", paths["assessment"], assessment_text + "\nAdvance Avery.\n"),
             ("eliminate verdict", paths["assessment"], assessment_text + "\nEliminate Avery.\n"),
             ("move-forward verdict", paths["assessment"], assessment_text + "\nMove Avery forward.\n"),
-            ("missing human owner", paths["assessment"], assessment_text.replace(HUMAN_OWNER, "")),
+            ("missing decision owner", paths["assessment"], assessment_text.replace(f"decision_owner: {DECISION_OWNER_VALUE}\n", "")),
+            ("wrong decision owner", paths["assessment"], assessment_text.replace(DECISION_OWNER_VALUE, "automated-system")),
+            ("recommendation field", paths["assessment"], assessment_text.replace("decision_owner:", "recommendation: hire\ndecision_owner:")),
+            ("decision field", paths["assessment"], assessment_text.replace("decision_owner:", "decision: human\ndecision_owner:")),
+            ("outcome field", paths["assessment"], assessment_text.replace("decision_owner:", "outcome: pending\ndecision_owner:")),
+            ("outcome in metadata value", paths["assessment"], assessment_text.replace("decision_owner:", "status: hire\ndecision_owner:")),
+            ("protected metadata value", paths["assessment"], assessment_text.replace("decision_owner:", "notes: Exampleland\ndecision_owner:")),
+            ("verdict section", paths["assessment"], assessment_text + "\n## Verdict\n\nPositive.\n"),
             ("missing evidence", paths["application"], paths["application"].read_text().replace(selected, "source-resumes/missing.md")),
             ("wildcard evidence", paths["application"], paths["application"].read_text().replace(selected, "source-resumes/*.md")),
             ("Avery-to-Blake source", paths["resume"], paths["resume"].read_text().replace("source: source.md", "source: source-resumes/blake.md")),
@@ -484,10 +583,14 @@ def self_test() -> None:
             ("semantic hired verdict", paths["assessment"], assessment_text + "\nAvery should be hired.\n"),
             ("recommend hiring verdict", paths["assessment"], assessment_text + "\nI recommend hiring Avery.\n"),
             ("yes decision verdict", paths["assessment"], assessment_text + "\nFinal decision: yes.\n"),
-            ("empty assessment matrix", paths["assessment"], assessment_text.replace("| Kubernetes operations | Not demonstrated |", "")),
-            ("assessment body-only requirement", paths["assessment"], assessment_text.replace("| Kubernetes operations | Not demonstrated |", "Kubernetes operations are discussed in prose.")),
-            ("empty interview coverage", paths["interview"], interview_text.replace("- Kubernetes operations: Question 1", "")),
-            ("interview body-only requirement", paths["interview"], interview_text.replace("- Kubernetes operations: Question 1", "Kubernetes operations are discussed in prose.")),
+            ("empty assessment matrix", paths["assessment"], assessment_text.replace("| Kubernetes operations | Not demonstrated | Resume record | No example | Cluster operations |", "")),
+            ("assessment body-only requirement", paths["assessment"], assessment_text.replace("| Kubernetes operations | Not demonstrated | Resume record | No example | Cluster operations |", "Kubernetes operations are discussed in prose.")),
+            ("assessment incomplete row", paths["assessment"], assessment_text.replace("| Kubernetes operations | Not demonstrated | Resume record | No example | Cluster operations |", "| Kubernetes operations | Not demonstrated | | No example | Cluster operations |")),
+            ("assessment combined row", paths["assessment"], assessment_text.replace("| Production incident response | Demonstrated | Resume record | Scope unclear | Incident ownership |\n| Kubernetes operations | Not demonstrated | Resume record | No example | Cluster operations |", "| Production incident response / Kubernetes operations | Demonstrated | Resume record | Scope unclear | Incident ownership |")),
+            ("empty interview coverage", paths["interview"], interview_text.replace("| Kubernetes operations | Question 2 | Evidence gap | Score 1 / Score 3 / Score 5 |", "")),
+            ("interview body-only requirement", paths["interview"], interview_text.replace("| Kubernetes operations | Question 2 | Evidence gap | Score 1 / Score 3 / Score 5 |", "Kubernetes operations are discussed in prose.")),
+            ("interview incomplete row", paths["interview"], interview_text.replace("| Kubernetes operations | Question 2 | Evidence gap | Score 1 / Score 3 / Score 5 |", "| Kubernetes operations | Question 2 | | Score 1 / Score 3 / Score 5 |")),
+            ("interview combined row", paths["interview"], interview_text.replace("| Production incident response | Question 1 | Role requirement | Score 1 / Score 3 / Score 5 |\n| Kubernetes operations | Question 2 | Evidence gap | Score 1 / Score 3 / Score 5 |", "| Production incident response / Kubernetes operations | Question 1 | Role requirement | Score 1 / Score 3 / Score 5 |")),
         )
         originals = {path: path.read_text(encoding="utf-8") for path in paths.values()}
         checks = 0
@@ -496,7 +599,7 @@ def self_test() -> None:
             try:
                 validate(
                     path, root,
-                    ["Kubernetes operations"] if path.name != "application.md" else [],
+                    requirements if path.name in {"assessment.md", "interview-plan.md"} else [],
                     expected_sources, expected_evidence, expected_h1,
                 )
             except (AssertionError, yaml.YAMLError):
@@ -593,16 +696,69 @@ def self_test() -> None:
 
         workspace_alias = root.parent / "workspace-alias"
         create_directory_alias(workspace_alias, root)
-        validate(
-            workspace_alias / "companies/northwind/company.md", workspace_alias, [],
-            expected_sources, expected_evidence, expected_h1,
-        )
-        checks += 1
+        for kind, path in paths.items():
+            alias_path = workspace_alias.joinpath(*lexical_relative_parts(path, root))
+            validate(
+                alias_path, workspace_alias,
+                requirements if kind in {"assessment", "interview"} else [],
+                expected_sources, expected_evidence, expected_h1,
+            )
+            checks += 1
         if os.name == "nt":
             case_root = Path(str(root).upper())
+            for kind, path in paths.items():
+                case_path = case_root.joinpath(
+                    *(part.upper() for part in lexical_relative_parts(path, root))
+                )
+                validate(
+                    case_path, case_root,
+                    requirements if kind in {"assessment", "interview"} else [],
+                    expected_sources, expected_evidence, expected_h1,
+                )
+                checks += 1
+
+        mixed_base = root / "companies/NorthWind"
+        mixed_selected = (
+            "hiring-workspace/companies/NorthWind/candidates/AveryChen/"
+            "resumes/2026-09-15-resume.md"
+        )
+        mixed_paths = {
+            "company": mixed_base / "company.md",
+            "role": mixed_base / "roles/PlatformOps/role.md",
+            "candidate": mixed_base / "candidates/AveryChen/candidate.md",
+            "resume": mixed_base / "candidates/AveryChen/resumes/2026-09-15-resume.md",
+            "application": mixed_base / "applications/PlatformOps/AveryChen/application.md",
+            "assessment": mixed_base / "applications/PlatformOps/AveryChen/assessment.md",
+            "interview": mixed_base / "applications/PlatformOps/AveryChen/interview-plan.md",
+        }
+        write(root.parent / "source-mixed.md", "Synthetic mixed-case source.\n")
+        write(mixed_paths["company"], frontmatter(company_id="NorthWind", updated="2026-09-15") + "# NorthWind\n")
+        write(mixed_paths["role"], frontmatter(company_id="NorthWind", role_id="PlatformOps", updated="2026-09-15") + "# Platform Operations Engineer\n")
+        write(mixed_paths["candidate"], frontmatter(company_id="NorthWind", candidate_id="AveryChen", updated="2026-09-15") + "# Avery Chen\n")
+        write(mixed_paths["resume"], frontmatter(company_id="NorthWind", candidate_id="AveryChen", source="source-mixed.md", updated="2026-09-15") + "# Normalized Resume\n")
+        write(mixed_paths["application"], frontmatter(company_id="NorthWind", role_id="PlatformOps", candidate_id="AveryChen", updated="2026-09-15", evidence=[mixed_selected]) + "# Application\n")
+        mixed_assessment = assessment_text.replace("northwind", "NorthWind").replace("platform", "PlatformOps").replace("avery", "AveryChen").replace(selected, mixed_selected)
+        mixed_interview = interview_text.replace("northwind", "NorthWind").replace("platform", "PlatformOps").replace("avery", "AveryChen").replace(selected, mixed_selected)
+        write(mixed_paths["assessment"], mixed_assessment)
+        write(mixed_paths["interview"], mixed_interview)
+        mixed_sources = {record_key(mixed_paths["resume"]): "source-mixed.md"}
+        mixed_evidence = {record_key(mixed_paths["application"]): [mixed_selected]}
+        mixed_h1 = {
+            record_key(mixed_paths["company"]): "NorthWind",
+            record_key(mixed_paths["role"]): "Platform Operations Engineer",
+            record_key(mixed_paths["candidate"]): "Avery Chen",
+        }
+        for kind, path in mixed_paths.items():
             validate(
-                case_root / "COMPANIES/NORTHWIND/COMPANY.MD", case_root, [],
-                expected_sources, expected_evidence, expected_h1,
+                path, root, requirements if kind in {"assessment", "interview"} else [],
+                mixed_sources, mixed_evidence, mixed_h1,
+            )
+            checks += 1
+            mixed_alias_path = workspace_alias.joinpath(*lexical_relative_parts(path, root))
+            validate(
+                mixed_alias_path, workspace_alias,
+                requirements if kind in {"assessment", "interview"} else [],
+                mixed_sources, mixed_evidence, mixed_h1,
             )
             checks += 1
 
@@ -625,7 +781,7 @@ def self_test() -> None:
         try:
             validate(
                 application_alias / "assessment.md", root,
-                ["Kubernetes operations"], expected_sources, expected_evidence,
+                requirements, expected_sources, expected_evidence,
                 expected_h1,
             )
         except AssertionError as exc:
@@ -665,6 +821,9 @@ def self_test() -> None:
         real_root = root.resolve(strict=True)
         file_parts = lexical_relative_parts(paths["resume"], root)
         file_target = real_root.joinpath(*file_parts)
+        # Creating a file symlink is privilege-dependent on Windows. Inject the
+        # documented lstat attribute so file-reparse rejection stays deterministic;
+        # the three directory-junction cases above exercise real filesystem objects.
         reparse_flag = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
 
         class ReparseFileStat:
@@ -714,29 +873,20 @@ def self_test() -> None:
                 write(path, record_text + f"\n{unsafe}\n")
                 try:
                     validate(
-                        path, root, ["Kubernetes operations"],
+                        path, root, requirements,
                         expected_sources, expected_evidence,
                     )
                 except AssertionError:
                     pass
                 else:
-                    fail(f"{path.name}: persisted semantic verdict passed: {unsafe}")
-                checks += 1
-
-            record_without_owner = record_text.replace(HUMAN_OWNER, "").rstrip()
-            for safe in SAFE_OUTCOMES:
-                write(path, record_without_owner + f"\n\n{safe}\n")
-                validate(
-                    path, root, ["Kubernetes operations"],
-                    expected_sources, expected_evidence,
-                )
+                    fail(f"{path.name}: prohibited bounded action passed: {unsafe}")
                 checks += 1
 
             for question in PROTECTED_QUESTIONS:
                 write(path, record_text + f"\n{question}\n")
                 try:
                     validate(
-                        path, root, ["Kubernetes operations"],
+                        path, root, requirements,
                         expected_sources, expected_evidence,
                     )
                 except AssertionError:
@@ -749,7 +899,7 @@ def self_test() -> None:
                 write(path, record_text + f"\n{value}\n")
                 try:
                     validate(
-                        path, root, ["Kubernetes operations"],
+                        path, root, requirements,
                         expected_sources, expected_evidence,
                     )
                 except AssertionError:
@@ -762,7 +912,7 @@ def self_test() -> None:
                 write(path, record_text + f"\n{mixed}\n")
                 try:
                     validate(
-                        path, root, ["Kubernetes operations"],
+                        path, root, requirements,
                         expected_sources, expected_evidence,
                     )
                 except AssertionError:
@@ -774,13 +924,13 @@ def self_test() -> None:
             for safe in (*SAFE_PRIVACY_TEXT, NEUTRAL_AVAILABILITY):
                 write(path, record_text + f"\n{safe}\n")
                 validate(
-                    path, root, ["Kubernetes operations"],
+                    path, root, requirements,
                     expected_sources, expected_evidence,
                 )
                 checks += 1
     print(f"7 canonical kinds and {checks} mutation/policy checks passed")
     print(
-        f"path identity ({os.name}): case/root-alias checks and "
+        f"path identity ({os.name}): all-record case/root-alias checks and "
         "4 reparse containment checks passed"
     )
 

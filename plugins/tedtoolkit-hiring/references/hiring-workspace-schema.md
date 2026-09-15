@@ -43,8 +43,8 @@ Every canonical record has exactly one H1 and these required frontmatter fields:
 | Candidate | `company_id`, `candidate_id`, `updated`; IDs equal its canonical path | Supplied candidate display name |
 | Normalized resume | `company_id`, `candidate_id`, `source`, `updated`; IDs equal its canonical path and filename begins with a valid date | `# Normalized Resume` |
 | Application | `company_id`, `role_id`, `candidate_id`, `evidence`, `updated`; IDs equal its canonical path | `# Application` |
-| Assessment | Same application IDs and exact `evidence` list, plus `updated` | `# Candidate Assessment` |
-| Interview plan | Same application IDs and exact `evidence` list, `assessment`, and `updated` | `# Interview Plan` |
+| Assessment | Same application IDs and exact `evidence` list, plus `updated` and `decision_owner: accountable-human-hiring-team` | `# Candidate Assessment` |
+| Interview plan | Same application IDs and exact `evidence` list, `assessment`, `updated`, and `decision_owner: accountable-human-hiring-team` | `# Interview Plan` |
 
 `evidence` is a non-empty, duplicate-free list. A workspace-internal evidence pointer may identify
 only a canonical normalized resume under the same company and candidate. External immutable source
@@ -146,6 +146,7 @@ updated: YYYY-MM-DD
 evidence:
   - <path selected by application.md>
 assessment: <canonical assessment.md path, interview-plan.md only when consumed>
+decision_owner: accountable-human-hiring-team
 ---
 
 # Candidate Assessment
@@ -153,6 +154,18 @@ assessment: <canonical assessment.md path, interview-plan.md only when consumed>
 
 Use `# Interview Plan` instead for `interview-plan.md`; these are the only H1 values and each file
 contains exactly one H1.
+
+Neither record contains a recommendation, verdict, decision, or outcome field or section. The
+assessment `## Requirement Evidence Matrix` is a Markdown table with one distinct row per role
+requirement and required columns `Requirement`, `Evidence state`, `Citation`, `Limitation`, and
+`Interview focus`. The interview plan `## Requirement Coverage` is a Markdown table with one
+distinct row per role requirement and required columns `Requirement`, `Question mapping`, `Evidence
+anchor`, and `Scoring anchors`; every row contains `Score 1`, `Score 3`, and `Score 5` anchors.
+
+Conversation output uses exactly one language-matched handoff: `Final hiring decisions remain with
+the accountable human hiring team.` for English or `最终招聘决定由负责任的人类招聘团队作出。` for
+Chinese. Other English/Chinese outcome-action wording is prohibited under the bounded bilingual
+output contract.
 
 Do not add newly supplied evidence directly to either output. Update the application's `evidence`
 list through `maintain-hiring-workspace` first. These derived outputs never become canonical
