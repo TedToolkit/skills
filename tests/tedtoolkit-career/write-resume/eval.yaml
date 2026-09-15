@@ -84,7 +84,8 @@ scenarios:
   - name: "Route comparison-only work to job matching"
     prompt: >-
       Compare my background with this job requirement by requirement, but do not draft or revise a
-      resume. Background: C# and SQL. Job: C#, SQL, and Kubernetes.
+      resume. Background: C# and SQL. Identified target: Acme Robotics, Backend Engineer. Its
+      supplied posting requires C# and SQL and prefers Kubernetes.
     assertions:
       - { type: "exit_success" }
       - { type: "output_contains", value: "# Job Match" }

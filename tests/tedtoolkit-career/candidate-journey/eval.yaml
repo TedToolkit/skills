@@ -1,0 +1,75 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+smoke_scenarios:
+  - "Build one supported company-role application"
+
+scenarios:
+  - name: "Validate candidate journey contracts"
+    mode: "static"
+    setup:
+      commands:
+        - >-
+          test -f "${REPO_ROOT}/plugins/tedtoolkit-career/skills/research-company/SKILL.md"
+          && test -f "${REPO_ROOT}/plugins/tedtoolkit-career/skills/research-company-role/SKILL.md"
+          && test -f "${REPO_ROOT}/plugins/tedtoolkit-career/skills/match-job-description/SKILL.md"
+          && test -f "${REPO_ROOT}/plugins/tedtoolkit-career/skills/write-resume/SKILL.md"
+          && test ! -d "${REPO_ROOT}/plugins/tedtoolkit-career/skills/design-interview"
+          && test ! -d "${REPO_ROOT}/plugins/tedtoolkit-career/skills/interview-career-project"
+        - >-
+          grep -Fq 'companies/<company-id>/company.md'
+          "${REPO_ROOT}/plugins/tedtoolkit-career/references/target-research-schema.md"
+          && grep -Fq 'applications/<company-id>/<role-id>/'
+          "${REPO_ROOT}/plugins/tedtoolkit-career/references/target-research-schema.md"
+          && grep -Fq 'Cannot write final resume: company-role target missing'
+          "${REPO_ROOT}/plugins/tedtoolkit-career/skills/write-resume/SKILL.md"
+    assertions:
+      - { type: "exit_success" }
+
+  - name: "Build one supported company-role application"
+    prompt: >-
+      Build my Acme Robotics Backend Engineer application in one journey. Use $research-company,
+      $research-company-role, $match-job-description, and $write-resume in that order. The exact
+      absent destinations are authorized:
+      career-workspace/companies/acme-robotics/company.md,
+      career-workspace/applications/acme-robotics/backend-engineer/role.md,
+      career-workspace/applications/acme-robotics/backend-engineer/match.md, and
+      career-workspace/applications/acme-robotics/backend-engineer/resume.md. Use only the existing
+      candidate records plus supplied-company.md and supplied-role.md; these are dated offline
+      fixtures, so do not browse. Preserve all inputs byte-for-byte. The resume must use only
+      supported candidate evidence, omit unsupported metrics and Kubernetes experience, and create
+      no preparation, review, companion, or non-canonical file.
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_exists", path: "career-workspace/companies/acme-robotics/company.md" }
+      - { type: "file_exists", path: "career-workspace/applications/acme-robotics/backend-engineer/role.md" }
+      - { type: "file_exists", path: "career-workspace/applications/acme-robotics/backend-engineer/match.md" }
+      - { type: "file_exists", path: "career-workspace/applications/acme-robotics/backend-engineer/resume.md" }
+      - { type: "file_contains", path: "career-workspace/companies/acme-robotics/company.md", value: "supplied-company.md" }
+      - { type: "file_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/role.md", value: "supplied-role.md" }
+      - { type: "file_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/match.md", value: "# Job Match" }
+      - { type: "file_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/match.md", value: "Not demonstrated" }
+      - { type: "file_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/resume.md", value: "# Lin Chen" }
+      - { type: "file_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/resume.md", value: "inventory API" }
+      - { type: "file_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/resume.md", value: "C#" }
+      - { type: "file_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/resume.md", value: "SQL" }
+      - { type: "file_not_contains", path: "career-workspace/companies/acme-robotics/company.md", value: "Lin Chen" }
+      - { type: "file_not_contains", path: "career-workspace/companies/acme-robotics/company.md", value: "inventory API" }
+      - { type: "file_not_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/role.md", value: "Lin Chen" }
+      - { type: "file_not_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/resume.md", value: "Kubernetes" }
+      - { type: "file_not_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/resume.md", value: "50%" }
+      - { type: "file_not_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/resume.md", value: "high-performance" }
+      - { type: "command", run: "test \"$(sha256sum career-workspace/profile.md | cut -d' ' -f1)\" = \"$(cat profile.sha256)\"" }
+      - { type: "command", run: "test \"$(sha256sum career-workspace/work/northwind/2022-01--present-inventory-api.md | cut -d' ' -f1)\" = \"$(cat work.sha256)\"" }
+      - { type: "command", run: "test \"$(sha256sum supplied-company.md | cut -d' ' -f1)\" = \"$(cat company-source.sha256)\"" }
+      - { type: "command", run: "test \"$(sha256sum supplied-role.md | cut -d' ' -f1)\" = \"$(cat role-source.sha256)\"" }
+      - { type: "command", run: "test $(find career-workspace -type f -name '*.md' | wc -l) -eq 6" }
+      - { type: "command", run: "test ! -e career-workspace/applications/acme-robotics/backend-engineer/interview-preparation.md && test ! -e career-workspace/review.md && test ! -e resume.md" }
+    rubric:
+      - "Completes the requested candidate-owned research, matching, and final resume sequence without crossing artifact ownership boundaries."
+    timeout: 600

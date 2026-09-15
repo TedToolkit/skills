@@ -58,7 +58,8 @@ scenarios:
   - name: "Route requirement comparison to job matching"
     prompt: >-
       Compare this candidate with the job requirement by requirement; do not rewrite the resume.
-      Candidate: C# APIs and SQL migrations. Job: C#, SQL, Kubernetes.
+      Candidate: C# APIs and SQL migrations. Identified target: Acme Robotics, Backend Engineer. Its
+      supplied posting requires C# and SQL and prefers Kubernetes.
     assertions:
       - { type: "exit_success" }
       - { type: "output_contains", value: "# Job Match" }
