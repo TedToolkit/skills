@@ -613,8 +613,9 @@ def self_test() -> None:
                 candidate_alias / "candidate.md", root, [], expected_sources,
                 expected_evidence, expected_h1,
             )
-        except AssertionError:
-            pass
+        except AssertionError as exc:
+            if "reparse points are forbidden" not in str(exc):
+                fail(f"candidate-directory junction failed for wrong reason: {exc}")
         else:
             fail("candidate-directory junction passed")
         checks += 1
@@ -627,8 +628,9 @@ def self_test() -> None:
                 ["Kubernetes operations"], expected_sources, expected_evidence,
                 expected_h1,
             )
-        except AssertionError:
-            pass
+        except AssertionError as exc:
+            if "reparse points are forbidden" not in str(exc):
+                fail(f"application-directory junction failed for wrong reason: {exc}")
         else:
             fail("application-directory junction passed")
         checks += 1
@@ -653,8 +655,9 @@ def self_test() -> None:
                 linked_application, root, [], expected_sources,
                 {record_key(linked_application): [linked_pointer]}, expected_h1,
             )
-        except AssertionError:
-            pass
+        except AssertionError as exc:
+            if "reparse points are forbidden" not in str(exc):
+                fail(f"resume-directory junction failed for wrong reason: {exc}")
         else:
             fail("resume-directory junction passed")
         checks += 1
@@ -675,8 +678,9 @@ def self_test() -> None:
 
         try:
             reject_reparse_below_root(real_root, file_parts, file_reparse_lstat)
-        except AssertionError:
-            pass
+        except AssertionError as exc:
+            if "reparse points are forbidden" not in str(exc):
+                fail(f"file reparse point failed for wrong reason: {exc}")
         else:
             fail("file reparse point passed")
         checks += 1
