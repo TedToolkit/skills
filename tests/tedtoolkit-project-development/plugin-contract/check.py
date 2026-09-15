@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 from pathlib import Path
 import re
 
@@ -87,7 +86,7 @@ def check_repo(root: Path) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--repo-root", type=Path, default=Path(os.environ["TEDTOOLKIT_REPO_ROOT"]))
+    parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     args = parser.parse_args()
     try:
         check_repo(args.repo_root)

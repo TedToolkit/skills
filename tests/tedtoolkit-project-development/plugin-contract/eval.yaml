@@ -7,11 +7,9 @@ scenarios:
     mode: "static"
     setup:
       copy_test_files: true
-      env:
-        TEDTOOLKIT_REPO_ROOT: "${REPO_ROOT}"
       commands:
-        - "py -3.10 check.py"
-        - "py -3.10 -m unittest -v test_check.py"
+        - "py -3.10 check.py --repo-root \"${REPO_ROOT}\""
+        - "py -3.10 \"${REPO_ROOT}/tests/tedtoolkit-project-development/plugin-contract/test_check.py\""
     assertions:
       - { type: "exit_success" }
       - { type: "output_contains", value: "OK: project-development plugin contract" }

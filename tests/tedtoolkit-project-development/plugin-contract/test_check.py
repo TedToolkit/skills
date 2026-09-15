@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 import shutil
 import tempfile
@@ -14,7 +13,8 @@ class PluginContractTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
-        source = Path(os.environ["TEDTOOLKIT_REPO_ROOT"]) / "plugins" / "tedtoolkit-project-development"
+        source = (Path(__file__).resolve().parents[3]
+                  / "plugins" / "tedtoolkit-project-development")
         shutil.copytree(source, self.root / "plugins" / "tedtoolkit-project-development")
 
     def tearDown(self) -> None:

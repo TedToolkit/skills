@@ -6,10 +6,8 @@ scenarios:
   - name: "Route an explicit prepare-change invocation to scope-changes"
     prompt: "$prepare-change is already explicitly selected. Read selected-plugin/skills/prepare-change/SKILL.md and follow it to separate a request that asks for both a resume rewrite and a repository lint command. Name the independent outcomes and canonical workflow, then stop without writing files."
     setup:
-      env:
-        TEDTOOLKIT_REPO_ROOT: "${REPO_ROOT}"
       commands:
-        - "cp -R \"$TEDTOOLKIT_REPO_ROOT/plugins/tedtoolkit-project-development\" selected-plugin"
+        - "cp -R \"${REPO_ROOT}/plugins/tedtoolkit-project-development\" selected-plugin"
     assertions:
       - { type: "exit_success" }
       - { type: "output_contains", value: "scope-changes" }

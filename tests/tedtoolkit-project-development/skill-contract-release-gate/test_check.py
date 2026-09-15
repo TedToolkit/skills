@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
 from pathlib import Path
 import shutil
 import tempfile
@@ -15,7 +14,7 @@ class SkillContractReleaseGateTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
-        source = Path(os.environ["TEDTOOLKIT_REPO_ROOT"])
+        source = Path(__file__).resolve().parents[3]
         shutil.copytree(source / ".codex-plugin", self.root / ".codex-plugin")
         shutil.copytree(source / ".claude-plugin", self.root / ".claude-plugin")
         shutil.copytree(source / "plugins", self.root / "plugins")
@@ -24,6 +23,8 @@ class SkillContractReleaseGateTests(unittest.TestCase):
         (self.root / "tests").mkdir()
         shutil.copy2(source / "tests/run_evals.py", self.root / "tests/run_evals.py")
         for eval_path in source.glob("tests/**/eval.yaml"):
+            if ".results" in eval_path.relative_to(source / "tests").parts:
+                continue
             target = self.root / eval_path.relative_to(source)
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(eval_path, target)
@@ -93,6 +94,13 @@ class SkillContractReleaseGateTests(unittest.TestCase):
         path.write_text(path.read_text(encoding="utf-8") +
                         "\nUse TEDTOOLKIT_PLUGIN_ROOT to locate helpers.\n", encoding="utf-8")
         self.assert_contract_fails("forbidden plugin-install-root dependency")
+
+    def test_repository_root_environment_dependency_fails(self) -> None:
+        forbidden_name = "_".join(("TEDTOOLKIT", "REPO", "ROOT"))
+        path = self.root / "README.md"
+        path.write_text(path.read_text(encoding="utf-8") +
+                        f"\nRead the repository from ${forbidden_name}.\n", encoding="utf-8")
+        self.assert_contract_fails("forbidden repository-root environment variable")
 
     def test_marketplace_plugin_set_drift_fails(self) -> None:
         path = self.root / ".claude-plugin/marketplace.json"

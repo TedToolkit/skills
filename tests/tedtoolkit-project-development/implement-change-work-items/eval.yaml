@@ -6,10 +6,8 @@ scenarios:
   - name: "Route an explicit work-item implementation alias to orchestration"
     prompt: "$implement-change-work-items is already explicitly selected. Read selected-plugin/skills/implement-change-work-items/SKILL.md and follow it to explain how an approved Controlled change with two items is coordinated when only the first item is dependency-ready. Name the canonical workflow and execution shape; do not modify files."
     setup:
-      env:
-        TEDTOOLKIT_REPO_ROOT: "${REPO_ROOT}"
       commands:
-        - "cp -R \"$TEDTOOLKIT_REPO_ROOT/plugins/tedtoolkit-project-development\" selected-plugin"
+        - "cp -R \"${REPO_ROOT}/plugins/tedtoolkit-project-development\" selected-plugin"
     assertions:
       - { type: "exit_success" }
       - { type: "output_contains", value: "orchestrate-work-items" }

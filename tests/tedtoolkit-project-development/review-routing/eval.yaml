@@ -17,10 +17,8 @@ scenarios:
   - name: "Allow an explicit review-code invocation"
     prompt: "Evaluate the explicitly selected review-code lane. Read only selected-plugin/skills/review-code/SKILL.md, then state its bounded responsibility and whether it issues the aggregate merge-readiness conclusion or executes tests. Do not inspect other files or modify anything."
     setup:
-      env:
-        TEDTOOLKIT_REPO_ROOT: "${REPO_ROOT}"
       commands:
-        - "cp -R \"$TEDTOOLKIT_REPO_ROOT/plugins/tedtoolkit-project-development\" selected-plugin"
+        - "cp -R \"${REPO_ROOT}/plugins/tedtoolkit-project-development\" selected-plugin"
     assertions:
       - { type: "exit_success" }
       - { type: "output_regex", pattern: "(?i)code.{0,40}correctness|correctness.{0,40}code" }
@@ -32,10 +30,8 @@ scenarios:
   - name: "Allow an explicit review-tests invocation"
     prompt: "Evaluate the explicitly selected review-tests lane. Read only selected-plugin/skills/review-tests/SKILL.md, then state its bounded responsibility and whether it executes tests or issues the aggregate merge-readiness conclusion. Do not inspect other files or modify anything."
     setup:
-      env:
-        TEDTOOLKIT_REPO_ROOT: "${REPO_ROOT}"
       commands:
-        - "cp -R \"$TEDTOOLKIT_REPO_ROOT/plugins/tedtoolkit-project-development\" selected-plugin"
+        - "cp -R \"${REPO_ROOT}/plugins/tedtoolkit-project-development\" selected-plugin"
     assertions:
       - { type: "exit_success" }
       - { type: "output_regex", pattern: "(?i)test.{0,40}adequacy|adequacy.{0,40}test" }
@@ -51,10 +47,8 @@ scenarios:
   - name: "Allow an explicit verify-implementation invocation"
     prompt: "Evaluate the explicitly selected verify-implementation lane. Read only selected-plugin/skills/verify-implementation/SKILL.md, then state its bounded responsibility for one exact candidate and whether it fixes implementation defects or issues the aggregate merge-readiness conclusion. Do not inspect other files or modify anything."
     setup:
-      env:
-        TEDTOOLKIT_REPO_ROOT: "${REPO_ROOT}"
       commands:
-        - "cp -R \"$TEDTOOLKIT_REPO_ROOT/plugins/tedtoolkit-project-development\" selected-plugin"
+        - "cp -R \"${REPO_ROOT}/plugins/tedtoolkit-project-development\" selected-plugin"
     assertions:
       - { type: "exit_success" }
       - { type: "output_regex", pattern: "(?is)verif.{0,100}candidate|candidate.{0,100}verif" }

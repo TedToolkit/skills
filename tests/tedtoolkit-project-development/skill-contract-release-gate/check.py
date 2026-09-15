@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 from pathlib import Path
 import re
 import shutil
@@ -21,6 +20,8 @@ FORBIDDEN_INSTALL_ROOT_NAMES = (
     "CLAUDE_PLUGIN_ROOT",
     "TEDTOOLKIT_PLUGIN_ROOT",
 )
+FORBIDDEN_REPOSITORY_ROOT_PATTERN = re.compile(
+    r"\b(?:CLAUDE|TEDTOOLKIT)_(?:REPO|REPOSITORY)_?ROOT\b")
 
 EXPECTED_MARKETPLACE_PLUGINS = {
     "tedtoolkit-annotations",
@@ -117,19 +118,23 @@ def check_markdown_resource_links(root: Path, path: Path, text: str | None = Non
 
 def check_no_install_root_contract(root: Path) -> None:
     text_suffixes = {".json", ".md", ".ps1", ".py", ".sh", ".yaml", ".yml"}
-    paths = [
+    all_text_paths = [path for path in sorted(root.rglob("*"))
+                      if path.is_file() and path.suffix.lower() in text_suffixes]
+    install_contract_paths = [
         root / "CLAUDE.md",
         root / "tests" / "run_evals.py",
         *(path for path in sorted((root / "plugins").glob("**/*"))
           if path.is_file() and path.suffix.lower() in text_suffixes),
     ]
-    for path in paths:
-        if not path.is_file():
-            continue
+    for path in install_contract_paths:
         text = path.read_text(encoding="utf-8")
         for name in FORBIDDEN_INSTALL_ROOT_NAMES:
             require(name not in text,
                     f"{relative(root, path)}: forbidden plugin-install-root dependency: {name}")
+    for path in all_text_paths:
+        text = path.read_text(encoding="utf-8")
+        require(not FORBIDDEN_REPOSITORY_ROOT_PATTERN.search(text),
+                f"{relative(root, path)}: forbidden repository-root environment variable")
 
 
 def marketplace_plugins(root: Path, path: Path, *, codex: bool) -> dict[str, str]:
@@ -361,8 +366,7 @@ def check_repo(root: Path, alias_contract: Path | None = None,
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate repository Skill release contracts offline.")
-    parser.add_argument("--repo-root", type=Path,
-                        default=Path(os.environ.get("TEDTOOLKIT_REPO_ROOT", ".")))
+    parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     args = parser.parse_args()
     try:
         check_repo(args.repo_root)

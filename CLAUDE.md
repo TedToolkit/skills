@@ -22,6 +22,10 @@ Both marketplace manifests must declare the same plugins: `.codex-plugin/marketp
 - `plugins/<plugin>/hooks/hooks.json` + scripts — plugin-level hooks
 - `tests/` — custom Python eval harness (see Testing)
 
+Tests and packaged workflows resolve repository or resource locations from their own source path,
+an explicit command argument, Git, or the eval harness's direct `${REPO_ROOT}` substitution. Never
+introduce a process-wide repository-root environment variable.
+
 The marketplace exposes six plugins: `tedtoolkit-shared`, `tedtoolkit-annotations`, `tedtoolkit-roslynhelper`, `tedtoolkit-project-development`, `tedtoolkit-career`, and `tedtoolkit-hiring`. `tedtoolkit-shared` contains reusable Git and .NET skills including `fix-csharp-diagnostics`, `generate-commit-message`, `merge-default-branch`, `run-fix`, and `tunit-testing`; `tunit-unit-testing` is a deprecated explicit compatibility alias. Project-development uses `design-change`, `continue-change`, `implement-change`, and `orchestrate-work-items`; `change-design` and `implement-change-tdd` are deprecated explicit aliases. `tedtoolkit-career` owns one candidate's factual workspace, target-company and role research, evidence matching, targeted resumes, review, and interview preparation. `tedtoolkit-hiring` owns company-scoped roles, candidates, applications, assessments, and interviewer plans. In the breaking migration, replace `tedtoolkit-career/design-interview` with `tedtoolkit-hiring/design-interview`, and replace `tedtoolkit-career/interview-career-project` with `tedtoolkit-career/enrich-career-project`; do not migrate user data automatically.
 
 ## SKILL.md conventions
