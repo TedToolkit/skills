@@ -44,13 +44,18 @@ design uses the new source.
 For an authorized normalized resume record:
 
 - create a new dated Markdown file at the exact canonical destination;
-- preserve a sanitized pointer to the immutable source;
+- bind `source` to the exact immutable source named for this record in the request; never substitute
+  another candidate's source or any canonical hiring record;
 - retain only supported, job-related evidence with attribution and scope;
 - exclude protected traits and unnecessary contact details; and
 - stop rather than overwrite an existing destination without exact authorization.
 
 Do not create derived indexes, status logs, databases, hidden state, or files outside the selected
 root.
+
+For each application, bind `evidence` to the exact ordered source selection authorized for that
+application. Do not infer the selection from another application or from files merely present in
+the workspace.
 
 ## Deliver
 

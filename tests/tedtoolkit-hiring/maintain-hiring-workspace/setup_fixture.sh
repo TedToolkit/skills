@@ -20,6 +20,26 @@ EOF
 EOF
     sha256sum source-resumes/avery.md > avery-source.sha256
     sha256sum source-resumes/blake.md > blake-source.sha256
+    cat > expected-files.txt <<'EOF'
+hiring-workspace/companies/northwind/applications/data/avery/application.md
+hiring-workspace/companies/northwind/applications/data/blake/application.md
+hiring-workspace/companies/northwind/applications/platform/avery/application.md
+hiring-workspace/companies/northwind/candidates/avery/candidate.md
+hiring-workspace/companies/northwind/candidates/avery/resumes/2026-09-15-resume.md
+hiring-workspace/companies/northwind/candidates/blake/candidate.md
+hiring-workspace/companies/northwind/candidates/blake/resumes/2026-09-15-resume.md
+hiring-workspace/companies/northwind/company.md
+hiring-workspace/companies/northwind/roles/data/role.md
+hiring-workspace/companies/northwind/roles/platform/role.md
+source-resumes/avery.md
+source-resumes/blake.md
+EOF
+    find source-resumes -type f -print | sort | xargs sha256sum > all-fixtures.sha256
+    {
+      sed 's#^#./#' expected-files.txt
+      printf '%s\n' ./all-fixtures.sha256 ./avery-source.sha256 ./blake-source.sha256 \
+        ./expected-files.txt ./setup_fixture.sh
+    } | sort > expected-all-files.txt
     ;;
   existing-resume)
     mkdir -p source-resumes hiring-workspace/companies/northwind/candidates/avery/resumes
@@ -35,6 +55,16 @@ EOF
 EOF
     sha256sum source-resumes/avery-new.md > source.sha256
     sha256sum hiring-workspace/companies/northwind/candidates/avery/resumes/2026-09-15-resume.md > destination.sha256
+    cat > expected-files.txt <<'EOF'
+hiring-workspace/companies/northwind/candidates/avery/resumes/2026-09-15-resume.md
+source-resumes/avery-new.md
+EOF
+    find hiring-workspace source-resumes -type f -print | sort | xargs sha256sum > all-fixtures.sha256
+    {
+      sed 's#^#./#' expected-files.txt
+      printf '%s\n' ./all-fixtures.sha256 ./destination.sha256 ./expected-files.txt \
+        ./setup_fixture.sh ./source.sha256
+    } | sort > expected-all-files.txt
     ;;
   *)
     echo "unknown fixture" >&2

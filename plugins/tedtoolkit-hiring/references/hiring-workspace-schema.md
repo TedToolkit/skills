@@ -52,6 +52,12 @@ pointers are allowed when the application already selected their exact paths. Re
 traversal, wildcard, cross-company, cross-candidate, and cross-application pointers before opening
 any evidence.
 
+Validate provenance against the current request, not merely path shape: each normalized resume's
+`source` must equal the exact immutable source selected for that record, and each application's
+ordered `evidence` list must equal the exact selection authorized for that application. A
+normalized-resume `source` may never point to any canonical hiring-workspace record, including
+itself or another candidate's normalized resume.
+
 Store sanitized relative source pointers when practical. Never embed source-file contents merely to
 preserve provenance. References must stay inside the selected company/application boundary unless
 the user explicitly selected an external read-only source.

@@ -2,10 +2,64 @@ config:
   max_parallel_scenarios: 1
   max_parallel_runs: 1
 
+x-multi-role-command: &multi_role_command
+  type: "tool_command_not_regex"
+  pattern: '(?is)\A(?!(?:Get-Content[ \t]+(?:-Raw[ \t]+)?-LiteralPath[ \t]+["'']?(?:source-resumes[\\/]avery\.md|source-resumes[\\/]blake\.md)["'']?|Test-Path[ \t]+-LiteralPath[ \t]+["'']?(?:source-resumes[\\/]avery\.md|source-resumes[\\/]blake\.md|hiring-workspace[\\/]companies[\\/]northwind[\\/]company\.md|hiring-workspace[\\/]companies[\\/]northwind[\\/]roles[\\/](?:platform|data)[\\/]role\.md|hiring-workspace[\\/]companies[\\/]northwind[\\/]candidates[\\/](?:avery|blake)[\\/](?:candidate\.md|resumes[\\/]2026-09-15-resume\.md)|hiring-workspace[\\/]companies[\\/]northwind[\\/]applications[\\/](?:platform[\\/]avery|data[\\/](?:avery|blake))[\\/]application\.md)["'']?|New-Item[ \t]+-ItemType[ \t]+Directory[ \t]+-Force[ \t]+-Path[ \t]+["'']?(?:hiring-workspace(?:[\\/]companies(?:[\\/]northwind(?:[\\/](?:roles(?:[\\/](?:platform|data))?|candidates(?:[\\/](?:avery(?:[\\/]resumes)?|blake(?:[\\/]resumes)?))?|applications(?:[\\/](?:platform(?:[\\/]avery)?|data(?:[\\/](?:avery|blake))?))?))?)?)?)["'']?|Set-Content[ \t]+-LiteralPath[ \t]+["'']?(?:hiring-workspace[\\/]companies[\\/]northwind[\\/]company\.md|hiring-workspace[\\/]companies[\\/]northwind[\\/]roles[\\/](?:platform|data)[\\/]role\.md|hiring-workspace[\\/]companies[\\/]northwind[\\/]candidates[\\/](?:avery|blake)[\\/](?:candidate\.md|resumes[\\/]2026-09-15-resume\.md)|hiring-workspace[\\/]companies[\\/]northwind[\\/]applications[\\/](?:platform[\\/]avery|data[\\/](?:avery|blake))[\\/]application\.md)["'']?[ \t]+-Value[ \t]+\(\[Text\.Encoding\]::UTF8\.GetString\(\[Convert\]::FromBase64String\(["''][A-Za-z0-9+/]+={0,2}["'']\)\)\))[ \t]*\Z)[\s\S]+\Z'
+
+x-existing-command: &existing_command
+  type: "tool_command_not_regex"
+  pattern: '(?is)\A(?!(?:Get-Content[ \t]+(?:-Raw[ \t]+)?-LiteralPath[ \t]+["'']?(?:source-resumes[\\/]avery-new\.md|hiring-workspace[\\/]companies[\\/]northwind[\\/]candidates[\\/]avery[\\/]resumes[\\/]2026-09-15-resume\.md)["'']?|Test-Path[ \t]+-LiteralPath[ \t]+["'']?(?:source-resumes[\\/]avery-new\.md|hiring-workspace[\\/]companies[\\/]northwind[\\/]candidates[\\/]avery[\\/]resumes[\\/]2026-09-15-resume\.md)["'']?)[ \t]*\Z)[\s\S]+\Z'
+
+x-multi-role-policy: &multi_role_policy
+  reads: [source-resumes/avery.md, source-resumes/blake.md]
+  writes:
+    - hiring-workspace/companies/northwind/company.md
+    - hiring-workspace/companies/northwind/roles/platform/role.md
+    - hiring-workspace/companies/northwind/roles/data/role.md
+    - hiring-workspace/companies/northwind/candidates/avery/candidate.md
+    - hiring-workspace/companies/northwind/candidates/avery/resumes/2026-09-15-resume.md
+    - hiring-workspace/companies/northwind/candidates/blake/candidate.md
+    - hiring-workspace/companies/northwind/candidates/blake/resumes/2026-09-15-resume.md
+    - hiring-workspace/companies/northwind/applications/platform/avery/application.md
+    - hiring-workspace/companies/northwind/applications/data/avery/application.md
+    - hiring-workspace/companies/northwind/applications/data/blake/application.md
+  directories:
+    - hiring-workspace
+    - hiring-workspace/companies
+    - hiring-workspace/companies/northwind
+    - hiring-workspace/companies/northwind/roles
+    - hiring-workspace/companies/northwind/roles/platform
+    - hiring-workspace/companies/northwind/roles/data
+    - hiring-workspace/companies/northwind/candidates
+    - hiring-workspace/companies/northwind/candidates/avery
+    - hiring-workspace/companies/northwind/candidates/avery/resumes
+    - hiring-workspace/companies/northwind/candidates/blake
+    - hiring-workspace/companies/northwind/candidates/blake/resumes
+    - hiring-workspace/companies/northwind/applications
+    - hiring-workspace/companies/northwind/applications/platform
+    - hiring-workspace/companies/northwind/applications/platform/avery
+    - hiring-workspace/companies/northwind/applications/data
+    - hiring-workspace/companies/northwind/applications/data/avery
+    - hiring-workspace/companies/northwind/applications/data/blake
+
+x-existing-policy: &existing_policy
+  reads:
+    - source-resumes/avery-new.md
+    - hiring-workspace/companies/northwind/candidates/avery/resumes/2026-09-15-resume.md
+
 smoke_scenarios:
   - "Create isolated candidates and three role applications"
 
 scenarios:
+  - name: "Validate fail-closed workspace command audits"
+    mode: "static"
+    setup:
+      commands:
+        - 'py -3.10 "${REPO_ROOT}/plugins/tedtoolkit-hiring/scripts/validate_hiring_eval_audits.py" "${REPO_ROOT}/tests/tedtoolkit-hiring/maintain-hiring-workspace/eval.yaml"'
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "2 command policies passed:" }
+
   - name: "Create isolated candidates and three role applications"
     prompt: >-
       At the selected root hiring-workspace, create the absent canonical records now for synthetic
@@ -16,10 +70,16 @@ scenarios:
       canonical resume path. Create Avery applications to platform and data, and Blake's application
       only to data, with those normalized records as their selected evidence. These exact absent
       canonical destinations are authorized. Do not assess either candidate or create interview
-      plans.
+      plans. For auditable shell access, issue one operation per command: exact `Get-Content [-Raw]
+      -LiteralPath` reads, exact `New-Item -ItemType Directory -Force -Path` directory creation, and
+      exact `Set-Content -LiteralPath <authorized-record> -Value
+      ([Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('<base64>')))` writes only; do
+      not combine, pipe, enumerate, or add encoding options.
     setup:
       copy_test_files: true
+      retain_tool_commands: true
       commands: ["bash setup_fixture.sh multi-role"]
+    x-command-policy: *multi_role_policy
     assertions:
       - { type: "exit_success" }
       - { type: "file_exists", path: "hiring-workspace/companies/northwind/company.md" }
@@ -46,12 +106,18 @@ scenarios:
           --record hiring-workspace/companies/northwind/applications/platform/avery/application.md
           --record hiring-workspace/companies/northwind/applications/data/avery/application.md
           --record hiring-workspace/companies/northwind/applications/data/blake/application.md
-      - { type: "command", run: "test $(find hiring-workspace -type f -name '*.md' | wc -l) -eq 10" }
-      - { type: "command", run: "sha256sum -c avery-source.sha256 && sha256sum -c blake-source.sha256" }
+          --expect-source hiring-workspace/companies/northwind/candidates/avery/resumes/2026-09-15-resume.md=source-resumes/avery.md
+          --expect-source hiring-workspace/companies/northwind/candidates/blake/resumes/2026-09-15-resume.md=source-resumes/blake.md
+          --expect-evidence hiring-workspace/companies/northwind/applications/platform/avery/application.md=hiring-workspace/companies/northwind/candidates/avery/resumes/2026-09-15-resume.md
+          --expect-evidence hiring-workspace/companies/northwind/applications/data/avery/application.md=hiring-workspace/companies/northwind/candidates/avery/resumes/2026-09-15-resume.md
+          --expect-evidence hiring-workspace/companies/northwind/applications/data/blake/application.md=hiring-workspace/companies/northwind/candidates/blake/resumes/2026-09-15-resume.md
+      - { type: "command", run: "diff -u expected-files.txt <(find hiring-workspace source-resumes -type f -print | sort) && diff -u expected-all-files.txt <(find . -type f ! -path './expected-all-files.txt' -print | sort)" }
+      - { type: "command", run: "sha256sum -c all-fixtures.sha256 && sha256sum -c avery-source.sha256 && sha256sum -c blake-source.sha256" }
       - { type: "command", run: "! grep -R -Ei 'nationality|Exampleland|religion|Example Faith' hiring-workspace" }
       - { type: "command", run: "! grep -R -Fq 'Blake' hiring-workspace/companies/northwind/applications/platform/avery hiring-workspace/companies/northwind/applications/data/avery" }
       - { type: "command", run: "! grep -R -Fq 'Avery' hiring-workspace/companies/northwind/applications/data/blake" }
       - { type: "command", run: 'test -z "$(find hiring-workspace -type f \( -name "assessment.md" -o -name "interview-plan.md" \) -print -quit)"' }
+      - *multi_role_command
     timeout: 420
 
   - name: "Refuse to overwrite an existing normalized resume without exact authorization"
@@ -59,12 +125,16 @@ scenarios:
       Import source-resumes/avery-new.md into the selected hiring-workspace for Northwind candidate
       avery as the 2026-09-15 normalized resume. The canonical destination already exists. I have not
       authorized overwriting it. Preserve both files and tell me what exact authorization is needed.
+      Use only one-operation exact `Get-Content [-Raw] -LiteralPath` reads; write nothing.
     setup:
       copy_test_files: true
+      retain_tool_commands: true
       commands: ["bash setup_fixture.sh existing-resume"]
+    x-command-policy: *existing_policy
     assertions:
       - { type: "exit_success" }
-      - { type: "command", run: "sha256sum -c source.sha256 && sha256sum -c destination.sha256" }
+      - { type: "command", run: "sha256sum -c all-fixtures.sha256 && sha256sum -c source.sha256 && sha256sum -c destination.sha256" }
       - { type: "output_regex", pattern: "(?i)overwrite|existing|exact.*authorization" }
-      - { type: "command", run: "test $(find hiring-workspace -type f -name '*.md' | wc -l) -eq 1" }
+      - { type: "command", run: "diff -u expected-files.txt <(find hiring-workspace source-resumes -type f -print | sort) && diff -u expected-all-files.txt <(find . -type f ! -path './expected-all-files.txt' -print | sort)" }
+      - *existing_command
     timeout: 300

@@ -18,10 +18,12 @@ KINDS = {
 }
 VERDICT_PATTERNS = (
     r"(?im)^\s*(?:final\s+)?(?:verdict|recommendation|decision|outcome)\s*:\s*"
-    r"(?:hire|reject|advance|proceed|move forward|select|eliminate)",
+    r"(?:yes|no|hire|reject|advance|proceed|move forward|select|eliminate)",
     r"(?is)\b(?:recommend|recommended|recommends)\b.{0,40}"
-    r"\b(?:hire|reject|advance|proceed|select|eliminate)\b",
-    r"(?is)\b(?:candidate|applicant)\s+(?:should|must|will|can)\b.{0,50}"
+    r"\b(?:hire|hired|hiring|reject|rejected|rejecting|advance|advanced|advancing|"
+    r"proceed|select|selected|selecting|eliminate|eliminated|eliminating)\b",
+    r"(?is)\b(?:candidate|applicant|[A-Z][\w-]*)\s+"
+    r"(?:should|must|will|can)\b.{0,50}"
     r"\b(?:hire|hired|reject|rejected|advance|advanced|proceed|selected|eliminate|eliminated)\b",
     r"(?i)\b(?:strong|weak|lean|clear)\s+(?:hire|reject|yes|no)\b",
     r"(?i)\bmov(?:e|ing)\s+(?:(?:the\s+)?(?:candidate|applicant)|[A-Z][\w-]*)\s+forward\b",
@@ -154,8 +156,11 @@ def evidence_list(metadata: dict, path: Path) -> list[str]:
     return evidence
 
 
-def validate_evidence_pointer(pointer: str, root: Path, company: str, candidate: str,
-                              path: Path) -> None:
+def record_key(path: Path) -> str:
+    return path.as_posix().removeprefix("./")
+
+
+def resolve_pointer(pointer: str, root: Path, path: Path) -> tuple[list[str], Path]:
     normalized = pointer.replace("\\", "/")
     pure = PurePosixPath(normalized)
     if (
@@ -171,6 +176,12 @@ def validate_evidence_pointer(pointer: str, root: Path, company: str, candidate:
         target = root.joinpath(*parts)
     else:
         target = root.parent.joinpath(*parts)
+    return parts, target
+
+
+def validate_evidence_pointer(pointer: str, root: Path, company: str, candidate: str,
+                              path: Path) -> None:
+    parts, target = resolve_pointer(pointer, root, path)
     if parts and parts[0] == "companies":
         expected_prefix = ["companies", company, "candidates", candidate, "resumes"]
         if parts[:5] != expected_prefix or len(parts) != 6:
@@ -179,6 +190,16 @@ def validate_evidence_pointer(pointer: str, root: Path, company: str, candidate:
             fail(f"{path}: non-canonical normalized resume pointer {pointer!r}")
     if not target.is_file():
         fail(f"{path}: evidence pointer does not name an existing file {pointer!r}")
+
+
+def validate_source_pointer(pointer: str, expected: str, root: Path, path: Path) -> None:
+    if pointer != expected:
+        fail(f"{path}: source must equal the request-selected immutable source {expected!r}")
+    parts, target = resolve_pointer(pointer, root, path)
+    if parts and parts[0] == "companies":
+        fail(f"{path}: source must not point to a canonical hiring record")
+    if not target.is_file():
+        fail(f"{path}: source pointer does not name an existing file {pointer!r}")
 
 
 def require_no_verdict(body: str, path: Path) -> None:
@@ -193,7 +214,8 @@ def require_no_verdict(body: str, path: Path) -> None:
             fail(f"{path}: final-verdict language matched {pattern}")
 
 
-def validate(path: Path, root: Path, requirements: list[str]) -> str:
+def validate(path: Path, root: Path, requirements: list[str], expected_sources: dict[str, str],
+             expected_evidence: dict[str, list[str]]) -> str:
     kind, company, tail = classify(path, root)
     metadata, body = load(path)
     require_ids(metadata, kind, company, tail, path)
@@ -210,7 +232,10 @@ def validate(path: Path, root: Path, requirements: list[str]) -> str:
     if kind == "resume":
         if not isinstance(metadata.get("source"), str) or not metadata["source"].strip():
             fail(f"{path}: immutable source pointer is required")
-        validate_evidence_pointer(metadata["source"], root, company, str(tail), path)
+        expected_source = expected_sources.get(record_key(path))
+        if expected_source is None:
+            fail(f"{path}: request-selected source binding is required")
+        validate_source_pointer(metadata["source"], expected_source, root, path)
         require_date(path.name[:10], f"{path}: filename date")
     elif kind in {"application", "assessment", "interview"}:
         role, candidate = str(tail).split("/", 1)
@@ -219,12 +244,19 @@ def validate(path: Path, root: Path, requirements: list[str]) -> str:
             path if kind == "application"
             else root / "companies" / company / "applications" / role / candidate / "application.md"
         )
-        if kind != "application":
+        if kind == "application":
+            selected = evidence
+        else:
             application_metadata, _ = load(application)
             require_ids(application_metadata, "application", company, tail, application)
             selected = evidence_list(application_metadata, application)
             if evidence != selected:
                 fail(f"{path}: evidence must exactly equal the application selection")
+        expected_selection = expected_evidence.get(record_key(application))
+        if expected_selection is None:
+            fail(f"{application}: request-selected evidence binding is required")
+        if selected != expected_selection:
+            fail(f"{application}: evidence must equal the request-selected evidence")
         for pointer in evidence:
             validate_evidence_pointer(pointer, root, company, candidate, path)
         if kind == "interview":
@@ -276,6 +308,7 @@ def self_test() -> None:
             "interview": base / "applications/platform/avery/interview-plan.md",
         }
         write(root.parent / "source.md", "Synthetic immutable resume source.\n")
+        write(root.parent / "source-resumes" / "blake.md", "Synthetic Blake source.\n")
         write(paths["company"], frontmatter(company_id="northwind", updated="2026-09-15") + "# Northwind\n")
         write(paths["role"], frontmatter(company_id="northwind", role_id="platform", updated="2026-09-15") + "# Platform Engineer\n")
         write(paths["candidate"], frontmatter(company_id="northwind", candidate_id="avery", updated="2026-09-15") + "# Avery\n")
@@ -286,7 +319,16 @@ def self_test() -> None:
         interview_text = frontmatter(company_id="northwind", role_id="platform", candidate_id="avery", updated="2026-09-15", evidence=[selected], assessment="hiring-workspace/companies/northwind/applications/platform/avery/assessment.md") + "# Interview Plan\n\n## Requirement Coverage\n\n- Kubernetes operations: Question 1\n\nDecision owner: the accountable human hiring team.\n"
         write(paths["interview"], interview_text)
 
-        observed = {validate(path, root, ["Kubernetes operations"] if kind in {"assessment", "interview"} else []) for kind, path in paths.items()}
+        expected_sources = {record_key(paths["resume"]): "source.md"}
+        expected_evidence = {record_key(paths["application"]): [selected]}
+        observed = {
+            validate(
+                path, root,
+                ["Kubernetes operations"] if kind in {"assessment", "interview"} else [],
+                expected_sources, expected_evidence,
+            )
+            for kind, path in paths.items()
+        }
         if observed != KINDS:
             fail(f"not every canonical kind was validated: {observed!r}")
 
@@ -309,18 +351,54 @@ def self_test() -> None:
             ("missing human owner", paths["assessment"], assessment_text.replace(HUMAN_OWNER, "")),
             ("missing evidence", paths["application"], paths["application"].read_text().replace(selected, "source-resumes/missing.md")),
             ("wildcard evidence", paths["application"], paths["application"].read_text().replace(selected, "source-resumes/*.md")),
+            ("Avery-to-Blake source", paths["resume"], paths["resume"].read_text().replace("source: source.md", "source: source-resumes/blake.md")),
+            ("wrong application evidence", paths["application"], paths["application"].read_text().replace(selected, "source.md")),
+            ("semantic hired verdict", paths["assessment"], assessment_text + "\nAvery should be hired.\n"),
+            ("recommend hiring verdict", paths["assessment"], assessment_text + "\nI recommend hiring Avery.\n"),
+            ("yes decision verdict", paths["assessment"], assessment_text + "\nFinal decision: yes.\n"),
         )
         originals = {path: path.read_text(encoding="utf-8") for path in paths.values()}
         for label, path, mutation in mutations:
             write(path, mutation)
             try:
-                validate(path, root, ["Kubernetes operations"] if path.name != "application.md" else [])
+                validate(
+                    path, root,
+                    ["Kubernetes operations"] if path.name != "application.md" else [],
+                    expected_sources, expected_evidence,
+                )
             except (AssertionError, yaml.YAMLError):
                 pass
             else:
                 fail(f"mutation passed: {label}")
             write(path, originals[path])
-    print("7 canonical kinds and 18 mutation checks passed")
+        self_source = paths["resume"].read_text().replace("source: source.md", f"source: {selected}")
+        write(paths["resume"], self_source)
+        try:
+            validate(
+                paths["resume"], root, [], {record_key(paths["resume"]): selected},
+                expected_evidence,
+            )
+        except AssertionError:
+            pass
+        else:
+            fail("mutation passed: canonical resume used as normalized-resume source")
+    print("7 canonical kinds and 24 mutation checks passed")
+
+
+def parse_bindings(values: list[str], label: str, many: bool) -> dict:
+    bindings: dict = {}
+    for value in values:
+        record, separator, selected = value.partition("=")
+        if not separator or not record or not selected:
+            fail(f"{label}: expected RECORD=POINTER, got {value!r}")
+        key = record.replace("\\", "/").removeprefix("./")
+        if many:
+            bindings.setdefault(key, []).append(selected)
+        elif key in bindings:
+            fail(f"{label}: duplicate record binding {record!r}")
+        else:
+            bindings[key] = selected
+    return bindings
 
 
 def main() -> None:
@@ -328,6 +406,8 @@ def main() -> None:
     parser.add_argument("--workspace-root")
     parser.add_argument("--record", action="append", default=[])
     parser.add_argument("--requirement", action="append", default=[])
+    parser.add_argument("--expect-source", action="append", default=[])
+    parser.add_argument("--expect-evidence", action="append", default=[])
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test:
@@ -336,7 +416,12 @@ def main() -> None:
     if not args.workspace_root or not args.record:
         parser.error("--workspace-root and at least one --record are required")
     root = Path(args.workspace_root)
-    observed = [validate(Path(record), root, args.requirement) for record in args.record]
+    expected_sources = parse_bindings(args.expect_source, "--expect-source", many=False)
+    expected_evidence = parse_bindings(args.expect_evidence, "--expect-evidence", many=True)
+    observed = [
+        validate(Path(record), root, args.requirement, expected_sources, expected_evidence)
+        for record in args.record
+    ]
     print(f"validated {len(observed)} canonical record(s): {', '.join(observed)}")
 
 
