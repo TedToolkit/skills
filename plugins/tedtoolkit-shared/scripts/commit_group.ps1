@@ -67,9 +67,9 @@ process {
 end {
     try {
         if ($messageLines.Count -gt 0) {
-            ($messageLines -join [Environment]::NewLine) | & $bash $canonical @Paths
+            ($messageLines -join [Environment]::NewLine) | & $bash -l $canonical @Paths
         } else {
-            & $bash $canonical @Paths
+            & $bash -l $canonical @Paths
         }
         $exitCode = $LASTEXITCODE
     } finally {

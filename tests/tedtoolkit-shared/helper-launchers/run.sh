@@ -64,6 +64,18 @@ ps_commit=$(cygpath -w "$scripts/commit_group.ps1")
 (cd "$pwsh_repo" && PATH="$fake_bin:$PATH" pwsh.exe -NoProfile -File "$ps_commit" selected.txt <"$message_file")
 (cd "$legacy_repo" && PATH="$fake_bin:$PATH" powershell.exe -NoProfile -File "$ps_commit" selected.txt <"$message_file")
 
+minimal_path_repo="$fixture/minimal-path-repo"
+make_repo "$minimal_path_repo"
+printf 'selected\n' >"$minimal_path_repo/selected.txt"
+pwsh_exe=$(command -v pwsh.exe)
+(
+    cd "$minimal_path_repo"
+    unset MSYSTEM MSYSTEM_CARCH MSYSTEM_CHOST MSYS EXEPATH SHELL
+    PATH="$fake_bin" "$pwsh_exe" -NoProfile -File "$ps_commit" selected.txt <"$message_file"
+)
+[[ $(git -C "$minimal_path_repo" show --format= --name-only HEAD) == selected.txt ]] \
+    || fail "PowerShell launcher did not provide the Git utilities required by the Bash helper"
+
 for target in "$bash_repo" "$pwsh_repo" "$legacy_repo"; do
     [[ $(git -C "$target" show --format= --name-only HEAD) == selected.txt ]] || fail "launcher widened commit membership"
     git -C "$target" diff --cached --quiet -- outside-staged.txt && fail "launcher lost unrelated staged state"
