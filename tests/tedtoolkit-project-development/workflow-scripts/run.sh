@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-repo_root=${TEDTOOLKIT_REPO_ROOT:-}
+repo_root=${1:-}
 if [[ -z $repo_root ]]; then
     repo_root=$(git rev-parse --show-toplevel)
 fi
+repo_root=$(cd "$repo_root" && pwd -P)
 scripts="$repo_root/plugins/tedtoolkit-project-development/scripts"
 fixture=$(mktemp -d)
 trap 'rm -rf -- "$fixture"' EXIT
@@ -1102,8 +1103,10 @@ grep -Fq '`cleanup-change`' "$repo_root/plugins/tedtoolkit-project-development/s
 grep -Fq 'Delete after terminal state is recorded in Git' "$repo_root/plugins/tedtoolkit-project-development/skills/review-implementation/SKILL.md"
 grep -Fq 'completed or superseded record' "$repo_root/README.md"
 grep -Fq 'never create a completed-change archive' "$repo_root/plugins/tedtoolkit-project-development/skills/design-change/SKILL.md"
-grep -Fq 'after the terminal record is committed' "$repo_root/plugins/tedtoolkit-project-development/skills/implement-change/SKILL.md"
-grep -Fq 'after the terminal record is committed' "$repo_root/plugins/tedtoolkit-project-development/skills/orchestrate-work-items/SKILL.md"
+grep -Fq 'immediately follows it with the separate' "$repo_root/plugins/tedtoolkit-project-development/skills/implement-change/SKILL.md"
+grep -Fq 'follows the terminal' "$repo_root/plugins/tedtoolkit-project-development/skills/orchestrate-work-items/SKILL.md"
+grep -Fq 'closure sequence with two atomic commits' "$repo_root/plugins/tedtoolkit-project-development/skills/continue-change/SKILL.md"
+grep -Fq 'explicit local commit request' "$repo_root/plugins/tedtoolkit-project-development/references/workflow/change-development-workflow.md"
 grep -Fq 'Do not retain it by default or move it to an archive' "$repo_root/plugins/tedtoolkit-project-development/skills/scope-changes/SKILL.md"
 grep -Fq 'absence of policy means cleanup' "$repo_root/plugins/tedtoolkit-project-development/references/orchestration/tool-state-layout.md"
 grep -Fq 'Retain only when explicit repository policy requires it' "$repo_root/plugins/tedtoolkit-project-development/skills/project-scaffolding/references/repository-layout.md"

@@ -75,3 +75,22 @@ scenarios:
       - "Treats explicit continuation of the identified terminal record as cleanup authorization and uses the deterministic cleanup helper without requiring default-branch reachability."
       - "Deletes only docs/changes/comment-cleanup after eligibility passes; it does not modify production source or create an archive."
     timeout: 420
+
+  - name: "General commit request immediately cleans an included terminal change"
+    prompt: "Use $continue-change for @docs/changes/comment-cleanup/change.md and commit all my current changes locally. Do not push."
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh completed-uncommitted"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "command", run: "test ! -e docs/changes/comment-cleanup" }
+      - { type: "command", run: "test \"$(git rev-list --count eval-base..HEAD)\" -eq 2" }
+      - { type: "command", run: "git show HEAD^:docs/changes/comment-cleanup/change.md | grep -Fq '<!-- change-status: completed -->'" }
+      - { type: "command", run: "test \"$(git diff-tree --no-commit-id --name-only -r HEAD)\" = 'docs/changes/comment-cleanup/change.md'" }
+      - { type: "command", run: "git status --porcelain", stdout_empty: true }
+    rubric:
+      - "Recognizes that the general local-commit request includes the inspected terminal record and uses it as authority for one uninterrupted terminal closure sequence."
+      - "Creates a delivery commit that preserves the complete Completed record, then a distinct cleanup commit that deletes only docs/changes/comment-cleanup."
+      - "Leaves a clean worktree and does not push."
+    timeout: 480

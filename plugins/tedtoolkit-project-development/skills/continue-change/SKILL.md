@@ -72,7 +72,7 @@ Use the resolver's action without asking the user to classify size or complexity
 | `request-work-item-map-approval` | Present the complete enumerated map and ask only whether it is approved. |
 | `orchestrate-work-items` | Invoke `orchestrate-work-items` for the approved map. |
 | `review-implementation` | Invoke `review-implementation` against the exact candidate. If Ready, the delivery owner records `implemented`; otherwise retain `candidate-ready` or return to the owning phase. |
-| `complete-change` | Verify required review, operational handoffs, durable documentation disposition, and exact candidate identity; then record `completed`, or report the exact blocker. |
+| `complete-change` | Verify required review, operational handoffs, durable documentation disposition, and exact candidate identity; then record `completed`, or report the exact blocker. When the same request explicitly authorizes a local commit containing that terminal record, finish the terminal commit-and-cleanup sequence below instead of leaving the record for another continuation. |
 | `cleanup-change` | Treat delivery as terminal, inspect repository retention guidance and durable-extraction disposition, and run `cleanup-change.sh` without `--delete`. On an explicit cleanup request or explicit continuation of this already terminal change, rerun it with `--delete`; otherwise report eligibility or the exact blocker. |
 
 If discovery changes behavior, scope, public or persisted contracts, security, migration,
@@ -106,6 +106,31 @@ The first command is the eligibility check; the second is allowed only by the ex
 terminal-change continuation request. The exact clean target subtree must exist in the current
 commit's Git history; it does not need to be reachable from the default branch. Preserve every
 reported blocker and never substitute an archive directory.
+
+### Finish a commit-authorized terminal change
+
+An explicit local commit request whose inspected scope contains the identified delivery's terminal
+format-3 record also authorizes cleanup of that exact change when repository guidance selects
+cleanup. This includes a general request to commit the current changes after the terminal status edit
+has been inspected and included. Treat it as one closure sequence with two atomic commits, not as a
+reason to ask for another continuation:
+
+1. Before committing, present the exact delivery commit and the deferred cleanup commit, including
+   every path. The delivery commit contains the complete terminal record and all other authorized
+   delivery paths; it must not delete the change directory.
+2. Create and verify the delivery commit with the repository's authorized atomic-commit workflow.
+   When no such workflow is available, ordinary non-interactive Git is allowed only if the index
+   and worktree contain no unrelated paths; stage and commit only the exact presented delivery
+   paths. Revalidate the exact `change.md` from `HEAD` and run the cleanup helper without `--delete`.
+3. If eligible, rerun the helper with `--delete`, then immediately create and verify a separate
+   cleanup commit containing only the deletion of that exact change directory. Use a concise
+   `chore(workflow)` message that names the completed change.
+4. Report both commits. If eligibility fails, keep the successful delivery commit and terminal
+   directory, report the exact blocker, and do not weaken checks or rewrite history.
+
+Commit authorization covering the terminal record is required for this chained sequence. A plain
+`continue`, approval, review, completion, or merge still authorizes no commit and no implicit
+deletion. Never sweep sibling changes or preparations into the cleanup commit.
 
 Fast plans have no durable change record and cannot use this cross-conversation route. When the
 user requires an @-addressable change or cross-conversation recovery, `design-change` uses a

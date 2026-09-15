@@ -54,6 +54,11 @@ revertible:
 - Keep an implementation with its tests, generated output with its source, and a signature change
   with its affected callers.
 - Separate unrelated features, dependency bumps, pure refactors, documentation, and formatting.
+- When an available owning change workflow declares an exact terminal change eligible for immediate
+  cleanup, keep its full terminal record in the delivery commit and reserve deletion of that exact
+  directory for a final, separate `chore(workflow)` cleanup commit. This deferred deletion is a
+  temporal follow-up group; do not fold it into the delivery group merely because it touches the
+  same paths.
 - Assign each path to exactly one group. When a file mixes concerns, place it with the dominant
   concern and disclose the smaller one in the body.
 - Order foundations before their consumers.
@@ -72,6 +77,13 @@ any added path invalidates the plan and requires reinspection and presentation. 
 group commits, treat only that group and the resulting HEAD as the expected transition; recheck all
 remaining path and index identities before committing the next group.
 
+For a deferred terminal-change cleanup, also present the exact directory that will be deleted and
+state that cleanup runs only after the terminal delivery commit is verified and the owning workflow's
+eligibility check passes. An explicit local commit request authorizes this already-presented follow-up
+commit for every tracked terminal format-3 record included in the inspected commit scope, including
+a general request to commit the current changes; do not ask again between the two commits. Completion,
+review, merge, or an uninspected terminal directory does not authorize deletion.
+
 - In message-only mode, this presentation completes the task.
 - In commit mode, an explicit request to commit is approval after the plan is shown. Otherwise wait
   for explicit approval.
@@ -84,6 +96,12 @@ inline. After each commit, verify its paths and message. The canonical helper co
 advances only the approved group in the real index; do not reset, stash, or otherwise normalize the
 remaining state. Complete when every approved group has one commit and `git status` accounts for all
 remaining changes, including unchanged out-of-group staged and unstaged entries.
+
+After the terminal delivery group commits, return control to the owning change workflow for its
+deterministic eligibility check and exact-directory deletion. Reinventory the resulting deletion,
+then use the same atomic helper to create the presented cleanup commit containing only that directory.
+If the owner reports a blocker, retain the successful delivery commit and record instead of
+reimplementing or weakening its checks.
 
 After the last commit, run `git --no-optional-locks status --porcelain=v1 -uall`. In the final
 response, use this evidence-complete shape for every created commit:

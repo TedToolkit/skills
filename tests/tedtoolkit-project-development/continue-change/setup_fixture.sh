@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-status=${1:?usage: setup_fixture.sh <draft|approved|completed>}
+mode=${1:?usage: setup_fixture.sh <draft|approved|completed|completed-uncommitted>}
+status=$mode
 case "$status" in
     draft) approval=none ;;
     approved|completed) approval="Fixture owner" ;;
+    completed-uncommitted) status=implemented; approval="Fixture owner" ;;
     *) echo "unknown status: $status" >&2; exit 1 ;;
 esac
 
@@ -83,3 +85,9 @@ rm -f setup_fixture.sh
 git add -A
 git commit -qm "fixture"
 git update-ref refs/remotes/origin/main HEAD
+
+if [[ $mode == completed-uncommitted ]]; then
+    git tag eval-base
+    sed -i 's/<!-- change-status: implemented -->/<!-- change-status: completed -->/' \
+        docs/changes/comment-cleanup/change.md
+fi

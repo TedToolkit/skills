@@ -162,7 +162,8 @@ behavior or governing contracts to `design-change`, changed item boundaries or p
 Mark enduring decisions, cross-cutting current semantics, and active migration/operations procedures
 as `not needed`, `captured`, or `missing`. Missing durable extraction is Important and belongs to
 `architecture-design` or the applicable documentation owner. For a complete Ready-to-merge parent
-with extraction complete, recommend `Delete after terminal state is recorded in Git` unless explicit
+with extraction complete, recommend `Delete after terminal state is recorded in Git`, or `Use the
+immediate follow-up cleanup commit when the terminal record is included in a local commit request`, unless explicit
 repository guidance requires retention. Name any reference, handoff, extraction, Git-recording,
 cleanliness, or policy blocker;
 the read-only reviewer never performs cleanup or treats its recommendation as deletion authority.

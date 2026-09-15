@@ -89,8 +89,10 @@ lifecycle, cadence, isolation, or ownership boundaries.
 `review-implementation` reports documentation disposition after durable decisions are captured in
 ADRs, current semantics are captured in architecture records, and active migration or operational
 procedures are retained elsewhere. `continue-change` performs exact eligibility checks and deletes
-one terminal change only after an explicit cleanup request or explicit continuation of that already
-terminal record. Git history is the archive; do not create a completed-change documentation tree.
+one terminal change after an explicit cleanup request, an explicit continuation of that already
+terminal record, or as a separate immediate cleanup commit when a local commit request includes the
+terminal record in its inspected scope. Git history is the archive; do not create a completed-change
+documentation tree.
 Ignored `.tedtoolkit/runs/` and `.tedtoolkit/worktrees/` follow their defined successful-completion
 cleanup lifecycle.
 

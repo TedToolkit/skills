@@ -232,6 +232,16 @@ continuation of the already terminal change. Completion, review, approval, or me
 authorize deletion. The recorded commit may be on any branch; default-branch reachability is not a
 cleanup requirement.
 
+An explicit local commit request whose inspected scope contains one or more terminal format-3 change
+records additionally authorizes their eligibility-checked cleanup. This includes a general request
+to commit the current changes after those tracked terminal records are inspected and included.
+Present the complete two-commit boundary before the first commit: the delivery commit records the
+full terminal change state, then a separate cleanup commit deletes only the exact eligible change
+directories. Run the normal cleanup checks against the recorded first commit and stop with a blocked
+terminal record retained if any check fails. Do not require another continuation between the two
+commits, fold deletion into the delivery commit, or infer this authority from completion or commit
+history alone.
+
 Any remaining prerequisite marker that resolves to the target pins it regardless of the dependent
 change's lifecycle status. Any tracked preparation containing its normalized repository-relative
 path also pins it regardless of preparation status. Clean terminal referrers first. An explicit
