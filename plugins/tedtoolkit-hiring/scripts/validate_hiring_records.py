@@ -11,41 +11,23 @@ import tempfile
 
 import yaml
 
+from hiring_semantics import (
+    HUMAN_OWNER,
+    SAFE_EXAMPLES,
+    UNSAFE_EXAMPLES,
+    assert_no_final_verdict,
+)
+
 
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 KINDS = {
     "company", "role", "candidate", "resume", "application", "assessment", "interview"
 }
-VERDICT_PATTERNS = (
-    r"(?im)^\s*(?:final\s+)?(?:verdict|recommendation|decision|outcome)\s*:\s*"
-    r"(?:yes|no|hire|reject|advance|proceed|move forward|select|eliminate)",
-    r"(?is)\b(?:recommend|recommended|recommends)\b.{0,40}"
-    r"\b(?:hire|hired|hiring|reject|rejected|rejecting|advance|advanced|advancing|"
-    r"proceed|select|selected|selecting|eliminate|eliminated|eliminating)\b",
-    r"(?is)\b(?:candidate|applicant|[A-Z][\w-]*)\s+"
-    r"(?:should|must|will|can)\b.{0,50}"
-    r"\b(?:hire|hired|reject|rejected|advance|advanced|proceed|selected|eliminate|eliminated)\b",
-    r"(?i)\b(?:strong|weak|lean|clear)\s+(?:hire|reject|yes|no)\b",
-    r"(?i)\bmov(?:e|ing)\s+(?:(?:the\s+)?(?:candidate|applicant)|[A-Z][\w-]*)\s+forward\b",
-    r"(?i)\bmov(?:e|ing)\s+forward\s+with\s+(?:the\s+)?(?:candidate|applicant|[A-Z][\w-]*)\b",
-    r"(?i)\b(?:advance|proceed|progress)\s+(?:the\s+(?:candidate|applicant)\s+)?"
-    r"(?:to|into|with)\b",
-    r"(?i)\b(?:do not|don't|should not|shouldn't)\s+"
-    r"(?:hire|advance|proceed|select|move forward|eliminate)\b",
-    r"(?i)\b(?:hire|reject|advance|select|eliminate)\s+"
-    r"(?:this|the)\s+(?:candidate|applicant)\b",
-    r"(?i)\b(?:send|put)\s+(?:the\s+)?(?:candidate|applicant)\s+"
-    r"(?:to|through)\s+(?:the\s+)?next\s+(?:round|stage)\b",
-    r"(?i)\b(?:continue|proceed)\s+with\s+"
-    r"(?:the\s+)?(?:candidate|applicant|application)\b",
-    r"(?m)^\s*(?:Hire|Reject|Advance|Select|Eliminate)\s+[A-Z][\w-]*[.!]?\s*$",
-)
 FORBIDDEN_VALUES = (
     "SyntheticStatus", "SyntheticFamilyStatus", "SyntheticHealthValue",
     "SyntheticDisabilityValue", "ORANGE-NEBULA-7719", "VIOLET-COMET-8820",
     "CYAN-ASTEROID-6631", "SILVER-QUASAR-4402",
 )
-HUMAN_OWNER = "Decision owner: the accountable human hiring team."
 
 
 def fail(message: str) -> None:
@@ -203,15 +185,11 @@ def validate_source_pointer(pointer: str, expected: str, root: Path, path: Path)
 
 
 def require_no_verdict(body: str, path: Path) -> None:
-    if HUMAN_OWNER not in body:
-        fail(f"{path}: missing required human-decision ownership statement")
+    assert_no_final_verdict(body, path)
     folded = body.casefold()
     for forbidden in FORBIDDEN_VALUES:
         if forbidden.casefold() in folded:
             fail(f"{path}: leaked protected or sibling synthetic value")
-    for pattern in VERDICT_PATTERNS:
-        if re.search(pattern, body):
-            fail(f"{path}: final-verdict language matched {pattern}")
 
 
 def validate(path: Path, root: Path, requirements: list[str], expected_sources: dict[str, str],
@@ -358,6 +336,7 @@ def self_test() -> None:
             ("yes decision verdict", paths["assessment"], assessment_text + "\nFinal decision: yes.\n"),
         )
         originals = {path: path.read_text(encoding="utf-8") for path in paths.values()}
+        checks = 0
         for label, path, mutation in mutations:
             write(path, mutation)
             try:
@@ -371,6 +350,7 @@ def self_test() -> None:
             else:
                 fail(f"mutation passed: {label}")
             write(path, originals[path])
+            checks += 1
         self_source = paths["resume"].read_text().replace("source: source.md", f"source: {selected}")
         write(paths["resume"], self_source)
         try:
@@ -382,7 +362,35 @@ def self_test() -> None:
             pass
         else:
             fail("mutation passed: canonical resume used as normalized-resume source")
-    print("7 canonical kinds and 24 mutation checks passed")
+        checks += 1
+
+        policy_records = (
+            (paths["assessment"], assessment_text),
+            (paths["interview"], interview_text),
+        )
+        for path, record_text in policy_records:
+            for unsafe in UNSAFE_EXAMPLES:
+                write(path, record_text + f"\n{unsafe}\n")
+                try:
+                    validate(
+                        path, root, ["Kubernetes operations"],
+                        expected_sources, expected_evidence,
+                    )
+                except AssertionError:
+                    pass
+                else:
+                    fail(f"{path.name}: persisted semantic verdict passed: {unsafe}")
+                checks += 1
+
+            record_without_owner = record_text.replace(HUMAN_OWNER, "").rstrip()
+            for safe in SAFE_EXAMPLES:
+                write(path, record_without_owner + f"\n\n{safe}\n")
+                validate(
+                    path, root, ["Kubernetes operations"],
+                    expected_sources, expected_evidence,
+                )
+                checks += 1
+    print(f"7 canonical kinds and {checks} mutation/policy checks passed")
 
 
 def parse_bindings(values: list[str], label: str, many: bool) -> dict:
