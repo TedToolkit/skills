@@ -199,6 +199,16 @@ delivery boundaries that must converge atomically before release.
 | AC-06 | Primary | The extended release gate fails when an old Skill path remains, replacement guidance is absent, or any Skill name has multiple plugin owners. | `py -3.10 tests/run_evals.py --plugin tedtoolkit-project-development skill-contract-release-gate --tier static` |
 | Affected eval harness | Conditional | Harness self-tests still pass after a sixth marketplace plugin and test group are introduced. | `py -3.10 tests/test_run_evals.py` |
 
+### Approved temporary verification exception
+
+On 2026-09-15 the user explicitly approved using the exact-candidate offline proof and independent
+implementation reviews as the verification basis for CH-001 and CH-002 so CH-003 can proceed. One
+representative career smoke scenario and one representative hiring smoke scenario were attempted on
+the integrated branch, but the installed Codex runtime could not execute file operations because
+`codex-code-mode-host.exe` was missing. Those attempts are recorded as environment-blocked, not as
+behavioral passes. The unexecuted model behavior remains a reported residual risk and does not
+authorize publication or user-data operations.
+
 <!-- section: completion-criteria -->
 ## Completion
 
