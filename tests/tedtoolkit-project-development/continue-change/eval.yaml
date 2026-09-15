@@ -61,7 +61,7 @@ scenarios:
     timeout: 420
 
   - name: "Explicit continuation cleans one eligible terminal change"
-    prompt: "Use $continue-change for @docs/changes/comment-cleanup/change.md. This completed change is already on the authoritative default branch; continue its next lifecycle action now."
+    prompt: "Use $continue-change for @docs/changes/comment-cleanup/change.md. This completed change is committed on my current branch but is not on the default branch; continue its next lifecycle action now."
     setup:
       copy_test_files: true
       commands:
@@ -72,6 +72,6 @@ scenarios:
       - { type: "file_contains", path: "Temperature.cs", value: "Represnts" }
       - { type: "output_contains", value: "Git history" }
     rubric:
-      - "Treats explicit continuation of the identified terminal record as cleanup authorization, resolves the authoritative local default-branch ref, and uses the deterministic cleanup helper."
+      - "Treats explicit continuation of the identified terminal record as cleanup authorization and uses the deterministic cleanup helper without requiring default-branch reachability."
       - "Deletes only docs/changes/comment-cleanup after eligibility passes; it does not modify production source or create an archive."
     timeout: 420

@@ -7,16 +7,10 @@ fail() {
 }
 
 delete=0
-default_ref=""
 retention_policy=""
 durable_extraction_confirmed=0
 while (( $# > 0 )); do
     case "$1" in
-        --default-ref)
-            [[ $# -ge 2 ]] || fail "--default-ref requires a local Git ref"
-            default_ref=$2
-            shift 2
-            ;;
         --delete)
             delete=1
             shift
@@ -35,8 +29,7 @@ while (( $# > 0 )); do
     esac
 done
 
-[[ $# == 1 ]] || fail "usage: cleanup-change.sh --default-ref <git-ref> --retention-policy <cleanup|retain> [--durable-extraction-confirmed] [--delete] <change.md>"
-[[ -n $default_ref ]] || fail "--default-ref is required"
+[[ $# == 1 ]] || fail "usage: cleanup-change.sh --retention-policy <cleanup|retain> [--durable-extraction-confirmed] [--delete] <change.md>"
 case "$retention_policy" in
     cleanup) ;;
     retain) fail "explicit repository policy requires retaining this change record" ;;
@@ -103,12 +96,12 @@ esac
 target_state=$(git -C "$repo_root" status --porcelain=v1 --ignored=matching --untracked-files=all -- "$change_dir_rel")
 [[ -z $target_state ]] || fail "target subtree has staged, unstaged, untracked, or ignored content: $change_dir_rel"
 
-git -C "$repo_root" rev-parse --verify "$default_ref^{commit}" >/dev/null 2>&1 ||
-    fail "authoritative default-branch ref does not resolve locally: $default_ref"
-git -C "$repo_root" cat-file -e "$default_ref:$change_rel" 2>/dev/null ||
-    fail "terminal change record is not present on the authoritative default-branch ref: $default_ref"
-git -C "$repo_root" diff --quiet "$default_ref" -- "$change_dir_rel" ||
-    fail "target subtree differs from the authoritative default-branch ref: $default_ref"
+history_commit=$(git -C "$repo_root" rev-parse --verify 'HEAD^{commit}' 2>/dev/null) ||
+    fail "repository has no commit containing the terminal change record"
+git -C "$repo_root" cat-file -e "$history_commit:$change_rel" 2>/dev/null ||
+    fail "terminal change record is not present in Git history at HEAD: $change_rel"
+git -C "$repo_root" diff --quiet "$history_commit" -- "$change_dir_rel" ||
+    fail "target subtree differs from its Git-recorded state at HEAD: $change_dir_rel"
 
 while IFS= read -r -d '' dependent_abs; do
     dependent=${dependent_abs#"$repo_root"/}
@@ -141,4 +134,4 @@ fi
 
 rm -rf -- "$change_dir"
 [[ ! -e $change_dir ]] || fail "failed to remove exact change directory: $change_dir_rel"
-printf 'REMOVED: %s; recoverable from Git history at %s\n' "$change_dir_rel" "$default_ref"
+printf 'REMOVED: %s; recoverable from Git history at %s\n' "$change_dir_rel" "$history_commit"

@@ -162,8 +162,9 @@ behavior or governing contracts to `design-change`, changed item boundaries or p
 Mark enduring decisions, cross-cutting current semantics, and active migration/operations procedures
 as `not needed`, `captured`, or `missing`. Missing durable extraction is Important and belongs to
 `architecture-design` or the applicable documentation owner. For a complete Ready-to-merge parent
-with extraction complete, recommend `Delete after merge` unless explicit repository guidance
-requires retention. Name any reference, handoff, extraction, merge, cleanliness, or policy blocker;
+with extraction complete, recommend `Delete after terminal state is recorded in Git` unless explicit
+repository guidance requires retention. Name any reference, handoff, extraction, Git-recording,
+cleanliness, or policy blocker;
 the read-only reviewer never performs cleanup or treats its recommendation as deletion authority.
 
 ## Report
@@ -211,7 +212,7 @@ Ready to merge | Ready with follow-ups | Not ready | Stale
 | --- | --- | --- |
 
 ## Change closure decision
-<Only for a complete Ready-to-merge parent with extraction complete: Delete after merge, explicit retention exception, or exact cleanup blocker.>
+<Only for a complete Ready-to-merge parent with extraction complete: Delete after terminal state is recorded in Git, explicit retention exception, or exact cleanup blocker.>
 
 ## Review scope and limits
 - Reviewed:

@@ -199,7 +199,7 @@ scenarios:
       - "Does not infer the work-package boundary from the diff or run tests."
     timeout: 420
 
-  - name: "Recommend default post-merge cleanup without another choice gate"
+  - name: "Recommend default cleanup after Git-recorded completion without another choice gate"
     prompt: "Review the fully integrated parent change at docs/changes/P1-temperature-parse/change.md in integrated-change mode. Review both non-superseded work items and the authoritative HEAD; exact candidate-bound independent code, test, and verification lane reports are stored in the Git note on HEAD. Do not modify files or rerun builds or tests. Use the exact review report structure."
     setup:
       copy_test_files: true
@@ -217,12 +217,12 @@ scenarios:
       - type: "output_contains"
         value: "Change closure decision"
       - type: "output_contains"
-        value: "Delete after merge"
+        value: "Delete after terminal state is recorded in Git"
       - type: "output_not_contains"
-        value: "delete after merge?"
+        value: "delete after terminal state is recorded in Git?"
     rubric:
       - "Recommends a documentation disposition for the completed parent change."
-      - "Applies the default delete-after-merge disposition after finding the complete parent change Ready to merge and does not ask the user to choose retention."
+      - "Applies the default delete-after-Git-recording disposition after finding the complete parent change Ready to merge and does not ask the user to choose retention."
       - "Does not delete or modify the change documents."
     timeout: 600
 

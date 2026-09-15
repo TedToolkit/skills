@@ -225,11 +225,12 @@ turned out easier than expected.
 At final review, extract enduring decisions to ADRs, current cross-cutting semantics to architecture
 records, and active migration or operations procedures to their owning guide. `docs/changes/` is an
 active-delivery workspace, not an archive. Absence of policy means cleanup: after a format-3 change
-is terminal, its exact directory is present on the authoritative default-branch ref, durable
+is terminal, its exact clean directory is present in the current commit's Git history, durable
 extraction and operational handoffs are complete, its subtree is clean, and no tracked change or
 preparation record references it, delete that directory on an explicit cleanup request or explicit
 continuation of the already terminal change. Completion, review, approval, or merge alone does not
-authorize deletion.
+authorize deletion. The recorded commit may be on any branch; default-branch reachability is not a
+cleanup requirement.
 
 Any remaining prerequisite marker that resolves to the target pins it regardless of the dependent
 change's lifecycle status. Any tracked preparation containing its normalized repository-relative

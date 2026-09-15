@@ -263,6 +263,7 @@ explicit continuation will enter `review-implementation`; do not mark it `implem
 delivery owner sets `implemented` only after candidate-bound verification and required review pass,
 then sets `completed` only on a later explicit continuation after operational handoffs and durable
 documentation disposition close on that exact revision. Completion does not itself authorize
-deletion; report post-merge `continue-change` cleanup as the next record-lifecycle action. Under
+deletion; after the terminal record is committed, report `continue-change` cleanup as the next
+record-lifecycle action. Under
 parallel execution, return the candidate for review and verified integration; do not update the
 parent status independently.

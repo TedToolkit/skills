@@ -73,7 +73,7 @@ Use the resolver's action without asking the user to classify size or complexity
 | `orchestrate-work-items` | Invoke `orchestrate-work-items` for the approved map. |
 | `review-implementation` | Invoke `review-implementation` against the exact candidate. If Ready, the delivery owner records `implemented`; otherwise retain `candidate-ready` or return to the owning phase. |
 | `complete-change` | Verify required review, operational handoffs, durable documentation disposition, and exact candidate identity; then record `completed`, or report the exact blocker. |
-| `cleanup-change` | Treat delivery as terminal, inspect repository retention guidance and durable-extraction disposition, resolve the authoritative local default-branch ref, and run `cleanup-change.sh` without `--delete`. On an explicit cleanup request or explicit continuation of this already terminal change, rerun it with `--delete`; otherwise report eligibility or the exact blocker. |
+| `cleanup-change` | Treat delivery as terminal, inspect repository retention guidance and durable-extraction disposition, and run `cleanup-change.sh` without `--delete`. On an explicit cleanup request or explicit continuation of this already terminal change, rerun it with `--delete`; otherwise report eligibility or the exact blocker. |
 
 If discovery changes behavior, scope, public or persisted contracts, security, migration,
 dependencies, architecture, destructive actions, or external effects, stop and return to the
@@ -98,13 +98,14 @@ after the delivery owner establishes that disposition. Resolve the packaged
 then use:
 
 ```text
-bash "<resolved cleanup-change.sh>" --default-ref <authoritative-local-ref> --retention-policy cleanup [--durable-extraction-confirmed] <change.md>
-bash "<resolved cleanup-change.sh>" --default-ref <authoritative-local-ref> --retention-policy cleanup [--durable-extraction-confirmed] --delete <change.md>
+bash "<resolved cleanup-change.sh>" --retention-policy cleanup [--durable-extraction-confirmed] <change.md>
+bash "<resolved cleanup-change.sh>" --retention-policy cleanup [--durable-extraction-confirmed] --delete <change.md>
 ```
 
 The first command is the eligibility check; the second is allowed only by the explicit cleanup or
-terminal-change continuation request. Preserve every reported blocker and never substitute an
-archive directory.
+terminal-change continuation request. The exact clean target subtree must exist in the current
+commit's Git history; it does not need to be reachable from the default branch. Preserve every
+reported blocker and never substitute an archive directory.
 
 Fast plans have no durable change record and cannot use this cross-conversation route. When the
 user requires an @-addressable change or cross-conversation recovery, `design-change` uses a

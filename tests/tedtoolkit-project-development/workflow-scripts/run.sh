@@ -903,12 +903,10 @@ write_cleanup_change "$cleanup_repo/docs/changes/sibling-change/change.md" appro
 printf 'sibling evidence\n' >"$cleanup_repo/docs/changes/sibling-change/evidence.txt"
 git -C "$cleanup_repo" add .
 git -C "$cleanup_repo" commit -qm "fixture: add cleanup candidates"
-git -C "$cleanup_repo" update-ref refs/remotes/origin/main HEAD
 
 cleanup_script="$scripts/cleanup-change.sh"
 cleanup_target="docs/changes/completed-change/change.md"
-cleanup_ref="refs/remotes/origin/main"
-cleanup_args=(--default-ref "$cleanup_ref" --retention-policy cleanup)
+cleanup_args=(--retention-policy cleanup)
 
 cleanup_output=$(cd "$cleanup_repo" && bash "$cleanup_script" "${cleanup_args[@]}" "$cleanup_target")
 grep -Fq 'ELIGIBLE:' <<<"$cleanup_output"
@@ -945,14 +943,13 @@ git -C "$cleanup_repo" restore -- "$cleanup_target"
 printf '%s\n' 'docs/changes/completed-change/*.ignored' >"$cleanup_repo/.gitignore"
 git -C "$cleanup_repo" add .gitignore
 git -C "$cleanup_repo" commit -qm "fixture: define ignored target content"
-git -C "$cleanup_repo" update-ref refs/remotes/origin/main HEAD
 printf 'ignored target evidence\n' >"$cleanup_repo/docs/changes/completed-change/local.ignored"
 ignored_output=$(cd "$cleanup_repo" && bash "$cleanup_script" "${cleanup_args[@]}" "$cleanup_target" 2>&1 || true)
 grep -Fq 'ignored content' <<<"$ignored_output"
 test -e "$cleanup_repo/docs/changes/completed-change/local.ignored"
 rm "$cleanup_repo/docs/changes/completed-change/local.ignored"
 
-retained_output=$(cd "$cleanup_repo" && bash "$cleanup_script" --default-ref "$cleanup_ref" --retention-policy retain "$cleanup_target" 2>&1 || true)
+retained_output=$(cd "$cleanup_repo" && bash "$cleanup_script" --retention-policy retain "$cleanup_target" 2>&1 || true)
 grep -Fq 'policy requires retaining' <<<"$retained_output"
 test -e "$cleanup_repo/$cleanup_target"
 
@@ -998,7 +995,6 @@ cat >"$cleanup_repo/docs/changes/dependent-change/change.md" <<'EOF'
 EOF
 git -C "$cleanup_repo" add docs/changes/dependent-change
 git -C "$cleanup_repo" commit -qm "fixture: add terminal dependent"
-git -C "$cleanup_repo" update-ref refs/remotes/origin/main HEAD
 dependent_output=$(cd "$cleanup_repo" && bash "$cleanup_script" "${cleanup_args[@]}" "$cleanup_target" 2>&1 || true)
 if ! grep -Fq 'referenced by prerequisite marker' <<<"$dependent_output"; then
     echo "cleanup accepted a target referenced by a terminal dependent" >&2
@@ -1007,13 +1003,11 @@ fi
 rm -rf -- "$cleanup_repo/docs/changes/dependent-change"
 git -C "$cleanup_repo" add -A docs/changes/dependent-change
 git -C "$cleanup_repo" commit -qm "fixture: remove terminal dependent"
-git -C "$cleanup_repo" update-ref refs/remotes/origin/main HEAD
 
 mkdir -p "$cleanup_repo/.tedtoolkit/preparations/request"
 printf '%s\n' 'Candidate: docs/changes/completed-change/change.md' >"$cleanup_repo/.tedtoolkit/preparations/request/preparation.md"
 git -C "$cleanup_repo" add .tedtoolkit/preparations
 git -C "$cleanup_repo" commit -qm "fixture: add preparation reference"
-git -C "$cleanup_repo" update-ref refs/remotes/origin/main HEAD
 preparation_output=$(cd "$cleanup_repo" && bash "$cleanup_script" "${cleanup_args[@]}" "$cleanup_target" 2>&1 || true)
 if ! grep -Fq 'referenced by preparation record' <<<"$preparation_output"; then
     echo "cleanup accepted a target referenced by a preparation" >&2
@@ -1022,7 +1016,6 @@ fi
 rm -rf -- "$cleanup_repo/.tedtoolkit/preparations/request"
 git -C "$cleanup_repo" add -A .tedtoolkit/preparations
 git -C "$cleanup_repo" commit -qm "fixture: remove preparation reference"
-git -C "$cleanup_repo" update-ref refs/remotes/origin/main HEAD
 
 mkdir -p "$cleanup_repo/.tedtoolkit/preparations/untracked-request"
 printf '%s\n' 'Candidate: docs/changes/completed-change/change.md' >"$cleanup_repo/.tedtoolkit/preparations/untracked-request/preparation.md"
@@ -1032,16 +1025,6 @@ if ! grep -Fq 'referenced by preparation record' <<<"$untracked_preparation_outp
     exit 1
 fi
 rm -rf -- "$cleanup_repo/.tedtoolkit/preparations/untracked-request"
-
-git -C "$cleanup_repo" switch -qc unmerged-cleanup
-printf 'merged-only work item\n' >"$cleanup_repo/docs/changes/completed-change/work-item.md"
-git -C "$cleanup_repo" add docs/changes/completed-change/work-item.md
-git -C "$cleanup_repo" commit -qm "fixture: add unmerged cleanup content"
-if (cd "$cleanup_repo" && bash "$cleanup_script" "${cleanup_args[@]}" "$cleanup_target" >/dev/null 2>&1); then
-    echo "cleanup accepted target content absent from the default branch" >&2
-    exit 1
-fi
-git -C "$cleanup_repo" switch -q main
 
 if (cd "$cleanup_repo" && bash "$cleanup_script" "${cleanup_args[@]}" ../outside/change.md >/dev/null 2>&1); then
     echo "cleanup accepted a path outside docs/changes/<slug>/change.md" >&2
@@ -1056,7 +1039,6 @@ git -C "$legacy_repo" config user.email "workflow@example.com"
 write_cleanup_change "$legacy_repo/docs/changes/legacy-change/change.md" completed 2
 git -C "$legacy_repo" add .
 git -C "$legacy_repo" commit -qm "fixture: add legacy terminal change"
-git -C "$legacy_repo" update-ref refs/remotes/origin/main HEAD
 if (cd "$legacy_repo" && bash "$cleanup_script" "${cleanup_args[@]}" docs/changes/legacy-change/change.md >/dev/null 2>&1); then
     echo "cleanup accepted a legacy terminal record" >&2
     exit 1
@@ -1070,7 +1052,6 @@ git -C "$active_repo" config user.email "workflow@example.com"
 write_cleanup_change "$active_repo/docs/changes/active-change/change.md" approved
 git -C "$active_repo" add .
 git -C "$active_repo" commit -qm "fixture: add active change"
-git -C "$active_repo" update-ref refs/remotes/origin/main HEAD
 active_output=$(cd "$active_repo" && bash "$cleanup_script" "${cleanup_args[@]}" docs/changes/active-change/change.md 2>&1 || true)
 grep -Fq "status 'approved' is not eligible" <<<"$active_output"
 
@@ -1082,25 +1063,47 @@ git -C "$superseded_repo" config user.email "workflow@example.com"
 write_cleanup_change "$superseded_repo/docs/changes/superseded-change/change.md" superseded
 git -C "$superseded_repo" add .
 git -C "$superseded_repo" commit -qm "fixture: add superseded change"
-git -C "$superseded_repo" update-ref refs/remotes/origin/main HEAD
 superseded_output=$(cd "$superseded_repo" && bash "$cleanup_script" "${cleanup_args[@]}" docs/changes/superseded-change/change.md 2>&1 || true)
 grep -Fq 'requires confirmed durable extraction disposition' <<<"$superseded_output"
 superseded_output=$(cd "$superseded_repo" && bash "$cleanup_script" "${cleanup_args[@]}" --durable-extraction-confirmed docs/changes/superseded-change/change.md)
 grep -Fq 'ELIGIBLE:' <<<"$superseded_output"
 
+branch_only_repo="$fixture/branch-only-cleanup-repo"
+mkdir -p "$branch_only_repo"
+git -C "$branch_only_repo" init -q -b main
+git -C "$branch_only_repo" config user.name "Workflow fixture"
+git -C "$branch_only_repo" config user.email "workflow@example.com"
+printf 'baseline\n' >"$branch_only_repo/README.md"
+git -C "$branch_only_repo" add README.md
+git -C "$branch_only_repo" commit -qm "fixture: add default-branch baseline"
+git -C "$branch_only_repo" switch -qc feature/terminal-change
+mkdir -p "$branch_only_repo/docs/changes/branch-only-change"
+write_cleanup_change "$branch_only_repo/docs/changes/branch-only-change/change.md" completed
+git -C "$branch_only_repo" add docs/changes/branch-only-change
+git -C "$branch_only_repo" commit -qm "fixture: record terminal change off default branch"
+branch_only_commit=$(git -C "$branch_only_repo" rev-parse HEAD)
+branch_only_output=$(cd "$branch_only_repo" && bash "$cleanup_script" "${cleanup_args[@]}" --delete docs/changes/branch-only-change/change.md)
+grep -Fq "recoverable from Git history at $branch_only_commit" <<<"$branch_only_output"
+test ! -e "$branch_only_repo/docs/changes/branch-only-change"
+git -C "$branch_only_repo" show "$branch_only_commit:docs/changes/branch-only-change/change.md" >/dev/null
+if git -C "$branch_only_repo" cat-file -e "main:docs/changes/branch-only-change/change.md" 2>/dev/null; then
+    echo "branch-only cleanup fixture unexpectedly exists on the default branch" >&2
+    exit 1
+fi
+
 (cd "$cleanup_repo" && bash "$cleanup_script" "${cleanup_args[@]}" --delete "$cleanup_target")
 test ! -e "$cleanup_repo/docs/changes/completed-change"
 test -e "$cleanup_repo/docs/changes/sibling-change/change.md"
 grep -Fq 'unrelated user change' "$cleanup_repo/docs/changes/sibling-change/evidence.txt"
-git -C "$cleanup_repo" show "$cleanup_ref:$cleanup_target" >/dev/null
+git -C "$cleanup_repo" show "HEAD:$cleanup_target" >/dev/null
 
 grep -Fiq 'absence of policy means cleanup' "$repo_root/plugins/tedtoolkit-project-development/references/workflow/change-development-workflow.md"
 grep -Fq '`cleanup-change`' "$repo_root/plugins/tedtoolkit-project-development/skills/continue-change/SKILL.md"
-grep -Fq 'Delete after merge' "$repo_root/plugins/tedtoolkit-project-development/skills/review-implementation/SKILL.md"
+grep -Fq 'Delete after terminal state is recorded in Git' "$repo_root/plugins/tedtoolkit-project-development/skills/review-implementation/SKILL.md"
 grep -Fq 'completed or superseded record' "$repo_root/README.md"
 grep -Fq 'never create a completed-change archive' "$repo_root/plugins/tedtoolkit-project-development/skills/design-change/SKILL.md"
-grep -Fq 'post-merge `continue-change` cleanup' "$repo_root/plugins/tedtoolkit-project-development/skills/implement-change/SKILL.md"
-grep -Fq 'post-merge `continue-change` cleanup' "$repo_root/plugins/tedtoolkit-project-development/skills/orchestrate-work-items/SKILL.md"
+grep -Fq 'after the terminal record is committed' "$repo_root/plugins/tedtoolkit-project-development/skills/implement-change/SKILL.md"
+grep -Fq 'after the terminal record is committed' "$repo_root/plugins/tedtoolkit-project-development/skills/orchestrate-work-items/SKILL.md"
 grep -Fq 'Do not retain it by default or move it to an archive' "$repo_root/plugins/tedtoolkit-project-development/skills/scope-changes/SKILL.md"
 grep -Fq 'absence of policy means cleanup' "$repo_root/plugins/tedtoolkit-project-development/references/orchestration/tool-state-layout.md"
 grep -Fq 'Retain only when explicit repository policy requires it' "$repo_root/plugins/tedtoolkit-project-development/skills/project-scaffolding/references/repository-layout.md"

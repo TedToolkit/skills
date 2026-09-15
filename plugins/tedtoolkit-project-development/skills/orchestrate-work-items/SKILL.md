@@ -153,7 +153,7 @@ parent risk, against the parent contract, all non-superseded items, and the auth
 SHA. After the integrated review is `Ready to merge`, set the parent change `implemented` when every
 item and change-level gate is Verified on that SHA. Set it `completed` only after closure checks.
 Completion does not itself authorize deleting the parent record; report eligibility-checked
-post-merge `continue-change` cleanup as its next record-lifecycle action.
+`continue-change` cleanup after the terminal record is committed as its next record-lifecycle action.
 At successful completion, remove every remaining clean worktree created by this orchestration, run
 `git worktree prune`, and verify that none remains registered beneath `.tedtoolkit/worktrees/`.
 Then delete every worker or disposable candidate branch created by this orchestration whose tip is
