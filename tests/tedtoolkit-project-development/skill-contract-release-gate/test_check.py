@@ -20,6 +20,7 @@ class SkillContractReleaseGateTests(unittest.TestCase):
         shutil.copytree(source / ".claude-plugin", self.root / ".claude-plugin")
         shutil.copytree(source / "plugins", self.root / "plugins")
         shutil.copy2(source / "CLAUDE.md", self.root / "CLAUDE.md")
+        shutil.copy2(source / "README.md", self.root / "README.md")
         (self.root / "tests").mkdir()
         shutil.copy2(source / "tests/run_evals.py", self.root / "tests/run_evals.py")
         for eval_path in source.glob("tests/**/eval.yaml"):
@@ -31,6 +32,11 @@ class SkillContractReleaseGateTests(unittest.TestCase):
         shutil.copy2(Path(__file__).with_name("aliases.yaml"), self.alias_contract)
         self.tracked = {path.relative_to(self.root).as_posix()
                         for path in self.root.rglob("*") if path.is_file()}
+
+    def track_tree(self, path: Path) -> None:
+        self.tracked.update(
+            item.relative_to(self.root).as_posix()
+            for item in path.rglob("*") if item.is_file())
 
     def tearDown(self) -> None:
         self.temp.cleanup()
@@ -95,12 +101,62 @@ class SkillContractReleaseGateTests(unittest.TestCase):
         path.write_text(json.dumps(data), encoding="utf-8")
         self.assert_contract_fails("plugin set differs")
 
+    def test_expected_marketplace_plugin_missing_from_both_fails(self) -> None:
+        for relative in (".codex-plugin/marketplace.json", ".claude-plugin/marketplace.json"):
+            path = self.root / relative
+            data = json.loads(path.read_text(encoding="utf-8"))
+            data["plugins"] = [entry for entry in data["plugins"]
+                               if entry["name"] != "tedtoolkit-hiring"]
+            path.write_text(json.dumps(data), encoding="utf-8")
+        self.assert_contract_fails("marketplace plugin set must be")
+
     def test_manifest_version_drift_fails(self) -> None:
         path = self.root / "plugins/tedtoolkit-shared/plugin.json"
         data = json.loads(path.read_text(encoding="utf-8"))
         data["version"] = "99.0.0"
         path.write_text(json.dumps(data), encoding="utf-8")
         self.assert_contract_fails("paired manifest versions differ")
+
+    def test_manifest_description_drift_fails(self) -> None:
+        path = self.root / "plugins/tedtoolkit-hiring/plugin.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        data["description"] = "Wrong persona description."
+        path.write_text(json.dumps(data), encoding="utf-8")
+        self.assert_contract_fails("paired manifest descriptions differ")
+
+    def test_manifest_skill_root_drift_fails(self) -> None:
+        path = self.root / "plugins/tedtoolkit-hiring/plugin.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        data["skills"] = ["./other-skills/"]
+        path.write_text(json.dumps(data), encoding="utf-8")
+        self.assert_contract_fails("paired manifest Skill roots differ")
+
+    def test_duplicate_skill_name_across_plugins_fails(self) -> None:
+        duplicate = self.root / "plugins/tedtoolkit-career/skills/run-fix"
+        (duplicate / "agents").mkdir(parents=True)
+        (duplicate / "SKILL.md").write_text(
+            "---\nname: run-fix\ndescription: Duplicate test Skill.\n---\n\n# Duplicate\n",
+            encoding="utf-8")
+        (duplicate / "agents/openai.yaml").write_text(
+            "interface:\n  display_name: Duplicate\n  short_description: Duplicate test Skill\n",
+            encoding="utf-8")
+        self.track_tree(duplicate)
+        self.assert_contract_fails("Skill name run-fix has multiple plugin owners")
+
+    def test_obsolete_career_entrypoint_fails(self) -> None:
+        obsolete = self.root / "plugins/tedtoolkit-career/skills/design-interview"
+        obsolete.mkdir(parents=True)
+        (obsolete / "SKILL.md").write_text(
+            "---\nname: design-interview\ndescription: Obsolete.\n---\n", encoding="utf-8")
+        self.track_tree(obsolete)
+        self.assert_contract_fails("obsolete Skill path remains")
+
+    def test_missing_breaking_replacement_guidance_fails(self) -> None:
+        path = self.root / "README.md"
+        path.write_text(path.read_text(encoding="utf-8").replace(
+            "`tedtoolkit-hiring/design-interview`", "`missing-interviewer-replacement`", 1),
+            encoding="utf-8")
+        self.assert_contract_fails("missing replacement guidance")
 
     def test_missing_agent_metadata_fails(self) -> None:
         path = self.root / "plugins/tedtoolkit-shared/skills/run-fix/agents/openai.yaml"

@@ -22,6 +22,30 @@ FORBIDDEN_INSTALL_ROOT_NAMES = (
     "TEDTOOLKIT_PLUGIN_ROOT",
 )
 
+EXPECTED_MARKETPLACE_PLUGINS = {
+    "tedtoolkit-annotations",
+    "tedtoolkit-career",
+    "tedtoolkit-hiring",
+    "tedtoolkit-project-development",
+    "tedtoolkit-roslynhelper",
+    "tedtoolkit-shared",
+}
+
+PERSONA_PLUGINS = {"tedtoolkit-career", "tedtoolkit-hiring"}
+
+BREAKING_SKILL_MIGRATIONS = (
+    (
+        "plugins/tedtoolkit-career/skills/design-interview",
+        "tedtoolkit-career/design-interview",
+        "tedtoolkit-hiring/design-interview",
+    ),
+    (
+        "plugins/tedtoolkit-career/skills/interview-career-project",
+        "tedtoolkit-career/interview-career-project",
+        "tedtoolkit-career/enrich-career-project",
+    ),
+)
+
 
 def relative(root: Path, path: Path) -> str:
     return path.resolve().relative_to(root.resolve()).as_posix()
@@ -134,6 +158,9 @@ def check_marketplaces(root: Path) -> list[str]:
     claude = marketplace_plugins(root, claude_path, codex=False)
     require(set(codex) == set(claude),
             ".codex-plugin/marketplace.json: plugin set differs from .claude-plugin/marketplace.json")
+    require(set(codex) == EXPECTED_MARKETPLACE_PLUGINS,
+            ".codex-plugin/marketplace.json: marketplace plugin set must be "
+            + ", ".join(sorted(EXPECTED_MARKETPLACE_PLUGINS)))
     for name in sorted(codex):
         expected = f"./plugins/{name}"
         require(codex[name] == expected,
@@ -143,6 +170,15 @@ def check_marketplaces(root: Path) -> list[str]:
         require((root / "plugins" / name).is_dir(),
                 f"plugins/{name}: marketplace plugin directory is missing")
     return sorted(codex)
+
+
+def manifest_skill_roots(root: Path, path: Path, manifest: dict) -> tuple[str, ...]:
+    raw = manifest.get("skills")
+    values = [raw] if isinstance(raw, str) else raw
+    require(isinstance(values, list) and values
+            and all(isinstance(value, str) and value.strip() for value in values),
+            f"{relative(root, path)}: manifest Skill root is required")
+    return tuple(sorted(value.replace("\\", "/").rstrip("/") for value in values))
 
 
 def check_manifests(root: Path, plugins: list[str]) -> None:
@@ -160,6 +196,43 @@ def check_manifests(root: Path, plugins: list[str]) -> None:
                     f"{relative(root, path)}: manifest version is required")
         require(codex["version"] == claude["version"],
                 f"plugins/{plugin_name}: paired manifest versions differ")
+        if plugin_name in PERSONA_PLUGINS:
+            require(codex.get("description") == claude.get("description"),
+                    f"plugins/{plugin_name}: paired manifest descriptions differ")
+            codex_roots = manifest_skill_roots(root, codex_path, codex)
+            claude_roots = manifest_skill_roots(root, claude_path, claude)
+            require(codex_roots == claude_roots,
+                    f"plugins/{plugin_name}: paired manifest Skill roots differ")
+            require(codex_roots == ("./skills",),
+                    f"plugins/{plugin_name}: manifest Skill root must be ./skills/")
+
+
+def check_breaking_migrations(root: Path) -> None:
+    guidance_paths = (root / "README.md", root / "CLAUDE.md")
+    guidance = {
+        relative(root, path): path.read_text(encoding="utf-8")
+        for path in guidance_paths
+    }
+    for obsolete_path, old_entry, replacement in BREAKING_SKILL_MIGRATIONS:
+        require(not (root / obsolete_path).exists(),
+                f"{obsolete_path}: obsolete Skill path remains")
+        for label, text in guidance.items():
+            require(old_entry in text and replacement in text,
+                    f"{label}: missing replacement guidance for {old_entry} -> {replacement}")
+
+
+def check_unique_skill_owners(root: Path, skill_paths: list[Path]) -> None:
+    owners: dict[str, list[str]] = {}
+    for skill_path in skill_paths:
+        _, frontmatter = load_skill(root, skill_path)
+        name = frontmatter.get("name")
+        plugin_name = skill_path.parents[2].name
+        if isinstance(name, str) and name:
+            owners.setdefault(name, []).append(plugin_name)
+    for name, plugin_names in sorted(owners.items()):
+        unique_plugins = sorted(set(plugin_names))
+        require(len(unique_plugins) == 1,
+                f"Skill name {name} has multiple plugin owners: {', '.join(unique_plugins)}")
 
 
 def check_skill(root: Path, skill_path: Path) -> None:
@@ -233,10 +306,15 @@ def _check_repo_tree(root: Path, alias_contract: Path | None = None) -> None:
     alias_contract = alias_contract or repository_alias_contract
     plugins = check_marketplaces(root)
     check_manifests(root, plugins)
-    skill_paths = sorted((root / "plugins").glob("*/skills/*/SKILL.md"))
+    check_breaking_migrations(root)
+    skill_paths = sorted(
+        skill_path
+        for plugin_name in plugins
+        for skill_path in (root / "plugins" / plugin_name / "skills").glob("*/SKILL.md"))
     require(bool(skill_paths), "plugins: no Skill entrypoints found")
     for skill_path in skill_paths:
         check_skill(root, skill_path)
+    check_unique_skill_owners(root, skill_paths)
     for reference_path in sorted((root / "plugins").glob("*/references/**/*.md")):
         check_markdown_resource_links(root, reference_path)
     check_no_install_root_contract(root)

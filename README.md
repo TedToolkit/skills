@@ -21,10 +21,11 @@ After installing or updating a plugin, start a new task so Codex loads its curre
 | [`tedtoolkit-annotations`](plugins/tedtoolkit-annotations/) | C# XML comments and explicit contracts using TedToolkit annotations for boxing, constness, documentation, maintenance, and ownership. |
 | [`tedtoolkit-roslynhelper`](plugins/tedtoolkit-roslynhelper/) | Generating C# source with `TedToolkit.RoslynHelper`. |
 | [`tedtoolkit-project-development`](plugins/tedtoolkit-project-development/) | Request scoping, risk-scaled change design and implementation, optional work-item orchestration, design-principle governance, ADRs, professional review, project scaffolding, and README writing. |
-| [`tedtoolkit-career`](plugins/tedtoolkit-career/) | Local factual career profiles, resume writing and review, job-description matching, candidate preparation, and interviewer design. |
+| [`tedtoolkit-career`](plugins/tedtoolkit-career/) | One candidate's factual career workspace, company and role research, evidence matching, targeted resume writing and review, and interview preparation. |
+| [`tedtoolkit-hiring`](plugins/tedtoolkit-hiring/) | Company-scoped roles, canonical candidate records, role applications, evidence-based assessments, and fair interviewer plans. |
 
 `tedtoolkit-project-development` replaces the former `tedtoolkit-project-scaffolding` plugin. Install the new plugin name if you previously used the old one.
-`tedtoolkit-career` replaces the former `tedtoolkit-resume` plugin, retains its resume workflows, and separates candidate preparation from interviewer design.
+`tedtoolkit-career` replaces the former `tedtoolkit-resume` plugin and retains its candidate-owned resume workflows. In the `0.4.0` breaking migration, replace `tedtoolkit-career/design-interview` with `tedtoolkit-hiring/design-interview`, and replace `tedtoolkit-career/interview-career-project` with `tedtoolkit-career/enrich-career-project`. Existing user workspaces are not moved or rewritten automatically.
 `tunit-testing` is the canonical TUnit skill; the former explicit name `tunit-unit-testing` remains
 as a deprecated compatibility alias for one migration release.
 `design-change` and `implement-change` are the canonical change skills; explicit invocations of

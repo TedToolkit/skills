@@ -27,7 +27,12 @@
     {
       "name": "tedtoolkit-career",
       "source": "./plugins/tedtoolkit-career",
-      "description": "Skills for local career profiles, factual resumes, job matching, candidate preparation, and interviewer design."
+      "description": "Candidate career evidence, target research, factual resumes, matching, review, and interview preparation."
+    },
+    {
+      "name": "tedtoolkit-hiring",
+      "source": "./plugins/tedtoolkit-hiring",
+      "description": "Company-scoped hiring records, evidence-based candidate assessment, and fair interviewer planning."
     }
   ]
 }
