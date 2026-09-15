@@ -3,12 +3,12 @@
 <!-- change-format: 3 -->
 <!-- workflow-profile: controlled -->
 <!-- change-kind: migration -->
-<!-- change-status: in-progress -->
+<!-- change-status: implemented -->
 <!-- delivery-shape: multi-item -->
 
 - Priority: P1
 <!-- approval-source: User approved the complete contract and requested continuation in the Codex conversation on 2026-09-15. -->
-<!-- candidate-binding: none -->
+<!-- candidate-binding: commit:1cfaf1ebbe58b2106b7dc7066523db31d8fab8e9 -->
 
 <!-- section: goal-rationale -->
 ## Goal and rationale
