@@ -72,7 +72,8 @@ scenarios:
     prompt: >-
       Rewrite this into a finished Markdown resume now; the exact conversational artifact is
       approved, and I do not want a critique report. Name: Mei Chen. Experience: built and maintained
-      a C# order API used by the support team. Target: backend engineer.
+      a C# order API used by the support team. Identified target: Acme Robotics, Backend Engineer;
+      its supplied posting requires C# API experience.
     assertions:
       - { type: "exit_success" }
       - { type: "output_contains", value: "# Mei Chen" }

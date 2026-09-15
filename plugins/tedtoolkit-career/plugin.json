@@ -1,6 +1,6 @@
 {
   "name": "tedtoolkit-career",
-  "version": "0.3.0",
-  "description": "Career-profile, resume, job-matching, and role-specific interview workflows.",
+  "version": "0.4.0",
+  "description": "Candidate career evidence, target research, resumes, matching, and interview preparation.",
   "skills": ["./skills/"]
 }

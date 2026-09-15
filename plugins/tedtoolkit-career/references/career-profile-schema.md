@@ -6,14 +6,18 @@ source for later career materials, not a resume draft.
 ## Location and isolation
 
 Use the exact root selected by the user. When no location is supplied, propose
-`career-profiles/<person-id>/` in the active workspace and obtain confirmation before writing. Never
-place personal profiles inside the installed plugin or its source directory.
+`career-workspace/` in the active workspace and obtain confirmation before writing. This selected
+root is itself person-bound: never add another person identifier or another `career-workspace/`
+directory below it. Never place personal records inside the installed plugin or its source
+directory.
 
-Each root contains one person. Use a stable, non-sensitive `<person-id>` and do not infer identity
-from unrelated workspace data.
+An explicitly supplied legacy `career-profiles/<person-id>/` root remains readable and writable in
+place under the same factual and authorization rules. Do not move, copy, rewrite, or wrap it merely
+to adopt the new default. Each selected root contains one person; do not infer identity from
+unrelated workspace data.
 
 ```text
-career-profiles/<person-id>/
+career-workspace/
 ├── profile.md
 ├── work/
 │   └── <organization-id>/
@@ -24,8 +28,18 @@ career-profiles/<person-id>/
 ├── personal/
 │   └── <group-id>/
 │       └── YYYY-MM--YYYY-MM-<project-slug>.md
-└── private/
-    └── contact.md
+├── private/
+│   └── contact.md
+├── companies/
+│   └── <company-id>/
+│       └── company.md
+└── applications/
+    └── <company-id>/
+        └── <role-id>/
+            ├── role.md
+            ├── match.md
+            ├── resume.md
+            └── interview-preparation.md
 ```
 
 `work/` owns employment, contracts, organizational volunteering, and projects performed in those
@@ -43,6 +57,11 @@ umbrella may use `personal/independent/`. Do not create role summaries, company 
 multi-project files, or `unknown` organization directories. If an employment project's company or
 an education record's school is unknown, stop before writing that record and ask the user for the
 missing parent.
+
+`companies/` owns externally researched facts about target employers. `applications/` owns one
+identified company's one identified role plus derived candidate artifacts for that target. These
+trees never own candidate employment facts. Read [target-research-schema.md](target-research-schema.md)
+before creating or using either tree.
 
 ## File format
 

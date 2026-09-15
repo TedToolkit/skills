@@ -1,7 +1,7 @@
 {
   "name": "tedtoolkit-career",
-  "version": "0.3.0",
-  "description": "Career-profile, resume, job-matching, and role-specific interview workflows.",
+  "version": "0.4.0",
+  "description": "Candidate career evidence, target research, resumes, matching, and interview preparation.",
   "author": {
     "name": "TedToolkit"
   },
@@ -9,14 +9,14 @@
   "interface": {
     "displayName": "TedToolkit Career",
     "shortDescription": "Maintain career evidence and create job materials",
-    "longDescription": "Factual, evidence-led workflows for maintaining local career profiles, matching candidate evidence to job descriptions, writing and reviewing resumes, preparing candidates, and designing fair interviews.",
+    "longDescription": "Factual, evidence-led candidate workflows for maintaining one career workspace, researching companies and roles, matching evidence, writing and reviewing targeted resumes, and preparing for interviews.",
     "developerName": "TedToolkit",
     "category": "Productivity",
     "capabilities": ["Interactive", "Write"],
     "defaultPrompt": [
-      "Maintain a factual local career profile as the source for later career materials.",
-      "Match supplied evidence to a job description, then write or review only the requested resume artifact.",
-      "Use candidate interview preparation separately from interviewer plan design."
+      "Maintain one factual local career workspace as the source for later career materials.",
+      "Research one company and role with dated sources before matching candidate evidence.",
+      "Write or review only a company-role-targeted resume artifact."
     ]
   }
 }

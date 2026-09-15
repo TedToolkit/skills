@@ -8,25 +8,25 @@ smoke_scenarios:
 scenarios:
   - name: "Create one person's authorized local career profile"
     prompt: >-
-      Create Alice Chen's factual career profile at the currently absent path
-      career-profiles/alice. Alice has worked as a backend engineer at Northwind from January 2022
+      Create Alice Chen's factual career workspace at the currently absent default path
+      career-workspace. Alice has worked as a backend engineer at Northwind from January 2022
       to the present, where she personally built a C# order API. She has studied part-time at
       Fabrikam University for an MSc in software engineering since September 2023 and has
       independently maintained an open-source parser as a weekend project since March 2024. No
       outcomes or metrics were supplied. Write the profile now and do not create a resume.
     assertions:
       - { type: "exit_success" }
-      - { type: "file_exists", path: "career-profiles/alice/profile.md" }
-      - { type: "command", run: "test $(find career-profiles/alice/work -mindepth 2 -type f -name '*.md' | wc -l) -eq 1" }
-      - { type: "command", run: "test $(find career-profiles/alice/education -mindepth 2 -type f -name '*.md' | wc -l) -eq 1" }
-      - { type: "command", run: "test $(find career-profiles/alice/personal -mindepth 2 -type f -name '*.md' | wc -l) -eq 1" }
-      - { type: "command", run: "test $(find career-profiles/alice/work career-profiles/alice/personal -type f -name '*.md' -exec grep -l '^record_type: project$' {} + | wc -l) -eq 2" }
-      - { type: "command", run: "test ! -d career-profiles/alice/private" }
-      - { type: "command", run: "test ! -e career-profiles/alice/timeline.md && test ! -e career-profiles/alice/skills.md && test ! -d career-profiles/alice/projects && test ! -d career-profiles/alice/activities && test ! -d career-profiles/alice/learning && test ! -d career-profiles/alice/evidence && test ! -e career-profiles/alice/sources.md" }
-      - { type: "command", run: "test -z \"$(find career-profiles/alice -type f ! -name '*.md' -print -quit)\"" }
-      - { type: "command", run: "! grep -R -Fq '50%' career-profiles/alice" }
+      - { type: "file_exists", path: "career-workspace/profile.md" }
+      - { type: "command", run: "test $(find career-workspace/work -mindepth 2 -type f -name '*.md' | wc -l) -eq 1" }
+      - { type: "command", run: "test $(find career-workspace/education -mindepth 2 -type f -name '*.md' | wc -l) -eq 1" }
+      - { type: "command", run: "test $(find career-workspace/personal -mindepth 2 -type f -name '*.md' | wc -l) -eq 1" }
+      - { type: "command", run: "test $(find career-workspace/work career-workspace/personal -type f -name '*.md' -exec grep -l '^record_type: project$' {} + | wc -l) -eq 2" }
+      - { type: "command", run: "test ! -d career-workspace/private && test ! -d career-workspace/alice" }
+      - { type: "command", run: "test ! -e career-workspace/timeline.md && test ! -e career-workspace/skills.md && test ! -d career-workspace/projects && test ! -d career-workspace/activities && test ! -d career-workspace/learning && test ! -d career-workspace/evidence && test ! -e career-workspace/sources.md" }
+      - { type: "command", run: "test -z \"$(find career-workspace -type f ! -name '*.md' -print -quit)\"" }
+      - { type: "command", run: "! grep -R -Fq '50%' career-workspace" }
     rubric:
-      - "Creates only Alice's authorized profile tree, groups employment under Northwind, the independent project under personal, and education under Fabrikam University."
+      - "Creates only Alice's authorized person-bound career-workspace with no nested person ID, grouping employment under Northwind, the independent project under personal, and education under Fabrikam University."
       - "Every work or personal Markdown file represents exactly one project; no role-summary or multi-project file is created."
       - "Makes each project record independently understandable from the supplied context, role, concrete contribution, deliverable or current state, and technologies rather than reducing it to resume-style promotion."
       - "Records the supplied contribution while placing missing outcomes and metrics in short, answerable To Confirm questions instead of inventing them or adding an evaluation."
@@ -70,12 +70,12 @@ scenarios:
 
   - name: "Request a destination before creating personal files"
     prompt: >-
-      Build a local career profile for Li from these notes: two years of Java API work and an
+      Build a local career workspace for Li from these notes: two years of Java API work and an
       evening cloud-computing course. I have not selected or authorized a filesystem location yet.
     assertions:
       - { type: "exit_success" }
-      - { type: "output_regex", pattern: "(?i)career-profiles|location|path|destination" }
-      - { type: "command", run: "test ! -e career-profiles/li" }
+      - { type: "output_regex", pattern: "(?i)career-workspace|location|path|destination" }
+      - { type: "command", run: "test ! -e career-workspace" }
     rubric:
-      - "Proposes a concrete default destination and waits for authorization without creating Li's personal files."
+      - "Proposes career-workspace as the person-bound default destination and waits for authorization without creating Li's personal files."
     timeout: 240

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Interview Career Project"
-  short_description: "Elicit and record one project's hiring evidence"
-  default_prompt: "Use $interview-career-project to question me one item at a time and update only the existing career-project records I specify."

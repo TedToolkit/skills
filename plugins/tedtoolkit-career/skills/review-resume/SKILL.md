@@ -14,7 +14,7 @@ assertion or career-profile entry as independently verified. Read
 [career-integrity.md](../../references/career-integrity.md) before evaluating.
 
 This skill solely owns `# Resume Review`. It may consume supporting analysis but emits no rewritten
-resume, career-profile update, `# Job Match`, `# Interview Preparation`, or `# Interview Plan` unless
+resume, career-profile update, target research, `# Job Match`, or `# Interview Preparation` unless
 separately requested. Apply the shared artifact and legal-source gates to any requested destination
 or jurisdiction-dependent conclusion.
 
@@ -22,9 +22,11 @@ or jurisdiction-dependent conclusion.
 
 Identify the resume's intended role, seniority, locale, and audience when known. A review without a
 job description assesses intrinsic quality; label role fit `Not assessed` rather than guessing. If
-the primary request is requirement-by-requirement role fit and both artifacts are supplied, route to
+the primary request is requirement-by-requirement company-role fit and both artifacts are supplied, route to
 `match-job-description`. Route requests for edited copy to `write-resume`.
-Route requests to record or correct the underlying career history to `maintain-career-profile`.
+Route requests to record or correct the underlying career history to `maintain-career-profile` and
+missing target evidence to `research-company-role`. Final rewritten copy still requires one
+identified company and role under `write-resume`.
 
 When a local career profile is supplied as review evidence, read
 [career-profile-schema.md](../../references/career-profile-schema.md). Use relevant records and

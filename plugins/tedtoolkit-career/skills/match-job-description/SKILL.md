@@ -1,27 +1,31 @@
 ---
 name: match-job-description
 description: >-
-  Compare a supplied career profile, resume, or other candidate evidence with a supplied job
-  description and return an evidence matrix for each material requirement without rewriting career
-  materials. Use for role-fit analysis, requirement coverage, evidence gaps, or truthful terminology
-  opportunities when both sides are available. Do not use for final resume copy, intrinsic resume
-  critique, or interview preparation and design.
+  Compare supplied candidate evidence with requirements attributable to one identified role at one
+  identified company and return an evidence matrix without rewriting career materials. Use for
+  company-role fit analysis, requirement coverage, evidence gaps, or truthful terminology
+  opportunities. Do not use for target research, final resume copy, intrinsic resume critique,
+  interview preparation, or employer-side candidate assessment.
 ---
 
 # Match Job Description
 
 Compare requirements with demonstrated evidence, not with assumptions. Read
-[career-integrity.md](../../references/career-integrity.md) first. When a local career profile is
-supplied, read [career-profile-schema.md](../../references/career-profile-schema.md) before using it.
+[career-integrity.md](../../references/career-integrity.md) first. When a local career workspace is
+supplied, read [career-profile-schema.md](../../references/career-profile-schema.md) and
+[target-research-schema.md](../../references/target-research-schema.md) before using it.
 
 This skill solely owns `# Job Match`. It may consume supporting analysis but emits no resume copy,
-career-profile update, `# Resume Review`, `# Interview Preparation`, or `# Interview Plan` unless
+career-profile update, target-research record, `# Resume Review`, or `# Interview Preparation` unless
 separately requested. Apply the shared artifact and legal-source gates to any requested destination
 or jurisdiction-dependent conclusion.
 
-Require both candidate evidence and a job description. When either side is absent, return
-`Cannot assess: candidate evidence missing` or `Cannot assess: job description missing`, ask for the
-missing source, and stop without producing a fit rating.
+Require candidate evidence plus requirements attributable to one identified company and one
+identified role. A canonical `role.md` satisfies the target side; an equivalent supplied dossier or
+job posting is sufficient only when it identifies both and preserves attribution. When candidate
+evidence is absent, return `Cannot assess: candidate evidence missing`. When the company, role, or
+attributable requirements are absent, return `Cannot assess: company-role target missing`, route to
+`research-company-role`, and stop without producing a fit rating.
 
 ## Parse the role
 
@@ -75,6 +79,10 @@ includes requirement, priority, cited evidence, and confidence. Then present:
 If the user wants a numerical score, disclose the weighting and calculate it only from the evidence
 matrix. Do not let repeated keywords outweigh required capabilities.
 
-For a tailored rewrite, route to `write-resume`; the final-copy request belongs there even when a job
-description is supplied. Route candidate practice to `prepare-for-interview` and interviewer plan
-design to `design-interview`; do not turn the evidence matrix itself into either interview artifact.
+When persisting inside a candidate workspace, write only the explicitly authorized canonical
+`applications/<company-id>/<role-id>/match.md`; do not alter `role.md` or candidate evidence.
+
+For a tailored rewrite, route to `write-resume`; the final-copy request belongs there after the
+company-role gate is satisfied. Route candidate practice to `prepare-for-interview`. Interviewer
+planning belongs to `tedtoolkit-hiring/design-interview`; do not turn this evidence matrix into
+either interview artifact.

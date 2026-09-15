@@ -9,7 +9,8 @@ scenarios:
   - name: "Write an approved conversational resume artifact"
     prompt: >-
       Turn these notes into the finished Markdown resume now; this exact conversational artifact is
-      approved. Name: Lin Chen. Target: backend engineer. Experience: built a C# inventory API,
+      approved. Name: Lin Chen. Identified target: Acme Robotics, Backend Engineer. Its supplied job
+      posting requires C# API and SQL experience. Candidate evidence: built a C# inventory API,
       maintained its SQL schema, and supported the internal warehouse team. No metrics were supplied.
     assertions:
       - { type: "exit_success" }
@@ -26,7 +27,8 @@ scenarios:
   - name: "Tailor an experienced technical resume for recruiter and engineer readers"
     prompt: >-
       Write the finished two-page-target Markdown resume now; this exact conversational artifact is
-      approved. Target: senior C# equipment software engineer. Job priorities: WPF desktop software,
+      approved. Identified target: Acme Robotics, Senior C# Equipment Software Engineer. Its supplied
+      job-posting priorities are WPF desktop software,
       multithreading, native device SDK integration, unit tests, and field defect repair. Evidence:
       Project Atlas shipped a WPF inspection client, used CancellationToken for long scans, wrapped a
       vendor SDK with SafeHandle, and added regression tests for a device disconnect defect. Project
@@ -52,7 +54,8 @@ scenarios:
 
   - name: "Keep truthful ongoing evidence and reject an unsupported metric"
     prompt: >-
-      Propose a resume strategy only. My open-source parser is ongoing: I published a working
+      Propose a resume strategy only for Acme Robotics' identified Backend Engineer role, whose
+      supplied posting requires parser and performance work. My open-source parser is ongoing: I published a working
       prototype and wrote 'improved performance', but I have no users, production use, measurement,
       or adoption metric. Do not draft the final resume yet.
     assertions:
@@ -93,7 +96,8 @@ scenarios:
 
   - name: "Keep an approved conversational resume out of the filesystem"
     prompt: >-
-      Read candidate-notes.md and return the finished Markdown resume in this conversation. This
+      Read candidate-notes.md and return the finished Markdown resume in this conversation for the
+      identified Acme Robotics Backend Engineer role; its supplied requirements are C# APIs and SQL. This
       conversational artifact is approved, but do not create or change any file. Keep unresolved
       questions and revision notes outside the resume.
     setup:
@@ -116,32 +120,35 @@ scenarios:
 
   - name: "Write only the exact approved resume destination"
     prompt: >-
-      Read candidate-notes.md and create the finished resume at the currently absent path resume.md.
-      Do not create any companion file; report unresolved questions after the artifact in your
-      response, not inside resume.md.
+      Read candidate-notes.md and create the finished resume for Acme Robotics' identified Backend
+      Engineer role at the currently absent canonical path
+      career-workspace/applications/acme-robotics/backend-engineer/resume.md. Its supplied
+      requirements are C# APIs and SQL. Do not create any companion file; report unresolved
+      questions after the artifact in your response, not inside the resume.
     setup:
       copy_test_files: true
       commands:
         - "bash setup_fixture.sh"
     assertions:
       - { type: "exit_success" }
-      - { type: "file_exists", path: "resume.md" }
-      - { type: "file_contains", path: "resume.md", value: "# Lin Chen" }
-      - { type: "file_contains", path: "resume.md", value: "inventory API" }
-      - { type: "file_not_contains", path: "resume.md", value: "## Notes" }
-      - { type: "file_not_contains", path: "resume.md", value: "50%" }
+      - { type: "file_exists", path: "career-workspace/applications/acme-robotics/backend-engineer/resume.md" }
+      - { type: "file_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/resume.md", value: "# Lin Chen" }
+      - { type: "file_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/resume.md", value: "inventory API" }
+      - { type: "file_not_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/resume.md", value: "## Notes" }
+      - { type: "file_not_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/resume.md", value: "50%" }
       - type: "command"
-        run: "test $(git status --porcelain | wc -l) -eq 1 && git status --porcelain | grep -Fq '?? resume.md'"
+        run: "test $(git status --porcelain | wc -l) -eq 1 && git status --porcelain | grep -Fq '?? career-workspace/'"
     rubric:
-      - "Writes only resume.md because the user approved that exact artifact and destination."
+      - "Writes only the canonical company-role resume because the user approved that exact artifact and destination."
       - "Keeps unresolved questions and revision notes outside the saved resume artifact."
       - "Uses candidate-asserted evidence without inventing absent metrics, dates, title, employer, or contact details."
     timeout: 360
 
   - name: "Protect an existing resume without overwrite authority"
     prompt: >-
-      Read candidate-notes.md and write the finished resume to resume.md. Do not create a companion
-      file. I have not said to overwrite, replace, or update an existing file.
+      Read candidate-notes.md and write the finished resume for Acme Robotics' Backend Engineer role
+      to resume.md. Its supplied requirements are C# APIs and SQL. Do not create a companion file. I
+      have not said to overwrite, replace, or update an existing file.
     setup:
       copy_test_files: true
       commands:
@@ -159,7 +166,9 @@ scenarios:
 
   - name: "Translate private repository evidence for unfamiliar hiring readers"
     prompt: >-
-      Write the approved final Markdown resume excerpt for a C# equipment-software role. Raw Git
+      Write the approved final Markdown resume excerpt for Acme Robotics' identified C#
+      Equipment-Software Engineer role; its supplied posting requires safe native interop and
+      domain-model tooling. Raw Git
       evidence says: in repository WeldCore, I added Id<T>, DomainObjectResolver,
       RecordEnumValueGenerator, and changed WorkpieceManagerBase; in NativeBridge, I added
       INativeObject, NativeArray<T>, and PooledProtobufBuffer plus release-path tests. The reader has
@@ -179,3 +188,49 @@ scenarios:
       - "Makes the system problem, personal action, relevant C# mechanism, and supported delivery/test result understandable without repository context."
       - "Does not invent performance, adoption, production, or scale metrics."
     timeout: 360
+
+  - name: "Block final copy without a company-role target"
+    prompt: >-
+      Write my finished Markdown resume now. Candidate evidence: Lin Chen built a C# inventory API
+      and maintained its SQL schema. I have not identified a company or role and do not want a
+      strategy; do not create any file.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "Cannot write final resume: company-role target missing" }
+      - { type: "output_regex", pattern: "(?i)research-company-role|company.*role" }
+      - { type: "output_not_contains", value: "# Lin Chen" }
+      - { type: "command", run: "test ! -e career-workspace && test ! -e resume.md" }
+    rubric:
+      - "Emits no final resume and routes the target-free request to company-role research."
+    timeout: 240
+
+  - name: "Block final copy for a role-only target"
+    prompt: >-
+      Write my finished Markdown resume now for a Backend Engineer role requiring C# and SQL.
+      Candidate evidence: Lin Chen built a C# inventory API. I have not identified the employer;
+      do not create any file.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "Cannot write final resume: company-role target missing" }
+      - { type: "output_regex", pattern: "(?i)company" }
+      - { type: "output_not_contains", value: "# Lin Chen" }
+      - { type: "command", run: "test ! -e career-workspace && test ! -e resume.md" }
+    rubric:
+      - "Treats a role title and requirements without an employer as insufficient and emits no resume."
+    timeout: 240
+
+  - name: "Block final copy for company-unattributed requirements"
+    prompt: >-
+      Write my finished Markdown resume now for Acme Robotics' Backend Engineer role. Candidate
+      evidence: Lin Chen built a C# inventory API. I also have a generic list saying C#, SQL, and
+      Kubernetes are useful, but it is not from Acme Robotics or its role posting; do not create a
+      file.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "Cannot write final resume: company-role target missing" }
+      - { type: "output_regex", pattern: "(?i)attribut|source|posting" }
+      - { type: "output_not_contains", value: "# Lin Chen" }
+      - { type: "command", run: "test ! -e career-workspace && test ! -e resume.md" }
+    rubric:
+      - "Rejects generic requirements that are not attributable to the identified company-role and emits no resume."
+    timeout: 240

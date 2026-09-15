@@ -40,16 +40,16 @@ scenarios:
       - "Emits one Job Match followed by one candidate preparation artifact and no undeclared deliverable."
     timeout: 360
 
-  - name: "Route interviewer work to interview design"
+  - name: "Route interviewer work to the hiring plugin"
     prompt: >-
       I am the interviewer. Design questions and scoring anchors for evaluating another candidate
       against a senior backend role. This is not preparation for my own interview.
     assertions:
       - { type: "exit_success" }
-      - { type: "output_contains", value: "# Interview Plan" }
+      - { type: "output_regex", pattern: "(?i)tedtoolkit-hiring|design-interview" }
       - { type: "output_not_contains", value: "# Interview Preparation" }
     rubric:
-      - "Routes interviewer-owned work to design-interview instead of producing candidate preparation."
+      - "Routes interviewer-owned work to tedtoolkit-hiring/design-interview instead of producing candidate preparation or an interview plan."
     timeout: 300
 
   - name: "Create only an authorized candidate-preparation file"

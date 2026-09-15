@@ -1,7 +1,7 @@
 # Interview Standard
 
-Use these shared rules for candidate preparation and interviewer design. Apply the separate output
-and audience rules from the owning skill.
+Use these shared rules for candidate preparation. Interviewer planning belongs to the separately
+installable `tedtoolkit-hiring` plugin.
 
 ## Coverage
 
@@ -33,6 +33,5 @@ pretending they all fit.
 
 ## Fairness
 
-Keep every interviewer question job-related. Apply the protected-trait exclusions and legal-source
-boundary in `career-integrity.md`. Candidate preparation may explain how to evidence a legitimate
-requirement, but must not encourage disclosure of irrelevant sensitive information.
+Candidate preparation may explain how to evidence a legitimate job-related requirement, but must
+not encourage disclosure of irrelevant sensitive information or simulate an employer verdict.

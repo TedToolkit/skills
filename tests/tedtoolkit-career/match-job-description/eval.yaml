@@ -9,8 +9,9 @@ scenarios:
   - name: "Map candidate evidence to a supplied role"
     prompt: >-
       Compare my background with this role requirement by requirement. Background: I built C# APIs,
-      maintained SQL Server schemas, and used Docker in CI. Job: C# and SQL are required; Kubernetes
-      is preferred. I only want the comparison, not rewritten resume copy.
+      maintained SQL Server schemas, and used Docker in CI. Identified target: Acme Robotics,
+      Backend Engineer. Its supplied posting requires C# and SQL and prefers Kubernetes. I only want
+      the comparison, not rewritten resume copy.
     assertions:
       - { type: "exit_success" }
       - { type: "output_contains", value: "# Job Match" }
@@ -26,7 +27,7 @@ scenarios:
 
   - name: "Refuse a fit assessment without candidate evidence"
     prompt: >-
-      Here is a platform engineer job description requiring Go, Kubernetes, and incident response.
+      Here is Acme Robotics' Platform Engineer job description requiring Go, Kubernetes, and incident response.
       Tell me how well the candidate matches, but I have not supplied a resume or background.
     assertions:
       - { type: "exit_success" }
@@ -41,7 +42,8 @@ scenarios:
     prompt: >-
       Rewrite my resume for this role and return the finished Markdown now; this exact conversational
       artifact is approved. Candidate: Alex Wu, backend engineer, built C# APIs and SQL migrations.
-      Role: backend engineer requiring C# and SQL. Do not give me a separate match report.
+      Company and role: Acme Robotics, Backend Engineer. Its supplied posting requires C# and SQL.
+      Do not give me a separate match report.
     assertions:
       - { type: "exit_success" }
       - { type: "output_contains", value: "# Alex Wu" }
@@ -53,22 +55,24 @@ scenarios:
 
   - name: "Create only a clearly named new match file"
     prompt: >-
-      Compare this background and role, and create the result at the currently absent path match.md.
-      Background: C# APIs and SQL. Role: C#, SQL, Kubernetes. Do not create a resume, review, pack,
-      or companion file.
+      Compare this background and identified target, and create the result at the currently absent
+      canonical path career-workspace/applications/acme-robotics/backend-engineer/match.md.
+      Background: C# APIs and SQL. Acme Robotics' Backend Engineer posting requires C#, SQL, and
+      Kubernetes. Do not create a resume, review, pack, or companion file.
     assertions:
       - { type: "exit_success" }
-      - { type: "file_exists", path: "match.md" }
-      - { type: "file_contains", path: "match.md", value: "# Job Match" }
-      - { type: "command", run: "test $(find . -maxdepth 1 -type f ! -name match.md | wc -l) -eq 0" }
+      - { type: "file_exists", path: "career-workspace/applications/acme-robotics/backend-engineer/match.md" }
+      - { type: "file_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/match.md", value: "# Job Match" }
+      - { type: "command", run: "test $(find . -type f | wc -l) -eq 1" }
     rubric:
       - "Creates the clearly named absent match file without a second gate or another deliverable."
     timeout: 300
 
   - name: "Exclude a protected-trait requirement from job matching"
     prompt: >-
-      Compare this candidate with the role, but do not rewrite anything. Candidate: maintained a C#
-      service. Job description: applicants must be under 30 years old. Return the requirement matrix
+      Compare this candidate with Acme Robotics' identified Backend Engineer role, but do not rewrite
+      anything. Candidate: maintained a C# service. Its supplied job description says applicants
+      must be under 30 years old. Return the requirement matrix
       and explain how this requirement affects fit.
     assertions:
       - { type: "exit_success" }

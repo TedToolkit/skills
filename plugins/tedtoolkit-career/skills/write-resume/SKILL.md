@@ -1,31 +1,38 @@
 ---
 name: write-resume
 description: >-
-  Create or revise final resume copy in Markdown. Use when the requested deliverable is a new,
-  tailored, shortened, translated, or restructured resume, including a resume targeted to a supplied
-  job description and one sourced from a local career profile. Do not use for maintaining the
-  profile, feedback-only review, a resume-to-job comparison without rewritten copy, or interview
-  preparation. Produces Markdown, not PDF or DOCX.
+  Create or revise final resume copy in Markdown for one identified role at one identified company.
+  Use when the requested deliverable is a new, tailored, shortened, translated, or restructured
+  targeted resume backed by candidate evidence and attributable company-role requirements. Do not
+  use for general or role-only resumes, target research, profile maintenance, feedback-only review,
+  comparison without rewritten copy, or interview preparation. Produces Markdown, not PDF or DOCX.
 ---
 
 # Write Resume
 
 Create a concise resume whose target fit is clear and whose claims are defensible. Read
 [career-integrity.md](../../references/career-integrity.md) and
-[resume-standard.md](references/resume-standard.md). Use
+[resume-standard.md](references/resume-standard.md). When a workspace or target dossier is supplied,
+also read [career-profile-schema.md](../../references/career-profile-schema.md) and
+[target-research-schema.md](../../references/target-research-schema.md). Use
 [resume-template.md](assets/resume-template.md) as a flexible starting point.
 
 This skill solely owns final resume copy. Emit no career-profile update, `# Resume Review`,
-`# Job Match`, `# Interview Preparation`, or `# Interview Plan` unless the user separately requested
+`# Job Match` or `# Interview Preparation` unless the user separately requested
 that deliverable; apply the shared conversation, file, and legal-source gates exactly once.
 
 ## Establish the assignment
 
-Choose `Create` or `Revise`. Identify the target role, seniority, audience, locale, language, and
-desired detail from the supplied context. For a technical role, plan explicitly for both the
-recruiter or hiring-manager scan and the technical reader's evidence check. If no target exists,
-position the resume around the candidate's strongest coherent value and say that it is a general
-version.
+Choose `Create` or `Revise`. Require one identified company, one identified role, attributable
+material requirements, and supported candidate evidence before producing final copy. A canonical
+`role.md` or equivalent sourced dossier satisfies the target side. A generic resume request, role
+title alone, unattributed requirements, or company facts without one role does not. In those cases,
+state `Cannot write final resume: company-role target missing`, request or route to
+`research-company-role`, and emit no resume artifact. Do not create a generic fallback.
+
+After that gate, identify seniority, audience, locale, language, and desired detail from the supplied
+context. For a technical role, plan explicitly for both the recruiter or hiring-manager scan and the
+technical reader's evidence check.
 
 Use two pages as the default target when the role expects roughly five or more years, the candidate
 has enough relevant evidence, and both recruiter and technical readers need meaningful depth. Keep
@@ -35,8 +42,9 @@ count or compress strong evidence into vague claims merely to force one page.
 Ask one focused question only when the answer would materially change positioning or make the
 requested copy unsafe to produce under the shared integrity rules. Route career-history recording
 to `maintain-career-profile`, feedback-only requests to `review-resume`, comparison-only requests to
-`match-job-description`, candidate interview preparation to `prepare-for-interview`, and interviewer
-plan design to `design-interview`.
+`match-job-description`, company or role research to the corresponding research Skill, and candidate
+interview preparation to `prepare-for-interview`. Interviewer planning belongs to
+`tedtoolkit-hiring/design-interview`.
 
 ## Build an evidence ledger
 
@@ -48,8 +56,11 @@ contact and portrait-path data only when the requested resume needs it and the u
 source. Track source,
 provenance/support class, role, dates, contribution ownership, context, constraints, deliverable or
 current state, observable result, metric, target relevance, and the material requirement or
-positioning theme the evidence supports. When both candidate evidence and a job description are
-present, use `match-job-description` to prioritize supported evidence before writing.
+positioning theme the evidence supports. Always perform the `match-job-description` evidence mapping
+internally before final writing. Reuse an existing current canonical `match.md` when it covers the
+exact candidate evidence and target; otherwise build the same matrix without emitting a separate
+`# Job Match` artifact unless requested. Never treat target-company facts or role requirements as
+candidate accomplishments.
 
 Treat repository names, commit hashes, file paths, internal type names, method names, and issue
 numbers as verification evidence, not as default resume language. Keep them in the ledger unless a
@@ -151,7 +162,9 @@ for a recruiter scan, and the technical detail is sufficient without becoming im
 transcript. Also confirm that no bullet requires familiarity with a private repository, internal
 class hierarchy, or commit history to understand its problem, action, technology, and result.
 
-Deliver rendered Markdown or a `.md` file when requested. Keep the resume artifact limited to final
-resume copy. Put unresolved fact questions and the revision summary after the artifact in the
+Deliver rendered Markdown or a `.md` file when requested. Inside a selected career workspace, the
+canonical destination is `applications/<company-id>/<role-id>/resume.md`; writing it requires exact
+destination authorization and never modifies `role.md`, `match.md`, or candidate facts. Keep the
+resume artifact limited to final resume copy. Put unresolved fact questions and the revision summary after the artifact in the
 conversational response, or in a separately approved companion file, so notes cannot be submitted as
 resume content.

@@ -1,7 +1,7 @@
 ---
 name: maintain-career-profile
 description: >-
-  Create or update one person's local plain-text Markdown career-profile knowledge base from supplied resumes,
+  Create or update one person's local plain-text Markdown career workspace from supplied resumes,
   notes, project evidence, education, learning, and activities. Use for recording, correcting,
   organizing, or importing career history, including detailed company-and-project records that will
   support later resume writing. Do not use for final resume copy, job matching, resume critique, or
@@ -14,17 +14,20 @@ Maintain a factual, reusable source for later career materials. Read
 [career-integrity.md](../../references/career-integrity.md) and
 [career-profile-schema.md](../../references/career-profile-schema.md) before writing.
 
-This skill owns profile creation, structure, import, and general maintenance. Route requests to
+This skill owns candidate profile creation, structure, import, and general maintenance. Route requests to
 question the candidate one item at a time and update only explicitly selected existing project
-records after each answer to `interview-career-project`. This skill emits no resume,
-`# Resume Review`, `# Job Match`, `# Interview Preparation`, or `# Interview Plan` unless separately
-requested. Do not store a person's data inside the plugin directory.
+records after each answer to `enrich-career-project`. Route target-company and role research to
+`research-company` and `research-company-role`. This skill emits no target research, resume,
+`# Resume Review`, `# Job Match`, or `# Interview Preparation` unless separately requested. Do not
+store a person's data inside the plugin directory.
 
 ## Establish the profile
 
-Identify the person, the supplied sources, and the exact profile root. Keep different people in
-separate roots. When the user names an absent root and directly asks to create it, proceed there.
-When no location is supplied, propose the schema default and obtain confirmation before writing.
+Identify the person, supplied sources, and exact selected root. Keep different people in separate
+roots. The default `career-workspace/` root is itself person-bound and receives no nested person ID.
+When the user names an absent root and directly asks to create it, proceed there. When no location is
+supplied, propose the schema default and obtain confirmation before writing. Treat an explicitly
+supplied legacy `career-profiles/<person-id>/` root as readable in place without migrating it.
 
 Inspect an existing profile before modifying it. A direct request to update that identified profile
 authorizes the smallest changes needed to record the supplied facts; it does not authorize deletion,
@@ -64,12 +67,14 @@ project with no umbrella may use `personal/independent/`. If an employment proje
 education record's institution is unknown, ask the user before creating or moving the affected
 record. Never invent an organization or institution or use an `unknown` directory.
 
-Assign every fact one canonical owner before writing it. Person-level identity facts belong in
+Assign every candidate fact one canonical owner before writing it. Person-level identity facts belong in
 `profile.md`; applied experience and its projects belong in one `work/` record; education and its
 projects belong in one `education/` record; self-directed work belongs in one `personal/` record. Do
 not create timeline, skill, project, activity,
 learning, evidence, or source indexes. If adding or changing an experience would require rewriting
 a supposed "stable career fact" in `profile.md`, that fact belongs in the relevant record instead.
+Company research and target-role requirements are not candidate facts; route them to their owning
+research Skills and never place them in these records.
 
 For every material record, preserve:
 

@@ -15,8 +15,9 @@ Help a candidate rehearse truthful, relevant evidence without inventing experien
 supplied, read [career-profile-schema.md](../../references/career-profile-schema.md) before using it.
 
 This skill solely owns `# Interview Preparation`. It emits no interviewer scorecard, hiring verdict,
-resume copy, `# Resume Review`, `# Job Match`, or `# Interview Plan` unless separately requested.
-Route requests to interview or evaluate another person to `design-interview`.
+resume copy, target research, `# Resume Review`, or `# Job Match` unless separately requested.
+Route requests to interview or evaluate another person to the independently installed
+`tedtoolkit-hiring/design-interview`; do not imitate that persona capability here.
 
 ## Establish the preparation brief
 
@@ -25,8 +26,8 @@ supplied candidate evidence. Infer reasonable defaults when optional details are
 direct request for a finished pack, default to a 30-minute, eight-question practice bank at medium
 difficulty in the source language.
 
-When both candidate evidence and a job description are supplied, use `match-job-description` as
-supporting analysis. With only a job description, prepare against the role and state that personal
+When both candidate evidence and an identified company-role dossier are supplied, use
+`match-job-description` as supporting analysis. With only a role dossier, prepare against the role and state that personal
 evidence selection is limited. With only candidate evidence, rehearse its strongest relevant claims
 and state that role coverage is limited. Ask a question only when neither the role nor supplied
 evidence provides a job-related basis for preparation.
@@ -63,5 +64,7 @@ role priority, avoids duplicate testing, fits the timebox, and preserves factual
 ## Deliver
 
 Return the finished preparation in the conversation or write only an explicitly authorized file.
+Inside a candidate workspace, its canonical path is
+`applications/<company-id>/<role-id>/interview-preparation.md`.
 Keep unresolved fact questions outside a saved preparation artifact unless the user requested them
 inside it. Route requests to update the underlying career profile to `maintain-career-profile`.

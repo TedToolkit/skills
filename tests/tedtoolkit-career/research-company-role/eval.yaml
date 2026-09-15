@@ -1,0 +1,51 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+smoke_scenarios:
+  - "Create one attributable company-role dossier"
+
+scenarios:
+  - name: "Create one attributable company-role dossier"
+    prompt: >-
+      Use $research-company-role to create the role record at the currently absent canonical path
+      career-workspace/applications/acme-robotics/backend-engineer/role.md. The identified company is
+      Acme Robotics and the identified role is Backend Engineer. Use only supplied-job-posting.md,
+      a dated offline fixture, and do not browse. Separate required from preferred qualifications,
+      retain the unknown posting close date, source attribution, confidence, retrieval date, and no
+      inferred requirement. Do not change the company or candidate records and create no match or
+      resume.
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh"
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_exists", path: "career-workspace/applications/acme-robotics/backend-engineer/role.md" }
+      - { type: "file_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/role.md", value: "Acme Robotics" }
+      - { type: "file_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/role.md", value: "Backend Engineer" }
+      - { type: "file_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/role.md", value: "2026-09-12" }
+      - { type: "file_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/role.md", value: "supplied-job-posting.md" }
+      - { type: "command", run: "grep -Eqi 'required qualifications' career-workspace/applications/acme-robotics/backend-engineer/role.md" }
+      - { type: "command", run: "grep -Eqi 'preferred qualifications' career-workspace/applications/acme-robotics/backend-engineer/role.md" }
+      - { type: "command", run: "grep -Eqi 'unknown|not stated' career-workspace/applications/acme-robotics/backend-engineer/role.md" }
+      - { type: "command", run: "test \"$(sha256sum career-workspace/profile.md | cut -d' ' -f1)\" = \"$(cat profile.sha256)\"" }
+      - { type: "command", run: "test \"$(sha256sum career-workspace/companies/acme-robotics/company.md | cut -d' ' -f1)\" = \"$(cat company.sha256)\"" }
+      - { type: "command", run: "test ! -e career-workspace/applications/acme-robotics/backend-engineer/match.md && test ! -e career-workspace/applications/acme-robotics/backend-engineer/resume.md" }
+    rubric:
+      - "Creates only the canonical role dossier for the identified company and role."
+      - "Preserves required/preferred priority, attribution, confidence, date, and unknown close date without inventing requirements or mutating candidate/company facts."
+    timeout: 360
+
+  - name: "Block role research without a company identity"
+    prompt: >-
+      Use $research-company-role to record requirements for a Backend Engineer role, but I have not
+      identified the company or supplied an attributable posting. Do not guess and do not create any
+      file.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_regex", pattern: "(?i)company" }
+      - { type: "command", run: "test ! -e career-workspace" }
+    rubric:
+      - "Requests the missing company identity and creates no role dossier."
+    timeout: 240

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Research Company"
+  short_description: "Build a sourced candidate company dossier"
+  default_prompt: "Use $research-company to research this target company and record current attributable facts in my career workspace."

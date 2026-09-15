@@ -1,0 +1,4 @@
+interface:
+  display_name: "Research Company Role"
+  short_description: "Build a sourced company-role dossier"
+  default_prompt: "Use $research-company-role to research this company's role and record attributable requirements in my career workspace."

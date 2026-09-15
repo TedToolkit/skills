@@ -1,7 +1,8 @@
 # Career Integrity
 
-This is the authoritative source for factual integrity, privacy, fairness, and artifact-write
-authorization across career profiles, resumes, job matching, and interview workflows. Skills may
+This is the authoritative source for factual integrity, research provenance, privacy, fairness, and
+artifact-write authorization across candidate career workspaces, target research, resumes, job
+matching, and interview preparation. Skills may
 describe how their output uses these rules, but must not redefine them.
 
 ## Evidence provenance and support
@@ -51,6 +52,21 @@ capability or that a claim is false.
 - Do not copy secrets, government identifiers, compensation, health information, or unrelated
   protected-trait data into the profile unless the user explicitly requests a legitimate use.
 
+## Target-research integrity
+
+- Keep candidate facts, company facts, and role requirements in separate owning records. A company
+  claim never becomes employment history, and a role requirement never becomes candidate evidence.
+- For every material public claim, retain a source URL or supplied source description, retrieval
+  date, confidence, and whether the statement is directly supported or an inference.
+- Record contradictions and unknowns explicitly. Missing or inaccessible public evidence is an
+  unknown, not permission to guess, fill a template, or silently rely on model memory.
+- Browse current authoritative sources when real-world facts may have changed. A supplied dated
+  fixture, snapshot, or document may be used without live browsing, but its date and limitations
+  remain visible.
+- Prefer the employer's official pages and job posting for identity and requirements. Use secondary
+  sources only to supplement or challenge them, and do not hide disagreement between sources.
+- Do not store scraped webpage copies. Persist concise attributable Markdown facts and links only.
+
 ## Editing rules
 
 - Preserve chronology, scope, attribution, and causality.
@@ -99,12 +115,13 @@ requested it.
 | Deliverable or mutation scope | Sole owner | Named output |
 | --- | --- | --- |
 | Career-profile creation, structure, import, and general maintenance | `maintain-career-profile` | Authorized profile root |
-| Guided incremental enrichment of explicitly selected existing project records | `interview-career-project` | Selected project records |
+| Guided incremental enrichment of explicitly selected existing project records | `enrich-career-project` | Selected project records |
+| One researched target company | `research-company` | `companies/<company-id>/company.md` |
+| One researched company-role target | `research-company-role` | `applications/<company-id>/<role-id>/role.md` |
 | New, revised, translated, shortened, or tailored resume Markdown | `write-resume` | Resume copy |
 | Findings or intrinsic critique without rewritten copy | `review-resume` | `# Resume Review` |
 | Candidate/job requirement comparison without copy or questions | `match-job-description` | `# Job Match` |
 | Candidate interview preparation | `prepare-for-interview` | `# Interview Preparation` |
-| Interviewer plan, questions, and evaluation anchors | `design-interview` | `# Interview Plan` |
 
 A compound request may sequence these owners, but emits each requested deliverable once and creates
 no undeclared report or companion file.
@@ -115,7 +132,7 @@ authorizes only that destination. A clear request to update an identified existi
 authorizes changes needed to record the supplied facts, but not deletion, unrelated reorganization,
 or modification of another person's profile. A clear request to interview the candidate about
 explicitly selected existing project records and write after each answer authorizes
-`interview-career-project` to make only those incremental record updates. Require explicit approval
+`enrich-career-project` to make only those incremental record updates. Require explicit approval
 before overwriting an existing resume or broadly restructuring an existing profile.
 
 ## Output boundaries
