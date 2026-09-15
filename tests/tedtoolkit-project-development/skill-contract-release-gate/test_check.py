@@ -143,20 +143,39 @@ class SkillContractReleaseGateTests(unittest.TestCase):
         self.track_tree(duplicate)
         self.assert_contract_fails("Skill name run-fix has multiple plugin owners")
 
-    def test_obsolete_career_entrypoint_fails(self) -> None:
-        obsolete = self.root / "plugins/tedtoolkit-career/skills/design-interview"
-        obsolete.mkdir(parents=True)
-        (obsolete / "SKILL.md").write_text(
-            "---\nname: design-interview\ndescription: Obsolete.\n---\n", encoding="utf-8")
-        self.track_tree(obsolete)
-        self.assert_contract_fails("obsolete Skill path remains")
+    def test_each_obsolete_career_entrypoint_fails(self) -> None:
+        for name in ("design-interview", "interview-career-project"):
+            with self.subTest(name=name):
+                obsolete = self.root / f"plugins/tedtoolkit-career/skills/{name}"
+                obsolete.mkdir(parents=True)
+                skill_path = obsolete / "SKILL.md"
+                skill_path.write_text(
+                    f"---\nname: {name}\ndescription: Obsolete.\n---\n", encoding="utf-8")
+                tracked_path = skill_path.relative_to(self.root).as_posix()
+                self.tracked.add(tracked_path)
+                try:
+                    self.assert_contract_fails("obsolete Skill path remains")
+                finally:
+                    self.tracked.remove(tracked_path)
+                    shutil.rmtree(obsolete)
 
-    def test_missing_breaking_replacement_guidance_fails(self) -> None:
-        path = self.root / "README.md"
-        path.write_text(path.read_text(encoding="utf-8").replace(
-            "`tedtoolkit-hiring/design-interview`", "`missing-interviewer-replacement`", 1),
-            encoding="utf-8")
-        self.assert_contract_fails("missing replacement guidance")
+    def test_each_breaking_replacement_is_required_in_each_guide(self) -> None:
+        replacements = (
+            "`tedtoolkit-hiring/design-interview`",
+            "`tedtoolkit-career/enrich-career-project`",
+        )
+        for guide in ("README.md", "CLAUDE.md"):
+            path = self.root / guide
+            original = path.read_text(encoding="utf-8")
+            for replacement in replacements:
+                with self.subTest(guide=guide, replacement=replacement):
+                    self.assertIn(replacement, original)
+                    path.write_text(original.replace(
+                        replacement, "`missing-replacement`", 1), encoding="utf-8")
+                    try:
+                        self.assert_contract_fails("missing replacement guidance")
+                    finally:
+                        path.write_text(original, encoding="utf-8")
 
     def test_missing_agent_metadata_fails(self) -> None:
         path = self.root / "plugins/tedtoolkit-shared/skills/run-fix/agents/openai.yaml"
