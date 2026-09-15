@@ -1,71 +1,67 @@
 # [Full Name]
 
-**[Target Role]**  
-[City, Country] | [Phone] | [Email] | [LinkedIn] | [GitHub or Portfolio]
+**Applying for: [Company] [Role] ([Requisition ID, when useful]) | [Technical or domain positioning]**
+
+[City] | [Phone] | [Email] | [Professional link] | [GitHub or portfolio]
 
 ## Professional Summary
 
-[Two to four lines connecting target role, relevant experience, domain strengths, and the strongest
-supported evidence. Remove this instruction from the final resume.]
+[Two to four evidence-led lines: relevant experience span; systems or products delivered; the
+highest-priority technical and domain strengths; and one recurring engineering pattern. Make the
+full lifecycle visible when supported, such as requirements, architecture, development, testing,
+deployment, and production support.]
 
 ## Core Skills
 
-- **Languages and Platforms:** [Most relevant supported skills]
-- **Architecture and Engineering:** [Methods and system capabilities]
-- **Domain:** [Industry, product, or specialist knowledge]
-- **Delivery and Tooling:** [Testing, automation, operations, or collaboration capabilities]
-- **Technical Signature:** [Optional: one or two recurring engineering patterns supported across
-  several projects; remove when evidence is insufficient]
+- **Primary language and platform:** [Target-critical languages, runtimes, application frameworks,
+  concurrency, and memory or resource-management capabilities]
+- **Architecture and refactoring:** [Design methods, boundaries, patterns, dependency management,
+  code generation, or modernization capabilities]
+- **Integration and domain:** [Device, native, data, algorithm, protocol, or industry capabilities]
+- **Testing and delivery:** [Tests, diagnostics, packaging, CI/CD, deployment, and field support]
 
 ## Professional Experience
 
-### [Company] - [Role]
+### [Company] | [Role]
 
 [Location] | [YYYY.MM - Present]
 
-#### [Project]
+#### [Most target-relevant project or product]
 
-- **Problem and contribution:** [Recognizable system capability, defect, risk, or constraint;
-  personal action; and the minimum public technical detail needed to establish depth.]
-- **Outcome or current state:** [Supported delivery, use, acceptance, scale, measurement, patent,
-  publication, award, or bounded ongoing state.]
-- **Target relevance:** [Usually express this through the two bullets above; keep this label only
-  when the connection would otherwise be unclear.]
+- [Personal ownership and recognizable delivered scope.]
+- [Important implementation mechanisms, constraints, integration boundaries, or failure modes.]
+- [Supported delivery, acceptance, production use, measured result, verified fix, or bounded current
+  state.]
 
-[Optional role-wide achievement that is not attributable to one project. Label it clearly.]
+#### [Second target-relevant project or product]
 
-### [Previous Company] - [Role]
+- [Personal ownership and why the work mattered.]
+- [Technical depth that supports a material role requirement.]
+- [Supported outcome or current state, with collaboration boundaries preserved.]
 
-[Location] | [YYYY.MM - YYYY.MM]
+#### [Optional architecture, refactoring, or delivery initiative]
 
-#### [Project]
+- [One compact evidence-led bullet when this initiative adds a distinct target-relevant capability.]
 
-- **Problem and contribution:** [Recognizable system problem and personal action expressed without
-  requiring familiarity with private repository symbols.]
-- **Outcome or current state:** [Supported observable result, delivered capability, or bounded
-  ongoing state.]
+### [Previous Company] | [Role]
 
-## Selected Projects
+[Location when supplied] | [YYYY.MM - YYYY.MM]
 
-### [Project] - [Role]
+- [Relevant system, research, product, or automation work and the candidate's contribution.]
+- [Supported delivery, acceptance, adoption, patent, publication, or other observable result.]
 
-[YYYY.MM - YYYY.MM] | [Optional link]
+## Open Source and Independent Practice
 
-- **Problem and contribution:** [Recognizable system problem, personal action, and relevant public
-  technology or engineering mechanism.]
-- **Outcome or current state:** [A supported result, delivered capability, or bounded ongoing state
-  that does not imply unsupported success.]
-
-## Open Source and Selected Achievements
-
-- [Project, package, patent, publication, award, or certification with evidence and optional link.]
+- [Project or package]: [Recognizable problem, personal contribution, important technical mechanism,
+  and supported release, validation, adoption, or bounded current state.] [Optional link]
+- [Optional sustained practice or portfolio evidence]: [Start point and verifiable publication,
+  usage, or distribution signal without turning activity counts into impact.] [Optional link]
 
 ## Education
 
-### [Institution] - [Degree, Field]
+### [Institution] | [Degree and Field]
 
-[YYYY - YYYY] | [Optional distinction relevant to the target role]
+[YYYY - YYYY] | [Relevant language credential, competition result, or distinction]
 
-## Certifications
-
-- [Include only material, current credentials; remove this section when empty.]
+[Add a separate certifications section only when the credentials are material enough to improve the
+hiring decision. Remove all instructions and unused placeholders from the final resume.]
