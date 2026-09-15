@@ -96,6 +96,11 @@ scenarios:
         run: >-
           py -3.10 "${REPO_ROOT}/tests/tedtoolkit-hiring/helpers/validate_hiring_records.py"
           --workspace-root hiring-workspace
+          --expect-company-name hiring-workspace/companies/northwind/company.md=Northwind
+          --expect-role-title "hiring-workspace/companies/northwind/roles/platform/role.md=Platform Engineer"
+          --expect-role-title "hiring-workspace/companies/northwind/roles/data/role.md=Data Engineer"
+          --expect-candidate-name hiring-workspace/companies/northwind/candidates/avery/candidate.md=Avery
+          --expect-candidate-name hiring-workspace/companies/northwind/candidates/blake/candidate.md=Blake
           --record hiring-workspace/companies/northwind/company.md
           --record hiring-workspace/companies/northwind/roles/platform/role.md
           --record hiring-workspace/companies/northwind/roles/data/role.md

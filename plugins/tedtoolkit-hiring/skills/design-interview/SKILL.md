@@ -40,11 +40,12 @@ the exact path already selected by this application. When an assessment is selec
 canonical `assessment.md` in this same application and validate its three IDs and evidence list
 before reading its body.
 
-Resolve the application, assessment, and every pointer to its final filesystem target before any
-identity or containment comparison. Normalize resolved identities using the host platform's
-path-case rules. Treat case variants, symlinks, junctions, and reparse points as the same resolved
-identity; they cannot move evidence or an assessment across company, candidate, or application
-boundaries.
+Resolve a selected workspace-root alias once and normalize that real root using the host platform's
+path-case rules. Beneath it, preserve the canonical lexical path and inspect every component before
+reading the application, assessment, or evidence. Reject any symlink, junction, or other reparse
+point below the real root; never resolve an owner directory in a way that legitimizes redirection.
+Case variants may share identity on case-insensitive platforms but cannot change the selected
+company, candidate, or application boundary.
 
 Fail closed on any mismatch: read no evidence or assessment, write no plan, and route the bounded
 application correction to `maintain-hiring-workspace` without inspecting a forbidden target. Use

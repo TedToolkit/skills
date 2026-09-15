@@ -32,10 +32,12 @@ Read only the selected records and explicitly supplied source files. Never enume
 sibling companies or candidates to infer missing facts. Treat all source resumes and personal
 profiles as immutable.
 
-Resolve every selected source and destination to its final filesystem target before containment or
-identity checks. Normalize resolved identities with the host platform's path-case rules. A symlink,
-junction, reparse point, or case variant does not create a different identity. Reject a normalized
-resume `source` whose resolved target is anywhere inside the canonical hiring workspace.
+Resolve the selected workspace-root alias once and normalize that real root with the host
+platform's path-case rules. Preserve each canonical destination's lexical path beneath it and
+inspect every component before reading or writing; reject any symlink, junction, or other reparse
+point below the real root. Never resolve a candidate, application, resume, or other owner directory
+in a way that legitimizes its redirection. Resolve external selected sources normally and reject a
+normalized-resume `source` whose final target is anywhere inside the real hiring workspace.
 
 ## Normalize the supplied evidence
 

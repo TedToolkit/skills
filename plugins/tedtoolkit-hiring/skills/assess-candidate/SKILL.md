@@ -26,10 +26,10 @@ Before opening any evidence, read only the selected `application.md` and validat
 `company_id`, `role_id`, and `candidate_id` exactly match both the request and its canonical path.
 Then validate every `evidence` pointer without dereferencing it:
 
-- resolve the application and pointers to their final filesystem targets, normalize identity using
-  the host platform's path-case rules, and apply all equality and containment checks to those
-  normalized identities; a symlink, junction, reparse point, or case variant cannot bypass a
-  boundary;
+- resolve a selected workspace-root alias once and normalize that real root using the host
+  platform's path-case rules; beneath it, preserve the canonical lexical path and reject any
+  symlink, junction, or other reparse point in every company, candidate, application, and evidence
+  component before reading; never resolve an owner directory in a way that legitimizes redirection;
 
 - reject absolute, traversal, wildcard, missing, or ambiguous pointers;
 - for a pointer inside the selected workspace, require the exact canonical normalized-resume path

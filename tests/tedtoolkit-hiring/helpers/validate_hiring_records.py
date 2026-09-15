@@ -8,6 +8,7 @@ from datetime import date
 import os
 from pathlib import Path, PurePosixPath
 import re
+import stat
 import subprocess
 import tempfile
 
@@ -77,6 +78,63 @@ def path_identity(path: Path, strict: bool = True) -> str:
     return os.path.normcase(os.path.normpath(str(resolved)))
 
 
+def absolute_identity(path: Path) -> str:
+    return os.path.normcase(os.path.normpath(os.path.abspath(path)))
+
+
+def lexical_relative_parts(path: Path, root: Path) -> tuple[str, ...]:
+    path_id = absolute_identity(path)
+    root_id = absolute_identity(root)
+    try:
+        if os.path.commonpath((path_id, root_id)) != root_id:
+            fail(f"{path}: record is outside workspace root")
+    except ValueError:
+        fail(f"{path}: record is outside workspace root")
+    relative = os.path.relpath(os.path.abspath(path), os.path.abspath(root))
+    if relative == os.curdir:
+        return ()
+    return tuple(Path(relative).parts)
+
+
+def is_lexically_within(path: Path, root: Path) -> bool:
+    try:
+        lexical_relative_parts(path, root)
+        return True
+    except AssertionError:
+        return False
+
+
+def is_reparse_stat(info: os.stat_result) -> bool:
+    attributes = getattr(info, "st_file_attributes", 0)
+    reparse_flag = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
+    return stat.S_ISLNK(info.st_mode) or bool(attributes & reparse_flag)
+
+
+def reject_reparse_below_root(real_root: Path, parts: tuple[str, ...],
+                              lstat=None) -> Path:
+    inspect = lstat or (lambda candidate: candidate.lstat())
+    cursor = real_root
+    for part in parts:
+        cursor = cursor / part
+        try:
+            info = inspect(cursor)
+        except (FileNotFoundError, OSError) as exc:
+            fail(f"{cursor}: cannot inspect canonical workspace component: {exc}")
+        if is_reparse_stat(info):
+            fail(f"{cursor}: reparse points are forbidden below the real workspace root")
+    return cursor
+
+
+def workspace_path_identity(path: Path, root: Path) -> str:
+    parts = lexical_relative_parts(path, root)
+    try:
+        real_root = root.resolve(strict=True)
+    except (FileNotFoundError, OSError) as exc:
+        fail(f"{root}: cannot resolve selected workspace root: {exc}")
+    lexical_target = reject_reparse_below_root(real_root, parts)
+    return path_identity(lexical_target)
+
+
 def same_path(first: Path, second: Path, strict: bool = True) -> bool:
     return path_identity(first, strict) == path_identity(second, strict)
 
@@ -91,47 +149,47 @@ def is_within(path: Path, directory: Path, strict: bool = True) -> bool:
 
 
 def relative_parts(path: Path, root: Path) -> tuple[str, ...]:
-    if not is_within(path, root):
-        fail(f"{path}: record is outside workspace root")
-    relative = os.path.relpath(path_identity(path), path_identity(root))
-    return tuple(Path(relative).parts)
+    parts = lexical_relative_parts(path, root)
+    workspace_path_identity(path, root)
+    return parts
 
 
 def classify(path: Path, root: Path) -> tuple[str, str, str | None]:
     parts = relative_parts(path, root)
-    if len(parts) == 3 and parts[0] == "companies" and parts[2] == "company.md":
-        return "company", parts[1], None
+    folded = tuple(os.path.normcase(part) for part in parts)
+    if len(parts) == 3 and folded[0] == "companies" and folded[2] == "company.md":
+        return "company", folded[1], None
     if (
-        len(parts) == 5 and parts[0] == "companies" and parts[2] == "roles"
-        and parts[4] == "role.md"
+        len(parts) == 5 and folded[0] == "companies" and folded[2] == "roles"
+        and folded[4] == "role.md"
     ):
-        return "role", parts[1], parts[3]
+        return "role", folded[1], folded[3]
     if (
-        len(parts) == 5 and parts[0] == "companies" and parts[2] == "candidates"
-        and parts[4] == "candidate.md"
+        len(parts) == 5 and folded[0] == "companies" and folded[2] == "candidates"
+        and folded[4] == "candidate.md"
     ):
-        return "candidate", parts[1], parts[3]
+        return "candidate", folded[1], folded[3]
     if (
-        len(parts) == 7 and parts[0] == "companies" and parts[2] == "candidates"
-        and parts[4] == "resumes" and re.fullmatch(r"\d{4}-\d{2}-\d{2}-resume\.md", parts[5])
+        len(parts) == 7 and folded[0] == "companies" and folded[2] == "candidates"
+        and folded[4] == "resumes" and re.fullmatch(r"\d{4}-\d{2}-\d{2}-resume\.md", folded[5])
     ):
         # Kept for a defensive error below; canonical resumes have six relative parts.
         fail(f"{path}: unexpected resume path depth")
     if (
-        len(parts) == 6 and parts[0] == "companies" and parts[2] == "candidates"
-        and parts[4] == "resumes" and re.fullmatch(r"\d{4}-\d{2}-\d{2}-resume\.md", parts[5])
+        len(parts) == 6 and folded[0] == "companies" and folded[2] == "candidates"
+        and folded[4] == "resumes" and re.fullmatch(r"\d{4}-\d{2}-\d{2}-resume\.md", folded[5])
     ):
-        return "resume", parts[1], parts[3]
+        return "resume", folded[1], folded[3]
     if (
-        len(parts) == 6 and parts[0] == "companies" and parts[2] == "applications"
-        and parts[5] in {"application.md", "assessment.md", "interview-plan.md"}
+        len(parts) == 6 and folded[0] == "companies" and folded[2] == "applications"
+        and folded[5] in {"application.md", "assessment.md", "interview-plan.md"}
     ):
         kind = {
             "application.md": "application",
             "assessment.md": "assessment",
             "interview-plan.md": "interview",
-        }[parts[5]]
-        return kind, parts[1], f"{parts[3]}/{parts[4]}"
+        }[folded[5]]
+        return kind, folded[1], f"{folded[3]}/{folded[4]}"
     fail(f"{path}: not a canonical hiring record path")
 
 
@@ -185,21 +243,26 @@ def resolve_pointer(pointer: str, root: Path, path: Path) -> Path:
         target = root.joinpath(*parts)
     else:
         target = root.parent.joinpath(*parts)
+    if is_lexically_within(target, root):
+        workspace_path_identity(target, root)
+    else:
+        path_identity(target)
     if not target.is_file():
         fail(f"{path}: pointer does not name an existing file {pointer!r}")
-    path_identity(target)
     return target
 
 
 def validate_evidence_pointer(pointer: str, root: Path, company: str, candidate: str,
                               path: Path) -> Path:
     target = resolve_pointer(pointer, root, path)
-    if is_within(target, root):
+    if is_lexically_within(target, root):
         resume_directory = root / "companies" / company / "candidates" / candidate / "resumes"
-        if not same_path(target.parent, resume_directory):
+        if absolute_identity(target.parent) != absolute_identity(resume_directory):
             fail(f"{path}: cross-boundary workspace evidence {pointer!r}")
         if not re.fullmatch(r"\d{4}-\d{2}-\d{2}-resume\.md", target.name, re.IGNORECASE):
             fail(f"{path}: non-canonical normalized resume pointer {pointer!r}")
+    elif is_within(target, root):
+        fail(f"{path}: indirect workspace alias is forbidden for evidence {pointer!r}")
     return target
 
 
@@ -212,7 +275,7 @@ def validate_source_pointer(pointer: str, expected: str, root: Path, path: Path)
     expected_target = resolve_pointer(expected, root, path)
     if not same_path(target, expected_target):
         fail(f"{path}: source must equal the request-selected immutable source {expected!r}")
-    if is_within(target, root):
+    if is_lexically_within(target, root) or is_within(target, root):
         fail(f"{path}: source must not point to a canonical hiring record")
 
 
@@ -221,20 +284,48 @@ def require_no_verdict(body: str, path: Path) -> None:
     assert_no_protected_content(body, path)
 
 
+def require_structured_requirements(body: str, heading: str, requirements: list[str],
+                                    path: Path) -> None:
+    match = re.search(
+        rf"(?ms)^##\s+{re.escape(heading)}\s*$\n(.*?)(?=^#{{1,2}}\s|\Z)", body,
+    )
+    if not match:
+        fail(f"{path}: missing structured {heading.casefold()} section")
+    structured_lines = []
+    for line in match.group(1).splitlines():
+        stripped = line.strip()
+        if re.match(r"^(?:[-*+]\s+|\d+[.)]\s+|\|)", stripped):
+            if re.fullmatch(r"\|?[\s:|-]+\|?", stripped):
+                continue
+            structured_lines.append(stripped.casefold())
+    for requirement in requirements:
+        if not any(requirement.casefold() in line for line in structured_lines):
+            fail(f"{path}: {requirement!r} is not a structured item in {heading!r}")
+
+
 def validate(path: Path, root: Path, requirements: list[str], expected_sources: dict[str, str],
-             expected_evidence: dict[str, list[str]]) -> str:
+             expected_evidence: dict[str, list[str]],
+             expected_h1: dict[str, str] | None = None) -> str:
+    expected_h1 = expected_h1 or {}
     kind, company, tail = classify(path, root)
     metadata, body = load(path)
     require_ids(metadata, kind, company, tail, path)
 
+    h1s = re.findall(r"(?m)^#\s+\S.*$", body)
     fixed_h1 = {
         "resume": "# Normalized Resume",
         "application": "# Application",
         "assessment": "# Candidate Assessment",
         "interview": "# Interview Plan",
     }.get(kind)
-    if fixed_h1 and re.findall(r"(?m)^#\s+\S.*$", body) != [fixed_h1]:
+    if fixed_h1 and h1s != [fixed_h1]:
         fail(f"{path}: expected H1 {fixed_h1!r}")
+    if kind in {"company", "role", "candidate"}:
+        expected = expected_h1.get(record_key(path))
+        if expected is None:
+            fail(f"{path}: request-specified display heading is required")
+        if h1s != [f"# {expected}"]:
+            fail(f"{path}: expected request-specified H1 {expected!r}")
 
     if kind == "resume":
         if not isinstance(metadata.get("source"), str) or not metadata["source"].strip():
@@ -251,6 +342,7 @@ def validate(path: Path, root: Path, requirements: list[str], expected_sources: 
             path if kind == "application"
             else root / "companies" / company / "applications" / role / candidate / "application.md"
         )
+        workspace_path_identity(application, root)
         if kind == "application":
             selected = evidence
         else:
@@ -284,18 +376,13 @@ def validate(path: Path, root: Path, requirements: list[str], expected_sources: 
             ):
                 fail(f"{path}: assessment must equal {expected!r}")
         if kind == "assessment":
-            if "## Requirement Evidence Matrix" not in body:
-                fail(f"{path}: missing structured requirement evidence matrix")
+            require_structured_requirements(
+                body, "Requirement Evidence Matrix", requirements, path,
+            )
             require_no_verdict(body, path)
         elif kind == "interview":
-            if "## Requirement Coverage" not in body:
-                fail(f"{path}: missing structured requirement coverage")
+            require_structured_requirements(body, "Requirement Coverage", requirements, path)
             require_no_verdict(body, path)
-
-    folded = body.casefold()
-    for requirement in requirements:
-        if requirement.casefold() not in folded:
-            fail(f"{path}: missing requirement coverage for {requirement!r}")
     return kind
 
 
@@ -354,11 +441,16 @@ def self_test() -> None:
 
         expected_sources = {record_key(paths["resume"]): "source.md"}
         expected_evidence = {record_key(paths["application"]): [selected]}
+        expected_h1 = {
+            record_key(paths["company"]): "Northwind",
+            record_key(paths["role"]): "Platform Engineer",
+            record_key(paths["candidate"]): "Avery",
+        }
         observed = {
             validate(
                 path, root,
                 ["Kubernetes operations"] if kind in {"assessment", "interview"} else [],
-                expected_sources, expected_evidence,
+                expected_sources, expected_evidence, expected_h1,
             )
             for kind, path in paths.items()
         }
@@ -366,6 +458,9 @@ def self_test() -> None:
             fail(f"not every canonical kind was validated: {observed!r}")
 
         mutations = (
+            ("wrong company H1", paths["company"], paths["company"].read_text().replace("# Northwind", "# Fabrikam")),
+            ("wrong role H1", paths["role"], paths["role"].read_text().replace("# Platform Engineer", "# Data Engineer")),
+            ("wrong candidate H1", paths["candidate"], paths["candidate"].read_text().replace("# Avery", "# Blake")),
             ("missing id", paths["assessment"], assessment_text.replace("candidate_id: avery\n", "")),
             ("mismatched id", paths["assessment"], assessment_text.replace("candidate_id: avery", "candidate_id: blake")),
             ("malformed frontmatter", paths["assessment"], assessment_text.replace("company_id: northwind", "company_id: [")),
@@ -389,6 +484,10 @@ def self_test() -> None:
             ("semantic hired verdict", paths["assessment"], assessment_text + "\nAvery should be hired.\n"),
             ("recommend hiring verdict", paths["assessment"], assessment_text + "\nI recommend hiring Avery.\n"),
             ("yes decision verdict", paths["assessment"], assessment_text + "\nFinal decision: yes.\n"),
+            ("empty assessment matrix", paths["assessment"], assessment_text.replace("| Kubernetes operations | Not demonstrated |", "")),
+            ("assessment body-only requirement", paths["assessment"], assessment_text.replace("| Kubernetes operations | Not demonstrated |", "Kubernetes operations are discussed in prose.")),
+            ("empty interview coverage", paths["interview"], interview_text.replace("- Kubernetes operations: Question 1", "")),
+            ("interview body-only requirement", paths["interview"], interview_text.replace("- Kubernetes operations: Question 1", "Kubernetes operations are discussed in prose.")),
         )
         originals = {path: path.read_text(encoding="utf-8") for path in paths.values()}
         checks = 0
@@ -398,7 +497,7 @@ def self_test() -> None:
                 validate(
                     path, root,
                     ["Kubernetes operations"] if path.name != "application.md" else [],
-                    expected_sources, expected_evidence,
+                    expected_sources, expected_evidence, expected_h1,
                 )
             except (AssertionError, yaml.YAMLError):
                 pass
@@ -494,6 +593,94 @@ def self_test() -> None:
 
         workspace_alias = root.parent / "workspace-alias"
         create_directory_alias(workspace_alias, root)
+        validate(
+            workspace_alias / "companies/northwind/company.md", workspace_alias, [],
+            expected_sources, expected_evidence, expected_h1,
+        )
+        checks += 1
+        if os.name == "nt":
+            case_root = Path(str(root).upper())
+            validate(
+                case_root / "COMPANIES/NORTHWIND/COMPANY.MD", case_root, [],
+                expected_sources, expected_evidence, expected_h1,
+            )
+            checks += 1
+
+        candidate_alias = base / "candidates/reparse-avery"
+        create_directory_alias(candidate_alias, base / "candidates/avery")
+        try:
+            validate(
+                candidate_alias / "candidate.md", root, [], expected_sources,
+                expected_evidence, expected_h1,
+            )
+        except AssertionError:
+            pass
+        else:
+            fail("candidate-directory junction passed")
+        checks += 1
+
+        application_alias = base / "applications/platform/reparse-avery"
+        create_directory_alias(application_alias, base / "applications/platform/avery")
+        try:
+            validate(
+                application_alias / "assessment.md", root,
+                ["Kubernetes operations"], expected_sources, expected_evidence,
+                expected_h1,
+            )
+        except AssertionError:
+            pass
+        else:
+            fail("application-directory junction passed")
+        checks += 1
+
+        linked_candidate = base / "candidates/linked"
+        linked_candidate.mkdir(parents=True)
+        create_directory_alias(linked_candidate / "resumes", blake_resume.parent)
+        linked_pointer = (
+            "hiring-workspace/companies/northwind/candidates/linked/"
+            "resumes/2026-09-15-resume.md"
+        )
+        linked_application = base / "applications/platform/linked/application.md"
+        write(
+            linked_application,
+            frontmatter(
+                company_id="northwind", role_id="platform", candidate_id="linked",
+                updated="2026-09-15", evidence=[linked_pointer],
+            ) + "# Application\n",
+        )
+        try:
+            validate(
+                linked_application, root, [], expected_sources,
+                {record_key(linked_application): [linked_pointer]}, expected_h1,
+            )
+        except AssertionError:
+            pass
+        else:
+            fail("resume-directory junction passed")
+        checks += 1
+
+        real_root = root.resolve(strict=True)
+        file_parts = lexical_relative_parts(paths["resume"], root)
+        file_target = real_root.joinpath(*file_parts)
+        reparse_flag = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
+
+        class ReparseFileStat:
+            st_mode = file_target.lstat().st_mode
+            st_file_attributes = reparse_flag
+
+        def file_reparse_lstat(candidate: Path):
+            if absolute_identity(candidate) == absolute_identity(file_target):
+                return ReparseFileStat()
+            return candidate.lstat()
+
+        try:
+            reject_reparse_below_root(real_root, file_parts, file_reparse_lstat)
+        except AssertionError:
+            pass
+        else:
+            fail("file reparse point passed")
+        checks += 1
+
         alias_source = (
             "workspace-alias/companies/northwind/candidates/avery/"
             "resumes/2026-09-15-resume.md"
@@ -589,8 +776,8 @@ def self_test() -> None:
                 checks += 1
     print(f"7 canonical kinds and {checks} mutation/policy checks passed")
     print(
-        f"path identity ({os.name}): 4 case-variant checks and "
-        "1 resolved-alias containment check passed"
+        f"path identity ({os.name}): case/root-alias checks and "
+        "4 reparse containment checks passed"
     )
 
 
@@ -617,6 +804,9 @@ def main() -> None:
     parser.add_argument("--requirement", action="append", default=[])
     parser.add_argument("--expect-source", action="append", default=[])
     parser.add_argument("--expect-evidence", action="append", default=[])
+    parser.add_argument("--expect-company-name", action="append", default=[])
+    parser.add_argument("--expect-role-title", action="append", default=[])
+    parser.add_argument("--expect-candidate-name", action="append", default=[])
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test:
@@ -627,8 +817,22 @@ def main() -> None:
     root = Path(args.workspace_root)
     expected_sources = parse_bindings(args.expect_source, "--expect-source", many=False)
     expected_evidence = parse_bindings(args.expect_evidence, "--expect-evidence", many=True)
+    expected_h1 = {}
+    for values, label in (
+        (args.expect_company_name, "--expect-company-name"),
+        (args.expect_role_title, "--expect-role-title"),
+        (args.expect_candidate_name, "--expect-candidate-name"),
+    ):
+        parsed = parse_bindings(values, label, many=False)
+        overlap = expected_h1.keys() & parsed.keys()
+        if overlap:
+            fail(f"{label}: duplicate display-heading binding")
+        expected_h1.update(parsed)
     observed = [
-        validate(Path(record), root, args.requirement, expected_sources, expected_evidence)
+        validate(
+            Path(record), root, args.requirement, expected_sources, expected_evidence,
+            expected_h1,
+        )
         for record in args.record
     ]
     print(f"validated {len(observed)} canonical record(s): {', '.join(observed)}")

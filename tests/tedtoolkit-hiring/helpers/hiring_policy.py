@@ -6,19 +6,23 @@ import re
 
 
 HUMAN_OWNER = "Decision owner: the accountable human hiring team."
-NAME = r"(?:(?:the\s+)?(?:candidate|applicant)|[A-Z][\w'-]*)"
 ACTION = (
     r"(?:hir(?:e|ed|ing)|reject(?:ed|ing|ion)?|advanc(?:e|ed|ing|ement)|"
     r"select(?:ed|ing|ion)?|eliminat(?:e|ed|ing|ion)|proceed(?:ed|ing)?|"
     r"invit(?:e|ed|ing|ation)|mov(?:e|ed|ing)\s+forward)"
 )
+SAFE_SUBJECT = (
+    r"(?:(?!\s+(?:and|but|yet|although|however|should|must|will|would|can|"
+    r"gets?|receives?|merits?|deserves?|proceed(?:s|ed|ing)?|advanc(?:e|es|ed|ing))\b)"
+    r"[^,.!?;\r\n])+"
+)
 SAFE_ACTION_SPAN = (
     rf"(?:"
-    rf"\bThis\s+assessment\s+does\s+not\s+recommend\s+hiring\s+{NAME}|"
-    rf"\bWe\s+are\s+unable\s+to\s+recommend\s+hiring\s+{NAME}|"
-    rf"\bI\s+cannot\s+recommend\s+whether\s+to\s+hire\s+or\s+reject\s+{NAME}|"
+    rf"\bThis\s+assessment\s+does\s+not\s+recommend\s+hiring\s+{SAFE_SUBJECT}|"
+    rf"\bWe\s+are\s+unable\s+to\s+recommend\s+hiring\s+{SAFE_SUBJECT}|"
+    rf"\bI\s+cannot\s+recommend\s+whether\s+to\s+hire\s+or\s+reject\s+{SAFE_SUBJECT}|"
     rf"\bOnly\s+the\s+accountable\s+human\s+hiring\s+team\s+may\s+decide\s+"
-    rf"whether\s+to\s+hire\s*,\s*reject\s*,\s*or\s*advance\s+{NAME}"
+    rf"whether\s+to\s+hire\s*,\s*reject\s*,\s*or\s*advance\s+{SAFE_SUBJECT}"
     rf")"
 )
 OUTCOME_ACTION = (
@@ -27,15 +31,17 @@ OUTCOME_ACTION = (
     rf"(?::|\bis\b|-)\s*(?:yes|no|positive|negative|{ACTION})\b|"
     rf"\b(?:strong|weak|lean|clear)\s+(?:hire|reject|yes|no)\b|"
     rf"\brecommend(?:ed|s|ing|ation)?\b[^.!?;\r\n]{{0,80}}"
-    rf"(?:\b{ACTION}\b|\b{NAME}\b)|"
-    rf"\b{NAME}\s+(?:should|must|will|would|can|is\s+to|gets?|receives?)\b"
-    rf"[^.!?;\r\n]{{0,80}}\b{ACTION}\b|"
+    rf"\b{ACTION}\b|"
+    rf"\b(?:should|must|will|would|can|is\s+to|gets?|receives?|"
+    rf"merits?|deserves?)\b[^.!?;\r\n]{{0,80}}\b{ACTION}\b|"
     rf"\bevidence\s+(?:supports?|justifies?|warrants?|indicates?)\b"
     rf"[^.!?;\r\n]{{0,80}}\b{ACTION}\b|"
     rf"(?:\A|[.!?;:\r\n])\s*(?:please\s+)?"
-    rf"(?:hire|reject|advance|select|eliminate|invite)\s+{NAME}\b|"
-    rf"\bproceed\s+with\s+(?:{NAME}|the\s+application)\b|"
-    rf"\b(?:move|send)\s+{NAME}\s+forward\b|"
+    rf"(?:hire|reject|advance|select|eliminate|invite)\b|"
+    rf"\bproceed\s+with\s+[^.!?;\r\n]+|"
+    rf"\b(?:move|send)\s+[^.!?;\r\n]{{1,80}}\s+forward\b|"
+    rf"\b(?:application|candidacy)\b[^.!?;\r\n]{{0,40}}"
+    rf"\b(?:merits?|deserves?)\b[^.!?;\r\n]{{0,20}}\b{ACTION}\b|"
     rf"\b(?:advance|proceed|progress|move|send|invite)\b[^.!?;\r\n]{{0,80}}"
     rf"\b(?:next|further)\s+(?:stage|round|step)\b|"
     rf"\b(?:give|gets?|receives?|received)\b[^.!?;\r\n]{{0,80}}"

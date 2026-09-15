@@ -52,11 +52,13 @@ pointers are allowed when the application already selected their exact paths. Re
 traversal, wildcard, cross-company, cross-candidate, and cross-application pointers before opening
 any evidence.
 
-Resolve every record and pointer to its final filesystem target before comparing identity or
-containment, and normalize the resolved identity using the host platform's path-case rules. Treat a
-case variant, symlink, junction, or reparse point as the identity of its resolved target. Apply the
-company, candidate, application, and workspace boundaries to that normalized identity rather than
-the pointer spelling.
+Resolve a selected workspace-root alias once and normalize that real root using the host platform's
+path-case rules. Beneath that real root, preserve the canonical lexical path and inspect every
+component before reading: reject any symlink, junction, or other reparse point in a company, role,
+candidate, application, or evidence path. Never resolve a canonical owner directory in a way that
+legitimizes its redirection. Case variants may share identity on case-insensitive platforms, but an
+internal reparse point never creates another valid canonical path. Resolve external immutable
+sources normally, then reject any whose final identity is inside the real workspace root.
 
 Validate provenance against the current request, not merely path shape: each normalized resume's
 `source` must equal the exact immutable source selected for that record, and each application's
