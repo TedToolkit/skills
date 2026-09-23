@@ -1,4 +1,4 @@
 interface:
   display_name: "Prepare for Interview"
-  short_description: "Build an evidence-based candidate practice plan"
-  default_prompt: "Use $prepare-for-interview to build my interview preparation pack from my background and target role."
+  short_description: "Prepare personal stories and role questions"
+  default_prompt: "Use $prepare-for-interview to prepare personal talking points, likely questions, and practice tasks from my resume and target role."
