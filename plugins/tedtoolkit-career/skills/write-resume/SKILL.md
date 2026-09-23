@@ -34,10 +34,12 @@ After that gate, identify seniority, audience, locale, language, and desired det
 context. For a technical role, plan explicitly for both the recruiter or hiring-manager scan and the
 technical reader's evidence check.
 
-Use two pages as the default target when the role expects roughly five or more years, the candidate
-has enough relevant evidence, and both recruiter and technical readers need meaningful depth. Keep
-one page for early-career or evidence-limited candidates. Never pad weak evidence to reach a page
-count or compress strong evidence into vague claims merely to force one page.
+Choose the page budget from evidence density and hiring value after selection, not from years of
+experience alone. Use the shortest version that preserves the candidate's meaningful fit, practical
+breadth, distinctive strengths, and strongest proof. One or two pages are both normal; use a
+second page when it adds distinct proof of current fit or a substantial transferable strength.
+Never pad weak evidence to reach a page count or compress strong
+evidence into vague claims merely to force one page.
 
 Ask one focused question only when the answer would materially change positioning or make the
 requested copy unsafe to produce under the shared integrity rules. Route career-history recording
@@ -68,10 +70,12 @@ name is externally meaningful or the technical reader genuinely needs it to vali
 
 ## Evaluate project evidence
 
-Apply the shared project-and-outcome claim rules. Rank retained projects by target relevance and
-evidence strength. Retain a project only when it supports at least one material responsibility,
-qualification, domain need, or truthful differentiator for the target; make that relevance visible
-in its bullets. Merge, compress, or remove projects whose only merit is general technical interest.
+Apply the shared project-and-outcome claim rules. Rank retained projects by target relevance,
+evidence strength, and the distinctiveness of the capability they prove. Retain a project when it
+supports a material target need or demonstrates a substantial personal strength with credible
+transferability or future value, even if the current role does not ask for it. Make its value clear
+without claiming an unevidenced future employer need. Merge, compress, or remove projects whose
+only merit is general technical interest.
 
 Require each retained project to carry at least one supported outcome, delivered capability, reuse
 signal, verified defect removal, release or migration state, test/acceptance result, or bounded
@@ -85,7 +89,8 @@ Before writing the complete resume, build this strategy:
 
 1. target positioning and audience;
 2. section order, page budget, and whether one or two pages are justified;
-3. requirement-to-project mapping and evidence to emphasize;
+3. requirement-to-project mapping, plus exceptional capabilities worth showing beyond the
+   current requirements and the evidence that earns their space;
 4. recruiter-scan message and technical-reader proof;
 5. evidence-backed technical signature or working style to surface;
 6. content to remove, merge, or de-emphasize;
@@ -103,8 +108,18 @@ never authorizes a claim that fails the shared integrity rules.
 Make the strongest relevant evidence visible in the first third. Prefer reverse chronology and
 retain only sections that improve the hiring decision.
 
-- Keep the summary to two to four evidence-led lines.
-- Group skills by useful capability; remove ratings and undifferentiated inventories.
+- Keep the summary to two to four evidence-led lines. Lead with one clear professional identity,
+  then cover the supported relevant experience span, principal direction, core stack and where it
+  has been applied, the candidate's strongest capability, current or most important role and scope,
+  and one or two highest-value outcomes. Rank these facts around what is most distinctive for the
+  target or candidate instead of giving every skill equal weight or turning the summary into a keyword list.
+- Build a layered core-skills section: lead with target-critical capabilities, then include supported
+  hands-on abilities and adjacent technologies. Give evidence-backed distinctive or exceptional
+  capabilities space even when the current posting does not request them, when they show depth,
+  transferable judgment, or plausible future usefulness. Group skills by application or
+  capability instead of presenting an undifferentiated inventory.
+- Express personal capabilities through demonstrated engineering practice—such as diagnosis,
+  design, integration, delivery, or technical ownership—not unsupported traits or self-ratings.
 - Write bullets as action plus object or constraint plus outcome, deliverable, or current state.
 - Translate repository evidence into reader-facing engineering language before drafting each bullet:
   `system or user problem + personal action + relevant technical method + supported result`.
@@ -113,12 +128,19 @@ retain only sections that improve the hiring decision.
 - Layer technical bullets for two readers: make the first clause legible to a recruiter, then add
   enough implementation detail, constraint, or failure mode for a technical reader to validate the
   claim. Do not split the resume into separate recruiter and engineer sections.
-- Surface one or two recurring, supported engineering patterns as the candidate's technical
-  signature, such as root-cause repair, contract-first design, difficult integration boundaries,
-  or reusable tooling. Express personality through demonstrated choices and working style, not
+- When the source and target industries differ, translate source-industry nouns and local workflow
+  names upward into widely recognizable system capabilities, business problems, technical
+  boundaries, or delivery responsibilities. Lead with the transferable meaning and retain the
+  original industry term only when it adds necessary context or proof. Preserve the actual source
+  domain; never substitute target-industry vocabulary in a way that implies experience the
+  candidate does not have.
+- Surface one or two evidence-backed strengths as the candidate's technical signature, whether
+  exceptional capabilities or recurring engineering patterns such as root-cause repair,
+  contract-first design, difficult integration boundaries, or reusable tooling. Express personality through demonstrated choices and working style, not
   unsupported adjectives, hobbies, slogans, or self-ratings.
-- Give every retained project a visible target reason and at least one outcome or current-state
-  proof. Prefer fewer relevant projects with stronger proof over a broad portfolio inventory.
+- Give every retained project a visible reason for inclusion: current target fit or a distinctive,
+  transferable strength. Require at least one outcome or current-state proof. Prefer fewer projects
+  with stronger proof over a broad portfolio inventory.
 - Use repeated **Responsibilities and implementation** / **Outcome or current state** labels only
   when they make several named projects easier to scan; compact achievement bullets are also valid.
 - Remove filler, self-praise, repetition, and detail that belongs in an interview.
@@ -128,6 +150,8 @@ Apply an outsider-comprehension gate to every project bullet:
 1. Can a recruiter identify what capability, defect, risk, or delivery problem was addressed?
 2. Can a technical reader identify the relevant platform, mechanism, constraint, or trade-off?
 3. Can both readers identify what changed as a result?
+4. When industries differ, can a target-industry reader understand the transferable meaning without
+   knowing the source industry's internal terminology?
 
 If any answer depends on knowing the repository, rewrite the bullet. Replace private symbols with
 their engineering meaning—for example, “strongly typed entity identifiers” rather than `Id<T>`,
@@ -147,20 +171,24 @@ Return a single-column Markdown resume with one `#` name heading, compact contac
 columns, images, icons, emoji, badges, progress bars, raw HTML, or decorative separators. Do not
 create PDF or DOCX in this skill.
 
-Aim for one page with limited experience. For experienced technical candidates, especially roles
-that ask for five or more years, default to a deliberate two-page information budget when relevant
-evidence supports it: page one establishes fit and strongest recent proof; page two completes the
-remaining relevant proof, differentiators, and concise education or credentials. Longer output
-requires an explicit academic, publication, portfolio, or jurisdiction-specific need.
+Use one page when target fit, practical breadth, distinctive strengths, and proof remain clear
+without over-compression. Use two pages when a second page contributes distinct experience,
+applied capabilities, exceptional strengths, or credentials that could change the hiring decision.
+Do not infer the
+page count from tenure or seniority alone. Longer output requires an explicit academic, publication,
+portfolio, or jurisdiction-specific need.
 
 ## Verify and deliver
 
 Check every final claim against the shared integrity ledger, then verify links, tense, language,
 target terminology, duplication, and unsupported skills. Confirm that every retained project maps
-to a material target need, every project has outcome/current-state evidence, the first third works
+to a material target need or demonstrates a distinctive transferable strength, and that every
+project has outcome/current-state evidence, the first third works
 for a recruiter scan, and the technical detail is sufficient without becoming implementation
 transcript. Also confirm that no bullet requires familiarity with a private repository, internal
-class hierarchy, or commit history to understand its problem, action, technology, and result.
+class hierarchy, commit history, or source-industry vocabulary to understand its problem, action,
+technology, and result, and that cross-industry translation does not imply unsupported target-domain
+experience.
 
 Deliver rendered Markdown or a `.md` file when requested. Inside a selected career workspace, the
 canonical destination is `applications/<company-id>/<role-id>/resume.md`; writing it requires exact

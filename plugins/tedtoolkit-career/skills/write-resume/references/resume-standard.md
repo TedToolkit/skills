@@ -43,6 +43,62 @@ Remove empty, generic, outdated, duplicated, or target-irrelevant sections. An a
 a different order and length, but only when the user explicitly requests a CV rather than a
 professional resume.
 
+## Professional summary contract
+
+Use the summary to establish the candidate's primary professional identity, not to compress every
+skill into an introduction. In two to four evidence-led lines, make the following legible in this
+order when supported and relevant:
+
+1. **Experience and direction:** relevant experience span plus the principal role family, technical
+   direction, or domain being pursued.
+2. **Primary capability and stack:** the candidate's strongest job-relevant capability and the core
+   technologies that enable it.
+3. **Application and ownership scope:** the systems, products, domains, or lifecycle stages where
+   those technologies have been applied; include the current remit or another important role when
+   it materially establishes level, ownership, or breadth.
+4. **Proof:** one or two strongest supported outcomes, delivered capabilities, scale signals, or
+   recurring engineering patterns that distinguish the candidate for the target.
+
+Make one primary theme unmistakable; subordinate supporting technologies and secondary strengths
+to it. Connect technologies to their application rather than listing names, and describe role
+scope through owned decisions, systems, delivery stages, or collaboration boundaries instead of a
+title alone. Prefer current work scope when it is both supported and target-relevant; otherwise use
+the most relevant demonstrated scope.
+
+State years only from supported chronology, do not double-count overlapping work, and distinguish
+overall experience from experience in a particular stack or domain. If a required summary fact is
+missing, ask only when it would materially change positioning; otherwise omit it rather than infer
+seniority, tenure, ownership, or results.
+
+## Core skills and practical breadth
+
+The core-skills section should reveal both target fit and the candidate's broader usable ability.
+Organize supported skills in decreasing hiring relevance:
+
+1. **Primary capabilities:** the main stack, domain, and engineering abilities central to the target
+   and the candidate's professional identity.
+2. **Applied breadth:** adjacent languages, frameworks, platforms, tools, integration boundaries,
+   and lifecycle capabilities the candidate has used in real work or substantial projects.
+3. **Distinctive strengths:** evidence-backed capabilities or rare combinations that show depth,
+   versatility, or transferable judgment, even when the current posting does not request them.
+4. **Engineering practice and ownership:** demonstrated abilities such as requirements analysis,
+   architecture, root-cause diagnosis, refactoring, testing, delivery, field support, mentoring, or
+   cross-team technical coordination.
+
+A skill does not have to appear in the job posting to earn space. Retain it when evidence shows
+substantial hands-on use and it strengthens target fit, practical range, or a distinctive technical
+identity with plausible future value. Show the capability without claiming an unevidenced future
+need at the employer. Connect important technologies to their application scope; for example, native interop, desktop
+delivery, data processing, device integration, build tooling, or production support. Describe
+personal abilities as observable work the candidate can perform, not adjectives such as “strong,”
+“excellent,” or “expert.”
+
+Do not imply the same depth for every item. Prefer capabilities backed by delivery, repeated use,
+problem solving, or a substantial project. Clearly subordinate bounded working familiarity when it
+is useful, and omit technologies that were only encountered or cannot be connected to supported
+practice. Keep enough breadth to represent the person truthfully, but remove trivial, obsolete, or
+repetitive items that dilute the main capability.
+
 ## Evidence-led bullets
 
 Build each bullet from the strongest available combination of:
@@ -98,11 +154,35 @@ Do not include provenance defenses such as “I am not claiming the whole system
 Scope ownership with a concrete verb and object, and keep audit limitations in the evidence ledger
 or delivery notes.
 
+## Cross-industry terminology
+
+When the candidate's source industry differs from the target industry, make transferable capability
+visible before source-industry vocabulary. Translate a specific industry object, workflow, device,
+or internal role into the closest truthful higher-level concept a general hiring reader can
+understand, such as:
+
+- the system or product capability being delivered;
+- the business or operational problem being solved;
+- the integration, data, reliability, safety, or lifecycle boundary being handled; or
+- the decisions, coordination, and delivery scope the candidate owned.
+
+Use the broad term in the first clause. Retain the precise source-industry term afterward, often in
+parentheses or a short qualifier, only when it provides material context, establishes technical
+difficulty, or is likely to be recognized by the target reader. Do not replace a precise term with a
+generic phrase such as “business system” when that would erase meaningful engineering depth.
+
+Abstract the vocabulary, not the evidence. Preserve the actual source domain, personal contribution,
+technical method, constraints, and results. Never rename a source-industry process or product with a
+target-industry term merely because the functions appear analogous; that would falsely imply direct
+target-domain experience. The final wording should let a target-industry reader see both what the
+candidate actually did and why the capability transfers.
+
 ## Project relevance gate
 
-For a targeted resume, every retained project must visibly support at least one material job
-responsibility, required or preferred qualification, domain context, or defensible differentiator.
-Remove or compress a technically impressive project when the reader must guess why it matters.
+For a targeted resume, every retained project must visibly support a material job need or prove a
+distinctive, substantial strength with credible transferability or future usefulness. Current
+requirements should lead, but they do not exhaust the candidate's value. Remove or compress a
+technically impressive project when its contribution or value is unclear to the reader.
 
 Across retained projects, cover the target's highest-priority themes without repeating the same
 proof. A useful portfolio often assigns each project a primary role, such as desktop delivery,
@@ -110,7 +190,8 @@ device or native integration, concurrency, system design, test/reliability, or d
 
 ## Technical signature
 
-Derive one or two memorable engineering patterns from repeated evidence across projects. Good
+Derive one or two memorable strengths from substantial evidence, including an exceptional
+capability beyond current requirements or a recurring engineering pattern. Good
 signatures are observable working choices, for example:
 
 - turning recurring defects into regression tests and explicit contracts;
@@ -141,16 +222,18 @@ label them clearly so they are not mistaken for an unstructured project bullet.
 
 ## Length and selection
 
-- Early career or limited relevant evidence: aim for one page of content.
-- Experienced technical candidates, especially when the target asks for roughly five or more years:
-  default to two pages when enough relevant proof exists for both recruiter and technical readers.
-- Senior specialists: keep two pages unless additional detail changes the hiring decision.
-- Academic, research, publication, or regulated CVs: allow longer formats only by explicit choice.
+- Use the shortest length that preserves clear target fit, meaningful practical breadth,
+  distinctive strengths, and strong evidence; tenure and seniority do not determine page count.
+- Use one page when the hiring case remains specific and readable after weak or repeated material is
+  removed.
+- Use two pages only when the second page adds distinct experience, applied capabilities,
+  exceptional strengths, or credentials that could affect the hiring decision.
+- Academic, research, publication, or regulated CVs may run longer only by explicit choice.
 
 Shorten by removing weak and repeated evidence before compressing strong evidence into vague prose.
 Do not repeat the same achievement in the summary, employment, project, and achievement sections.
 
-For a two-page technical resume, budget the pages deliberately:
+When two pages are justified, budget them deliberately:
 
 - **Page one:** identity, target, evidence-led summary, core requirements, and the strongest recent
   experience or project proof.

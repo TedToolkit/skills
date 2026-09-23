@@ -6,19 +6,28 @@
 
 ## Professional Summary
 
-[Two to four evidence-led lines: relevant experience span; systems or products delivered; the
-highest-priority technical and domain strengths; and one recurring engineering pattern. Make the
-full lifecycle visible when supported, such as requirements, architecture, development, testing,
-deployment, and production support.]
+[Two to four evidence-led lines. Lead with one primary professional identity: supported relevant
+experience span plus principal role family, technical direction, or domain. Connect the strongest
+capability and core stack to the systems, products, domains, or lifecycle stages where they were
+applied. Include the current remit or another important role and scope when material, then close
+with one or two strongest supported outcomes, exceptional capabilities, or recurring engineering
+patterns. Make the main theme
+unmistakable; do not turn the summary into an equal-weight skill list. When source and target
+industries differ, lead with widely recognizable transferable capabilities rather than unexplained
+source-industry terminology.]
 
 ## Core Skills
 
-- **Primary language and platform:** [Target-critical languages, runtimes, application frameworks,
-  concurrency, and memory or resource-management capabilities]
-- **Architecture and refactoring:** [Design methods, boundaries, patterns, dependency management,
-  code generation, or modernization capabilities]
-- **Integration and domain:** [Device, native, data, algorithm, protocol, or industry capabilities]
-- **Testing and delivery:** [Tests, diagnostics, packaging, CI/CD, deployment, and field support]
+- **Primary capabilities:** [Main stack, domain, and engineering abilities central to the target and
+  the candidate's professional identity]
+- **Applied systems and integration:** [Languages, frameworks, platforms, tools, device/native/data
+  boundaries, and lifecycle capabilities used in real work or substantial projects]
+- **Engineering practice and ownership:** [Supported abilities such as requirements analysis,
+  architecture, diagnosis, refactoring, testing, delivery, field support, mentoring, or technical
+  coordination]
+- **Distinctive strengths and technical breadth:** [Evidence-backed exceptional or unusual abilities,
+  including those outside current role requirements, when they show depth or credible transferability;
+  omit mere exposure]
 
 ## Professional Experience
 
@@ -28,20 +37,22 @@ deployment, and production support.]
 
 #### [Most target-relevant project or product]
 
-- [Personal ownership and recognizable delivered scope.]
+- [Personal ownership and recognizable delivered scope, expressed through transferable system or
+  business meaning before source-industry terminology when industries differ.]
 - [Important implementation mechanisms, constraints, integration boundaries, or failure modes.]
 - [Supported delivery, acceptance, production use, measured result, verified fix, or bounded current
   state.]
 
-#### [Second target-relevant project or product]
+#### [Second project or product showing target fit or a distinctive transferable strength]
 
 - [Personal ownership and why the work mattered.]
-- [Technical depth that supports a material role requirement.]
+- [Technical depth that supports a role requirement or demonstrates a substantial personal strength.]
 - [Supported outcome or current state, with collaboration boundaries preserved.]
 
 #### [Optional architecture, refactoring, or delivery initiative]
 
-- [One compact evidence-led bullet when this initiative adds a distinct target-relevant capability.]
+- [One compact evidence-led bullet when this initiative adds target fit or a distinctive
+  transferable capability.]
 
 ### [Previous Company] | [Role]
 
