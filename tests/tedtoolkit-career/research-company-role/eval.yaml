@@ -11,10 +11,18 @@ scenarios:
       Use $research-company-role to create the role record at the currently absent canonical path
       career-workspace/applications/acme-robotics/backend-engineer/role.md. The identified company is
       Acme Robotics and the identified role is Backend Engineer. Use only supplied-job-posting.md,
-      a dated offline fixture, and do not browse. Separate required from preferred qualifications,
-      retain the unknown posting close date, source attribution, confidence, retrieval date, and no
-      inferred requirement. Do not change the company or candidate records and create no match or
-      resume.
+      supplied-recent-context.md, supplied-interview-reports.md, dated offline fixtures, and do not
+      browse. Separate required from preferred qualifications; explain an abstract capability model
+      with its concrete signals and role relevance; and distinguish job-posting requirements from
+      evidence-backed potentially valuable, recently emerging capabilities. Describe the sourced
+      work after joining, including recurring delivery, collaboration, operating cadence, success
+      measures, early-tenure expectations, and stated unknowns without inventing a generic day in
+      the life. Preserve every distinct reported interview and written-assessment item, deduplicate
+      the repeated SQL item, distinguish candidate reports from inferred topics, and retain report
+      scope and limitations. Do not promote the company update or interview reports into role
+      requirements. Retain the unknown posting close date, source attribution, confidence,
+      retrieval date, and inference limitations. Do not change the company or candidate records and
+      create no match, resume, or generated practice-question pack.
     setup:
       copy_test_files: true
       commands:
@@ -26,15 +34,34 @@ scenarios:
       - { type: "file_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/role.md", value: "Backend Engineer" }
       - { type: "file_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/role.md", value: "2026-09-12" }
       - { type: "file_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/role.md", value: "supplied-job-posting.md" }
+      - { type: "file_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/role.md", value: "supplied-recent-context.md" }
+      - { type: "file_contains", path: "career-workspace/applications/acme-robotics/backend-engineer/role.md", value: "supplied-interview-reports.md" }
       - { type: "command", run: "grep -Eqi 'required qualifications' career-workspace/applications/acme-robotics/backend-engineer/role.md" }
       - { type: "command", run: "grep -Eqi 'preferred qualifications' career-workspace/applications/acme-robotics/backend-engineer/role.md" }
+      - { type: "command", run: "grep -Eqi 'capability analysis|capability model' career-workspace/applications/acme-robotics/backend-engineer/role.md" }
+      - { type: "command", run: "grep -Eqi 'event-driven|AI-assisted incident triage' career-workspace/applications/acme-robotics/backend-engineer/role.md" }
+      - { type: "command", run: "grep -Eqi 'one-in-six|incident rotation' career-workspace/applications/acme-robotics/backend-engineer/role.md" }
+      - { type: "command", run: "grep -Eqi 'robotics.controls|site.reliability|SRE' career-workspace/applications/acme-robotics/backend-engineer/role.md" }
+      - { type: "command", run: "grep -Eqi 'delivery reliability|restoration time' career-workspace/applications/acme-robotics/backend-engineer/role.md" }
+      - { type: "command", run: "grep -Eqi 'first 90 days|early.tenure|onboarding' career-workspace/applications/acme-robotics/backend-engineer/role.md" }
+      - { type: "command", run: "grep -Eqi 'office days|performance.review|promotion criteria' career-workspace/applications/acme-robotics/backend-engineer/role.md" }
+      - { type: "command", run: "grep -Eqi 'interview and assessment|interview question|written assessment' career-workspace/applications/acme-robotics/backend-engineer/role.md" }
+      - { type: "command", run: "grep -Eqi 'idempoten|duplicate.{0,24}(command|request)|retry behavior' career-workspace/applications/acme-robotics/backend-engineer/role.md" }
+      - { type: "command", run: "grep -Eqi 'deadlock|locking' career-workspace/applications/acme-robotics/backend-engineer/role.md" }
+      - { type: "command", run: "grep -Eqi 'candidate.reported|individual report|historical report' career-workspace/applications/acme-robotics/backend-engineer/role.md" }
+      - { type: "command", run: "grep -Eqi 'inferred topic|not reported as.*question' career-workspace/applications/acme-robotics/backend-engineer/role.md" }
+      - { type: "command", run: "awk 'BEGIN{IGNORECASE=1} /^## Required qualifications/{inside=1; next} inside && /^## /{exit} inside && /event-driven|AI-assisted/{found=1} END{exit found}' career-workspace/applications/acme-robotics/backend-engineer/role.md" }
       - { type: "command", run: "grep -Eqi 'unknown|not stated' career-workspace/applications/acme-robotics/backend-engineer/role.md" }
       - { type: "command", run: "test \"$(sha256sum career-workspace/profile.md | cut -d' ' -f1)\" = \"$(cat profile.sha256)\"" }
       - { type: "command", run: "test \"$(sha256sum career-workspace/companies/acme-robotics/company.md | cut -d' ' -f1)\" = \"$(cat company.sha256)\"" }
       - { type: "command", run: "test ! -e career-workspace/applications/acme-robotics/backend-engineer/match.md && test ! -e career-workspace/applications/acme-robotics/backend-engineer/resume.md" }
     rubric:
       - "Creates only the canonical role dossier for the identified company and role."
-      - "Preserves required/preferred priority, attribution, confidence, date, and unknown close date without inventing requirements or mutating candidate/company facts."
+      - "Explains a transferable capability model through concrete signals, role relevance, evidence, confidence, and limitations rather than listing unexplained skills."
+      - "Preserves required/preferred priority and keeps responsibility-derived, potentially valuable, and recently emerging capabilities visibly separate from published requirements."
+      - "Builds a source-bounded picture of work after joining that preserves recurring delivery, collaboration, cadence, success measures, early-tenure expectations, and material unknowns without inventing a generic day in the life."
+      - "Retains all distinct reported interview and written-assessment items, deduplicates the repeated item, and separates historical candidate reports from inferred topics and generated practice questions."
+      - "Preserves attribution, date, and unknown close date without inventing requirements or mutating candidate/company facts."
     timeout: 360
 
   - name: "Block role research without a company identity"

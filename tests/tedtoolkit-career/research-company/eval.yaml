@@ -10,10 +10,13 @@ scenarios:
     prompt: >-
       Use $research-company to create the target-company record at the currently absent canonical
       path career-workspace/companies/acme-robotics/company.md. The company is Acme Robotics at
-      acme.example. Use only the supplied dated sources official-company.md and trade-report.md;
-      this is an offline fixture, so do not browse. Preserve the disagreement about customer scope,
-      label any inference, confidence, retrieval date, and unknowns. Do not change candidate facts
-      or create a role, match, resume, or interview artifact.
+      acme.example. Use only the supplied dated sources official-company.md, trade-report.md,
+      compensation-snapshot.md, and employee-reviews.md; this is an offline fixture, so do not
+      browse. Include supported organization, management, compensation, and employee-experience
+      findings. Preserve the disagreement about customer scope and the mixed employee feedback;
+      preserve compensation scope and employee-review sample limitations; label any inference,
+      confidence, retrieval date, and unknowns. Do not change candidate facts or create a role,
+      match, resume, or interview artifact.
     setup:
       copy_test_files: true
       commands:
@@ -24,6 +27,12 @@ scenarios:
       - { type: "file_contains", path: "career-workspace/companies/acme-robotics/company.md", value: "2026-09-10" }
       - { type: "file_contains", path: "career-workspace/companies/acme-robotics/company.md", value: "official-company.md" }
       - { type: "file_contains", path: "career-workspace/companies/acme-robotics/company.md", value: "trade-report.md" }
+      - { type: "file_contains", path: "career-workspace/companies/acme-robotics/company.md", value: "compensation-snapshot.md" }
+      - { type: "file_contains", path: "career-workspace/companies/acme-robotics/company.md", value: "employee-reviews.md" }
+      - { type: "command", run: "grep -Eqi 'organization|workforce|reporting|matrix' career-workspace/companies/acme-robotics/company.md" }
+      - { type: "command", run: "grep -Eqi 'compensation|salary|pay|benefit' career-workspace/companies/acme-robotics/company.md" }
+      - { type: "command", run: "grep -Eqi 'employee|review|sentiment|experience' career-workspace/companies/acme-robotics/company.md" }
+      - { type: "command", run: "grep -Eqi 'sample|self-selection|self-reported|limitation' career-workspace/companies/acme-robotics/company.md" }
       - { type: "command", run: "grep -Eqi 'confidence' career-workspace/companies/acme-robotics/company.md" }
       - { type: "command", run: "grep -Eqi 'contradiction|disagree|conflict' career-workspace/companies/acme-robotics/company.md" }
       - { type: "command", run: "test \"$(sha256sum career-workspace/profile.md | cut -d' ' -f1)\" = \"$(cat profile.sha256)\"" }
@@ -31,4 +40,5 @@ scenarios:
     rubric:
       - "Creates only the canonical company dossier and keeps candidate facts byte-identical."
       - "Attributes current facts to the supplied dated sources with confidence and preserves the source disagreement and unknown state instead of guessing."
+      - "Separates formal organization and management evidence from employee perceptions, scopes compensation precisely, and summarizes mixed employee reports without overgeneralizing the small self-selected sample."
     timeout: 360

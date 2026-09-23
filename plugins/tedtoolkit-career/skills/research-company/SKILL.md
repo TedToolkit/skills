@@ -3,7 +3,8 @@ name: research-company
 description: >-
   Research one identified target company for a job candidate and create or update an attributable,
   dated Markdown company dossier. Use for understanding a prospective employer's identity,
-  products, customers, engineering context, and candidate-relevant unknowns. Do not use for role
+  products, customers, engineering context, organization, management practices, compensation and
+  benefits, employee-reported experience, and candidate-relevant unknowns. Do not use for role
   requirements, candidate facts, job matching, resume copy, or employer-side candidate assessment.
 ---
 
@@ -34,14 +35,34 @@ use credible independent sources to supplement or challenge them. When the user 
 fixtures or snapshots for an offline task, use those sources and preserve their date and limitation
 without requiring live access.
 
-Collect only facts that can improve a candidate's understanding of the target: identity, products
-or services, customers or users, business and engineering context, public technology or operating
-constraints, and material recent changes. Do not browse for employees' personal information,
-invent culture claims, or infer what an unstated role requires.
+Collect only information that can improve a candidate's understanding of the target: identity,
+products or services, customers or users, business and engineering context, public technology or
+operating constraints, material recent changes, and the employment context below when evidence is
+available:
+
+- organization and workforce shape, including relevant business units, functions, reporting lines,
+  geographic distribution, team size, or growth and reduction signals;
+- management model and practices, including decision authority, coordination model, performance
+  management, communication cadence, and autonomy;
+- compensation and benefits, preserving currency, time basis, geography, function, level, and
+  whether a figure is base pay, variable pay, equity, or total compensation; and
+- employee-reported experience, including recurring favorable and unfavorable themes about
+  management, workload, development, collaboration, stability, and work-life conditions.
+
+Do not browse for employees' personal information, reconstruct a private org chart, invent culture
+claims, or infer what an unstated role requires. Prefer official disclosures for formal structures,
+policies, and posted pay ranges. Treat compensation databases and employee-review platforms as
+secondary, self-reported evidence rather than company fact. For employee sentiment, summarize
+patterns only when the visible sample supports them; preserve timeframe, location, function, sample
+size, selection bias, disagreement, and material outliers when available. Never identify or profile
+individual reviewers.
 
 For each material fact, record its source marker. Distinguish direct support from labeled inference,
 assign confidence, and preserve contradictions and unknowns. If a source is unavailable, record the
-gap; do not reconstruct it from memory. Do not store webpage copies.
+gap; do not reconstruct it from memory. Keep formal organization or management claims separate from
+employee perceptions of management. Do not merge incomparable compensation figures or generalize a
+review from one location, function, level, or period to the whole company. Do not store webpage
+copies.
 
 ## Write and verify
 
