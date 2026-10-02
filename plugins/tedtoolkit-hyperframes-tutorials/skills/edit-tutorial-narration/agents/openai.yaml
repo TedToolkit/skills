@@ -1,4 +1,4 @@
 interface:
   display_name: "Edit Tutorial Narration"
-  short_description: "Create the final voice master and word transcript"
-  default_prompt: "Use $edit-tutorial-narration to inspect my raw recordings, list any exact sentences I must record again, and create narration.wav with its verified transcript.json."
+  short_description: "Match multiple WAV recordings exactly to an approved TXT"
+  default_prompt: "Use $edit-tutorial-narration to reconstruct narration.wav from my WAV recordings so it matches narration.txt exactly, and list any complete paragraphs I must record again."
