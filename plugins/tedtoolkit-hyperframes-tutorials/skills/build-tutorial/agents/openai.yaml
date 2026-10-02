@@ -1,0 +1,4 @@
+interface:
+  display_name: "Build Tutorial"
+  short_description: "Build the video master and aligned WebVTT captions"
+  default_prompt: "Use $build-tutorial to create video.mp4 and captions.vtt from my approved lesson artifacts and final storyboard."

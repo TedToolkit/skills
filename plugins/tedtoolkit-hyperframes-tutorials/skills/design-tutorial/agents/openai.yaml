@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design Tutorial"
+  short_description: "Design one lesson and its spoken script"
+  default_prompt: "Use $design-tutorial to design this lesson and write a script I can record."

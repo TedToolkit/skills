@@ -1,0 +1,4 @@
+interface:
+  display_name: "Edit Tutorial Narration"
+  short_description: "Create the final voice master and word transcript"
+  default_prompt: "Use $edit-tutorial-narration to edit my raw recording into narration.wav and its verified transcript.json."

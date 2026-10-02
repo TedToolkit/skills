@@ -75,6 +75,18 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Productivity"
+    },
+    {
+      "name": "tedtoolkit-hyperframes-tutorials",
+      "source": {
+        "source": "local",
+        "path": "./plugins/tedtoolkit-hyperframes-tutorials"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
     }
   ]
 }

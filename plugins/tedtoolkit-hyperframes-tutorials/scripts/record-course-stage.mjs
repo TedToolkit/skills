@@ -1,0 +1,87 @@
+#!/usr/bin/env node
+
+import {
+  LESSON_STAGES,
+  checkFingerprintRecord,
+  fingerprintFiles,
+  lessonContractSha256,
+  loadCourseDocuments,
+  requiredLessonFiles,
+  stageIndex,
+  validateDependencyGraph,
+  validateLessonArtifacts,
+  validateStateShape,
+  writeJsonAtomic,
+} from "./course-state-lib.mjs";
+
+function usage() {
+  console.error(
+    "usage: record-course-stage.mjs <course-root> <lesson-id> <stage> [--approval-source <text>]",
+  );
+  process.exit(2);
+}
+
+const args = process.argv.slice(2);
+if (args.length < 3) usage();
+const [rootInput, lessonId, targetStage] = args;
+let approvalSource;
+for (let index = 3; index < args.length; index += 1) {
+  if (args[index] !== "--approval-source" || index + 1 >= args.length || approvalSource !== undefined) usage();
+  approvalSource = args[index + 1];
+  index += 1;
+}
+if (stageIndex(targetStage) < 1) usage();
+
+try {
+  const documents = loadCourseDocuments(rootInput);
+  const { root, config, state, statePath } = documents;
+  const structural = [
+    ...validateStateShape(config, state),
+    ...validateDependencyGraph(state).errors,
+  ];
+  if (structural.length) throw new Error(structural.map((item) => item.message).join("; "));
+  const lesson = state.lessons.find((item) => item.id === lessonId);
+  if (!lesson) throw new Error(`unknown lesson: ${lessonId}`);
+
+  const targetIndex = stageIndex(targetStage);
+  const currentIndex = stageIndex(lesson.status);
+  if (targetIndex > currentIndex + 1) {
+    throw new Error(`cannot skip from ${lesson.status} to ${targetStage}`);
+  }
+  if (targetIndex > 1) {
+    const previousStage = LESSON_STAGES[targetIndex - 1];
+    const checked = await checkFingerprintRecord(
+      root,
+      lesson.records[previousStage],
+      requiredLessonFiles(lesson, previousStage),
+      lesson,
+    );
+    if (!checked.fresh) {
+      throw new Error(`cannot record ${targetStage}; ${previousStage} is not fresh: ${checked.errors.join("; ")}`);
+    }
+  }
+  if (targetStage === "script-approved" && (!approvalSource || approvalSource.trim() === "")) {
+    throw new Error("script-approved requires --approval-source with explicit human approval evidence");
+  }
+
+  const artifactErrors = validateLessonArtifacts(root, lesson, targetStage);
+  if (artifactErrors.length) throw new Error(artifactErrors.map((item) => item.message).join("; "));
+  const fingerprints = await fingerprintFiles(root, requiredLessonFiles(lesson, targetStage));
+
+  for (const stage of Object.keys(lesson.records)) {
+    if (stageIndex(stage) >= targetIndex) delete lesson.records[stage];
+  }
+  lesson.records[targetStage] = {
+    recordedAt: new Date().toISOString(),
+    lessonContractSha256: lessonContractSha256(lesson),
+    ...(targetStage === "script-approved" ? { approvalSource: approvalSource.trim() } : {}),
+    fingerprints,
+  };
+  lesson.status = targetStage;
+  state.release = { status: "not-packaged" };
+  writeJsonAtomic(statePath, state);
+  console.log(`Recorded ${lessonId} as ${targetStage}; downstream records and release state were invalidated.`);
+} catch (error) {
+  console.error(`record-course-stage: ${error.message}`);
+  process.exitCode = 1;
+}

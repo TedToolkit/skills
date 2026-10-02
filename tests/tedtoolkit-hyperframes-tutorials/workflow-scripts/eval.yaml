@@ -1,0 +1,18 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Validate tutorial course workflow scripts offline"
+    mode: "static"
+    setup:
+      copy_test_files: true
+      env:
+        LC_ALL: "C.UTF-8"
+      commands:
+        - "timeout 120s bash run.sh \"${REPO_ROOT}\""
+    assertions:
+      - type: "exit_success"
+      - type: "output_contains"
+        value: "OK: tutorial workflow script regressions passed"
+    timeout: 130

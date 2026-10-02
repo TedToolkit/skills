@@ -1,0 +1,6 @@
+{
+  "name": "tedtoolkit-hyperframes-tutorials",
+  "version": "0.3.0",
+  "description": "Plan, resume, script, edit narration, storyboard, produce, validate, and package animated HyperFrames tutorials.",
+  "skills": ["./skills/"]
+}

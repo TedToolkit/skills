@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plan Tutorial Course"
+  short_description: "Plan chapters, lessons, and learning outcomes"
+  default_prompt: "Use $plan-tutorial-course to plan the chapters and lessons of this animated video course."

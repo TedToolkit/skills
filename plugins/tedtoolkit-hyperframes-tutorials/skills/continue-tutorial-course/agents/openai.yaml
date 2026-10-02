@@ -1,0 +1,4 @@
+interface:
+  display_name: "Continue Tutorial Course"
+  short_description: "Resume a course from verified production state"
+  default_prompt: "Use $continue-tutorial-course to inspect this tutorial course, detect stale work, and continue from the next valid stage."

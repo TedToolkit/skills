@@ -8,10 +8,10 @@ Register a local checkout as a Codex marketplace, then install a plugin:
 
 ```powershell
 codex plugin marketplace add ./path/to/skills
-codex plugin add tedtoolkit-shared@tedtoolkit-skills
+codex plugin add tedtoolkit-shared@tedtoolkit
 ```
 
-After installing or updating a plugin, start a new task so Codex loads its current skills. Claude Code compatibility metadata remains available in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json); Codex uses [`.codex-plugin/marketplace.json`](.codex-plugin/marketplace.json) and each plugin's Codex manifest.
+After installing or updating a plugin, start a new task so Codex loads its current skills. Claude Code compatibility metadata remains available in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json); current Codex local discovery uses [`.agents/plugins/marketplace.json`](.agents/plugins/marketplace.json), with [`.codex-plugin/marketplace.json`](.codex-plugin/marketplace.json) retained for compatibility.
 
 ## Plugins
 
@@ -23,6 +23,7 @@ After installing or updating a plugin, start a new task so Codex loads its curre
 | [`tedtoolkit-project-development`](plugins/tedtoolkit-project-development/) | Request scoping, risk-scaled change design and implementation, optional work-item orchestration, design-principle governance, ADRs, professional review, project scaffolding, and README writing. |
 | [`tedtoolkit-career`](plugins/tedtoolkit-career/) | One candidate's factual career workspace, company and role research, evidence matching, targeted resume writing and review, and interview preparation. |
 | [`tedtoolkit-hiring`](plugins/tedtoolkit-hiring/) | Company-scoped roles, canonical candidate records, role applications, evidence-based assessments, and fair interviewer plans. |
+| [`tedtoolkit-hyperframes-tutorials`](plugins/tedtoolkit-hyperframes-tutorials/) | Planning and resuming animated video courses, detecting stale production artifacts, writing and editing narration, storyboarding against the final voice master, producing HyperFrames videos, and packaging verified offline courses. |
 
 `tedtoolkit-project-development` replaces the former `tedtoolkit-project-scaffolding` plugin. Install the new plugin name if you previously used the old one.
 `tedtoolkit-career` replaces the former `tedtoolkit-resume` plugin and retains its candidate-owned resume workflows. In the `0.4.0` breaking migration, replace `tedtoolkit-career/design-interview` with `tedtoolkit-hiring/design-interview`, and replace `tedtoolkit-career/interview-career-project` with `tedtoolkit-career/enrich-career-project`. Existing user workspaces are not moved or rewritten automatically.
