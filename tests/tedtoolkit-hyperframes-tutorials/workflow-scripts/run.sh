@@ -15,6 +15,11 @@ if rg -q 'video-captioned\.mp4' "$repo_root/plugins/tedtoolkit-hyperframes-tutor
     exit 1
 fi
 
+if rg -q 'storyboard-tutorial' "$repo_root/plugins/tedtoolkit-hyperframes-tutorials"; then
+    echo "removed storyboard skill is still referenced by the tutorial workflow" >&2
+    exit 1
+fi
+
 course="$fixture/course"
 mkdir -p "$course/lessons/lesson-01" "$course/release/lessons/lesson-01"
 
@@ -24,7 +29,23 @@ cat >"$course/course.config.json" <<'EOF'
   "title": "Workflow fixture",
   "slug": "workflow-fixture",
   "contentLanguage": "en",
-  "outline": "course.md"
+  "outline": "course.md",
+  "video": {
+    "aspectRatio": "16:9",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "container": "mp4",
+    "videoCodec": "h264",
+    "pixelFormat": "yuv420p",
+    "audioCodec": "aac",
+    "audioSampleRate": 48000
+  },
+  "cover": {
+    "width": 1920,
+    "height": 1080,
+    "format": "png"
+  }
 }
 EOF
 
@@ -57,6 +78,32 @@ if (!report.valid) process.exit(1);
 if (report.nextWave.length !== 1 || report.nextWave[0].id !== "lesson-01" || report.nextWave[0].nextSkill !== "design-tutorial") process.exit(2);
 ' "$fixture/planned.json"
 
+question_gate_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft 2>&1 || true)
+grep -Fq 'lesson.md must contain exactly one ## Post-lesson question section' <<<"$question_gate_output"
+cat >>"$course/lessons/lesson-01/lesson.md" <<'EOF'
+
+## Post-lesson question
+
+EOF
+empty_question_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft 2>&1 || true)
+grep -Fq '## Post-lesson question must contain learner-facing text' <<<"$empty_question_output"
+cat >>"$course/lessons/lesson-01/lesson.md" <<'EOF'
+
+What did this lesson demonstrate?
+EOF
+cp "$course/lessons/lesson-01/lesson.md" "$fixture/lesson.saved"
+cat >>"$course/lessons/lesson-01/lesson.md" <<'EOF'
+
+## Post-lesson question
+
+Why would this duplicate be invalid?
+EOF
+duplicate_question_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft 2>&1 || true)
+grep -Fq 'lesson.md must contain exactly one ## Post-lesson question section' <<<"$duplicate_question_output"
+cp "$fixture/lesson.saved" "$course/lessons/lesson-01/lesson.md"
+missing_storyboard_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft 2>&1 || true)
+grep -Fq 'missing provisional storyboard: lessons/lesson-01/storyboard.md' <<<"$missing_storyboard_output"
+printf '# Provisional storyboard\n' >"$course/lessons/lesson-01/storyboard.md"
 node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft >/dev/null
 if node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-approved >/dev/null 2>&1; then
     echo "script approval advanced without explicit approval evidence" >&2
@@ -74,6 +121,13 @@ cat >"$course/lessons/lesson-01/transcript.json" <<'EOF'
 ]
 EOF
 node "$scripts/record-course-stage.mjs" "$course" lesson-01 narration-final >/dev/null
+
+node "$scripts/validate-course.mjs" "$course" --json >"$fixture/narration-final.json"
+node -e '
+const report=require(process.argv[1]);
+if (!report.valid) process.exit(1);
+if (report.nextWave.length !== 1 || report.nextWave[0].nextSkill !== "design-tutorial") process.exit(2);
+' "$fixture/narration-final.json"
 
 printf '# Storyboard\n' >"$course/lessons/lesson-01/storyboard.md"
 node "$scripts/record-course-stage.mjs" "$course" lesson-01 storyboard-final >/dev/null
@@ -103,13 +157,30 @@ EOF
 node "$scripts/record-course-stage.mjs" "$course" lesson-01 video-verified >/dev/null
 node "$scripts/validate-course.mjs" "$course" >/dev/null
 
+if node "$scripts/record-course-stage.mjs" "$course" lesson-01 cover-verified >/dev/null 2>&1; then
+    echo "cover-verified advanced without the course cover system and lesson cover" >&2
+    exit 1
+fi
+printf '# Cover system\n' >"$course/cover-system.md"
+printf 'course cover\n' >"$course/course-cover.png"
+printf 'cover\n' >"$course/lessons/lesson-01/cover.png"
+node "$scripts/record-course-stage.mjs" "$course" lesson-01 cover-verified >/dev/null
+node "$scripts/validate-course.mjs" "$course" >/dev/null
+
 cp "$course/lessons/lesson-01/video.mp4" "$course/release/lessons/lesson-01/video.mp4"
+cp "$course/lessons/lesson-01/cover.png" "$course/release/lessons/lesson-01/cover.png"
+cp "$course/course-cover.png" "$course/release/course-cover.png"
 cat >"$course/release/index.html" <<'EOF'
 <!doctype html>
-<video controls>
+<img src="course-cover.png" alt="Workflow fixture course cover">
+<video controls poster="lessons/lesson-01/cover.png">
   <source src="lessons/lesson-01/video.mp4" type="video/mp4">
   <track src="lessons/lesson-01/captions.vtt" kind="captions" srclang="en">
 </video>
+<section data-post-lesson-question="lesson-01">
+  <h2>Post-lesson question</h2>
+  <p>What did this lesson demonstrate?</p>
+</section>
 EOF
 printf 'zip fixture\n' >"$course/workflow-fixture.zip"
 if node "$scripts/record-course-release.mjs" "$course" release workflow-fixture.zip >/dev/null 2>&1; then
@@ -125,6 +196,66 @@ sed -i 's#lessons/lesson-01/video.mp4#https://example.invalid/video.mp4#' "$cour
 network_output=$(node "$scripts/validate-course.mjs" "$course" 2>&1 || true)
 grep -Fq 'NETWORK_MEDIA' <<<"$network_output"
 cp "$fixture/index.saved" "$course/release/index.html"
+node "$scripts/validate-course.mjs" "$course" >/dev/null
+
+cp "$course/release/index.html" "$fixture/index.saved"
+sed -i '/course-cover.png/d' "$course/release/index.html"
+course_cover_output=$(node "$scripts/validate-course.mjs" "$course" 2>&1 || true)
+grep -Fq 'RELEASE_COVERAGE: index.html does not reference current course-cover.png' <<<"$course_cover_output"
+cp "$fixture/index.saved" "$course/release/index.html"
+node "$scripts/validate-course.mjs" "$course" >/dev/null
+
+cp "$course/release/index.html" "$fixture/index.saved"
+sed -i 's# poster="lessons/lesson-01/cover.png"##' "$course/release/index.html"
+cover_output=$(node "$scripts/validate-course.mjs" "$course" 2>&1 || true)
+grep -Fq 'RELEASE_COVERAGE [lesson-01]: index.html does not reference current lessons/lesson-01/cover.png' <<<"$cover_output"
+cp "$fixture/index.saved" "$course/release/index.html"
+node "$scripts/validate-course.mjs" "$course" >/dev/null
+
+cp "$course/release/index.html" "$fixture/index.saved"
+sed -i 's/data-post-lesson-question/data-omitted-question/' "$course/release/index.html"
+question_output=$(node "$scripts/validate-course.mjs" "$course" 2>&1 || true)
+grep -Fq 'RELEASE_COVERAGE [lesson-01]: index.html does not expose the current static post-lesson question' <<<"$question_output"
+cp "$fixture/index.saved" "$course/release/index.html"
+node "$scripts/validate-course.mjs" "$course" >/dev/null
+
+cp "$course/release/index.html" "$fixture/index.saved"
+sed -i 's/What did this lesson demonstrate?/Different visible text./' "$course/release/index.html"
+question_text_output=$(node "$scripts/validate-course.mjs" "$course" 2>&1 || true)
+grep -Fq 'RELEASE_COVERAGE [lesson-01]: index.html does not expose the current static post-lesson question' <<<"$question_text_output"
+cp "$fixture/index.saved" "$course/release/index.html"
+node "$scripts/validate-course.mjs" "$course" >/dev/null
+
+cp "$course/course.config.json" "$fixture/config.saved"
+node -e '
+const fs=require("fs"), file=process.argv[1], config=JSON.parse(fs.readFileSync(file,"utf8"));
+config.cover.width=1000;
+fs.writeFileSync(file, JSON.stringify(config,null,2)+"\n");
+' "$course/course.config.json"
+config_output=$(node "$scripts/validate-course.mjs" "$course" 2>&1 || true)
+grep -Fq 'COVER_ASPECT_RATIO' <<<"$config_output"
+cp "$fixture/config.saved" "$course/course.config.json"
+node "$scripts/validate-course.mjs" "$course" >/dev/null
+
+cp "$course/cover-system.md" "$fixture/cover-system.saved"
+printf '# Changed cover system\n' >"$course/cover-system.md"
+cover_system_output=$(node "$scripts/validate-course.mjs" "$course" 2>&1 || true)
+grep -Fq 'cover-verified: fingerprint changed: cover-system.md' <<<"$cover_system_output"
+grep -Fq 'STALE_RELEASE' <<<"$cover_system_output"
+cp "$fixture/cover-system.saved" "$course/cover-system.md"
+node "$scripts/validate-course.mjs" "$course" >/dev/null
+
+cp "$course/course.config.json" "$fixture/config.saved"
+node -e '
+const fs=require("fs"), file=process.argv[1], config=JSON.parse(fs.readFileSync(file,"utf8"));
+config.cover.width=1280;
+config.cover.height=720;
+fs.writeFileSync(file, JSON.stringify(config,null,2)+"\n");
+' "$course/course.config.json"
+cover_contract_output=$(node "$scripts/validate-course.mjs" "$course" 2>&1 || true)
+grep -Fq 'cover-verified: video or cover production contract changed' <<<"$cover_contract_output"
+grep -Fq 'STALE_RELEASE' <<<"$cover_contract_output"
+cp "$fixture/config.saved" "$course/course.config.json"
 node "$scripts/validate-course.mjs" "$course" >/dev/null
 
 printf 'evidence\n' >"$course/evidence.txt"

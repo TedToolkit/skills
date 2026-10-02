@@ -1,0 +1,70 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+smoke_scenarios:
+  - "Preserve one lesson promise across supporting material"
+
+scenarios:
+  - name: "Preserve one lesson promise across supporting material"
+    prompt: >-
+      Use $design-tutorial to draft the recordable Mandarin narration and provisional storyboard in
+      this conversation only for
+      a twelve-minute visual-design lesson titled “为什么画面平衡不等于左右对称”. The primary
+      outcome is that the learner can explain visual balance in terms of perceived weight and use
+      that idea to judge an unfamiliar composition. A vivid example with one large muted shape and
+      several small high-contrast shapes may support the explanation, and a three-question
+      observation routine may help the learner apply it, but neither the example nor the routine is
+      the lesson topic. The instructor was introduced elsewhere, but this independently accessible
+      lesson still needs a brief natural entry without repeating a biography. Mention that learners
+      may choose different practice branches after this lesson; the course has no single fixed
+      successor. This is a coherent long-form teaching episode, not a short-form teaser. Do not
+      create or change files.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "画面平衡" }
+      - { type: "output_contains", value: "视觉重量" }
+      - { type: "output_contains", value: "分镜" }
+      - { type: "output_not_contains", value: "下一课" }
+      - { type: "command", run: "test -z \"$(find . -mindepth 1 -maxdepth 1 -type f -print -quit)\"" }
+    rubric:
+      - "The title's question, the dominant explanation, and the closing share one primary promise: visual balance depends on perceived weight rather than bilateral symmetry."
+      - "The shape arrangement is supporting evidence rather than the topic learners are most likely to remember."
+      - "The observation routine and optional-practice guidance remain supporting material and do not create competing lesson centers."
+      - "The opening contains a brief, natural entry that acknowledges and orients the learner without repeating an instructor biography, and it reaches the title's problem promptly rather than lingering in a generic welcome."
+      - "The full script uses coherent long-form sections instead of repeated hooks or short-form teaser language."
+      - "The narration is natural to speak and does not invent a fixed successor for a branching course."
+      - "A provisional storyboard maps the spoken progression to visible explanations and motion without inventing precise timestamps before recording."
+    timeout: 360
+
+  - name: "Keep a first lesson coherent and estimate its spoken duration"
+    prompt: >-
+      Use $design-tutorial to draft the recordable Mandarin narration and provisional storyboard in
+      this conversation only for
+      a six-minute first lesson in a dependency-driven programming course titled “为什么从执行讲到架构”.
+      This is instructor 秋水's first appearance; a concise mention that they mainly work on backend
+      development and architecture is relevant, but credentials must not delay the lesson. The
+      primary outcome is that learners can explain why reliable architecture decisions begin with
+      observable execution paths and state changes. A registration program that should accept three
+      names but accepts only two may support the explanation, and a five-question evidence routine
+      may help analyze it, but neither is the main topic. The course has Core and Extension branches
+      and no fixed next lesson. Keep the spoken text natural, introduce the registration example only
+      once, and report a provisional duration range with its calculation basis. Do not create or
+      change files.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "秋水" }
+      - { type: "output_contains", value: "执行" }
+      - { type: "output_contains", value: "架构" }
+      - { type: "output_contains", value: "分镜" }
+      - { type: "output_not_contains", value: "下一课" }
+      - { type: "output_not_contains", value: "R-24" }
+      - { type: "command", run: "test -z \"$(find . -mindepth 1 -maxdepth 1 -type f -print -quit)\"" }
+    rubric:
+      - "The opening introduces 秋水 briefly, establishes the series direction, and reaches the title's question without a ceremonial biography or unrelated hook."
+      - "The registration case is introduced once and developed as one continuous supporting thread; the script does not preview the missing record, leave it, and later restart the same case."
+      - "The dominant explanation, closing, and any post-lesson question answer why architecture reasoning begins with execution paths and state changes; the case and five-question routine remain supporting material."
+      - "The narration avoids arbitrary record identifiers, spoken course inventories, dense metadata, and a fixed-successor preview for the branching course."
+      - "The reported duration is a provisional range and states a defensible text-count or speaking-rate basis plus allowance for demonstrations or pauses, rather than claiming one exact verified time."
+      - "A provisional storyboard is anchored to the narration, makes the execution-path and state-change explanation visible, and does not claim final audio timing."
+    timeout: 360

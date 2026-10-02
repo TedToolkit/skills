@@ -1,7 +1,7 @@
 {
   "name": "tedtoolkit-hyperframes-tutorials",
-  "version": "0.3.0",
-  "description": "Plan, resume, script, edit narration, storyboard, produce, validate, and package animated HyperFrames tutorials.",
+  "version": "0.4.0",
+  "description": "Plan, resume, script, edit narration, storyboard, produce, cover, validate, and package animated HyperFrames tutorials.",
   "author": {
     "name": "TedToolkit"
   },
@@ -9,7 +9,7 @@
   "interface": {
     "displayName": "TedToolkit HyperFrames Tutorials",
     "shortDescription": "Produce narrated animated tutorial courses",
-    "longDescription": "File-based workflows for planning and resuming tutorial courses, detecting stale artifacts, writing scripts, editing narration, designing final-audio-aligned storyboards, producing HyperFrames videos, and packaging verified offline learner releases.",
+    "longDescription": "File-based workflows for planning and resuming tutorial courses, detecting stale artifacts, co-designing scripts and provisional storyboards, editing narration, finalizing storyboards against recorded timing, producing HyperFrames videos and coherent course and lesson covers, and packaging verified offline learner releases.",
     "developerName": "TedToolkit",
     "category": "Productivity",
     "capabilities": ["Interactive", "Write"],
@@ -17,7 +17,8 @@
       "Plan a coherent animated tutorial course with stable lesson workspaces.",
       "Resume a partially produced course from its verified state and detect stale artifacts.",
       "Turn an approved script and raw recording into a verified narration master.",
-      "Storyboard and produce a lesson against its final narration timing."
+      "Co-design each lesson's script and provisional storyboard, then finalize it against recorded narration timing.",
+      "Create a coherent course cover system and lesson covers from verified tutorial content."
     ]
   }
 }

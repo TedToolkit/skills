@@ -8,6 +8,8 @@ every workflow stage can discover its inputs without guessing.
 ├── course.config.json
 ├── course-state.json
 ├── <course-outline>.md
+├── cover-system.md
+├── course-cover.png
 ├── tools/
 │   ├── build-course-player.mjs
 │   └── package-course.mjs
@@ -20,8 +22,10 @@ every workflow stage can discover its inputs without guessing.
 │       ├── transcript.json
 │       ├── captions.vtt
 │       ├── storyboard.md
+│       ├── cover.png
 │       ├── sources/
-│       │   └── narration-original.<ext>
+│       │   ├── narration-original.<ext>
+│       │   └── narration-original-<NN>.<ext>
 │       ├── <editable HyperFrames project files>
 │       └── video.mp4
 └── <generated-release>/
@@ -42,17 +46,27 @@ status source; lesson cards must not maintain another status field.
 | Artifact | Owner and meaning |
 | --- | --- |
 | `course-state.json` | `plan-tutorial-course` initializes identity and dependencies; stage owners advance it only through the packaged recorders. |
-| `lesson.md` | `design-tutorial`; stable production card, paragraph map, sources, and exit check; no mutable status. |
+| `cover-system.md` | `create-tutorial-cover`; reproducible course-wide layout, typography, palette, safe-area, and variation rules. |
+| `course-cover.png` | `create-tutorial-cover`; course-level visual anchor used by the learner page and cover family. |
+| `lesson.md` | `design-tutorial`; stable production card, paragraph map, sources, and one `## Post-lesson question`; no mutable status. |
 | `narration.txt` | `design-tutorial`; approved spoken words only. |
-| `sources/narration-original.<ext>` | Immutable uploaded recording when the original is not retained elsewhere. |
-| `narration-source.wav` | `edit-tutorial-narration`; canonical unedited PCM working source. |
+| `sources/narration-original.<ext>` or `sources/narration-original-<NN>.<ext>` | One or more immutable uploaded recordings when the originals are not retained elsewhere. |
+| `narration-source.wav` | `edit-tutorial-narration`; canonical unedited PCM source reel assembled from the supplied recordings with a recoverable mapping to each original. |
 | `narration.wav` | `edit-tutorial-narration`; edited and verified voice master with no music or SFX. |
 | `transcript.json` | `edit-tutorial-narration`; normalized word-level production timing aligned to `narration.wav`. |
 | `captions.vtt` | `build-tutorial`; learner-facing WebVTT cues aligned to the formal video timeline. |
 | `captions.srt` | Optional `build-tutorial` export for a named destination that requires SubRip captions. |
-| `storyboard.md` | `storyboard-tutorial`; the single shot plan consumed by production. |
+| `storyboard.md` | `design-tutorial`; the provisional visual plan created with the script and later finalized against edited narration. |
 | Editable composition | `build-tutorial`; implementation of the final storyboard. |
 | `video.mp4` | `build-tutorial`; formal render and the packaging workflow's publication signal. |
+| `cover.png` | `create-tutorial-cover`; verified lesson-level poster created from the current formal video and lesson identity. |
+
+Starting at `script-draft`, the validator requires each `lesson.md` to contain exactly one non-empty
+`## Post-lesson question` section. This is a hard authoring gate for every lesson, including an
+introduction or extension. The question stays outside the narration and video. A finished offline
+release must render its text visibly and identify its static container with
+`data-post-lesson-question="<lesson-id>"`; missing or duplicated authoring content and missing release
+content both fail validation.
 
 Do not create a canonical `demo.md`. Record the teaching purpose and paths to demonstration evidence
 in `lesson.md`. Put short, exact learner-facing text or illustrative snippets directly in
@@ -71,18 +85,23 @@ sources.
 
 The normal order is:
 
-1. `lesson.md` plus `narration.txt` and all demonstration sources referenced by the lesson.
-2. Raw recording preserved and normalized as `narration-source.wav`.
+1. `lesson.md`, `narration.txt`, provisional `storyboard.md`, and all referenced demonstration sources.
+2. One or more raw recordings preserved and normalized into `narration-source.wav`.
 3. Edited `narration.wav` plus word-level `transcript.json`.
 4. Final audio-aligned `storyboard.md`.
 5. Editable HyperFrames composition, formal `video.mp4`, and aligned `captions.vtt`.
-6. Generated offline learner release and ZIP.
+6. Course `cover-system.md` and `course-cover.png`, plus a verified lesson `cover.png` based on the current formal video.
+7. Generated offline learner release and ZIP.
 
-A provisional storyboard may precede the final voice master only when explicitly requested. It must
-use estimated durations, identify itself as provisional, and cannot unlock formal rendering. A final
+A provisional storyboard is a normal part of lesson design. It must identify itself as provisional,
+use paragraph anchors and narration cues without invented timestamps or precise durations, and
+cannot unlock formal rendering. The same file is aligned and finalized after the voice master; do
+not create a parallel draft-storyboard artifact. A final
 video requires `lesson.md`, `narration.txt`, `narration.wav`, `transcript.json`, and final
-`storyboard.md`, plus every demonstration source declared by the lesson. Upstream changes invalidate
-affected downstream timing, captions, and production artifacts; refresh them in order rather than
+`storyboard.md`, plus every demonstration source declared by the lesson. A finished release also
+requires `course-cover.png` and `cover.png` for every published lesson. A changed
+`cover-system.md` or course cover requires lesson covers to be rechecked for continuity. Upstream changes invalidate affected downstream
+timing, captions, video, cover, and packaging artifacts; refresh them in order rather than
 patching around the mismatch during rendering.
 
 Keep `video.mp4` as the clean reusable master and `captions.vtt` as the only canonical learner

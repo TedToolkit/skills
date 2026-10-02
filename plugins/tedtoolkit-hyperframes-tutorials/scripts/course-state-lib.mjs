@@ -9,18 +9,38 @@ export const LESSON_STAGES = [
   "narration-final",
   "storyboard-final",
   "video-verified",
+  "cover-verified",
 ];
 
 export const NEXT_SKILL = {
   planned: "design-tutorial",
   "script-draft": "review-tutorial-script",
   "script-approved": "edit-tutorial-narration",
-  "narration-final": "storyboard-tutorial",
+  "narration-final": "design-tutorial",
   "storyboard-final": "build-tutorial",
-  "video-verified": "package-tutorial-course",
+  "video-verified": "create-tutorial-cover",
+  "cover-verified": "package-tutorial-course",
 };
 
 const CONFIG_FIELDS = ["courseId", "title", "slug", "contentLanguage", "outline"];
+
+export const DEFAULT_VIDEO_CONFIG = Object.freeze({
+  aspectRatio: "16:9",
+  width: 1920,
+  height: 1080,
+  fps: 30,
+  container: "mp4",
+  videoCodec: "h264",
+  pixelFormat: "yuv420p",
+  audioCodec: "aac",
+  audioSampleRate: 48000,
+});
+
+export const DEFAULT_COVER_CONFIG = Object.freeze({
+  width: 1920,
+  height: 1080,
+  format: "png",
+});
 
 function issue(code, message, lessonId) {
   return lessonId ? { code, lessonId, message } : { code, message };
@@ -38,6 +58,16 @@ export function lessonContractSha256(lesson) {
     sourcePaths: lesson.sourcePaths,
   });
   return `sha256:${crypto.createHash("sha256").update(contract).digest("hex")}`;
+}
+
+export function productionContractSha256(config, stage) {
+  const index = stageIndex(stage);
+  if (index < stageIndex("video-verified")) return undefined;
+  const production = effectiveProductionConfig(config);
+  const contract = index >= stageIndex("cover-verified")
+    ? { video: production.video, cover: production.cover }
+    : { video: production.video };
+  return `sha256:${crypto.createHash("sha256").update(JSON.stringify(contract)).digest("hex")}`;
 }
 
 export function courseRoot(input) {
@@ -105,6 +135,9 @@ export function requiredLessonFiles(lesson, stage) {
   if (index >= stageIndex("video-verified")) {
     files.push(`${base}/video.mp4`, `${base}/captions.vtt`);
   }
+  if (index >= stageIndex("cover-verified")) {
+    files.push("cover-system.md", "course-cover.png", `${base}/cover.png`);
+  }
   return files;
 }
 
@@ -151,6 +184,7 @@ export function validateStateShape(config, state) {
   if (typeof state?.courseId !== "string" || state.courseId !== config.courseId) {
     errors.push(issue("COURSE_ID", "course-state.json courseId must match course.config.json"));
   }
+  errors.push(...validateProductionConfig(config));
   if (!Array.isArray(state?.lessons)) {
     errors.push(issue("LESSONS", "course-state.json lessons must be an array"));
     return errors;
@@ -184,6 +218,72 @@ export function validateStateShape(config, state) {
   }
   if (!state.release || !["not-packaged", "packaged"].includes(state.release.status)) {
     errors.push(issue("RELEASE_STATUS", "release.status must be not-packaged or packaged"));
+  }
+  return errors;
+}
+
+function positiveInteger(value) {
+  return Number.isInteger(value) && value > 0;
+}
+
+export function effectiveProductionConfig(config) {
+  return {
+    video: { ...DEFAULT_VIDEO_CONFIG, ...(config?.video || {}) },
+    cover: { ...DEFAULT_COVER_CONFIG, ...(config?.cover || {}) },
+  };
+}
+
+export function validateProductionConfig(config) {
+  const errors = [];
+  for (const section of ["video", "cover"]) {
+    if (config?.[section] !== undefined &&
+        (!config[section] || typeof config[section] !== "object" || Array.isArray(config[section]))) {
+      errors.push(issue("PRODUCTION_CONFIG", `${section} must be an object when provided`));
+    }
+  }
+  if (errors.length) return errors;
+
+  const { video, cover } = effectiveProductionConfig(config);
+  if (!positiveInteger(video.width) || !positiveInteger(video.height)) {
+    errors.push(issue("VIDEO_DIMENSIONS", "video width and height must be positive integers"));
+  }
+  if (!positiveInteger(video.fps)) {
+    errors.push(issue("VIDEO_FPS", "video fps must be a positive integer"));
+  }
+  if (!positiveInteger(video.audioSampleRate)) {
+    errors.push(issue("AUDIO_SAMPLE_RATE", "video audioSampleRate must be a positive integer"));
+  }
+  const ratio = /^(\d+):(\d+)$/.exec(video.aspectRatio);
+  if (!ratio || Number(ratio[1]) === 0 || Number(ratio[2]) === 0) {
+    errors.push(issue("VIDEO_ASPECT_RATIO", "video aspectRatio must use a positive W:H ratio"));
+  } else if (positiveInteger(video.width) && positiveInteger(video.height)) {
+    const declared = Number(ratio[1]) / Number(ratio[2]);
+    const actual = video.width / video.height;
+    if (Math.abs(declared - actual) > 0.001) {
+      errors.push(issue("VIDEO_ASPECT_RATIO", "video width and height must match aspectRatio"));
+    }
+  }
+  const expectedStrings = {
+    container: "mp4",
+    videoCodec: "h264",
+    pixelFormat: "yuv420p",
+    audioCodec: "aac",
+  };
+  for (const [field, expected] of Object.entries(expectedStrings)) {
+    if (video[field] !== expected) {
+      errors.push(issue("VIDEO_FORMAT", `video ${field} must be ${expected}`));
+    }
+  }
+  if (!positiveInteger(cover.width) || !positiveInteger(cover.height)) {
+    errors.push(issue("COVER_DIMENSIONS", "cover width and height must be positive integers"));
+  }
+  if (cover.format !== "png") {
+    errors.push(issue("COVER_FORMAT", "cover format must be png"));
+  }
+  if (positiveInteger(video.width) && positiveInteger(video.height) &&
+      positiveInteger(cover.width) && positiveInteger(cover.height) &&
+      Math.abs(video.width / video.height - cover.width / cover.height) > 0.001) {
+    errors.push(issue("COVER_ASPECT_RATIO", "cover dimensions must match the video aspect ratio"));
   }
   return errors;
 }
@@ -254,6 +354,42 @@ function normalizeSpokenText(value) {
     .replace(/[\p{P}\p{S}\s]/gu, "");
 }
 
+export function extractPostLessonQuestion(markdown) {
+  const normalized = markdown.replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n");
+  const heading = /^##[ \t]+Post-lesson question[ \t]*$/gm;
+  const matches = [...normalized.matchAll(heading)];
+  if (matches.length !== 1) {
+    throw new Error("lesson.md must contain exactly one ## Post-lesson question section");
+  }
+  const sectionStart = matches[0].index + matches[0][0].length;
+  const remainder = normalized.slice(sectionStart);
+  const nextSection = /^#{1,2}[ \t]+\S.*$/m.exec(remainder);
+  const question = remainder
+    .slice(0, nextSection?.index ?? remainder.length)
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .trim();
+  if (!question || normalizeSpokenText(question) === "") {
+    throw new Error("## Post-lesson question must contain learner-facing text");
+  }
+  return question;
+}
+
+function releaseVisibleText(html) {
+  return normalizeSpokenText(
+    html
+      .replace(/<(script|style|template)\b[^>]*>[\s\S]*?<\/\1>/gi, " ")
+      .replace(/&#x([0-9a-f]+);/gi, (_, value) => String.fromCodePoint(Number.parseInt(value, 16)))
+      .replace(/&#([0-9]+);/g, (_, value) => String.fromCodePoint(Number.parseInt(value, 10)))
+      .replace(/&quot;/gi, '"')
+      .replace(/&apos;|&#39;/gi, "'")
+      .replace(/&nbsp;/gi, " "),
+  );
+}
+
+function escapeRegularExpression(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function parseVttTimestamp(text) {
   const match = /^(?:(\d{2,}):)?(\d{2}):(\d{2})\.(\d{3})$/.exec(text);
   if (!match) return Number.NaN;
@@ -310,6 +446,15 @@ export function validateLessonArtifacts(root, lesson, stage) {
   }
   if (errors.length > 0) return errors;
 
+  if (stageIndex(stage) >= stageIndex("script-draft")) {
+    try {
+      const lessonPath = safeCoursePath(root, `lessons/${id}/lesson.md`).absolute;
+      extractPostLessonQuestion(fs.readFileSync(lessonPath, "utf8"));
+    } catch (error) {
+      errors.push(issue("POST_LESSON_QUESTION", error.message, id));
+    }
+  }
+
   if (stageIndex(stage) >= stageIndex("narration-final")) {
     const base = `lessons/${id}`;
     try {
@@ -359,7 +504,7 @@ export function validateLessonArtifacts(root, lesson, stage) {
   return errors;
 }
 
-export async function checkFingerprintRecord(root, record, expectedFiles, lesson) {
+export async function checkFingerprintRecord(root, record, expectedFiles, lesson, config, stage) {
   const errors = [];
   if (!record || typeof record !== "object" || Array.isArray(record)) {
     return { fresh: false, errors: ["record is missing"] };
@@ -369,6 +514,19 @@ export async function checkFingerprintRecord(root, record, expectedFiles, lesson
   }
   if (lesson && record.lessonContractSha256 !== lessonContractSha256(lesson)) {
     errors.push("lesson identity, type, prerequisites, or source paths changed");
+  }
+  const expectedProductionContract = config && stage
+    ? productionContractSha256(config, stage)
+    : undefined;
+  const hasExplicitProductionConfig = stage === "video-verified"
+    ? config?.video !== undefined
+    : stage === "cover-verified"
+      ? config?.video !== undefined || config?.cover !== undefined
+      : false;
+  if (expectedProductionContract &&
+      (record.productionContractSha256 !== undefined || hasExplicitProductionConfig) &&
+      record.productionContractSha256 !== expectedProductionContract) {
+    errors.push("video or cover production contract changed");
   }
   for (const relativePath of expectedFiles) {
     if (typeof record.fingerprints[relativePath] !== "string") {
@@ -392,7 +550,11 @@ export async function checkFingerprintRecord(root, record, expectedFiles, lesson
 }
 
 function draftArtifactsExist(root, lesson) {
-  return requiredLessonFiles(lesson, "script-draft").every((relativePath) => {
+  const paths = [
+    ...requiredLessonFiles(lesson, "script-draft"),
+    `lessons/${lesson.id}/storyboard.md`,
+  ];
+  return paths.every((relativePath) => {
     try {
       const resolved = safeCoursePath(root, relativePath);
       return fs.existsSync(resolved.absolute) && fs.statSync(resolved.absolute).isFile();
@@ -470,7 +632,14 @@ export async function validateCourse(rootInput, stateOverride) {
         recordProblems.push("script-approved: approvalSource is missing");
         break;
       }
-      const checked = await checkFingerprintRecord(root, record, requiredLessonFiles(lesson, stage), lesson);
+      const checked = await checkFingerprintRecord(
+        root,
+        record,
+        requiredLessonFiles(lesson, stage),
+        lesson,
+        config,
+        stage,
+      );
       if (!checked.fresh) {
         staleStage = stage;
         recordProblems.push(...checked.errors.map((message) => `${stage}: ${message}`));
@@ -516,7 +685,7 @@ export async function validateCourse(rootInput, stateOverride) {
   if (graph.errors.length === 0) {
     const position = new Map(graph.order.map((id, index) => [id, index]));
     const candidates = lessons
-      .filter((lesson) => lesson.effectiveStatus !== "video-verified" && lesson.blockedBy.length === 0)
+      .filter((lesson) => lesson.effectiveStatus !== "cover-verified" && lesson.blockedBy.length === 0)
       .sort((left, right) => {
         const typeOrder = Number(left.type === "extension") - Number(right.type === "extension");
         return typeOrder || stageIndex(left.effectiveStatus) - stageIndex(right.effectiveStatus) ||
@@ -533,7 +702,7 @@ export async function validateCourse(rootInput, stateOverride) {
 
   if (state.release?.status === "packaged") {
     const invalidProduction = lessons.filter(
-      (lesson) => lesson.type === "core" && lesson.effectiveStatus !== "video-verified",
+      (lesson) => lesson.type === "core" && lesson.effectiveStatus !== "cover-verified",
     );
     if (invalidProduction.length) {
       errors.push(
@@ -566,10 +735,11 @@ export async function validateCourse(rootInput, stateOverride) {
 
         const releaseDirectory = safeCoursePath(root, state.release.directory);
         const indexHtml = fs.readFileSync(path.join(releaseDirectory.absolute, "index.html"), "utf8");
+        const visibleReleaseText = releaseVisibleText(indexHtml);
         for (const lesson of lessons.filter(
-          (item) => item.type === "core" && item.effectiveStatus === "video-verified",
+          (item) => item.type === "core" && item.effectiveStatus === "cover-verified",
         )) {
-          for (const filename of ["video.mp4", "captions.vtt"]) {
+          for (const filename of ["video.mp4", "captions.vtt", "cover.png"]) {
             const sourcePath = `lessons/${lesson.id}/${filename}`;
             const sourceHash = await hashFile(safeCoursePath(root, sourcePath).absolute);
             const packagedPaths = Object.entries(current)
@@ -581,6 +751,35 @@ export async function validateCourse(rootInput, stateOverride) {
               errors.push(issue("RELEASE_COVERAGE", `index.html does not reference current ${sourcePath}`, lesson.id));
             }
           }
+          const marker = new RegExp(
+            `\\bdata-post-lesson-question\\s*=\\s*(["'])${escapeRegularExpression(lesson.id)}\\1`,
+            "i",
+          );
+          const lessonCard = fs.readFileSync(
+            safeCoursePath(root, `lessons/${lesson.id}/lesson.md`).absolute,
+            "utf8",
+          );
+          const question = extractPostLessonQuestion(lessonCard);
+          if (!marker.test(indexHtml) || !visibleReleaseText.includes(normalizeSpokenText(question))) {
+            errors.push(
+              issue(
+                "RELEASE_COVERAGE",
+                "index.html does not expose the current static post-lesson question",
+                lesson.id,
+              ),
+            );
+          }
+        }
+
+        const courseCoverPath = "course-cover.png";
+        const courseCoverHash = await hashFile(safeCoursePath(root, courseCoverPath).absolute);
+        const packagedCourseCovers = Object.entries(current)
+          .filter(([, value]) => value === courseCoverHash)
+          .map(([relativePath]) => path.posix.relative(releaseDirectory.relative, relativePath));
+        if (packagedCourseCovers.length === 0) {
+          errors.push(issue("RELEASE_COVERAGE", `release does not contain current ${courseCoverPath}`));
+        } else if (!packagedCourseCovers.some((relativePath) => indexHtml.includes(relativePath))) {
+          errors.push(issue("RELEASE_COVERAGE", `index.html does not reference current ${courseCoverPath}`));
         }
       } catch (error) {
         errors.push(issue("STALE_RELEASE", `packaged release is stale: ${error.message}`));

@@ -1,12 +1,16 @@
 #!/usr/bin/env node
 
+import fs from "node:fs";
+
 import {
   LESSON_STAGES,
   checkFingerprintRecord,
   fingerprintFiles,
   lessonContractSha256,
   loadCourseDocuments,
+  productionContractSha256,
   requiredLessonFiles,
+  safeCoursePath,
   stageIndex,
   validateDependencyGraph,
   validateLessonArtifacts,
@@ -55,6 +59,8 @@ try {
       lesson.records[previousStage],
       requiredLessonFiles(lesson, previousStage),
       lesson,
+      config,
+      previousStage,
     );
     if (!checked.fresh) {
       throw new Error(`cannot record ${targetStage}; ${previousStage} is not fresh: ${checked.errors.join("; ")}`);
@@ -63,9 +69,15 @@ try {
   if (targetStage === "script-approved" && (!approvalSource || approvalSource.trim() === "")) {
     throw new Error("script-approved requires --approval-source with explicit human approval evidence");
   }
-
   const artifactErrors = validateLessonArtifacts(root, lesson, targetStage);
   if (artifactErrors.length) throw new Error(artifactErrors.map((item) => item.message).join("; "));
+  if (targetStage === "script-draft") {
+    const relativePath = `lessons/${lesson.id}/storyboard.md`;
+    const storyboardPath = safeCoursePath(root, relativePath).absolute;
+    if (!fs.existsSync(storyboardPath) || !fs.statSync(storyboardPath).isFile()) {
+      throw new Error(`missing provisional storyboard: ${relativePath}`);
+    }
+  }
   const fingerprints = await fingerprintFiles(root, requiredLessonFiles(lesson, targetStage));
 
   for (const stage of Object.keys(lesson.records)) {
@@ -74,6 +86,9 @@ try {
   lesson.records[targetStage] = {
     recordedAt: new Date().toISOString(),
     lessonContractSha256: lessonContractSha256(lesson),
+    ...(productionContractSha256(config, targetStage)
+      ? { productionContractSha256: productionContractSha256(config, targetStage) }
+      : {}),
     ...(targetStage === "script-approved" ? { approvalSource: approvalSource.trim() } : {}),
     fingerprints,
   };

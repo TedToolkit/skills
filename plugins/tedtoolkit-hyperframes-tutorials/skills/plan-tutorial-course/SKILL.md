@@ -35,6 +35,14 @@ do not let individual lessons independently switch to a dark theme. A user-suppl
 theme may override this default. Treat screenshots, IDEs, terminals, and other source evidence as
 content that may retain its authentic appearance inside the course's light visual frame rather than
 recoloring evidence solely for uniformity.
+Record one course-wide production contract in `course.config.json`. Default lesson videos to 16:9,
+1920x1080, 30 fps, MP4/H.264/yuv420p with AAC audio at 48 kHz, and default lesson covers to
+1920x1080 PNG. Override dimensions or integer fps only for a stated delivery requirement. Keep the
+video and cover aspect ratios equal, and never record a fixed total frame count; final duration and
+fps determine it after narration and scene timing are complete.
+Record any supplied brand constraints or cover direction as inputs for `create-tutorial-cover`, but
+do not invent or render `cover-system.md`, `course-cover.png`, or lesson covers during curriculum
+planning.
 Inspect an existing outline before changing it. If a source is current or product-specific, verify
 material claims against the supplied authoritative material or current official documentation;
 mark unsupported assumptions and version-dependent steps. Clarify only a missing choice that would
@@ -65,12 +73,14 @@ For each chapter, state its purpose, prerequisite knowledge, progression level, 
 stopping point. Link each chapter's exit capability to the course outcome IDs it advances. For each
 lesson, record a stable identifier, title, one observable learning outcome, the concepts or procedure
 it must explain, a useful example or demonstration, its lesson type, its direct content
-prerequisites, and one learner-facing exit check. The exit check contains one prompt aligned to the
-lesson outcome, concise success criteria, and a pointer to the concept or demonstration to revisit
-when the learner cannot answer. Give a rough duration only as an estimate; actual timing will come
-from recorded narration later. Derive a valid viewing order from the dependency graph after the
-content relationships are designed; do not use list position as a substitute for prerequisites.
-Avoid repeating a full explanation across lessons without a reason.
+prerequisites, and exactly one learner-facing post-lesson question. Make the question a concise
+recall, explanation, choice, prediction, or application prompt aligned to the lesson outcome, not a
+confidence check such as "Do you understand?" Treat it as static text shown after the lesson video,
+outside the narration, storyboard, captions, and video duration. It does not require an input,
+submission, answer reveal, scoring, or completion gate. Give a rough duration only as an estimate;
+actual timing will come from recorded narration later. Derive a valid viewing order from the
+dependency graph after the content relationships are designed; do not use list position as a
+substitute for prerequisites. Avoid repeating a full explanation across lessons without a reason.
 
 ### Classify progression and learning paths
 
@@ -212,15 +222,19 @@ core lessons for `design-tutorial` and pass along each outcome, scope, and sourc
 references; there may be more than one valid starting lesson.
 
 For a file-based course, give each lesson a stable `lessons/<lesson-id>/` directory. The canonical
-lesson artifacts are `lesson.md`, `narration.txt`, `narration-source.wav`, `narration.wav`,
-`transcript.json`, `storyboard.md`, `video.mp4`, and `captions.vtt`; create each only when its
-workflow stage produces real content. Keep an uploaded original recording under
-`lessons/<lesson-id>/sources/narration-original.<ext>` when it is not retained elsewhere. Do not
+course cover artifacts are root `cover-system.md` and `course-cover.png`; canonical per-lesson
+artifacts are `lesson.md`, `narration.txt`, `narration-source.wav`, `narration.wav`,
+`transcript.json`, `storyboard.md`, `video.mp4`, `captions.vtt`, and `cover.png`; create each only when its
+workflow stage produces real content. Keep one uploaded original recording under
+`lessons/<lesson-id>/sources/narration-original.<ext>`, or multiple originals under stable numbered
+names such as `narration-original-01.<ext>`, when they are not retained elsewhere. Do not
 create a canonical `demo.md`: record demonstration source paths in `lesson.md`, keep runnable or
 substantial evidence in its actual project or asset file, and let `storyboard.md` own short exact
 on-screen text and the choice of what source range or state to show.
 
-Create or update `course.config.json` and `course-state.json` with the outline. Initialize every new
+Create or update `course.config.json` and `course-state.json` with the outline. Include the explicit
+`video` and `cover` production objects from the shared course state contract for new courses;
+preserve compatible intentional overrides in existing courses. Initialize every new
 lesson as `planned`, preserve existing records for unchanged lesson IDs, and keep `type`, direct
 `requires`, and course-root-relative `sourcePaths` synchronized with the approved outline and lesson
 cards. When a change makes an existing stage record stale, leave its recorded evidence intact for
@@ -229,10 +243,10 @@ after re-verification. Never manufacture, delete, or edit approval and fingerpri
 
 The course outline remains the human-readable sequence index; `course-state.json` is the
 machine-readable dependency and production-status source. A lesson card records its title, outcome, example,
-prerequisites, inherited chapter level, lesson type, estimated duration, exit-check prompt, success
-criteria, remediation pointer, and demonstration sources. Create cards when the user
+prerequisites, inherited chapter level, lesson type, estimated duration, post-lesson question, and
+demonstration sources. Create cards when the user
 requests a navigable per-lesson workspace. Do not create empty narration, audio, transcript,
-storyboard, caption, or video placeholders. Keep any course-wide voice and audience brief outside the
+storyboard, caption, video, or cover placeholders. Keep any course-wide voice and audience brief outside the
 read-aloud text.
 Run the packaged validator after writing the outline and initial state; a planned course should pass
 its configuration, identity, dependency-graph, path, and state-shape checks before handoff.

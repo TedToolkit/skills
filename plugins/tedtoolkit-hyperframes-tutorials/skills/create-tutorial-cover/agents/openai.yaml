@@ -1,0 +1,4 @@
+interface:
+  display_name: "Create Tutorial Cover"
+  short_description: "Create consistent course and lesson video covers"
+  default_prompt: "Use $create-tutorial-cover to design a coherent course cover system and create the requested course or lesson cover."

@@ -26,10 +26,10 @@ try {
     throw new Error(`course production state is not valid: ${production.errors.map((item) => item.message).join("; ")}`);
   }
   const incompleteCore = production.lessons.filter(
-    (lesson) => lesson.type === "core" && lesson.effectiveStatus !== "video-verified",
+    (lesson) => lesson.type === "core" && lesson.effectiveStatus !== "cover-verified",
   );
   if (incompleteCore.length) {
-    throw new Error(`core lessons are not video-verified: ${incompleteCore.map((lesson) => lesson.id).join(", ")}`);
+    throw new Error(`core lessons are not cover-verified: ${incompleteCore.map((lesson) => lesson.id).join(", ")}`);
   }
   const referenceErrors = validateReleaseReferences(documents.root, args[1]);
   if (referenceErrors.length) throw new Error(referenceErrors.map((item) => item.message).join("; "));

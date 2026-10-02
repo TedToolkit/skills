@@ -2,7 +2,7 @@
 name: continue-tutorial-course
 description: >-
   Inspect and resume an existing file-based animated tutorial course across planning, scripting,
-  narration editing, storyboarding, video production, captions, and offline packaging. Use when the
+  narration editing, storyboarding, video production, covers, captions, and offline packaging. Use when the
   user asks what is next, wants to continue a partially produced course, needs stale-artifact
   diagnosis, or wants a course-wide production status report. Do not use to invent a new curriculum
   or bypass a stage's review and approval gate.
@@ -47,9 +47,11 @@ Use the effective verified state rather than the declared state:
 - `planned` → `design-tutorial`
 - `script-draft` → `review-tutorial-script`, followed by explicit human approval
 - `script-approved` → `edit-tutorial-narration`
-- `narration-final` → `storyboard-tutorial`
+- `narration-final` → `design-tutorial` for final storyboard timing
 - `storyboard-final` → `build-tutorial`
-- all required core lessons `video-verified` → `package-tutorial-course`
+- `video-verified` → `create-tutorial-cover`; establish `cover-system.md` and `course-cover.png`
+  before the first lesson cover
+- all required core lessons `cover-verified` → `package-tutorial-course`
 
 A request to continue authorizes inspection and the next ordinary draft or production action within
 the selected course, but not a `script-approved` transition, publishing, uploading, or changing the

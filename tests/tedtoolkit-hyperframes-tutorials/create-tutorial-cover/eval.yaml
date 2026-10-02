@@ -1,0 +1,43 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+smoke_scenarios:
+  - "Resolve an existing course before asking for cover inputs"
+
+scenarios:
+  - name: "Resolve an existing course before asking for cover inputs"
+    prompt: >-
+      Use $create-tutorial-cover for the current course. Before creating any image or changing any
+      file, summarize the resolved course-cover scope and the next design action. Do not browse the
+      web. Ask only if a material choice is genuinely missing from the workspace.
+    setup:
+      copy_test_files: true
+      commands:
+        - "bash setup_fixture.sh current-course"
+    assertions:
+      - type: "exit_success"
+      - type: "output_contains"
+        value: "从证据到可靠的 C# 程序"
+      - type: "output_contains"
+        value: "16:9"
+      - type: "output_regex"
+        pattern: "1920\\s*[xX×]\\s*1080"
+      - type: "output_not_contains"
+        value: "请提供课程名称"
+      - type: "output_not_contains"
+        value: "请告诉我课程目录"
+      - type: "command"
+        run: "test ! -e course-cover.png && test ! -e cover-system.md"
+    rubric:
+      - >-
+        The response treats the fixture as the current course, derives the title, audience,
+        observable outcome, light visual mode, and default 1920x1080 PNG cover without asking the
+        user to repeat them.
+      - >-
+        The response says it will inspect or reuse the supplied local iconography before considering
+        generated illustration, and it does not invent a need for ImageGen.
+      - >-
+        Because the prompt requests a read-only scope summary, the response does not create canonical
+        cover artifacts or claim that a final direction has already been selected.
+    timeout: 240

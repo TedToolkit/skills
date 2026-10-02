@@ -31,14 +31,17 @@ approved spoken content and `narration.wav` as the final timing source; titles, 
 IDs, and production notes in other files are not spoken. Confirm the required artifacts describe the
 same lesson and script version. If only `narration-source.wav` exists, return it to
 `edit-tutorial-narration`. If `storyboard.md` is missing or provisional, return the lesson to
-`storyboard-tutorial`. Create only an explicitly requested project scaffold or silent preview when
+`design-tutorial` for timing finalization. Create only an explicitly requested project scaffold or silent preview when
 these gates are incomplete, and never claim it is a finished narrated video. If script, storyboard,
 and edited recording materially disagree, show the mismatch and resolve the affected upstream
 artifact before final rendering.
-Confirm that the lesson card and storyboard agree on the exit-check prompt, success criteria, and
-remediation pointer and that the recording includes the learner-facing prompt and pause instruction.
-Return a missing or contradictory check to the lesson workflow rather than inventing it during
-production.
+Read the video production contract from `course.config.json`; for an older course that omits it,
+use the defaults in the course state contract. Configure the composition and formal render to the
+declared aspect ratio, pixel dimensions, integer fps, container, codecs, pixel format, and audio
+sample rate. Do not choose a fixed total frame count independently of the final timeline duration.
+Confirm that the lesson card contains exactly one `## Post-lesson question`. It belongs to the
+packaged course page, not the recording or storyboard. Return a missing question to the lesson
+workflow; do not append it to the narration, captions, composition, or video during production.
 
 Inspect the selected project and propose the files or scenes to create or change before writing.
 A direct request to build or revise this named tutorial authorizes edits to its project files and
@@ -85,18 +88,15 @@ switch a scene to dark mode for decoration. Preserve the authentic appearance of
 IDEs, terminals, and other source evidence when recoloring would misrepresent it, framing that
 content within the light course treatment and maintaining readable contrast.
 
-Implement the storyboarded exit-check sequence as part of the lesson: show the prompt clearly,
-preserve the intentional response opportunity, and reveal the success criteria and targeted
-remediation pointer in learner-facing form. Keep this sequence seekable and readable like every
-other teaching scene; do not omit it merely because the narration has ended.
-
 ## Verify and deliver
 
 Run the available HyperFrames validation and render commands. Inspect representative frames at
 the start, middle, and end of each shot and around transitions; listen to the finished audio and
 check shot, action, and WebVTT cue timing against the rendered video. Check readability at the target
-resolution, completeness of all spoken paragraphs, factual visual fidelity, missing assets, clipped
-text, exit-check response and reveal states, ending audio, and any agreed episode duration. Fix
+resolution, and inspect the encoded output to confirm its dimensions, fps, container, codecs, pixel
+format, and audio sample rate match `course.config.json`. Also check completeness of all spoken
+paragraphs, factual visual fidelity, missing assets, clipped
+text, a natural ending without an appended post-lesson question, ending audio, and any agreed episode duration. Fix
 material problems and render again. If the recording makes the lesson longer than agreed, report
 the actual length and seek a coherent lesson split or script change; do not silently speed up the
 narration. On later revision requests, change only affected scenes and repeat checks for those

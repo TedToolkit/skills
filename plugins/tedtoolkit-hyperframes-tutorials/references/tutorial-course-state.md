@@ -36,6 +36,35 @@ The required `course.config.json` fields are `courseId`, `title`, `slug`, `conte
 `outline`. `outline` is a course-root-relative path to the readable course plan. `courseId` must
 match `course-state.json`.
 
+New courses also record the production contract below. Existing courses that omit `video` or
+`cover` use these same defaults so the configuration change is backward compatible.
+
+```json
+{
+  "video": {
+    "aspectRatio": "16:9",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "container": "mp4",
+    "videoCodec": "h264",
+    "pixelFormat": "yuv420p",
+    "audioCodec": "aac",
+    "audioSampleRate": 48000
+  },
+  "cover": {
+    "width": 1920,
+    "height": 1080,
+    "format": "png"
+  }
+}
+```
+
+The configured video and cover dimensions must have the same aspect ratio. Override width, height,
+or integer fps only when the course delivery target requires it. Keep the MP4/H.264/yuv420p and
+AAC compatibility contract and the canonical PNG cover format. Do not store a fixed total frame
+count: derive it from the final timeline duration and configured fps.
+
 ## Lesson lifecycle
 
 Use these ordered states:
@@ -45,9 +74,10 @@ Use these ordered states:
 | `planned` | The outline and dependency graph contain the lesson; no script is claimed. | `design-tutorial` |
 | `script-draft` | `lesson.md`, `narration.txt`, and every declared demonstration source exist as a draft. | `review-tutorial-script` |
 | `script-approved` | The reviewed script has explicit human approval for recording. | `edit-tutorial-narration` |
-| `narration-final` | The edited voice master and verified timing data match the approved script. | `storyboard-tutorial` |
+| `narration-final` | The edited voice master and verified timing data match the approved script. | `design-tutorial` finalizes storyboard timing |
 | `storyboard-final` | The final storyboard is aligned to the voice master and has complete evidence. | `build-tutorial` |
-| `video-verified` | The formal video and WebVTT track passed production verification. | `package-tutorial-course` |
+| `video-verified` | The formal video and WebVTT track passed production verification. | `create-tutorial-cover` |
+| `cover-verified` | The lesson cover represents the current verified video and passed full-size, thumbnail, and course-family review. | `package-tutorial-course` |
 
 Only explicit human approval may advance `script-draft` to `script-approved`. A review result such
 as “passed,” silence, or a request to continue is not approval. Record the user's approval source in
@@ -62,7 +92,8 @@ lesson states. Any new or replaced lesson-stage record resets release state to `
 Never hand-author hashes. Use the packaged
 [`record-course-stage.mjs`](../scripts/record-course-stage.mjs) after a stage passes. It records a
 SHA-256 fingerprint for every required artifact through that stage plus the lesson's identity, type,
-direct prerequisites, and declared source paths; it then removes later stage records and sets the
+direct prerequisites, and declared source paths. Video and cover records also fingerprint the
+effective production settings that govern them. The recorder then removes later stage records and sets the
 lesson status. Use
 [`record-course-release.mjs`](../scripts/record-course-release.mjs) only after packaging and release
 verification; pass both the generated release directory and ZIP path so it fingerprints every
@@ -77,6 +108,15 @@ Required cumulative lesson artifacts are:
 | `narration-final` | `narration-source.wav`, `narration.wav`, `transcript.json` |
 | `storyboard-final` | `storyboard.md` |
 | `video-verified` | `video.mp4`, `captions.vtt` |
+| `cover-verified` | Root `cover-system.md`, root `course-cover.png`, and lesson `cover.png` |
+
+`design-tutorial` creates a provisional `storyboard.md` with the script before `script-draft` is
+recorded; the stage recorder enforces this for new or re-recorded drafts. That file intentionally
+enters the cumulative fingerprints only at `storyboard-final`: the same storyboard is expected to
+gain real time ranges and pacing adjustments after `narration-final`. Its provisional existence is
+an authoring and review requirement, not a claim of verified timing. A legacy stage record created
+before this contract remains readable and can acquire its storyboard when the lesson next enters
+design or final timing work.
 
 Run [`validate-course.mjs`](../scripts/validate-course.mjs) before resuming work and before packaging.
 It recomputes fingerprints rather than trusting declared status. A changed or missing file makes its
@@ -84,7 +124,14 @@ record and all downstream claims stale. Do not repair stale state by copying old
 the JSON: return to the earliest affected workflow, verify the current artifacts, and record that
 stage again. A changed approved script therefore returns to `script-draft` and needs fresh approval;
 a changed final narration returns to `script-approved`; a changed storyboard returns to
-`narration-final`.
+`narration-final`; a changed video production contract returns to `storyboard-final`; and a changed
+cover-only contract returns to `video-verified`. A changed cover system or course cover also returns
+lesson covers to `video-verified` for continuity review. Legacy courses without explicit production objects
+continue to use the documented defaults and do not invalidate an existing pre-contract video record.
+In addition to file presence and fingerprints, every lesson at `script-draft` or later must have
+exactly one non-empty `## Post-lesson question` section in `lesson.md`. A packaged core lesson must
+also expose that question as visible static page text in a container identified by
+`data-post-lesson-question="<lesson-id>"`.
 
 ## Transcript data required for deterministic validation
 

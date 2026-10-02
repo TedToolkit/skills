@@ -1,4 +1,0 @@
-interface:
-  display_name: "Storyboard Tutorial"
-  short_description: "Design shots against the final narration timing"
-  default_prompt: "Use $storyboard-tutorial to create storyboard.md from my script, narration.wav, transcript.json, and referenced source files."

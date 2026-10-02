@@ -24,12 +24,13 @@ Read the [course state contract](../../references/tutorial-course-state.md) and 
 Inspect the course outline, lesson directories, existing page generator, language setting, and
 release conventions before changing anything. In a course using this toolkit's file layout, use
 `course.config.json` for the course ID, title, slug, and content language; use the outline for
-lesson IDs, types, titles, and prerequisites; use `lessons/<id>/video.mp4` as the publication
-artifact and effective `video-verified` state as the publication gate. Keep each lesson's stable ID
+lesson IDs, types, titles, and prerequisites; use `lessons/<id>/video.mp4`, `captions.vtt`, and
+`cover.png` as publication artifacts and effective `cover-verified` state as the publication gate.
+Keep each lesson's stable ID
 and the learner's local-progress storage key across rebuilds.
 
 Run the packaged validator before building. Do not package while the graph is invalid, a required
-artifact is stale, or a core lesson selected for release is below `video-verified`. An incomplete
+artifact is stale, or a core lesson selected for release is below `cover-verified`. An incomplete
 extension may remain unpublished without blocking a complete core release.
 
 Skill instructions being written in English do not require English learner content. Keep the
@@ -42,13 +43,14 @@ the actual content, not merely alter the HTML `lang` attribute.
 
 Prefer the course-local `tools/package-course.mjs`; invoke it from the course root. It must call
 `tools/build-course-player.mjs` first so the page reflects current outline, text, and video
-metadata, then collect learner-facing Markdown/plain text, referenced assets/examples, and formal
-videos and caption tracks into a generated output directory and ZIP. If a different course lacks these scripts,
+metadata, then collect learner-facing Markdown/plain text, referenced assets/examples, formal
+videos, caption tracks, `course-cover.png`, and lesson covers into a generated output directory and ZIP. If a different course lacks these scripts,
 adapt or create project-local scripts for its real schema before packaging; do not assume that
 one course's Chinese outline parser works for every course. Keep author-only demo clips and raw
 production files out of the release unless the user explicitly wants them.
 
-Treat a lesson without its formal video as `unpublished`, even when all prerequisites are complete.
+Treat a lesson without its formal video, canonical captions, or verified cover as `unpublished`,
+even when all prerequisites are complete.
 It must not be clickable, playable, markable as completed, or counted as a completed prerequisite.
 Previously stored completion for an unpublished lesson must not unlock descendants. A published
 lesson whose prerequisites are incomplete remains locked. Keep the generated directory clearly
@@ -59,6 +61,18 @@ Keep the player width available for learning content. Group the current lesson's
 in one compact metadata row beside or directly below the lesson title; do not place them at opposite
 edges of the content area. Let the group wrap as one unit on narrow screens instead of reserving a
 second column or shrinking the video.
+
+For every published lesson, read the exact learner-facing text from the lesson card's single
+`## Post-lesson question` section. Render it as static text after the lesson's video and transcript
+and before completion and next-lesson controls. Keep it visible without requiring video playback to
+finish. Do not add an input, submission, answer reveal, scoring, stored response, or completion gate;
+the learner answers privately. Do not derive the question from `narration.txt`, captions, or video
+frames, and do not include author notes from the rest of `lesson.md` in this learner-facing block.
+Treat the Markdown heading as an authoring key and localize the visible section label to the course
+language. Wrap the learner-facing block in an element with
+`data-post-lesson-question="<lesson-id>"` so the packaged-release validator can prove that the
+question is present without adding interaction. A missing, empty, duplicate, unmarked, or omitted
+question prevents a finished release.
 
 For every published narrated lesson, include `captions.vtt` as a local WebVTT track on the video and
 use those same cues to render the learner transcript; do not create a second independently timed
@@ -75,6 +89,23 @@ course experience and supports switching, restyling, accessibility, synchronized
 and later localization. Never render subtitle text into the video pixels or package a second
 captioned video variant.
 
+Package the current `cover.png` for every published lesson and set it as that video's local `poster`
+image. Use the cover in lesson navigation when the layout includes thumbnails, but do not duplicate
+large decorative imagery around the player. A missing, stale, or unreferenced cover prevents a
+finished release just like a missing video or caption track.
+
+Place the current `course-cover.png` in the course landing or hero area with useful alternative text.
+For each lesson player, use the local lesson cover with the native `poster` attribute, keep controls
+enabled, set `preload="metadata"` or `preload="none"`, and do not autoplay. The poster must remain
+visible before the learner chooses Play; do not replace it with a blank player, first video frame,
+or a separately maintained CSS background. If a custom play button overlays the poster, give it an
+accessible name and keep the native video as the playback source.
+
+Use lesson covers as optional navigation thumbnails with stable 16:9 boxes and responsive sizing.
+Because the canonical images already match the video ratio, avoid decorative cropping in the player;
+thumbnail cards may use `object-fit: cover` only within the safe area defined by `cover-system.md`.
+Do not rely on text inside an image as the only course or lesson label.
+
 Treat completion and navigation as separate actions: marking a lesson complete updates progress but
 does not navigate immediately. After completion, make the recommended next lesson the primary action.
 When the next incomplete core lesson is a different eligible destination, also offer it as a secondary
@@ -87,14 +118,17 @@ do not describe a lesson as the next course.
 ## Verify and hand off
 
 Run the packaging script and test ZIP integrity. Inspect the archive listing and confirm that its
-top-level folder contains `index.html`, course text, and each video referenced by the HTML; there
-must be no absolute or network-dependent media path. Open the extracted HTML as a local file when
+top-level folder contains `index.html`, course text, `course-cover.png`, and each video, caption
+track, and lesson cover referenced by the HTML; there must be no absolute or network-dependent
+media path. Open the extracted HTML as a local file when
 the environment supports it, and check the unpublished/locked/completed behavior, compact lesson
 metadata, conditional next-lesson navigation, native subtitle track, active-cue highlighting,
-seeking, responsive transcript placement, and manual-scroll behavior. A published narrated lesson
-without a valid local caption track prevents a finished release; report it as a missing artifact.
+seeking, responsive transcript placement, manual-scroll behavior, one static post-lesson question
+per published lesson, initial poster display, and the absence of autoplay. A published narrated
+lesson without a valid local caption track, cover, or post-lesson question prevents a finished
+release; report it as a missing artifact.
 Report the number of published and unpublished lessons, the output paths, and any missing videos,
-captions, or translation gaps. If no formal videos exist, label the result a structural preview,
+captions, covers, or translation gaps. If no formal videos exist, label the result a structural preview,
 not a finished course release.
 
 Only after the extracted release and ZIP pass these checks, call the packaged release recorder with
