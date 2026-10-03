@@ -2,14 +2,14 @@
 name: build-tutorial
 description: >-
   Build, revise, verify, and render one narrated animated tutorial in HyperFrames from a
-  lesson script, final storyboard, and edited narration master. Use for production or changes to an
+  lesson script, final storyboard, and generated narration audio. Use for production or changes to an
   existing tutorial video. Do not use for course-level curriculum planning, script-only work,
   or storyboard-only work.
 ---
 
 # Build Tutorial
 
-Produce one editable HyperFrames composition and a checked rendered video from the user's recorded
+Produce one editable HyperFrames composition and a checked rendered video from the verified generated
 narration and lesson storyboard. This skill also owns production review and revisions to existing
 tutorial projects; there is no separate review or revision skill.
 For a file-based course, follow the shared
@@ -20,27 +20,27 @@ Read the [course state contract](../../references/tutorial-course-state.md) and 
 
 ## Check the handoff
 
-For a file-based course, require `lesson.md`, `narration.txt`, the edited `narration.wav`, and the
-word-level `transcript.json`, final `storyboard.md`, and every demonstration source referenced by the
-lesson card or storyboard. Do not require or create a canonical `demo.md`.
+For a file-based course, require `lesson.md`, `narration.txt`, the generated `narration.wav`, final
+`storyboard.md`, and every demonstration source referenced by the lesson card or storyboard. Do not
+require or create a canonical `demo.md`.
 Run the course validator and require effective `storyboard-final` state before a formal render. A
-stale script, narration, transcript, source, or storyboard returns to its owning workflow; do not
+stale script, narration, source, or storyboard returns to its owning workflow; do not
 render around the mismatch or refresh hashes without re-verification.
 Also inspect the existing project and user delivery constraints. Treat `narration.txt` as the
 approved spoken content and `narration.wav` as the final timing source; titles, headings, paragraph
 IDs, and production notes in other files are not spoken. Confirm the required artifacts describe the
-same lesson and script version. If only `narration-source.wav` exists, return it to
-`edit-tutorial-narration`. If `storyboard.md` is missing or provisional, return the lesson to
+same lesson and script version. If `narration.wav` is missing, return the lesson to
+`generate-tutorial-narration`. If `storyboard.md` is missing or provisional, return the lesson to
 `design-tutorial` for timing finalization. Create only an explicitly requested project scaffold or silent preview when
 these gates are incomplete, and never claim it is a finished narrated video. If script, storyboard,
-and edited recording materially disagree, show the mismatch and resolve the affected upstream
+and verified narration materially disagree, show the mismatch and resolve the affected upstream
 artifact before final rendering.
 Read the video production contract from `course.config.json`; for an older course that omits it,
 use the defaults in the course state contract. Configure the composition and formal render to the
 declared aspect ratio, pixel dimensions, integer fps, container, codecs, pixel format, and audio
 sample rate. Do not choose a fixed total frame count independently of the final timeline duration.
 Confirm that the lesson card contains exactly one `## Post-lesson question`. It belongs to the
-packaged course page, not the recording or storyboard. Return a missing question to the lesson
+packaged course page, not the narration or storyboard. Return a missing question to the lesson
 workflow; do not append it to the narration, captions, composition, or video during production.
 
 Inspect the selected project and propose the files or scenes to create or change before writing.
@@ -57,7 +57,7 @@ versions differ; do not copy a fixed upstream command or timing API into this sk
 source is [HyperFrames](https://github.com/heygen-com/hyperframes).
 
 Align scene boundaries and key teaching actions to `narration.wav`. Do not recut or repair the
-voice master inside this skill; send narration changes back to `edit-tutorial-narration` and then
+voice audio inside this skill; send narration changes back to `generate-tutorial-narration` and then
 refresh the affected storyboard timing. Use local assets where practical and track their
 source. Implement storyboarded states and transitions with seekable, deterministic animation so
 arbitrary-frame preview and render agree. Keep exact procedural text, code, and visual results
@@ -67,12 +67,14 @@ actual source files. Do not substitute an editor capture for a course that chose
 files, or copy a large source artifact into the storyboard.
 
 For a file-based course, create `lessons/<lesson-id>/captions.vtt` from `narration.txt`, the final
-`narration.wav`, and verified `transcript.json`. Use readable phrase or sentence cues rather than whole
-paragraphs, omit authoring labels and Markdown, make the cue text match what is actually spoken, and
-use stable WebVTT cue identifiers derived from the lesson paragraph IDs when available.
+`narration.wav`, and the verified shot ranges and narration cues in `storyboard.md`. Use readable
+phrase or sentence cues rather than whole paragraphs, omit authoring labels and Markdown, make the
+cue text match what is actually spoken, and use stable WebVTT cue identifiers derived from the
+lesson paragraph IDs when available.
 Map narration timing onto the formal video timeline, including any intentional lead-in, and verify
 the WebVTT against the rendered video. If reliable word or phrase alignment is missing, align the
-final audio again; never estimate cue boundaries by spreading a paragraph evenly over its duration.
+audio and return the corrected ranges to `design-tutorial`; do not silently rewrite storyboard
+timing during production. Never estimate cue boundaries by spreading a paragraph evenly over its duration.
 Treat WebVTT as the canonical browser track. Produce SRT only for a named downstream platform that
 requires it, deriving it from the same verified cues rather than maintaining a second timing source.
 
@@ -97,7 +99,7 @@ resolution, and inspect the encoded output to confirm its dimensions, fps, conta
 format, and audio sample rate match `course.config.json`. Also check completeness of all spoken
 paragraphs, factual visual fidelity, missing assets, clipped
 text, a natural ending without an appended post-lesson question, ending audio, and any agreed episode duration. Fix
-material problems and render again. If the recording makes the lesson longer than agreed, report
+material problems and render again. If the generated narration makes the lesson longer than agreed, report
 the actual length and seek a coherent lesson split or script change; do not silently speed up the
 narration. On later revision requests, change only affected scenes and repeat checks for those
 scenes plus their boundaries.

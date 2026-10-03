@@ -17,15 +17,12 @@ every workflow stage can discover its inputs without guessing.
 │   └── <lesson-id>/
 │       ├── lesson.md
 │       ├── narration.txt
-│       ├── narration-source.wav
 │       ├── narration.wav
-│       ├── transcript.json
 │       ├── captions.vtt
 │       ├── storyboard.md
 │       ├── cover.png
 │       ├── sources/
-│       │   ├── narration-original.<ext>
-│       │   └── narration-original-<NN>.<ext>
+│       │   └── <lesson evidence files>
 │       ├── <editable HyperFrames project files>
 │       └── video.mp4
 └── <generated-release>/
@@ -50,13 +47,10 @@ status source; lesson cards must not maintain another status field.
 | `course-cover.png` | `create-tutorial-cover`; course-level visual anchor used by the learner page and cover family. |
 | `lesson.md` | `design-tutorial`; stable production card, paragraph map, sources, and one `## Post-lesson question`; no mutable status. |
 | `narration.txt` | `design-tutorial`; approved spoken words only. |
-| `sources/narration-original.<ext>` or `sources/narration-original-<NN>.<ext>` | One or more immutable uploaded recordings when the originals are not retained elsewhere. |
-| `narration-source.wav` | `edit-tutorial-narration`; canonical unedited PCM source reel assembled from the supplied recordings with a recoverable mapping to each original. |
-| `narration.wav` | `edit-tutorial-narration`; edited and verified voice master with no music or SFX. |
-| `transcript.json` | `edit-tutorial-narration`; normalized word-level production timing aligned to `narration.wav`. |
+| `narration.wav` | `generate-tutorial-narration`; Fish Audio output generated directly from the approved `narration.txt`. |
 | `captions.vtt` | `build-tutorial`; learner-facing WebVTT cues aligned to the formal video timeline. |
 | `captions.srt` | Optional `build-tutorial` export for a named destination that requires SubRip captions. |
-| `storyboard.md` | `design-tutorial`; the provisional visual plan created with the script and later finalized against edited narration. |
+| `storyboard.md` | `design-tutorial`; the provisional visual plan created with the script and later finalized against verified generated narration. |
 | Editable composition | `build-tutorial`; implementation of the final storyboard. |
 | `video.mp4` | `build-tutorial`; formal render and the packaging workflow's publication signal. |
 | `cover.png` | `create-tutorial-cover`; verified lesson-level poster created from the current formal video and lesson identity. |
@@ -75,30 +69,29 @@ large or independently verified evidence in their real project or asset files; t
 references those paths and the exact state or range to show. Final storyboarding and rendering stop
 when a declared source is missing or unverified.
 
-`transcript.json` is production data, not a learner subtitle file. Keep its normalized word-level
-timestamps for precise edit verification and animated captions. `captions.vtt` is the canonical
-learner-facing sidecar because the course player is HTML-based. Generate SRT from the same verified
-cues only when a target platform requires it; never maintain VTT and SRT as independent timing
-sources.
+The final `storyboard.md` is the production timing source. Give every shot one verified audio range
+in `HH:MM:SS.mmm --> HH:MM:SS.mmm` form, plus its paragraph IDs and spoken cue. Keep ranges ordered
+and non-overlapping. `captions.vtt` is the canonical learner-facing sidecar because the course
+player is HTML-based. Generate SRT from the same verified cues only when a target platform requires
+it; never maintain VTT and SRT as independent timing sources.
 
 ## Production gates
 
 The normal order is:
 
 1. `lesson.md`, `narration.txt`, provisional `storyboard.md`, and all referenced demonstration sources.
-2. One or more raw recordings preserved and normalized into `narration-source.wav`.
-3. Edited `narration.wav` plus word-level `transcript.json`.
-4. Final audio-aligned `storyboard.md`.
-5. Editable HyperFrames composition, formal `video.mp4`, and aligned `captions.vtt`.
-6. Course `cover-system.md` and `course-cover.png`, plus a verified lesson `cover.png` based on the current formal video.
-7. Generated offline learner release and ZIP.
+2. Fish Audio generates `narration.wav` from the approved text and saved voice model ID.
+3. `design-tutorial` listens to that audio and writes verified shot ranges into `storyboard.md`.
+4. Editable HyperFrames composition, formal `video.mp4`, and aligned `captions.vtt`.
+5. Course `cover-system.md` and `course-cover.png`, plus a verified lesson `cover.png` based on the current formal video.
+6. Generated offline learner release and ZIP.
 
 A provisional storyboard is a normal part of lesson design. It must identify itself as provisional,
 use paragraph anchors and narration cues without invented timestamps or precise durations, and
-cannot unlock formal rendering. The same file is aligned and finalized after the voice master; do
+cannot unlock formal rendering. The same file is aligned and finalized after narration generation; do
 not create a parallel draft-storyboard artifact. A final
-video requires `lesson.md`, `narration.txt`, `narration.wav`, `transcript.json`, and final
-`storyboard.md`, plus every demonstration source declared by the lesson. A finished release also
+video requires `lesson.md`, `narration.txt`, `narration.wav`, and final `storyboard.md`, plus every
+demonstration source declared by the lesson. A finished release also
 requires `course-cover.png` and `cover.png` for every published lesson. A changed
 `cover-system.md` or course cover requires lesson covers to be rechecked for continuity. Upstream changes invalidate affected downstream
 timing, captions, video, cover, and packaging artifacts; refresh them in order rather than
@@ -110,5 +103,5 @@ variant. A delivery destination that cannot consume sidecar subtitles is outside
 workflow and must not change the canonical lesson artifacts.
 
 Keep authoring sources and generated learner releases in separate directories. Never overwrite an
-unknown output directory, and do not include raw recordings, internal production files, or author-only
-assets in a release unless the user explicitly requests them.
+unknown output directory, and do not include internal production files or author-only assets in a
+release unless the user explicitly requests them.

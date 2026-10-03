@@ -78,7 +78,7 @@ recall, explanation, choice, prediction, or application prompt aligned to the le
 confidence check such as "Do you understand?" Treat it as static text shown after the lesson video,
 outside the narration, storyboard, captions, and video duration. It does not require an input,
 submission, answer reveal, scoring, or completion gate. Give a rough duration only as an estimate;
-actual timing will come from recorded narration later. Derive a valid viewing order from the
+actual timing will come from the generated narration audio later. Derive a valid viewing order from the
 dependency graph after the content relationships are designed; do not use list position as a
 substitute for prerequisites. Avoid repeating a full explanation across lessons without a reason.
 
@@ -182,7 +182,7 @@ exercises the learner completes afterward.
 
 When the user requests a course introduction, plan it as a short, separately counted lesson that
 answers the course purpose, intended learners, prerequisites, reason for the approach, learning
-path, and realistic outcome. Hand its recordable narration to `design-tutorial`. Keep the
+path, and realistic outcome. Hand its synthesis-ready narration brief to `design-tutorial`. Keep the
 introduction aligned with the course-wide episode duration and teaching premise. Do not let it
 create a chapter that violates the mixed lesson-type rule.
 
@@ -223,11 +223,9 @@ references; there may be more than one valid starting lesson.
 
 For a file-based course, give each lesson a stable `lessons/<lesson-id>/` directory. The canonical
 course cover artifacts are root `cover-system.md` and `course-cover.png`; canonical per-lesson
-artifacts are `lesson.md`, `narration.txt`, `narration-source.wav`, `narration.wav`,
-`transcript.json`, `storyboard.md`, `video.mp4`, `captions.vtt`, and `cover.png`; create each only when its
-workflow stage produces real content. Keep one uploaded original recording under
-`lessons/<lesson-id>/sources/narration-original.<ext>`, or multiple originals under stable numbered
-names such as `narration-original-01.<ext>`, when they are not retained elsewhere. Do not
+artifacts are `lesson.md`, `narration.txt`, `narration.wav`, `storyboard.md`,
+`video.mp4`, `captions.vtt`, and `cover.png`; create each only when its workflow stage produces real
+content. `narration.wav` is generated directly from the approved script and saved Fish voice ID. Do not
 create a canonical `demo.md`: record demonstration source paths in `lesson.md`, keep runnable or
 substantial evidence in its actual project or asset file, and let `storyboard.md` own short exact
 on-screen text and the choice of what source range or state to show.
@@ -245,8 +243,8 @@ The course outline remains the human-readable sequence index; `course-state.json
 machine-readable dependency and production-status source. A lesson card records its title, outcome, example,
 prerequisites, inherited chapter level, lesson type, estimated duration, post-lesson question, and
 demonstration sources. Create cards when the user
-requests a navigable per-lesson workspace. Do not create empty narration, audio, transcript,
-storyboard, caption, video, or cover placeholders. Keep any course-wide voice and audience brief outside the
+requests a navigable per-lesson workspace. Do not create empty narration, audio, storyboard,
+caption, video, or cover placeholders. Keep any course-wide voice and audience brief outside the
 read-aloud text.
 Run the packaged validator after writing the outline and initial state; a planned course should pass
 its configuration, identity, dependency-graph, path, and state-shape checks before handoff.

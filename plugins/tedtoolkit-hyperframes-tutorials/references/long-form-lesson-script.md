@@ -35,7 +35,7 @@ Make boundaries audible with a short, natural signpost that says why the new sec
 section with a compressed conclusion or changed understanding, not a verbatim recap. Group the
 paragraph map by these sections, or add a section field to it, so later storyboarding can create
 visible chapter boundaries and navigation without putting production labels into `narration.txt`.
-Do not assign final timestamps before edited narration exists.
+Do not assign final timestamps before verified generated narration exists.
 
 Do not force every section to the same duration and do not impose a universal maximum video length.
 Instead, ensure each section has a coherent local result and reserve time for demonstrations,

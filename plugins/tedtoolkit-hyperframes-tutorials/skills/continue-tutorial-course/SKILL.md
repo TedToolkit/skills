@@ -2,7 +2,7 @@
 name: continue-tutorial-course
 description: >-
   Inspect and resume an existing file-based animated tutorial course across planning, scripting,
-  narration editing, storyboarding, video production, covers, captions, and offline packaging. Use when the
+  Fish narration generation, storyboarding, video production, covers, captions, and offline packaging. Use when the
   user asks what is next, wants to continue a partially produced course, needs stale-artifact
   diagnosis, or wants a course-wide production status report. Do not use to invent a new curriculum
   or bypass a stage's review and approval gate.
@@ -46,7 +46,7 @@ Use the effective verified state rather than the declared state:
 
 - `planned` → `design-tutorial`
 - `script-draft` → `review-tutorial-script`, followed by explicit human approval
-- `script-approved` → `edit-tutorial-narration`
+- `script-approved` → `generate-tutorial-narration`
 - `narration-final` → `design-tutorial` for final storyboard timing
 - `storyboard-final` → `build-tutorial`
 - `video-verified` → `create-tutorial-cover`; establish `cover-system.md` and `course-cover.png`
@@ -55,8 +55,14 @@ Use the effective verified state rather than the declared state:
 
 A request to continue authorizes inspection and the next ordinary draft or production action within
 the selected course, but not a `script-approved` transition, publishing, uploading, or changing the
-course scope. Stop for explicit approval when a reviewed script is ready to record. Preserve optional
+course scope. Stop for explicit approval when a reviewed script is ready for Fish narration generation. Preserve optional
 extensions as optional; do not delay a valid core release solely because an extension is incomplete.
+
+When the user asks to generate narration and synchronize the storyboard, run the two owning stages
+in order: `generate-tutorial-narration` writes the WAV, this coordinator records `narration-final`,
+then `design-tutorial` writes the verified ranges into `storyboard.md` before this coordinator
+records `storyboard-final`. A request only for audio stops after `narration-final`; the generation
+skill itself never edits the storyboard.
 
 After the owning skill passes its verification, use the packaged recorder for that exact stage. Do
 not advance state before the files exist and pass their checks. Re-run the validator and report the

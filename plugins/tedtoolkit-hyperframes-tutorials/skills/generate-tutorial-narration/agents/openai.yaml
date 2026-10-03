@@ -1,0 +1,4 @@
+interface:
+  display_name: "Generate Tutorial Narration"
+  short_description: "Generate narration audio from TXT with Fish Audio"
+  default_prompt: "Use $generate-tutorial-narration to turn my narration.txt into narration.wav with Fish Audio."

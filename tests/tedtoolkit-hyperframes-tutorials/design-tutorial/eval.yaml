@@ -34,7 +34,7 @@ scenarios:
       - "The opening contains a brief, natural entry that acknowledges and orients the learner without repeating an instructor biography, and it reaches the title's problem promptly rather than lingering in a generic welcome."
       - "The full script uses coherent long-form sections instead of repeated hooks or short-form teaser language."
       - "The narration is natural to speak and does not invent a fixed successor for a branching course."
-      - "A provisional storyboard maps the spoken progression to visible explanations and motion without inventing precise timestamps before recording."
+      - "A provisional storyboard maps the spoken progression to visible explanations and motion without inventing precise timestamps before narration generation."
     timeout: 360
 
   - name: "Keep a first lesson coherent and estimate its spoken duration"

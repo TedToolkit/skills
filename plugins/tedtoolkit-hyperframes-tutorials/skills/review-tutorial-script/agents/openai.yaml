@@ -1,4 +1,4 @@
 interface:
   display_name: "Review Tutorial Script"
-  short_description: "Review lesson narration against the course plan"
+  short_description: "Audit existing tutorial lesson scripts"
   default_prompt: "Use $review-tutorial-script to review these lesson scripts against the course outline and fix any gaps I have asked you to address."

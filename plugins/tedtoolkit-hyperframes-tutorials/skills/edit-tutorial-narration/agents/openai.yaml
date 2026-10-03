@@ -1,4 +1,0 @@
-interface:
-  display_name: "Edit Tutorial Narration"
-  short_description: "Match multiple WAV recordings exactly to an approved TXT"
-  default_prompt: "Use $edit-tutorial-narration to reconstruct narration.wav from my WAV recordings so it matches narration.txt exactly, and list any complete paragraphs I must record again."

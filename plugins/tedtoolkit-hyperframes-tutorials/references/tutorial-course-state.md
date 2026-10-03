@@ -73,9 +73,9 @@ Use these ordered states:
 | --- | --- | --- |
 | `planned` | The outline and dependency graph contain the lesson; no script is claimed. | `design-tutorial` |
 | `script-draft` | `lesson.md`, `narration.txt`, and every declared demonstration source exist as a draft. | `review-tutorial-script` |
-| `script-approved` | The reviewed script has explicit human approval for recording. | `edit-tutorial-narration` |
-| `narration-final` | The edited voice master and verified timing data match the approved script. | `design-tutorial` finalizes storyboard timing |
-| `storyboard-final` | The final storyboard is aligned to the voice master and has complete evidence. | `build-tutorial` |
+| `script-approved` | The reviewed script has explicit human approval for Fish narration generation. | `generate-tutorial-narration` |
+| `narration-final` | Fish Audio generated `narration.wav` from the approved script. | `design-tutorial` aligns and finalizes the storyboard |
+| `storyboard-final` | The final storyboard contains verified shot ranges aligned to the generated narration. | `build-tutorial` |
 | `video-verified` | The formal video and WebVTT track passed production verification. | `create-tutorial-cover` |
 | `cover-verified` | The lesson cover represents the current verified video and passed full-size, thumbnail, and course-family review. | `package-tutorial-course` |
 
@@ -105,7 +105,7 @@ Required cumulative lesson artifacts are:
 | --- | --- |
 | `script-draft` | `lesson.md`, `narration.txt`, plus every path in `sourcePaths` |
 | `script-approved` | No new file; a fresh script snapshot plus `approvalSource` |
-| `narration-final` | `narration-source.wav`, `narration.wav`, `transcript.json` |
+| `narration-final` | `narration.wav` |
 | `storyboard-final` | `storyboard.md` |
 | `video-verified` | `video.mp4`, `captions.vtt` |
 | `cover-verified` | Root `cover-system.md`, root `course-cover.png`, and lesson `cover.png` |
@@ -133,22 +133,14 @@ exactly one non-empty `## Post-lesson question` section in `lesson.md`. A packag
 also expose that question as visible static page text in a container identified by
 `data-post-lesson-question="<lesson-id>"`.
 
-## Transcript data required for deterministic validation
+## Storyboard timing required for deterministic validation
 
-`transcript.json` is a normalized flat word array:
-
-```json
-[
-  { "id": "w0001", "text": "Hello", "start": 0.4, "end": 0.9 },
-  { "id": "w0002", "text": "world.", "start": 1.0, "end": 1.6 }
-]
-```
-
-Word IDs are unique and stable, spoken text is non-empty, and time ranges are finite, ordered, and
-non-overlapping. Concatenated transcript text must match `narration.txt`; the stage fingerprint binds
-both files to the same approved snapshot. `captions.vtt` must be valid, ordered, non-overlapping
-WebVTT whose spoken text matches `narration.txt`; its cue range must be consistent with the transcript
-plus a non-negative video lead-in.
+`design-tutorial` writes the verified production timeline directly into `storyboard.md`. Every final
+shot uses an audio range in `HH:MM:SS.mmm --> HH:MM:SS.mmm` form and identifies its paragraph IDs
+and spoken cue. Ranges must be finite, ordered, and non-overlapping; together they must cover every
+approved spoken paragraph. The validator checks the stored ranges without requiring a second timing
+artifact. `captions.vtt` must be valid, ordered, non-overlapping WebVTT whose spoken text matches
+`narration.txt`, and its cues must remain inside the final storyboard timeline.
 
 All stored paths are course-root-relative, use forward slashes, and must stay inside the course root.
 Absolute paths, parent traversal, and network-dependent release media are invalid.

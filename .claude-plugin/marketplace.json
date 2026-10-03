@@ -37,7 +37,7 @@
     {
       "name": "tedtoolkit-hyperframes-tutorials",
       "source": "./plugins/tedtoolkit-hyperframes-tutorials",
-      "description": "Plan, script, edit narration, storyboard, produce, cover, and package animated HyperFrames tutorials."
+      "description": "Plan, script, generate Fish narration, storyboard, produce, cover, and package animated HyperFrames tutorials."
     }
   ]
 }

@@ -15,7 +15,7 @@ export const LESSON_STAGES = [
 export const NEXT_SKILL = {
   planned: "design-tutorial",
   "script-draft": "review-tutorial-script",
-  "script-approved": "edit-tutorial-narration",
+  "script-approved": "generate-tutorial-narration",
   "narration-final": "design-tutorial",
   "storyboard-final": "build-tutorial",
   "video-verified": "create-tutorial-cover",
@@ -125,13 +125,11 @@ export function requiredLessonFiles(lesson, stage) {
   const base = `lessons/${lesson.id}`;
   const files = [`${base}/lesson.md`, `${base}/narration.txt`, ...(lesson.sourcePaths || [])];
   if (index >= stageIndex("narration-final")) {
-    files.push(
-      `${base}/narration-source.wav`,
-      `${base}/narration.wav`,
-      `${base}/transcript.json`,
-    );
+    files.push(`${base}/narration.wav`);
   }
-  if (index >= stageIndex("storyboard-final")) files.push(`${base}/storyboard.md`);
+  if (index >= stageIndex("storyboard-final")) {
+    files.push(`${base}/storyboard.md`);
+  }
   if (index >= stageIndex("video-verified")) {
     files.push(`${base}/video.mp4`, `${base}/captions.vtt`);
   }
@@ -338,10 +336,6 @@ export function validateDependencyGraph(state) {
   return { errors, order };
 }
 
-function finiteNonNegative(value) {
-  return typeof value === "number" && Number.isFinite(value) && value >= 0;
-}
-
 function normalizeSpokenText(value) {
   return value
     .replace(/<[^>]*>/g, "")
@@ -431,6 +425,29 @@ export function parseWebVtt(contents) {
   return cues;
 }
 
+export function parseStoryboardTiming(contents) {
+  const normalized = contents.replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n");
+  const pattern = /((?:\d{2,}:)?\d{2}:\d{2}\.\d{3})\s+-->\s+((?:\d{2,}:)?\d{2}:\d{2}\.\d{3})/g;
+  const ranges = [...normalized.matchAll(pattern)].map((match) => ({
+    start: parseVttTimestamp(match[1]),
+    end: parseVttTimestamp(match[2]),
+    source: match[0],
+  }));
+  if (ranges.length === 0) {
+    throw new Error("final storyboard.md contains no audio ranges; use HH:MM:SS.mmm --> HH:MM:SS.mmm");
+  }
+  for (let index = 0; index < ranges.length; index += 1) {
+    const range = ranges[index];
+    if (!Number.isFinite(range.start) || !Number.isFinite(range.end) || range.end <= range.start) {
+      throw new Error(`invalid storyboard audio range: ${range.source}`);
+    }
+    if (index > 0 && range.start < ranges[index - 1].end - 0.001) {
+      throw new Error(`storyboard audio ranges overlap or are out of order at range ${index + 1}`);
+    }
+  }
+  return ranges;
+}
+
 export function validateLessonArtifacts(root, lesson, stage) {
   const errors = [];
   const id = lesson.id;
@@ -455,35 +472,13 @@ export function validateLessonArtifacts(root, lesson, stage) {
     }
   }
 
-  if (stageIndex(stage) >= stageIndex("narration-final")) {
+  if (stageIndex(stage) >= stageIndex("storyboard-final")) {
     const base = `lessons/${id}`;
     try {
-      const transcript = readJson(safeCoursePath(root, `${base}/transcript.json`).absolute);
+      const storyboardPath = safeCoursePath(root, `${base}/storyboard.md`).absolute;
       const scriptPath = safeCoursePath(root, `${base}/narration.txt`).absolute;
-      if (!Array.isArray(transcript) || transcript.length === 0) throw new Error("transcript must be a non-empty array");
-      const ids = new Set();
-      let previousEnd = 0;
-      for (const word of transcript) {
-        if (typeof word.id !== "string" || word.id.length === 0 || ids.has(word.id)) {
-          throw new Error("word IDs must be non-empty and unique");
-        }
-        ids.add(word.id);
-        if (typeof word.text !== "string" || word.text.trim() === "") {
-          throw new Error(`word ${word.id} has no spoken text`);
-        }
-        if (!finiteNonNegative(word.start) || !finiteNonNegative(word.end)) {
-          throw new Error(`word ${word.id} has an invalid time`);
-        }
-        if (word.end <= word.start || word.start < previousEnd - 0.001) {
-          throw new Error(`word ${word.id} is overlapping or out of order`);
-        }
-        previousEnd = word.end;
-      }
+      const storyboardRanges = parseStoryboardTiming(fs.readFileSync(storyboardPath, "utf8"));
       const narration = fs.readFileSync(scriptPath, "utf8");
-      const transcriptText = normalizeSpokenText(transcript.map((word) => word.text).join(" "));
-      if (transcriptText !== normalizeSpokenText(narration)) {
-        throw new Error("transcript spoken text does not match narration.txt");
-      }
 
       if (stageIndex(stage) >= stageIndex("video-verified")) {
         const captionsPath = safeCoursePath(root, `${base}/captions.vtt`).absolute;
@@ -491,14 +486,15 @@ export function validateLessonArtifacts(root, lesson, stage) {
         const captionText = normalizeSpokenText(cues.map((cue) => cue.text).join(" "));
         const narrationText = normalizeSpokenText(narration);
         if (captionText !== narrationText) throw new Error("WebVTT spoken text does not match narration.txt");
-        const offset = cues[0].start - transcript[0].start;
-        if (offset < -0.25) throw new Error("WebVTT begins before the aligned narration timeline");
-        if (cues.at(-1).end > transcript.at(-1).end + offset + 0.75) {
-          throw new Error("WebVTT extends beyond the aligned narration timeline");
+        if (cues[0].start < storyboardRanges[0].start - 0.25) {
+          throw new Error("WebVTT begins before the final storyboard timeline");
+        }
+        if (cues.at(-1).end > storyboardRanges.at(-1).end + 0.75) {
+          throw new Error("WebVTT extends beyond the final storyboard timeline");
         }
       }
     } catch (error) {
-      errors.push(issue("TIMING_OR_CAPTIONS", error.message, id));
+      errors.push(issue("STORYBOARD_TIMING_OR_CAPTIONS", error.message, id));
     }
   }
   return errors;

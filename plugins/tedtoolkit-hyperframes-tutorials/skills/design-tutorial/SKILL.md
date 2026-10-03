@@ -1,18 +1,17 @@
 ---
 name: design-tutorial
 description: >-
-  Design one narrated animated video lesson from its recordable spoken script and provisional
-  storyboard through its final audio-aligned shot plan. Use for a standalone tutorial or one lesson
-  from a course outline, including its learning objective, teaching sequence, exact narration,
-  visual explanation, animation intent, and final storyboard timing. Do not use for planning an
-  entire multi-lesson course, editing narration audio, or building and rendering the video.
+  Create or materially redesign one narrated animated video lesson, from its synthesis-ready spoken
+  script and provisional storyboard through its final audio-aligned shot plan. Use for a standalone
+  tutorial or one lesson from a course outline. Do not use for review-only requests, narrow fixes to
+  an existing draft, narration generation, course-level curriculum planning, or rendering.
 ---
 
 # Design Tutorial
 
-Design one lesson so its spoken and visual explanations work together. Before recording, produce a
-recordable script and a provisional storyboard without invented timecodes. After the edited voice
-master exists, return to the same storyboard, align it to verified audio timing, and finalize it for
+Design one lesson so its spoken and visual explanations work together. Before narration generation,
+produce a synthesis-ready script and a provisional storyboard without invented timecodes. After the
+generated narration exists, return to the same storyboard, align it to verified audio timing, and finalize it for
 production. An existing `plan-tutorial-course` outline supplies the lesson's scope, but a standalone
 lesson does not require a course outline.
 For a file-based course, follow the shared
@@ -86,7 +85,7 @@ where the simpler approach is preferable. Treat a code smell as a reason to insp
 not an automatic mandate to apply a pattern. Demonstrate the resulting behavior with the course's
 selected test framework or another observable check; avoid a stand-alone terminology lecture.
 
-Write the actual words to be recorded, in natural spoken language. Give the lesson a coherent arc:
+Write the actual words to be synthesized, in natural spoken language. Give the lesson a coherent arc:
 an opening question or concrete problem, the relevant mechanism and example, an observable check,
 the limits or cost of the solution, and a natural closing takeaway. A transition to the next lesson
 may follow only when the course has an explicit linear continuation and it introduces a real next
@@ -124,14 +123,14 @@ sure a listener can distinguish it without looking at the screen.
 
 Write exactly one post-lesson question that lets the learner recall, explain, choose, predict, or
 apply the lesson outcome without merely reporting confidence. Keep it outside the spoken script so
-the recording can end naturally. It is static learner-facing text for the course page, not a prompt
+the narration can end naturally. It is static learner-facing text for the course page, not a prompt
 that requires an input, submission, answer reveal, score, or completion gate.
 
 In a file-based course, save `lesson.md`, `narration.txt`, and `storyboard.md` inside
 `lessons/<lesson-id>/`.
 `lesson.md` is the production card: lesson ID and title, objective, audience assumptions,
 prerequisites, teaching arc, paragraph map, demonstrations, sources, and estimated duration.
-`narration.txt` is the sole recording source and contains only the words the speaker should read,
+`narration.txt` is the sole TTS text source and contains only the words the selected voice should speak,
 as plain-text paragraphs. Do not put a title, Markdown heading, segment label, timestamp, citation,
 stage direction, pronunciation note, or production instruction in that file. Never make the speaker
 read a heading simply because it appears on the lesson card or screen. Put the exact question in a
@@ -149,7 +148,7 @@ same order as the blank-line-separated paragraphs in `narration.txt`. For each p
 teaching purpose, any required demonstration or exact on-screen value, and the source for claims
 that require verification. Keep these notes out of spoken text. Do not prescribe camera moves or
 animation timing in the paragraph map; those belong in `storyboard.md`. Estimate total length only
-from likely speaking pace; the recording will determine final timecodes.
+from likely speaking pace; the generated and verified master will determine final timecodes.
 
 Use the course's requested voice. When it calls for humor or allusions, make them illuminate the
 technical point and suit the stated audience. Prefer concise, accurate references to primary
@@ -179,11 +178,10 @@ rate, and add explicit allowance for demonstrations, predictions, and useful sil
 defensible range with those assumptions rather than a falsely precise single duration. If the range
 does not fit, split the teaching outcome into two lessons or propose a narrower scope; do not
 accelerate speech or remove an essential explanation merely to hit the limit. Treat every estimate
-as provisional until the user records the script.
+as provisional until Fish Audio generates the narration audio.
 
-Preserve exact commands, labels, and results when correctness depends on them. If the user supplies
-an existing recording, compare it with the script and identify material differences; do not silently
-replace what was spoken with new claims. Do not generate a voice recording unless requested.
+Preserve exact commands, labels, and results when correctness depends on them. Do not generate
+narration before the reviewed script receives explicit human approval.
 
 ## Design the provisional storyboard
 
@@ -192,12 +190,12 @@ to one or more shots, and every shot must identify its paragraph IDs and narrati
 shot, specify the learner-facing visual, initial and final states, motion sequence, exact on-screen
 text, required asset or evidence source, and transition to the next shot. Split or revise narration
 that cannot be visualized clearly, would overload the screen, or requires evidence that does not
-exist; do not postpone those script defects until after recording.
+exist; do not postpone those script defects until after narration generation.
 
-Mark the pre-recording storyboard as provisional. Preserve shot order and paragraph anchors, but do
+Mark the pre-generation storyboard as provisional. Preserve shot order and paragraph anchors, but do
 not invent timestamps or precise durations. Use qualitative pacing only when it changes the teaching
-intent, such as holding for a comparison or revealing a result after a prediction. The edited
-`narration.wav` and verified `transcript.json` will determine final shot boundaries, reading time,
+intent, such as holding for a comparison or revealing a result after a prediction. The generated
+`narration.wav` and timing derived from it will determine final shot boundaries, reading time,
 motion beats, and transitions.
 
 Make motion reveal relationships, sequence, state changes, or cause and effect; use stillness when
@@ -217,19 +215,22 @@ Keep the post-lesson question out of the storyboard, narration, captions, and vi
 static course-page content owned by packaging; do not invent a pause or answer-reveal sequence for
 it.
 
-## Align and finalize after recording
+## Align and finalize after narration generation
 
-When edited narration is available, read `lesson.md`, `narration.txt`, the provisional
-`storyboard.md`, final `narration.wav`, word-level `transcript.json`, every declared demonstration
-source, and the course's visual constraints. For a course lesson, require effective
-`narration-final` state before finalization. If only `narration-source.wav` exists, return it to
-`edit-tutorial-narration`. Verify transcript timings against the audio rather than trusting them
-blindly, and surface missing, added, or meaning-changing speech instead of animating a false step.
+When generated narration is available, read `lesson.md`, `narration.txt`, the provisional
+`storyboard.md`, `narration.wav`, every declared demonstration source, and the course's visual
+constraints. For a course lesson, require effective `narration-final` state before finalization.
+Use the installed `media-use` workflow when available to inspect or transiently align the actual
+`narration.wav`. Compare the spoken content with `narration.txt`, but do not save a separate
+transcript artifact. Surface missing, added, or meaning-changing speech instead of animating a false
+step.
 
-Replace provisional timing notes with the actual audio range and spoken cue for every shot. Use the
+Replace provisional timing notes with the actual audio range and spoken cue for every shot. Write
+each range in `HH:MM:SS.mmm --> HH:MM:SS.mmm` form. Keep the ranges ordered and non-overlapping, and
+make their paragraph IDs and cues cover every approved spoken paragraph. Use the
 speaker's pauses, emphasis, and delivery to split or combine provisional shots, while preserving the
 approved teaching purpose and visual evidence. Confirm that on-screen text and source material remain
-readable for their real durations. If the recording exceeds an agreed episode limit, identify a
+readable for their real durations. If the generated narration exceeds an agreed episode limit, identify a
 coherent split point or script revision rather than compressing instructional visuals or speeding up
 speech.
 
@@ -241,18 +242,18 @@ passes these checks, record `storyboard-final` with the packaged recorder and re
 
 ## Deliver and hand off
 
-Before recording, return or save one lesson card, recordable script, and provisional storyboard in
+Before narration generation, return or save one lesson card, synthesis-ready script, and provisional storyboard in
 the user-selected project. Check that the stated outcome is taught, the example works from the
 stated prerequisites, every paragraph has a
 clear reason to exist, the post-lesson question tests that outcome, and `narration.txt` contains
 spoken words only without the post-lesson question. Confirm that the provisional storyboard covers
-the script without fabricated timing, then tell the user which script version to record. The next
-file-based stage records the raw take as `narration-source.wav` and passes it with the approved
-script to `edit-tutorial-narration`; do not create an empty audio placeholder. Pass the provisional
+the script without fabricated timing, then identify the exact script version awaiting approval. The
+next file-based stage sends that approved text and the environment-provided saved voice ID to
+`generate-tutorial-narration`, which writes `narration.wav` directly. Pass the provisional
 storyboard, paragraph identifiers, required demonstrations, post-lesson question, and sources with
 that handoff.
 
-Before recording `script-draft`, apply a recall test: if a learner summarized the episode in one
+Before writing the `script-draft` stage record, apply a recall test: if a learner summarized the episode in one
 sentence immediately after watching, would that sentence answer the title's primary promise? Also
 check whether the post-lesson question can be answered while missing that promise. If the likely
 summary names the example, method, or side topic instead, or the question tests only supporting
@@ -264,8 +265,8 @@ downstream records and resets release
 state; report that invalidation before handing the revision to `review-tutorial-script`. Never record
 `script-approved` from this skill. The course validator makes the single non-empty
 `## Post-lesson question` section a hard `script-draft` gate. A validator pass proves structural
-consistency only; it does not prove that the narration is natural, clear, or ready to record.
+consistency only; it does not prove that the narration is natural, clear, or ready for synthesis.
 
 After final audio alignment, deliver the final `storyboard.md` with its verified ranges and unresolved
-feasibility questions, then hand `lesson.md`, `narration.txt`, `narration.wav`, `transcript.json`, the
-final storyboard, and all referenced source files to `build-tutorial`.
+feasibility questions, then hand `lesson.md`, `narration.txt`, `narration.wav`, the final storyboard,
+and all referenced source files to `build-tutorial`.

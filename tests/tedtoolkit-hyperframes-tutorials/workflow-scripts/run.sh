@@ -10,110 +10,42 @@ scripts="$repo_root/plugins/tedtoolkit-hyperframes-tutorials/scripts"
 fixture=$(mktemp -d)
 trap 'rm -rf -- "$fixture"' EXIT
 
-narration="$fixture/narration-edit"
+narration="$fixture/narration-generate"
 mkdir -p "$narration"
 cat >"$narration/narration.txt" <<'EOF'
 先说今天的问题。我们现在开始。
 
 接下来给出解决方法。
 EOF
-printf 'source audio fixture 1\n' >"$narration/narration-working-01.wav"
-printf 'source audio fixture 2\n' >"$narration/narration-working-02.wav"
-node "$scripts/narration-edit.mjs" template \
-    "$narration/narration.txt" \
-    "$narration/narration-edit-plan.json" \
-    --source "$narration/narration-working-01.wav" \
-    --source "$narration/narration-working-02.wav" >/dev/null
-node - "$narration/narration-edit-plan.json" <<'NODE'
-const fs = require("fs");
-const file = process.argv[2];
-const plan = JSON.parse(fs.readFileSync(file, "utf8"));
-plan.clips = [
-  { id: "take-01", unit: "P01", sourceId: "source-01", start: 1, end: 5, gapAfter: 0.2, selectionReason: "complete opening paragraph" },
-  { id: "take-02", unit: "P02", sourceId: "source-02", start: 2, end: 5, gapAfter: 0, selectionReason: "clean final paragraph" },
-];
-fs.writeFileSync(file, JSON.stringify(plan, null, 2) + "\n");
-NODE
-node "$scripts/narration-edit.mjs" check "$narration/narration-edit-plan.json" >/dev/null
-node "$scripts/narration-edit.mjs" render "$narration/narration-edit-plan.json" --dry-run --json >"$narration/render.json"
+node "$scripts/fish-tts.mjs" \
+    "$narration/narration.txt" "$narration/narration.wav" --dry-run >"$narration/fish-dry-run.json"
 node -e '
 const report=require(process.argv[1]);
-if (report.status !== "dry-run" || !report.filterComplex.includes("concat=n=3")) process.exit(1);
-if (!report.args.includes("pcm_s24le")) process.exit(2);
-if (!report.filterComplex.includes("[0:a]") || !report.filterComplex.includes("[1:a]")) process.exit(3);
-' "$narration/render.json"
-if [[ -n ${NARRATION_TEST_FFMPEG:-} && -x ${NARRATION_TEST_FFMPEG:-} ]]; then
-    "$NARRATION_TEST_FFMPEG" -hide_banner -loglevel error -y \
-        -f lavfi -i 'sine=frequency=440:sample_rate=48000:duration=6' \
-        -c:a pcm_s24le "$narration/narration-working-01.wav"
-    "$NARRATION_TEST_FFMPEG" -hide_banner -loglevel error -y \
-        -f lavfi -i 'sine=frequency=660:sample_rate=48000:duration=6' \
-        -c:a pcm_s24le "$narration/narration-working-02.wav"
-    node "$scripts/narration-edit.mjs" render \
-        "$narration/narration-edit-plan.json" --ffmpeg "$NARRATION_TEST_FFMPEG" >/dev/null
-    test -s "$narration/narration-semantic.wav"
-fi
-cat >"$narration/transcript.json" <<'EOF'
-[
-  { "id": "w0001", "text": "先说今天的问题。我们现在开始。", "start": 0.0, "end": 3.0 },
-  { "id": "w0002", "text": "接下来给出解决方法。", "start": 3.2, "end": 6.0 }
-]
-EOF
-node "$scripts/narration-edit.mjs" verify \
-    "$narration/narration-edit-plan.json" "$narration/transcript.json" --strict >/dev/null
-
-cp "$narration/narration-edit-plan.json" "$narration/duplicate-plan.json"
-node - "$narration/duplicate-plan.json" <<'NODE'
-const fs = require("fs");
-const file = process.argv[2];
-const plan = JSON.parse(fs.readFileSync(file, "utf8"));
-plan.clips[1].unit = "P01";
-fs.writeFileSync(file, JSON.stringify(plan, null, 2) + "\n");
-NODE
-duplicate_plan_output=$(node "$scripts/narration-edit.mjs" check "$narration/duplicate-plan.json" 2>&1 || true)
-grep -Fq 'paragraph must be covered exactly once: P01' <<<"$duplicate_plan_output"
-grep -Fq 'missing paragraph coverage: P02' <<<"$duplicate_plan_output"
-
-cat >"$narration/repeated-transcript.json" <<'EOF'
-[
-  { "id": "w0001", "text": "先说今天的问题。我们现在开始。", "start": 0.0, "end": 3.0 },
-  { "id": "w0002", "text": "我们现在开始。接下来给出解决方法。", "start": 3.1, "end": 7.0 }
-]
-EOF
-repeat_output=$(node "$scripts/narration-edit.mjs" verify \
-    "$narration/narration-edit-plan.json" "$narration/repeated-transcript.json" --strict 2>&1 || true)
-grep -Fq 'boundary_repeat' <<<"$repeat_output"
-
-cat >"$narration/missing-transcript.json" <<'EOF'
-[
-  { "id": "w0001", "text": "先说今天的问题。我们现在开始。", "start": 0.0, "end": 3.0 }
-]
-EOF
-missing_output=$(node "$scripts/narration-edit.mjs" verify \
-    "$narration/narration-edit-plan.json" "$narration/missing-transcript.json" --strict 2>&1 || true)
-grep -Fq 'script_unit_coverage' <<<"$missing_output"
-
-cat >"$narration/off-script-transcript.json" <<'EOF'
-[
-  { "id": "w0001", "text": "先说今天的问题。我们现在开始。", "start": 0.0, "end": 3.0 },
-  { "id": "w0002", "text": "哎呀，这一句太难读了。", "start": 3.1, "end": 4.0 },
-  { "id": "w0003", "text": "接下来给出解决方法。", "start": 4.1, "end": 7.0 }
-]
-EOF
-off_script_output=$(node "$scripts/narration-edit.mjs" verify \
-    "$narration/narration-edit-plan.json" "$narration/off-script-transcript.json" --strict 2>&1 || true)
-grep -Fq 'off_script_entry' <<<"$off_script_output"
-
-cat >"$narration/one-token-extra-transcript.json" <<'EOF'
-[
-  { "id": "w0001", "text": "先说今天的问题。我们现在开始。", "start": 0.0, "end": 3.0 },
-  { "id": "w0002", "text": "嗯", "start": 3.1, "end": 3.2 },
-  { "id": "w0003", "text": "接下来给出解决方法。", "start": 3.3, "end": 6.0 }
-]
-EOF
-one_token_extra_output=$(node "$scripts/narration-edit.mjs" verify \
-    "$narration/narration-edit-plan.json" "$narration/one-token-extra-transcript.json" --strict 2>&1 || true)
-grep -Fq 'off_script_content' <<<"$one_token_extra_output"
+if (report.model !== "s2.1-pro") process.exit(1);
+if (report.format !== "wav" || report.sampleRate !== 44100) process.exit(2);
+if (report.sendsReferenceAudio !== false) process.exit(3);
+if (report.apiKeyEnv !== "FISH_API_KEY" || report.voiceIdEnv !== "FISH_VOICE_ID") process.exit(4);
+if (!(report.textUtf8Bytes > 0)) process.exit(5);
+if (report.outputExists !== false || report.replace !== false) process.exit(6);
+' "$narration/fish-dry-run.json"
+printf 'existing output fixture\n' >"$narration/narration.wav"
+node "$scripts/fish-tts.mjs" \
+    "$narration/narration.txt" "$narration/narration.wav" --dry-run >"$narration/fish-existing-dry-run.json"
+node -e '
+const report=require(process.argv[1]);
+if (report.outputExists !== true || report.replace !== false) process.exit(1);
+' "$narration/fish-existing-dry-run.json"
+node "$scripts/fish-tts.mjs" \
+    "$narration/narration.txt" "$narration/narration.wav" \
+    --model s2.1-pro-free --dry-run >"$narration/fish-free-dry-run.json"
+node -e '
+const report=require(process.argv[1]);
+if (report.model !== "s2.1-pro-free") process.exit(1);
+' "$narration/fish-free-dry-run.json"
+invalid_model_output=$(node "$scripts/fish-tts.mjs" \
+    "$narration/narration.txt" "$narration/narration.wav" \
+    --model s2.1-pro-fre --dry-run 2>&1 || true)
+grep -Fq 'unsupported Fish TTS model: s2.1-pro-fre' <<<"$invalid_model_output"
 
 if rg -q 'video-captioned\.mp4' "$repo_root/plugins/tedtoolkit-hyperframes-tutorials"; then
     echo "captioned video derivative is still part of the tutorial workflow" >&2
@@ -122,6 +54,11 @@ fi
 
 if rg -q 'storyboard-tutorial' "$repo_root/plugins/tedtoolkit-hyperframes-tutorials"; then
     echo "removed storyboard skill is still referenced by the tutorial workflow" >&2
+    exit 1
+fi
+
+if rg -q 'transcript\.json' "$repo_root/plugins/tedtoolkit-hyperframes-tutorials"; then
+    echo "removed transcript artifact is still referenced by the tutorial workflow" >&2
     exit 1
 fi
 
@@ -217,14 +154,7 @@ fi
 node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-approved \
     --approval-source "Fixture owner approved version 1" >/dev/null
 
-printf 'source audio\n' >"$course/lessons/lesson-01/narration-source.wav"
 printf 'final audio\n' >"$course/lessons/lesson-01/narration.wav"
-cat >"$course/lessons/lesson-01/transcript.json" <<'EOF'
-[
-  { "id": "w0001", "text": "Hello", "start": 0.0, "end": 0.5 },
-  { "id": "w0002", "text": "world.", "start": 0.5, "end": 1.0 }
-]
-EOF
 node "$scripts/record-course-stage.mjs" "$course" lesson-01 narration-final >/dev/null
 
 node "$scripts/validate-course.mjs" "$course" --json >"$fixture/narration-final.json"
@@ -235,6 +165,26 @@ if (report.nextWave.length !== 1 || report.nextWave[0].nextSkill !== "design-tut
 ' "$fixture/narration-final.json"
 
 printf '# Storyboard\n' >"$course/lessons/lesson-01/storyboard.md"
+missing_storyboard_timing_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 storyboard-final 2>&1 || true)
+grep -Fq 'final storyboard.md contains no audio ranges' <<<"$missing_storyboard_timing_output"
+cat >"$course/lessons/lesson-01/storyboard.md" <<'EOF'
+# Storyboard
+
+| S01 | P01 | 00:00:00.000 --> 00:00:00.700 | Hello |
+| S02 | P01 | 00:00:00.600 --> 00:00:01.000 | world. |
+EOF
+overlapping_storyboard_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 storyboard-final 2>&1 || true)
+grep -Fq 'storyboard audio ranges overlap or are out of order' <<<"$overlapping_storyboard_output"
+cat >"$course/lessons/lesson-01/storyboard.md" <<'EOF'
+# Storyboard
+
+## Final timing
+
+| Shot | Paragraph | Audio range | Spoken cue |
+| --- | --- | --- | --- |
+| S01 | P01 | 00:00:00.000 --> 00:00:00.500 | Hello |
+| S02 | P01 | 00:00:00.500 --> 00:00:01.000 | world. |
+EOF
 node "$scripts/record-course-stage.mjs" "$course" lesson-01 storyboard-final >/dev/null
 printf 'video\n' >"$course/lessons/lesson-01/video.mp4"
 cat >"$course/lessons/lesson-01/captions.vtt" <<'EOF'

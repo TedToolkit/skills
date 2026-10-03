@@ -1,4 +1,4 @@
 interface:
   display_name: "Design Tutorial"
-  short_description: "Design a lesson, script, and timed storyboard"
-  default_prompt: "Use $design-tutorial to design this lesson, write its recordable script, and carry its storyboard from a provisional visual plan to final narration timing."
+  short_description: "Create or redesign a lesson and timed storyboard"
+  default_prompt: "Use $design-tutorial to design this lesson, write its synthesis-ready script, and carry its storyboard from a provisional visual plan to final narration timing."

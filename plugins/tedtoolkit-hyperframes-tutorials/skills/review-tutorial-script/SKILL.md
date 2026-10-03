@@ -1,18 +1,19 @@
 ---
 name: review-tutorial-script
 description: >-
-  Review one or many narrated tutorial lesson scripts against their course direction,
-  course-level outcomes, outline, lesson cards, audience brief, sources, and episode
-  duration and provisional storyboards. Use for script quality review, course-wide narration audit,
-  visual-feasibility review, or requested fixes after drafting. Do not use to finalize storyboard
-  timing, edit recorded audio, or render a video.
+  Audit one or many existing narrated tutorial lesson drafts against their course direction,
+  outcomes, outline, lesson cards, audience brief, sources, duration, and provisional storyboards.
+  Use for review-only work or fixes supported by that review. Do not use to originate or materially
+  redesign a lesson, finalize storyboard timing, generate narration audio, or render a video.
 ---
 
 # Review Tutorial Script
 
-Assess whether each script teaches its promised result accurately and can be recorded as written.
+Assess whether each script teaches its promised result accurately and can be synthesized as written.
 Review is read-only unless the user asks for fixes; a request to write and then review scripts
 authorizes correcting those drafts and their lesson cards.
+Use `design-tutorial` when the user wants a new lesson or a material redesign; this skill owns
+evaluation and review-driven corrections to an existing draft.
 For a file-based course, check artifacts against the shared
 [tutorial workspace contract](../../references/tutorial-workspace-layout.md).
 Also read the [course state contract](../../references/tutorial-course-state.md) and resolve the
@@ -99,7 +100,7 @@ Verify that each lesson card, including an introduction lesson, has exactly one 
 explanation, choice, prediction, or application and be answerable from the lesson; a confidence
 question such as "Do you understand?" is not evidence. Confirm that `narration.txt` does not read
 the question aloud or tell the learner to pause, answer, submit, or wait for a reveal. The packaged
-course, not the recording, owns presentation of this text.
+course, not the narration audio, owns presentation of this text.
 
 Check technical claims, version-dependent behavior, commands, and framework syntax against
 authoritative sources or a runnable example. Put citations and verification notes in the lesson
@@ -115,10 +116,10 @@ demonstration has a real source, motion explains a relationship or change, and n
 result is implied. Require paragraph anchors and narration cues, but reject fabricated timestamps or
 precise durations before final audio exists. If a paragraph is visually overloaded, repetitive, or
 not supportable with available evidence, correct the spoken and visual drafts together before
-recording.
+narration generation.
 
 Read the script aloud when possible; otherwise simulate a natural technical speaking pace including
-demonstration pauses. The estimate is provisional until recorded audio exists. Flag sentences that
+demonstration pauses. The estimate is provisional until generated audio exists. Flag sentences that
 are hard to say in one pass, paragraphs with more than one main job, transitions that sound like
 headings, inventory-like lists, and explanations that become clear only after rereading. Also flag
 lessons likely outside the agreed duration, rushed explanations, repeated filler, monotonous
@@ -132,7 +133,7 @@ two passages that independently establish the same context, conflict, or conclus
 wording differs. An example should be introduced once and then developed as one thread; opening with
 its consequence, leaving for an abstract detour, and later restarting it as a new example is a
 structural repetition, not a fresh hook.
-When reporting a pre-recording duration, require a range based on a stated count, a natural speaking
+When reporting a pre-generation duration, require a range based on a stated count, a natural speaking
 rate appropriate to the script's language and density, and explicit allowance for demonstrations,
 predictions, or silence. Do not present a single exact duration as verified before audio exists.
 
@@ -169,7 +170,7 @@ curriculum conflicts. When fixes are authorized, correct the script, card, and p
 storyboard together, then reread the affected lesson, neighboring transitions, and the affected
 course-outcome coverage. Say explicitly
 which lessons passed, which remain in draft, which cannot be checked against the course direction,
-and which checks still depend on recorded narration or runnable code.
+and which checks still depend on generated narration or runnable code.
 
 For a file-based course, run the validator before review and treat stale output as the review
 boundary. When authorized fixes change `lesson.md`, `narration.txt`, or a declared source, record the
