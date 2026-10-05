@@ -61,7 +61,7 @@ status source; lesson cards must not maintain another status field.
 | Artifact | Owner and meaning |
 | --- | --- |
 | `course-state.json` | `plan-tutorial-course` initializes identity and dependencies; stage owners advance it only through the packaged recorders. |
-| `video-style.md` | `design-tutorial`; shared video identity, allowed lesson variation, and local visual references, reviewed with the first script and shot preview. See the [video style contract](tutorial-video-style.md). |
+| `video-style.md` | `design-tutorial` drafts or maintains the course video identity, inherited series rules, lesson variation, motion vocabulary, and visual references; `plan-tutorial-series` may seed selected course style drafts when a series visual request explicitly includes them. Review the contract with the first script and shot preview. See the [video style contract](tutorial-video-style.md). |
 | `cover-system.md` | `create-tutorial-cover`; reproducible course-wide layout, typography, palette, safe-area, and variation rules. |
 | `course-cover.png` | `create-tutorial-cover`; course-level visual anchor used by the learner page and cover family. |
 | `lesson-outline.md` | `outline-tutorial-lesson`; the separately reviewable narrative spine approved before scripting. |
@@ -117,7 +117,7 @@ it; never maintain VTT and SRT as independent timing sources.
 The normal order is:
 
 1. `lesson-outline.md` is drafted, reviewed, and explicitly approved.
-2. Course `video-style.md`, then `lesson.md`, `narration.txt`, provisional `storyboard.md`, visual `storyboard-preview.html`, and all referenced demonstration sources. Review the script and shot images against the course style together before approval.
+2. Existing series visual system when present, course `video-style.md`, then `lesson.md`, `narration.txt`, provisional `storyboard.md`, visual `storyboard-preview.html`, and all referenced demonstration sources. Review the script and shot images against the applicable style rules together before approval; inspect a short motion specimen when movement itself defines the style or teaching relationship.
 3. Fish Audio generates `narration.wav` from the approved text and saved voice model ID.
 4. `design-tutorial` listens to that audio and writes verified shot ranges into `storyboard.md`.
 5. Editable HyperFrames composition, formal `video.mp4`, and aligned `captions.vtt`.

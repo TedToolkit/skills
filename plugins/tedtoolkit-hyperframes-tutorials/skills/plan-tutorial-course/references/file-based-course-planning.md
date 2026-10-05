@@ -8,13 +8,13 @@ linked resource is a stop condition.
 
 ## Read and preserve course-wide state
 
-Record one course-wide visual mode for the lesson videos. Default to a light visual mode that
-matches the course's light `index.html` output, and keep it consistent across every lesson. A
-user-supplied established theme may override this default. Screenshots, IDEs, terminals, and other
-source evidence may retain their authentic appearance inside the course's visual frame.
-Record supplied brand assets, visual constraints, and references for later video design. Do not
-invent a detailed lesson-video style while planning the curriculum: `design-tutorial` develops the
-course's `video-style.md` with actual shot previews. See the shared
+Record an established or user-selected visual mode for the lesson videos when one exists. Do not
+derive the video palette from the learner page's `index.html` or assume a light or dark default.
+Screenshots, applications, and other source evidence may retain their authentic appearance inside
+the course's treatment. Record supplied brand assets, visual constraints, the series visual system
+when present, and references for later video design. Leave an open visual choice for
+`design-tutorial` to resolve with actual shot previews rather than inventing a detailed style while
+planning the curriculum. See the shared
 [video style contract](../../../references/tutorial-video-style.md).
 
 Record one course-wide production contract in `course.config.json`. Default lesson videos to 16:9,

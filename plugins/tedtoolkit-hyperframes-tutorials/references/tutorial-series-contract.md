@@ -24,6 +24,18 @@ Course roots may already exist when a series is first brought under this contrac
 plan does not require every future course root to exist. Keep the brief outside the planned course
 root so the boundary can be reviewed before `plan-tutorial-course` creates detailed course files.
 
+## Optional series visual system
+
+When the series needs a recognizable identity across course videos, maintain one linked visual
+system file at the series level. Its path is a project choice; `visual-system.md` or
+`series-standards/visual-system.md` are examples, not required filenames. Follow the shared
+[tutorial video style contract](tutorial-video-style.md) for scope, extensible elements, motion,
+specimens, and review. Link this authoring file from the series README without duplicating its
+rules there. Each course's `video-style.md` names the series file's relative path in prose and
+records its own identity, variations, and explicit exceptions. Series planning alone does not
+require a visual system or
+authorize course-level previews or video production.
+
 ## README ownership and inheritance
 
 The series-root `README.md` is the single source of truth for learner-facing information that applies

@@ -276,7 +276,8 @@ subject. A course's main color is an anchor, not the only color permitted. Descr
 objects and how their appearance or position can change across the lesson; use different spatial
 arrangements when the explanation calls for them rather than making every beat another title and
 two-column card. Do not impose a layout, asset, color, or animation quota.
-For a course lesson, compare representative frames with `video-style.md` and prior lesson
+For a course lesson, compare representative frames with `video-style.md`, its referenced series
+visual system when present, and prior lesson
 references at the intended viewing size. Identify a deliberate difference that helps this lesson in
 the storyboard or style contract; resolve an accidental mismatch before requesting script approval.
 If a course-wide style revision is needed, update the contract and inspect earlier affected lessons.
@@ -378,8 +379,9 @@ the learner needs to inspect them. Preserve recognizable before and after states
 inspect the result at the intended viewing size; verify the actual hold after audio exists.
 Segment at a meaningful state or reasoning boundary without imposing a fixed shot length. Keep
 code, labels, diagrams, and critical actions readable. Follow the course's chosen visual mode and
-code-presentation medium. If none is recorded, use a light mode
-that matches the course's light `index.html` output. Authentic screenshots, IDEs, terminals, and
+code-presentation medium. If none is recorded, select a mode from the audience, teaching material,
+existing brand or verified course footage, and intended viewing context; record the choice in
+`video-style.md` before the script-and-preview review. Authentic screenshots, applications, and
 other evidence may retain their native appearance inside that course treatment.
 Check the planned composition at the intended embedded-player size with captions and native player
 controls in view. Preserve enough area and time for the code, state, or comparison that teaches the

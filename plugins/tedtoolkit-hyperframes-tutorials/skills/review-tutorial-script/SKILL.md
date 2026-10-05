@@ -35,8 +35,9 @@ section as missing. Then read the course outline, each selected lesson's approve
 declared by the lesson card or storyboard. For a whole-course request, inventory every outline lesson
 and inspect every script; do not infer quality from a sample. Identify missing scripts before claiming
 the course is reviewed. Treat course-specific visual style as a project artifact, not a rule from
-this skill. When a course has `video-style.md`, read it and its local reference frames or verified
-video under the shared [video style contract](../../references/tutorial-video-style.md). An older
+this skill. When a course has `video-style.md`, read it, its linked series visual system when
+present, and local reference frames or verified video under the shared
+[video style contract](../../references/tutorial-video-style.md). An older
 course without that file can be reviewed against its existing videos; do not invent retroactive
 approval or create the contract during a read-only review.
 Extract the course promise, intended audience, entry assumptions, course-level observable outcome
@@ -217,7 +218,10 @@ For a course, compare representative frames side by side with the shared style r
 adjacent or earlier lesson when available. Check the visual handoff across different lesson forms,
 such as a guide and a demonstration. Report the specific typography, component, evidence treatment,
 or motion rule that breaks continuity; allow a difference that serves the learning task and is
-explained by the course contract. Do not require identical layouts or a fixed visual effect count.
+explained by the course or series contract. If the style depends on movement to convey identity or
+meaning, inspect its short motion specimen and check object continuity, attention target, and a
+stable state for reading. A still-only preview cannot establish timing quality before final audio.
+Do not require identical layouts or a fixed visual effect count.
 Return missing or mismatched frames to `design-tutorial`; revise the script and visuals together if
 the fix changes a spoken cue. Treat the preview as provisional: final motion and reading time remain
 subject to audio-aligned storyboarding and video review.

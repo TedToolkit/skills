@@ -21,11 +21,15 @@ a course outline.
 For a file-based course, follow the shared
 [tutorial workspace contract](../../references/tutorial-workspace-layout.md).
 Read the shared [video style contract](../../references/tutorial-video-style.md) when designing or
-revising lesson visuals. If the course has no `video-style.md`, draft it from the course's established
-choices and representative shot types before finishing the first visual preview. Review that draft
-with the script and preview; it does not create another approval stage. For a later lesson, inspect
-the contract and locally viewable reference frames or verified video before designing new frames.
-Carry forward the recognizable visual grammar while letting the subject determine the scene form.
+revising lesson visuals. Read the linked series visual system when one exists. If the course has no
+`video-style.md`, draft it from its established choices, the series rules, and representative shot
+types before finishing the first visual preview. Record explicit exceptions rather than silently
+overriding a series rule. Review that draft with the script and preview; it does not create another
+approval stage. For a later lesson, inspect the contract and locally viewable reference frames or
+verified video before designing new frames. Where motion is part of the visual identity or the
+explanation, inspect or create a short moving specimen before committing to the full sequence;
+static frames alone cannot settle its rhythm or continuity. Carry forward the recognizable visual
+grammar while letting the subject determine the scene form.
 Read the [course state contract](../../references/tutorial-course-state.md) and resolve the packaged
 [`validate-course.mjs`](../../scripts/validate-course.mjs) and
 [`record-course-stage.mjs`](../../scripts/record-course-stage.mjs) relative to this `SKILL.md` before

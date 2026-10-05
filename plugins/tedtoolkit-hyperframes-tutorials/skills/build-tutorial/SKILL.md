@@ -15,7 +15,8 @@ tutorial projects; there is no separate review or revision skill.
 For a file-based course, follow the shared
 [tutorial workspace contract](../../references/tutorial-workspace-layout.md).
 Read the shared [video style contract](../../references/tutorial-video-style.md) and the course's
-`video-style.md` when present. Compare its local references with available verified lesson frames.
+`video-style.md` when present, plus any series visual system linked from it. Compare their local
+references with available verified lesson frames and short motion specimens.
 For an older course without the contract, use its established videos as references and establish
 the contract when a course-wide visual redesign is authorized.
 Read the [course state contract](../../references/tutorial-course-state.md) and resolve the packaged
@@ -83,9 +84,13 @@ the installed tooling supports it, while checking final-size text at the target 
 clear composition problems in these local previews before paying the time and compute cost of a
 full render. A preview does not replace the required full-resolution render and normal-speed review.
 Compare representative frames and a short cross-lesson handoff with `video-style.md` and another
-available lesson video or preview. Keep shared visual identity recognizable while preserving the
-lesson's evidence and appropriate variation. If production suggests changing the course-wide style,
-revise the shared contract and review affected earlier videos before declaring the new style stable.
+available lesson video or preview. Also compare across courses when a series style applies. Check
+the motion vocabulary in normal-speed passages: the stated object remains traceable through a move
+or transform, a transition communicates the intended relationship, competing movement does not hide
+evidence, and code or results become stable for reading. Keep shared visual identity recognizable
+while preserving the lesson's evidence and appropriate variation. If production suggests changing
+the course-wide or series-wide style, revise the owning project contract and review affected earlier
+videos before declaring the new style stable.
 Let a diagram or process develop in time when the viewer benefits from seeing how it forms. Time
 attention cues with the event they clarify, and leave room to inspect a result or anticipate the next
 one. Use playful movement where it builds curiosity or character. These are creative choices shaped
@@ -156,13 +161,13 @@ Keep `video.mp4` as a clean master and keep WebVTT as the learner subtitle sourc
 switch, restyle, localize, search, and reuse it for a synchronized transcript. Never render subtitle
 text into the video pixels or create a second captioned video variant in this workflow.
 
-Implement the course's visual mode explicitly and deterministically. When no course-specific mode
-is recorded, make the composition and its `index.html` use a light mode, matching the course's light
-web output. Keep the canvas, surfaces, typography, diagrams, code presentation, and shared course
-chrome in that mode across every lesson; do not inherit a viewer's OS color-scheme preference or
-switch a scene to dark mode for decoration. Preserve the authentic appearance of screenshots,
-IDEs, terminals, and other source evidence when recoloring would misrepresent it, framing that
-content within the light course treatment and maintaining readable contrast.
+Implement the selected course visual mode explicitly and deterministically. Use the course style,
+its series inheritance, and the reviewed shot preview; do not infer video colors from the learner
+page or a viewer's OS color-scheme preference. Keep semantic color, typography, diagrams, code
+presentation, and recurring chrome consistent across lessons while allowing evidence and teaching
+needs to change a scene's treatment. Preserve the authentic appearance of screenshots,
+applications, and other source evidence when recoloring would misrepresent it; keep the surrounding
+labels and contrast readable.
 
 ## Verify and deliver
 
