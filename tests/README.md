@@ -20,12 +20,12 @@ their Release-build gate.
 
 ```powershell
 py -3.10 tests/test_run_evals.py                          # harness self-tests; no model/API call
-py -3.10 tests/run_evals.py                               # every eval
+py -3.10 tests/run_evals.py                               # static evals only; no model call
 py -3.10 tests/run_evals.py generate-commit-message      # one skill
 py -3.10 tests/run_evals.py --filter "conflict"          # scenarios whose name contains "conflict"
 py -3.10 tests/run_evals.py --tier static                 # every selected offline scenario; no Codex call
 py -3.10 tests/run_evals.py --tier smoke                  # static plus explicitly reviewed smoke scenarios
-py -3.10 tests/run_evals.py --tier full                   # every selected scenario; legacy default
+py -3.10 tests/run_evals.py --tier full                   # every selected scenario; explicit paid run
 py -3.10 tests/run_evals.py --keep                       # keep work dirs to inspect on failure
 py -3.10 tests/run_evals.py --judge                      # rubric failures also fail the run
 py -3.10 tests/run_evals.py --plugin tedtoolkit-project-development design-change
@@ -44,7 +44,7 @@ fails the scenario.
 Tier selection intersects with `--plugin`, positional skill names, and `--filter`; it never widens
 another selector. `static` selects only `mode: static`. `smoke` selects every matching static
 scenario plus only the names declared in that eval file's top-level `smoke_scenarios` list. `full`
-preserves declared scenario order and is the default. Invalid tier metadata or a selection with no
+preserves declared scenario order. The default is `static`. Invalid tier metadata or a selection with no
 matching scenarios exits non-zero. Static scenarios never invoke Codex, including with `--judge`.
 
 Each scenario prints PASS/FAIL with per-assertion detail and wall-clock. A full run also writes
@@ -52,6 +52,12 @@ Each scenario prints PASS/FAIL with per-assertion detail and wall-clock. A full 
 code is 0 only if every scenario passed. Each result records the source HEAD plus a deterministic
 SHA-256 identity over the selected plugin, selected eval directories, and runner bytes, so a
 reviewer can independently bind archived evidence to the inputs that actually ran.
+
+Use static checks for routine edits. For a behavior change, run the relevant skill's smoke scenarios;
+run `--tier full` only when broader model coverage is needed. Add `--judge` only when deterministic
+assertions cannot decide the behavior. Codex scenarios record input, cached input, output, and total
+tokens from completed CLI turns in the result files, so compare the same scenario and model before
+and after a prompt change. Missing usage data remains unknown rather than being treated as zero.
 
 > Codex scenarios cost tokens and take ~30s–3min (merge scenarios run a build). The runner is sequential.
 

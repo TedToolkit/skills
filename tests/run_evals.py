@@ -270,6 +270,41 @@ def scenario_execution_path(workdir: Path, path_prefix: list[str], inherited: st
     return os.pathsep.join(parts)
 
 
+def extract_token_usage(event_text: str) -> dict[str, int] | None:
+    """Sum per-turn usage reported by completed Codex JSON events."""
+    totals = {"input_tokens": 0, "cached_input_tokens": 0,
+              "output_tokens": 0, "total_tokens": 0}
+    found = False
+    for line in event_text.splitlines():
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(event, dict) or event.get("type") != "turn.completed":
+            continue
+        usage = event.get("usage")
+        if not isinstance(usage, dict):
+            continue
+        turn_values = {}
+        for key in ("input_tokens", "output_tokens", "total_tokens"):
+            value = usage.get(key)
+            if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
+                turn_values[key] = value
+        if not turn_values:
+            continue
+        found = True
+        for key, value in turn_values.items():
+            totals[key] += value
+        if "total_tokens" not in turn_values:
+            totals["total_tokens"] += turn_values.get("input_tokens", 0) + turn_values.get("output_tokens", 0)
+        cached = usage.get("cached_input_tokens")
+        if cached is None and isinstance(usage.get("input_tokens_details"), dict):
+            cached = usage["input_tokens_details"].get("cached_tokens")
+        if isinstance(cached, int) and not isinstance(cached, bool) and cached >= 0:
+            totals["cached_input_tokens"] += cached
+    return totals if found else None
+
+
 class ToolCommandCapture(list[str]):
     """Recognized command inputs plus a completeness verdict for the JSON event schema."""
 
@@ -882,12 +917,14 @@ def run_scenario(skill: str, eval_dir: Path, scen: dict, args,
         result_text = _read(result_path) if result_path.is_file() else ""
         event_text = _read(event_path) if event_path.is_file() else ""
         tool_commands = extract_tool_commands(event_text)
+        token_usage = extract_token_usage(event_text)
         cost = None
         if not result_text.strip() and stderr_text.strip():
             result_text = stderr_text
 
         record["duration_s"] = round(time.monotonic() - scenario_started, 1)
         record["cost_usd"] = cost
+        record["token_usage"] = token_usage
         record["result_text"] = result_text
         record["tool_command_count"] = len(tool_commands) if tool_commands is not None else None
         record["tool_command_audit_complete"] = (
@@ -1035,6 +1072,8 @@ def print_scenario(rec: dict) -> bool:
         meta.append(f"{rec['duration_s']}s")
     if rec.get("cost_usd") is not None:
         meta.append(f"${rec['cost_usd']:.4f}")
+    if rec.get("token_usage") is not None:
+        meta.append(f"{rec['token_usage']['total_tokens']} tokens")
     meta_s = f" {DIM}({', '.join(meta)}){RESET}" if meta else ""
     print(f"  [{head}] {rec['scenario']}{meta_s}")
     if rec.get("error"):
@@ -1074,6 +1113,11 @@ def write_results(all_recs: list[dict], passed: int, total: int,
             meta.append(f"{r['duration_s']}s")
         if r.get("cost_usd") is not None:
             meta.append(f"${r['cost_usd']:.4f}")
+        if r.get("token_usage") is not None:
+            usage = r["token_usage"]
+            meta.append(f"{usage['total_tokens']} tokens "
+                        f"(input {usage['input_tokens']}, cached {usage['cached_input_tokens']}, "
+                        f"output {usage['output_tokens']})")
         if meta:
             lines.append(f"_{', '.join(meta)}_")
         for a in r.get("assertions", []):
@@ -1094,8 +1138,8 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Run TedToolkit plugin skill evals.")
     ap.add_argument("skills", nargs="*", help="skill names to run (default: all)")
     ap.add_argument("--filter", help="only run scenarios whose name contains this substring")
-    ap.add_argument("--tier", choices=("static", "smoke", "full"), default="full",
-                    help="eval cost tier (default: full)")
+    ap.add_argument("--tier", choices=("static", "smoke", "full"), default="static",
+                    help="eval cost tier (default: static; no model calls)")
     ap.add_argument("--keep", action="store_true", help="keep work dirs for debugging")
     ap.add_argument("--judge", action="store_true",
                     help="grade rubric points with Codex and fail scenarios on any failed grade")

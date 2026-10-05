@@ -62,11 +62,12 @@ Requires: Python 3.10+ with `pyyaml`, Codex CLI, `git`, `bash`, and .NET 10 SDK 
 
 ```powershell
 py -3.10 tests/test_run_evals.py                          # harness self-tests; no API
-py -3.10 tests/run_evals.py                               # all scenarios
+py -3.10 tests/run_evals.py                               # static scenarios only; no API
 py -3.10 tests/run_evals.py generate-commit-message      # one skill
 py -3.10 tests/run_evals.py --filter conflict            # scenarios matching substring
 py -3.10 tests/run_evals.py --tier static                 # all selected offline scenarios; no API
 py -3.10 tests/run_evals.py --tier smoke                  # static plus explicit reviewed smoke scenarios
+py -3.10 tests/run_evals.py --tier full                   # explicit full model run
 py -3.10 tests/run_evals.py --keep                       # keep work dirs for debugging
 py -3.10 tests/run_evals.py --judge                      # rubric failures fail the scenario
 py -3.10 tests/run_evals.py --plugin tedtoolkit-project-development design-change

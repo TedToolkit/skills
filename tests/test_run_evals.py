@@ -11,6 +11,17 @@ import run_evals
 
 
 class AssertionHarnessTests(unittest.TestCase):
+    def test_completed_turn_usage_is_summed_without_double_counting_events(self):
+        events = '\n'.join([
+            '{"type":"turn.started"}',
+            '{"type":"turn.completed","usage":{"input_tokens":100,"cached_input_tokens":60,"output_tokens":20,"total_tokens":120}}',
+            '{"type":"turn.completed","usage":{"input_tokens":50,"input_tokens_details":{"cached_tokens":30},"output_tokens":10,"total_tokens":60}}',
+        ])
+        self.assertEqual({"input_tokens": 150, "cached_input_tokens": 90,
+                          "output_tokens": 30, "total_tokens": 180},
+                         run_evals.extract_token_usage(events))
+        self.assertIsNone(run_evals.extract_token_usage('{"type":"turn.started"}'))
+
     def setUp(self):
         self.temp_dir = tempfile.TemporaryDirectory()
         self.workdir = Path(self.temp_dir.name)
