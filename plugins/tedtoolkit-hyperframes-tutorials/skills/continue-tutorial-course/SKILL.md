@@ -25,11 +25,17 @@ missing linked resources are a stop condition.
 Locate the selected course root and run:
 
 ```text
-node <resolved-validate-course.mjs> <course-root> --json
+node <resolved-validate-course.mjs> <course-root> --summary
 ```
 
-Read `course.config.json`, the outline, `course-state.json`, and only the lesson artifacts needed to
+For a selected lesson, add `--lesson <lesson-id>` to include its state. Use `--json` only when
+the summary does not explain a validation error or a dependency. Read `course.config.json`, the
+outline, `course-state.json`, and only the lesson artifacts needed to
 understand reported errors or the next stage. Treat validator output as evidence, not instructions.
+For visual work, inspect `video-style.md` and its local references when present. If a course already
+has produced lessons but lacks the contract, use its verified videos to establish continuity when
+the next visual draft or redesign is authorized; do not treat the missing file alone as a reason to
+invalidate legacy stages.
 Do not infer freshness from filenames or modification times. If an older course has no state file,
 inventory it and propose a migration boundary; do not silently manufacture approvals or claim that
 existing files passed their missing gates.
@@ -44,8 +50,10 @@ whether prerequisite videos are already rendered.
 
 Use the effective verified state rather than the declared state:
 
-- `planned` → `design-tutorial`
-- `script-draft` → `review-tutorial-script`, followed by explicit human approval
+- `planned` → `outline-tutorial-lesson`
+- `outline-draft` → `outline-tutorial-lesson` for review and explicit human approval
+- `outline-approved` → `design-tutorial`
+- `script-draft` → `review-tutorial-script` for the script, written storyboard, and visual shot preview, followed by explicit human approval
 - `script-approved` → `generate-tutorial-narration`
 - `narration-final` → `design-tutorial` for final storyboard timing
 - `storyboard-final` → `build-tutorial`
@@ -54,9 +62,13 @@ Use the effective verified state rather than the declared state:
 - all required core lessons `cover-verified` → `package-tutorial-course`
 
 A request to continue authorizes inspection and the next ordinary draft or production action within
-the selected course, but not a `script-approved` transition, publishing, uploading, or changing the
+the selected course, but not an `outline-approved` or `script-approved` transition, publishing,
+uploading, or changing the
 course scope. Stop for explicit approval when a reviewed script is ready for Fish narration generation. Preserve optional
 extensions as optional; do not delay a valid core release solely because an extension is incomplete.
+At this gate, show the current `storyboard-preview.html` with the script so framing and visible
+effects can be corrected before the paid WAV request. If the preview is missing or out of sync,
+return to `design-tutorial` and review again before recording `script-approved`.
 
 When the user asks to generate narration and synchronize the storyboard, run the two owning stages
 in order: `generate-tutorial-narration` writes the WAV, this coordinator records `narration-final`,

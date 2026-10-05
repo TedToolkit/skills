@@ -18,7 +18,7 @@ scenarios:
     assertions:
       - type: "exit_success"
       - type: "output_contains"
-        value: "从证据到可靠的 C# 程序"
+        value: "从观察到健康的阳台花园"
       - type: "output_contains"
         value: "16:9"
       - type: "output_regex"

@@ -8,40 +8,40 @@ scenarios:
       Use $review-tutorial-script to review the following draft in this conversation only. Do not
       rewrite it and do not create or change files.
 
-      Course model: dependency-driven, with parallel Core and Extension branches and no fixed next
+      Course model: dependency-driven balcony gardening, with parallel Core and Extension branches and no fixed next
       lesson.
-      Lesson title: 为什么从执行讲到架构
-      Primary outcome: the learner can explain why reliable architecture decisions begin with
-      observable execution paths and state changes.
+      Lesson title: 为什么浇水要看土壤状态而不只看日历
+      Primary outcome: the learner can explain why watering decisions depend on observed soil and
+      plant conditions rather than a fixed calendar.
       Supporting method: 预期、观察、假设、最小实验、决策五问法。
 
       Draft narration:
 
-      你好，我是秋水，主要做后端开发和架构设计。先看一个常见问题：程序少处理了一条记录。你还不知道它在哪里消失，就开始加类、加接口，最后可能只是用更多代码包住同一个问题。
+      大家好，今天先看一个常见问题：两盆植物同一天浇水，一盆土还湿，另一盆已经干了。没检查土壤，就照日历继续浇水，可能让其中一盆更难恢复。
 
-      这套课程有六十三节 Core、四十六节 Extension，总计九百多分钟。我们会先讲执行，再讲数据、对象、失败、并发、模块和发布。
+      这套课程有十二节 Core、四节 Extension，总计一百八十分钟。我们会先讲光照，再讲土壤、浇水、换盆和季节管理。
 
-      为什么从执行开始？因为架构要回答代码怎样分工、边界放在哪里，以及变化由谁承担。
+      为什么不能只看日历？因为同样的七天，不同花盆的土壤干燥速度可能不同。
 
-      看一个很小的例子。报名程序读取三条记录，却只登记了两条。R-17 和 R-31 成功，R-24 消失了。
+      看一个很小的例子。三盆植物上周一起浇水，P-17 和 P-31 的土已经干了，P-24 仍然很湿。
 
-      我们用五问法检查 R-24：预期是什么，观察到什么，假设是什么，最小实验是什么，下一步怎样决策。这样就找到了排查方向。
+      我们用五问法检查 P-24：预期是什么，观察到什么，假设是什么，最小实验是什么，下一步怎样决策。这样就找到了排查方向。
 
-      下一课，我们会看计数器怎样从零变成一。
+      下一课，我们会看不同花盆的材质。
 
       The draft is structurally valid and its paragraph map matches. Estimate whether the spoken
       duration is appropriate if useful, but do not treat structural validation as prose approval.
     assertions:
       - { type: "exit_success" }
       - { type: "output_contains", value: "重复" }
-      - { type: "output_contains", value: "R-24" }
+      - { type: "output_contains", value: "P-24" }
       - { type: "output_contains", value: "下一课" }
       - { type: "output_contains", value: "标题" }
       - { type: "command", run: "test -z \"$(find . -mindepth 1 -maxdepth 1 -type f -print -quit)\"" }
     rubric:
-      - "The review identifies that the missing-record case is started in the opening and restarted later, creating a structural repetition even though the wording differs."
-      - "The review explains that the registration case and five-question routine dominate recall while the title promises an explanation of the path from execution evidence to architecture decisions."
-      - "The review flags R-17, R-24, and R-31 as context-free spoken identifiers and flags the course counts as lesson-card or screen material rather than natural narration."
+      - "The review identifies that the different-moisture case is started in the opening and restarted later, creating a structural repetition even though the wording differs."
+      - "The review explains that the planter case and five-question routine dominate recall while the title promises an explanation of watering from observed conditions rather than a calendar."
+      - "The review flags P-17, P-24, and P-31 as context-free spoken identifiers and flags the course counts as lesson-card or screen material rather than natural narration."
       - "The review rejects the fixed 'next lesson' preview because the course is dependency-driven and branching."
       - "The review does not pass the prose merely because structural validation and the paragraph map pass, and it gives concrete correction directions without rewriting the draft."
     timeout: 360

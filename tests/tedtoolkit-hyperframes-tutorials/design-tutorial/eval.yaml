@@ -19,52 +19,60 @@ scenarios:
       lesson still needs a brief natural entry without repeating a biography. Mention that learners
       may choose different practice branches after this lesson; the course has no single fixed
       successor. This is a coherent long-form teaching episode, not a short-form teaser. Do not
-      create or change files.
+      create or change files. The lesson's narrative spine has already been approved in this
+      conversation: open with two visibly different compositions that can both feel balanced;
+      examine how size, contrast, and position affect perceived weight; use the large-muted versus
+      small-high-contrast example as evidence; then apply the principle to a new composition and
+      close by answering the title's question. The planned post-lesson question asks the learner
+      to justify the balance of an unfamiliar arrangement using perceived weight.
     assertions:
       - { type: "exit_success" }
       - { type: "output_contains", value: "画面平衡" }
       - { type: "output_contains", value: "视觉重量" }
-      - { type: "output_contains", value: "分镜" }
-      - { type: "output_not_contains", value: "下一课" }
       - { type: "command", run: "test -z \"$(find . -mindepth 1 -maxdepth 1 -type f -print -quit)\"" }
     rubric:
       - "The title's question, the dominant explanation, and the closing share one primary promise: visual balance depends on perceived weight rather than bilateral symmetry."
       - "The shape arrangement is supporting evidence rather than the topic learners are most likely to remember."
       - "The observation routine and optional-practice guidance remain supporting material and do not create competing lesson centers."
-      - "The opening contains a brief, natural entry that acknowledges and orients the learner without repeating an instructor biography, and it reaches the title's problem promptly rather than lingering in a generic welcome."
+      - "The opening reaches the title's problem directly without a greeting or instructor biography, orients the learner, and leaves the deciding evidence for the visual explanation."
       - "The full script uses coherent long-form sections instead of repeated hooks or short-form teaser language."
       - "The narration is natural to speak and does not invent a fixed successor for a branching course."
+      - "The Mandarin narration does not leave ordinary descriptive words in English when they can be spoken naturally in Chinese; exact source text and necessary technical names may remain unchanged."
       - "A provisional storyboard maps the spoken progression to visible explanations and motion without inventing precise timestamps before narration generation."
+      - "When the lesson compares an expected and observed result, the learner knows the expected result before the reveal and the storyboard visibly carries that comparison instead of cycling through labeled summary cards."
     timeout: 360
 
   - name: "Keep a first lesson coherent and estimate its spoken duration"
     prompt: >-
       Use $design-tutorial to draft the recordable Mandarin narration and provisional storyboard in
       this conversation only for
-      a six-minute first lesson in a dependency-driven programming course titled “为什么从执行讲到架构”.
-      This is instructor 秋水's first appearance; a concise mention that they mainly work on backend
-      development and architecture is relevant, but credentials must not delay the lesson. The
-      primary outcome is that learners can explain why reliable architecture decisions begin with
-      observable execution paths and state changes. A registration program that should accept three
-      names but accepts only two may support the explanation, and a five-question evidence routine
-      may help analyze it, but neither is the main topic. The course has Core and Extension branches
-      and no fixed next lesson. Keep the spoken text natural, introduce the registration example only
+      a six-minute first lesson in a branching balcony-gardening course titled “为什么浇水要看土壤状态而不只看日历”.
+      This is the instructor's first appearance; the opening should orient the learner without an
+      instructor self-introduction. The primary outcome is that learners can explain why watering
+      decisions depend on observed soil and plant conditions rather than a fixed calendar. Two
+      planters watered on the same day, one still moist and one dry, may support the explanation,
+      and a five-question observation routine may help analyze them, but neither is the main topic.
+      The course has Core and Extension branches and no fixed next lesson. Keep the spoken text natural, introduce the planter example only
       once, and report a provisional duration range with its calculation basis. Do not create or
-      change files.
+      change files. The lesson's narrative spine has already been approved in this conversation:
+      start with the two planters' different moisture readings, compare the same-day watering rule
+      with their observed conditions, show how sunlight and drainage can change drying rates, then
+      explain why a watering decision should follow an actual check. The five-question routine is a
+      supporting method. The planned post-lesson question asks why watering both planters again on
+      the same date would be premature.
     assertions:
       - { type: "exit_success" }
-      - { type: "output_contains", value: "秋水" }
-      - { type: "output_contains", value: "执行" }
-      - { type: "output_contains", value: "架构" }
+      - { type: "output_contains", value: "土壤" }
+      - { type: "output_contains", value: "浇水" }
       - { type: "output_contains", value: "分镜" }
-      - { type: "output_not_contains", value: "下一课" }
-      - { type: "output_not_contains", value: "R-24" }
+      - { type: "output_not_contains", value: "P-24" }
       - { type: "command", run: "test -z \"$(find . -mindepth 1 -maxdepth 1 -type f -print -quit)\"" }
     rubric:
-      - "The opening introduces 秋水 briefly, establishes the series direction, and reaches the title's question without a ceremonial biography or unrelated hook."
-      - "The registration case is introduced once and developed as one continuous supporting thread; the script does not preview the missing record, leave it, and later restart the same case."
-      - "The dominant explanation, closing, and any post-lesson question answer why architecture reasoning begins with execution paths and state changes; the case and five-question routine remain supporting material."
+      - "The opening orients the learner and reaches the title's question without an instructor self-introduction or unrelated hook."
+      - "The two-planter case is introduced once and developed as one continuous supporting thread; the script does not preview the moisture difference, leave it, and later restart the same case."
+      - "The dominant explanation, closing, and any post-lesson question answer why watering follows observed conditions rather than a fixed date; the case and five-question routine remain supporting material."
       - "The narration avoids arbitrary record identifiers, spoken course inventories, dense metadata, and a fixed-successor preview for the branching course."
       - "The reported duration is a provisional range and states a defensible text-count or speaking-rate basis plus allowance for demonstrations or pauses, rather than claiming one exact verified time."
-      - "A provisional storyboard is anchored to the narration, makes the execution-path and state-change explanation visible, and does not claim final audio timing."
+      - "A provisional storyboard is anchored to the narration, makes the moisture-state comparison visible, and does not claim final audio timing."
+      - "The planter example establishes the shared watering schedule before showing different moisture states, and the visual sequence carries the expected-versus-observed difference through the explanation instead of presenting only summary cards."
     timeout: 360

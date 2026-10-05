@@ -1,0 +1,83 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+smoke_scenarios:
+  - "Define course completion and orient optional branches"
+  - "Keep required preparation in the video route"
+
+scenarios:
+  - name: "Define course completion and orient optional branches"
+    prompt: >-
+      Use $plan-tutorial-course to plan only the learner-facing boundary and opening structure of a
+      Mandarin course about practical photography. Do not create or change files and do not
+      draft the full chapter or lesson inventory. The course is independently published, has several
+      chapters, one required Core route, and optional Extension branches for portrait lighting,
+      color editing, and print preparation. The intended learner can already use a camera in automatic
+      mode. State what completing the Core route enables and proves, what each optional
+      Extension branch adds, and define the required 00.00 course-guide lesson. The
+      guide must explain the whole course, its audience, gains, features, major parts, and routes,
+      without becoming a prerequisite that supplies technical knowledge to later lessons. Require
+      two continuity checks: the course must remain logically complete when every Extension is
+      skipped, and it must also remain logically ordered when the learner watches Core plus every
+      Extension.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "核心" }
+      - { type: "output_contains", value: "扩展" }
+      - { type: "output_contains", value: "证据" }
+      - { type: "output_contains", value: "00.00" }
+      - { type: "command", run: "test -z \"$(find . -mindepth 1 -maxdepth 1 -type f -print -quit)\"" }
+    rubric:
+      - "The Core route has one observable course-completion outcome backed by a finished artifact, demonstration, diagnosis, comparison, or decision rather than a topic list."
+      - "Portrait lighting, color editing, and print preparation are separate evidence-backed Extension routes; none is required for course completion and learners need not watch every optional lesson."
+      - "The course receives a required 00.00 course-guide lesson whose outcome is that learners can explain what the whole course teaches, who it suits, what completing it enables, what distinguishes it, and how its major parts and routes fit together."
+      - "00.00 is kept outside the chapter taxonomy and is not treated as a technical prerequisite for domain lessons unless it produces a real artifact that they consume."
+      - "The guide covers every chapter or major content part at guide depth and relates those parts meaningfully, without becoming a marketing trailer, instructor biography, mechanical syllabus recital, or compressed first technical lesson."
+      - "It separately audits a Core-only route and a comprehensive Core-plus-all-Extensions route: both are coherent learning experiences, not merely valid topological orders, and the Core-only route never refers to skipped Extension content."
+    timeout: 360
+
+  - name: "Keep the required course guide concise for a narrow short course"
+    prompt: >-
+      Use $plan-tutorial-course to plan the learner-facing boundary and required 00.00 course-guide
+      lesson for a self-contained Mandarin course with one chapter, three required technical
+      lessons, no optional branches, and a single linear outcome: learners can prepare tea, compare
+      two brewing results, and adjust one variable to improve a bitter cup. Define the Core completion outcome and state whether any
+      Extension route is warranted. Make 00.00 concise but ensure it explains what the whole course
+      teaches, who it suits, what learners gain, the course's problem-to-solution and evidence-driven
+      features, and how the three technical lessons fit together. Do not create or change files and
+      do not invent additional chapters or extension lessons merely to make the course look larger.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "核心" }
+      - { type: "output_contains", value: "00.00" }
+      - { type: "command", run: "test -z \"$(find . -mindepth 1 -maxdepth 1 -type f -print -quit)\"" }
+    rubric:
+      - "The response defines the observable Core completion artifact or evidence without inventing unrelated breadth."
+      - "It does not manufacture an Extension route when the supplied course has no meaningful optional depth; it may state that the course currently has no Extension lessons."
+      - "It includes a concise but substantive 00.00 course-guide lesson even though the course is short, and does not allow a landing page to replace that lesson."
+      - "The 00.00 guide explains the complete course's content, intended learner, prerequisites, Core completion gain, distinctive teaching features, and relationship among the three technical lessons."
+      - "It preserves the requested one-chapter, three-lesson boundary and does not invent extension lessons to satisfy a template."
+    timeout: 360
+
+  - name: "Keep required preparation in the video route"
+    prompt: >-
+      Use $plan-tutorial-course to decide the opening lesson structure of a Mandarin, video-only
+      photo-editing course for learners who have never used an image editor. The first technical
+      lesson, 01.01, starts by importing a sample photo and already needs its full
+      episode to teach adjustment and export. Learners must install or gain access to the editor
+      first. A written setup page exists, but a learner may only follow the videos. Do not
+      create files or write full scripts. Explain the roles and order of 00.00, any 00.XX lessons,
+      and 01.01, including how the learner knows the preparation worked.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "00.00" }
+      - { type: "output_contains", value: "00.01" }
+      - { type: "output_contains", value: "01.01" }
+      - { type: "command", run: "test -z \"$(find . -mindepth 1 -maxdepth 1 -type f -print -quit)\"" }
+    rubric:
+      - "00.00 explains the course and audibly hands learners to the required preparation video; it does not become the installation walkthrough."
+      - "00.01 is a required Core preparation video before 01.01, with visible installation or access steps, an observable editor readiness check, success criteria, and a failure route."
+      - "01.01 consumes the readiness result from 00.01; the written page is supplementary rather than the only source of mandatory setup instructions."
+      - "The preparation video is counted in the Core route and duration outside the subject chapters; prerequisite subject knowledge is distinguished from operational setup."
+    timeout: 360

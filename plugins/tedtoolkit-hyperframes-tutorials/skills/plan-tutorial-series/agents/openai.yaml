@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plan Tutorial Series"
+  short_description: "Plan course boundaries and prerequisite routes"
+  default_prompt: "Use $plan-tutorial-series to plan the course boundaries, outcomes, and prerequisite routes for this tutorial series."

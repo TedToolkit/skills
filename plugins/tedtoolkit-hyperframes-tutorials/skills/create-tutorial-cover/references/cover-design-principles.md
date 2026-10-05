@@ -78,7 +78,7 @@ For Chinese and mixed Chinese-Latin titles:
 
 - keep Chinese line breaks semantically meaningful;
 - do not leave closing punctuation at the start of a line or opening punctuation at the end;
-- do not split tokens such as `C#`, `.NET`, version numbers, or short code identifiers;
+- do not split tokens such as `pH`, `ISO 400`, version numbers, or short identifiers;
 - check the optical baseline and weight of Han characters, Latin letters, numerals, and symbols;
 - avoid arbitrary expansion of Chinese character spacing to fill a box.
 
@@ -105,7 +105,7 @@ Use these as working design heuristics rather than platform upload rules:
 - use the adjacent publication title for precision and the cover headline for rapid recognition.
 
 The character range is deliberately a starting constraint, not a reason to damage meaning. A short
-code token such as `C#`, `.NET`, or `Git` may count as one semantic unit. If a truthful headline needs
+technical token such as `pH`, `ISO 400`, or `RAW` may count as one semantic unit. If a truthful headline needs
 more words, rework the phrase or composition and verify it at thumbnail size; do not automatically
 shrink the type. An established series mark may stay small as a recognition cue, but no required
 information should depend on reading it.

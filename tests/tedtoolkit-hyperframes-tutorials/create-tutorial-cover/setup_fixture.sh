@@ -11,24 +11,24 @@ mkdir -p assets/iconography/light
 
 cat > course.config.json <<'JSON'
 {
-  "courseId": "evidence-first-csharp",
-  "slug": "evidence-first-csharp",
-  "title": "从证据到可靠的 C# 程序",
+  "courseId": "balcony-garden",
+  "slug": "balcony-garden",
+  "title": "从观察到健康的阳台花园",
   "contentLanguage": "zh-CN",
   "outline": "course-outline.md"
 }
 JSON
 
 cat > course-outline.md <<'MARKDOWN'
-# 从证据到可靠的 C# 程序
+# 从观察到健康的阳台花园
 
 ## Audience
 
-已有一般编程经验、正在学习 C# 工程实践的开发者。
+想在阳台种植植物、尚不熟悉光照和浇水判断的新手。
 
 ## Observable course outcome
 
-学员能够用可复现的证据定位失败，并交付一个具有明确边界和验证结果的无界面 C# 程序。
+学员能够观察阳台环境与植物状态，制定四周养护计划，并根据记录调整浇水和光照。
 MARKDOWN
 
 cat > video-style.md <<'MARKDOWN'

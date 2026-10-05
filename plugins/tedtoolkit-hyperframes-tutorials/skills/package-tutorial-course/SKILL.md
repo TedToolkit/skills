@@ -26,12 +26,19 @@ release conventions before changing anything. In a course using this toolkit's f
 `course.config.json` for the course ID, title, slug, and content language; use the outline for
 lesson IDs, types, titles, and prerequisites; use `lessons/<id>/video.mp4`, `captions.vtt`, and
 `cover.png` as publication artifacts and effective `cover-verified` state as the publication gate.
+Read every path in `learnerDocuments` when present. For a new course, require its learner-facing
+chapter checkpoints and final Core completion task in the listed practice document; report a missing
+task or self-check as a curriculum gap before calling the release complete.
 Keep each lesson's stable ID
 and the learner's local-progress storage key across rebuilds.
 
 Run the packaged validator before building. Do not package while the graph is invalid, a required
 artifact is stale, or a core lesson selected for release is below `cover-verified`. An incomplete
 extension may remain unpublished without blocking a complete core release.
+For a video-led course with required `00.01+` preparation lessons, verify that the learner route
+shows `00.00` first, presents each required preparation video before its first dependent technical
+lesson, and does not rely on a linked document to communicate a mandatory step. Apply the ordinary
+Core publication gate to every required preparation video.
 
 Skill instructions being written in English do not require English learner content. Keep the
 page, source text, and metadata in the course's chosen language. For a requested translation,
@@ -48,6 +55,11 @@ videos, caption tracks, `course-cover.png`, and lesson covers into a generated o
 adapt or create project-local scripts for its real schema before packaging; do not assume that
 one course's Chinese outline parser works for every course. Keep author-only demo clips and raw
 production files out of the release unless the user explicitly wants them.
+Copy each configured `learnerDocuments` file into the release and expose a visible local link from
+`index.html`. Place the practice link near the course route and make chapter checkpoints reachable
+at the corresponding chapter exit. Preserve task prompts and self-check guidance; do not silently
+replace them with a completion checkbox. The release validator checks file identity and the local
+link, while the packaging review checks the pedagogical content.
 
 Treat a lesson without its formal video, canonical captions, or verified cover as `unpublished`,
 even when all prerequisites are complete.
@@ -83,6 +95,21 @@ let a learner select a cue to seek the video. Do not fight deliberate manual scr
 auto-follow until the learner explicitly resumes it or selects or seeks to a cue. Keep native caption
 controls available for learners who prefer subtitles over the transcript panel, but do not show both
 the overlay captions and the transcript panel as duplicate text by default.
+
+If a published lesson has a `## Visual descriptions` section in `lesson.md`, render that section as
+learner-facing text near the video and transcript, in the same order as the described scenes. Give it
+an accessible heading and make it reachable without playing the video. Extract only this section;
+do not expose the rest of the production card. Check that the text conveys necessary visual-only
+details, including exact labels or code where these affect the lesson outcome; a speech-only WebVTT
+transcript does not supply them. If the lesson needs such details but the section is absent or empty,
+return it to `design-tutorial` before finishing the release.
+For a file-based release, mark each rendered section with
+`data-visual-descriptions="<lesson-id>"` and verify that its current learner-facing text appears in
+the extracted offline page. The section must switch with the selected lesson, like the post-lesson
+question; storing it in the authoring card alone does not complete the handoff.
+Prefer integrated spoken description for visual meaning needed to follow the lesson. A page section
+for remaining exact details helps readers but does not by itself establish an audio-description
+conformance level; evaluate that separately if the course has a stated accessibility target.
 
 Package the clean `video.mp4` together with its sidecar `captions.vtt`. WebVTT is the canonical
 course experience and supports switching, restyling, accessibility, synchronized transcript display,
@@ -124,9 +151,12 @@ media path. Open the extracted HTML as a local file when
 the environment supports it, and check the unpublished/locked/completed behavior, compact lesson
 metadata, conditional next-lesson navigation, native subtitle track, active-cue highlighting,
 seeking, responsive transcript placement, manual-scroll behavior, one static post-lesson question
-per published lesson, initial poster display, and the absence of autoplay. A published narrated
+per published lesson, any authored visual descriptions beside the learner transcript, initial poster
+display, and the absence of autoplay. A published narrated
 lesson without a valid local caption track, cover, or post-lesson question prevents a finished
 release; report it as a missing artifact.
+For every configured learner document, verify that the current file is in the ZIP, its link opens
+offline, and its tasks still provide the promised independent action, evidence, and self-check.
 Report the number of published and unpublished lessons, the output paths, and any missing videos,
 captions, covers, or translation gaps. If no formal videos exist, label the result a structural preview,
 not a finished course release.

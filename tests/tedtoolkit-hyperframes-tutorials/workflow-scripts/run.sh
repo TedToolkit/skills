@@ -26,18 +26,16 @@ if (report.format !== "wav" || report.sampleRate !== 44100) process.exit(2);
 if (report.sendsReferenceAudio !== false) process.exit(3);
 if (report.apiKeyEnv !== "FISH_API_KEY" || report.voiceIdEnv !== "FISH_VOICE_ID") process.exit(4);
 if (!(report.textUtf8Bytes > 0)) process.exit(5);
-if (report.outputExists !== false || report.replace !== false) process.exit(6);
 ' "$narration/fish-dry-run.json"
 printf 'existing output fixture\n' >"$narration/narration.wav"
 node "$scripts/fish-tts.mjs" \
-    "$narration/narration.txt" "$narration/narration.wav" --dry-run >"$narration/fish-existing-dry-run.json"
-node -e '
-const report=require(process.argv[1]);
-if (report.outputExists !== true || report.replace !== false) process.exit(1);
-' "$narration/fish-existing-dry-run.json"
+    "$narration/narration.txt" "$narration/narration.wav" --dry-run >"$narration/fish-existing.json"
+node -e 'if (!require(process.argv[1]).outputExists) process.exit(1)' "$narration/fish-existing.json"
+node "$scripts/fish-tts.mjs" \
+    "$narration/narration.txt" "$narration/narration.wav" --replace --dry-run >"$narration/fish-existing-dry-run.json"
 node "$scripts/fish-tts.mjs" \
     "$narration/narration.txt" "$narration/narration.wav" \
-    --model s2.1-pro-free --dry-run >"$narration/fish-free-dry-run.json"
+    --model s2.1-pro-free --replace --dry-run >"$narration/fish-free-dry-run.json"
 node -e '
 const report=require(process.argv[1]);
 if (report.model !== "s2.1-pro-free") process.exit(1);
@@ -46,6 +44,116 @@ invalid_model_output=$(node "$scripts/fish-tts.mjs" \
     "$narration/narration.txt" "$narration/narration.wav" \
     --model s2.1-pro-fre --dry-run 2>&1 || true)
 grep -Fq 'unsupported Fish TTS model: s2.1-pro-fre' <<<"$invalid_model_output"
+
+cat >"$narration/fake-fish.mjs" <<'EOF'
+import fs from "node:fs";
+globalThis.fetch = async (_url, request) => {
+  if (process.env.FISH_FETCH_MARKER) fs.appendFileSync(process.env.FISH_FETCH_MARKER, "fetch\n");
+  if (process.env.EXPECT_ENV_PROXY === "1" &&
+      !process.execArgv.includes("--use-env-proxy")) {
+    throw new Error("environment proxy was not enabled before the request");
+  }
+  if (process.env.EXPECT_ENV_PROXY === "0" &&
+      process.execArgv.includes("--use-env-proxy")) {
+    throw new Error("environment proxy was enabled unexpectedly");
+  }
+  const body = JSON.parse(request.body);
+  if (body.sample_rate !== 44100 || body.format !== "wav") {
+    throw new Error("unexpected Fish request format");
+  }
+  const audio = Buffer.alloc(48);
+  audio.write("RIFF", 0);
+  audio.writeUInt32LE(0x7fffffff, 4);
+  audio.write("WAVEfmt ", 8);
+  audio.writeUInt32LE(16, 16);
+  audio.writeUInt16LE(1, 20);
+  audio.writeUInt16LE(1, 22);
+  audio.writeUInt32LE(44100, 24);
+  audio.writeUInt32LE(88200, 28);
+  audio.writeUInt16LE(2, 32);
+  audio.writeUInt16LE(16, 34);
+  audio.write("data", 36);
+  audio.writeUInt32LE(0x7fffffff, 40);
+  audio.writeInt16LE(100, 44);
+  audio.writeInt16LE(-100, 46);
+  return { ok: true, arrayBuffer: async () => audio };
+};
+EOF
+if node -e 'process.exit(process.allowedNodeEnvironmentFlags.has("--use-env-proxy") ? 0 : 1)'; then
+    env -u NODE_USE_ENV_PROXY HTTPS_PROXY=http://127.0.0.1:9 \
+        EXPECT_ENV_PROXY=1 FISH_API_KEY=fixture-key FISH_VOICE_ID=fixture-voice \
+        node --import "$narration/fake-fish.mjs" \
+        "$scripts/fish-tts.mjs" "$narration/narration.txt" "$narration/narration.wav" \
+        --replace >"$narration/fish-generated.json"
+else
+    FISH_API_KEY=fixture-key FISH_VOICE_ID=fixture-voice \
+        node --import "$narration/fake-fish.mjs" \
+        "$scripts/fish-tts.mjs" "$narration/narration.txt" "$narration/narration.wav" \
+        --replace >"$narration/fish-generated.json"
+fi
+env -u HTTPS_PROXY -u https_proxy -u NODE_USE_ENV_PROXY \
+    EXPECT_ENV_PROXY=0 FISH_API_KEY=fixture-key FISH_VOICE_ID=fixture-voice \
+    node --import "$narration/fake-fish.mjs" \
+    "$scripts/fish-tts.mjs" "$narration/narration.txt" "$narration/narration.wav" \
+    --replace >"$narration/fish-no-proxy.json"
+NODE_USE_ENV_PROXY=0 HTTPS_PROXY=http://127.0.0.1:9 \
+    EXPECT_ENV_PROXY=0 FISH_API_KEY=fixture-key FISH_VOICE_ID=fixture-voice \
+    node --import "$narration/fake-fish.mjs" \
+    "$scripts/fish-tts.mjs" "$narration/narration.txt" "$narration/narration.wav" \
+    --replace >"$narration/fish-proxy-disabled.json"
+FISH_FETCH_MARKER="$narration/reuse-fetch-marker" \
+    FISH_API_KEY=fixture-key FISH_VOICE_ID=fixture-voice \
+    node --import "$narration/fake-fish.mjs" \
+    "$scripts/fish-tts.mjs" "$narration/narration.txt" "$narration/narration.wav" \
+    >"$narration/fish-reused.json"
+node -e 'if (require(process.argv[1]).reused !== true) process.exit(1)' "$narration/fish-reused.json"
+test ! -e "$narration/reuse-fetch-marker"
+node -e '
+const fs=require("node:fs"), record=require(process.argv[1]);
+if (record.attempts.length !== 3 || record.attempts.some((a)=>a.status!=="complete")) process.exit(1);
+const raw=fs.readFileSync(process.argv[1],"utf8");
+if (raw.includes("fixture-voice") || raw.includes("先说今天的问题")) process.exit(2);
+' "$narration/narration.wav.fish-request.json"
+
+cat >"$narration/failing-fish.mjs" <<'EOF'
+globalThis.fetch = async () => { throw new Error("connection lost after send"); };
+EOF
+uncertain_output=$(FISH_API_KEY=fixture-key FISH_VOICE_ID=fixture-voice \
+    node --import "$narration/failing-fish.mjs" \
+    "$scripts/fish-tts.mjs" "$narration/narration.txt" "$narration/uncertain.wav" 2>&1 || true)
+grep -Fq 'connection lost after send' <<<"$uncertain_output"
+test ! -e "$narration/uncertain.wav"
+blocked_retry_output=$(FISH_FETCH_MARKER="$narration/blocked-fetch-marker" \
+    FISH_API_KEY=fixture-key FISH_VOICE_ID=fixture-voice \
+    node --import "$narration/fake-fish.mjs" \
+    "$scripts/fish-tts.mjs" "$narration/narration.txt" "$narration/uncertain.wav" 2>&1 || true)
+grep -Fq 'previous Fish request has no confirmed WAV' <<<"$blocked_retry_output"
+test ! -e "$narration/blocked-fetch-marker"
+FISH_API_KEY=fixture-key FISH_VOICE_ID=fixture-voice \
+    node --import "$narration/fake-fish.mjs" \
+    "$scripts/fish-tts.mjs" "$narration/narration.txt" "$narration/uncertain.wav" \
+    --retry-uncertain >"$narration/fish-retried.json"
+node -e '
+const record=require(process.argv[1]);
+if (record.attempts.length!==2 || record.attempts[0].status!=="pending" ||
+    record.attempts[1].status!=="complete") process.exit(1);
+' "$narration/uncertain.wav.fish-request.json"
+mv "$narration/uncertain.wav" "$narration/uncertain.saved.wav"
+missing_completed_output=$(FISH_FETCH_MARKER="$narration/missing-fetch-marker" \
+    FISH_API_KEY=fixture-key FISH_VOICE_ID=fixture-voice \
+    node --import "$narration/fake-fish.mjs" \
+    "$scripts/fish-tts.mjs" "$narration/narration.txt" "$narration/uncertain.wav" 2>&1 || true)
+grep -Fq 'same Fish request completed before, but its WAV is missing' <<<"$missing_completed_output"
+test ! -e "$narration/missing-fetch-marker"
+mv "$narration/uncertain.saved.wav" "$narration/uncertain.wav"
+node -e '
+const fs=require("node:fs");
+const audio=fs.readFileSync(process.argv[1]);
+if (audio.readUInt32LE(4) !== audio.length - 8) process.exit(1);
+if (audio.readUInt32LE(40) !== audio.length - 44) process.exit(2);
+if (audio.readUInt32LE(24) !== 44100) process.exit(3);
+if (audio.readInt16LE(44) !== 100 || audio.readInt16LE(46) !== -100) process.exit(4);
+' "$narration/narration.wav"
 
 if rg -q 'video-captioned\.mp4' "$repo_root/plugins/tedtoolkit-hyperframes-tutorials"; then
     echo "captioned video derivative is still part of the tutorial workflow" >&2
@@ -72,6 +180,7 @@ cat >"$course/course.config.json" <<'EOF'
   "slug": "workflow-fixture",
   "contentLanguage": "en",
   "outline": "course.md",
+  "learnerDocuments": ["practice.md"],
   "video": {
     "aspectRatio": "16:9",
     "width": 1920,
@@ -110,15 +219,80 @@ cat >"$course/course-state.json" <<'EOF'
 EOF
 
 printf '# Course\n' >"$course/course.md"
+cat >"$course/practice.md" <<'EOF'
+# Core practice
+
+## Chapter checkpoint
+
+Predict the output, run the example, and explain any mismatch.
+
+## Final Core completion task
+
+Change the example and verify the result with the stated acceptance conditions.
+EOF
 printf '# Lesson 01\n' >"$course/lessons/lesson-01/lesson.md"
 printf 'Hello world.\n' >"$course/lessons/lesson-01/narration.txt"
 
 node "$scripts/validate-course.mjs" "$course" --json >"$fixture/planned.json"
+node "$scripts/validate-course.mjs" "$course" --summary --lesson lesson-01 >"$fixture/planned-summary.json"
+node -e '
+const report=require(process.argv[1]);
+if (!report.valid || report.selectedLesson?.id !== "lesson-01" || report.nextWave[0]?.nextSkill !== "outline-tutorial-lesson") process.exit(1);
+if ("lessons" in report || report.staleLessons.length !== 0) process.exit(2);
+' "$fixture/planned-summary.json"
+if node "$scripts/validate-course.mjs" "$course" --summary --lesson missing-lesson >"$fixture/missing-lesson.json"; then
+    echo "summary accepted an unknown lesson" >&2
+    exit 1
+fi
+node -e '
+const report=require(process.argv[1]);
+if (report.valid || report.selectedLesson !== null || !report.errors.some(e => e.code === "LESSON_NOT_FOUND")) process.exit(1);
+' "$fixture/missing-lesson.json"
 node -e '
 const report=require(process.argv[1]);
 if (!report.valid) process.exit(1);
-if (report.nextWave.length !== 1 || report.nextWave[0].id !== "lesson-01" || report.nextWave[0].nextSkill !== "design-tutorial") process.exit(2);
+if (report.nextWave.length !== 1 || report.nextWave[0].id !== "lesson-01" || report.nextWave[0].nextSkill !== "outline-tutorial-lesson") process.exit(2);
 ' "$fixture/planned.json"
+mv "$course/practice.md" "$fixture/practice.saved"
+missing_practice_output=$(node "$scripts/validate-course.mjs" "$course" 2>&1 || true)
+grep -Fq 'LEARNER_DOCUMENTS: learner document does not exist: practice.md' <<<"$missing_practice_output"
+mv "$fixture/practice.saved" "$course/practice.md"
+
+printf '# Lesson outline\n\nA problem leads to an observation and a usable conclusion.\n' >"$course/lessons/lesson-01/lesson-outline.md"
+node "$scripts/record-course-stage.mjs" "$course" lesson-01 outline-draft >/dev/null
+if node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft >/dev/null 2>&1; then
+    echo "script draft advanced before lesson outline approval" >&2
+    exit 1
+fi
+if node "$scripts/record-course-stage.mjs" "$course" lesson-01 outline-approved >/dev/null 2>&1; then
+    echo "lesson outline advanced without explicit approval evidence" >&2
+    exit 1
+fi
+node "$scripts/validate-course.mjs" "$course" --json >"$fixture/outline-draft.json"
+node -e '
+const report=require(process.argv[1]);
+if (!report.valid || report.nextWave[0]?.nextSkill !== "outline-tutorial-lesson") process.exit(1);
+' "$fixture/outline-draft.json"
+node "$scripts/record-course-stage.mjs" "$course" lesson-01 outline-approved \
+    --approval-source "Fixture owner approved the lesson outline" >/dev/null
+node "$scripts/validate-course.mjs" "$course" --json >"$fixture/outline-approved.json"
+node -e '
+const report=require(process.argv[1]);
+if (!report.valid || report.nextWave[0]?.nextSkill !== "design-tutorial") process.exit(1);
+' "$fixture/outline-approved.json"
+printf 'demonstration evidence\n' >"$course/evidence.txt"
+node -e '
+const fs=require("fs"), file=process.argv[1], state=JSON.parse(fs.readFileSync(file,"utf8"));
+state.lessons[0].sourcePaths=["evidence.txt"];
+fs.writeFileSync(file, JSON.stringify(state,null,2)+"\n");
+' "$course/course-state.json"
+node "$scripts/validate-course.mjs" "$course" >/dev/null
+node -e '
+const fs=require("fs"), file=process.argv[1], state=JSON.parse(fs.readFileSync(file,"utf8"));
+state.lessons[0].sourcePaths=[];
+fs.writeFileSync(file, JSON.stringify(state,null,2)+"\n");
+' "$course/course-state.json"
+rm "$course/evidence.txt"
 
 question_gate_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft 2>&1 || true)
 grep -Fq 'lesson.md must contain exactly one ## Post-lesson question section' <<<"$question_gate_output"
@@ -132,6 +306,10 @@ grep -Fq '## Post-lesson question must contain learner-facing text' <<<"$empty_q
 cat >>"$course/lessons/lesson-01/lesson.md" <<'EOF'
 
 What did this lesson demonstrate?
+
+## Visual descriptions
+
+The result panel shows Hello followed by world.
 EOF
 cp "$course/lessons/lesson-01/lesson.md" "$fixture/lesson.saved"
 cat >>"$course/lessons/lesson-01/lesson.md" <<'EOF'
@@ -143,19 +321,64 @@ EOF
 duplicate_question_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft 2>&1 || true)
 grep -Fq 'lesson.md must contain exactly one ## Post-lesson question section' <<<"$duplicate_question_output"
 cp "$fixture/lesson.saved" "$course/lessons/lesson-01/lesson.md"
+cat >>"$course/lessons/lesson-01/lesson.md" <<'EOF'
+
+## Visual descriptions
+
+This duplicate should fail validation.
+EOF
+duplicate_visual_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft 2>&1 || true)
+grep -Fq 'lesson.md must contain at most one ## Visual descriptions section' <<<"$duplicate_visual_output"
+cp "$fixture/lesson.saved" "$course/lessons/lesson-01/lesson.md"
 missing_storyboard_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft 2>&1 || true)
 grep -Fq 'missing provisional storyboard: lessons/lesson-01/storyboard.md' <<<"$missing_storyboard_output"
 printf '# Provisional storyboard\n' >"$course/lessons/lesson-01/storyboard.md"
+missing_preview_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft 2>&1 || true)
+grep -Fq 'missing visual storyboard preview: lessons/lesson-01/storyboard-preview.html' <<<"$missing_preview_output"
+printf '<!doctype html><title>Shot 1</title><main><figure>Result panel</figure></main>\n' >"$course/lessons/lesson-01/storyboard-preview.html"
+missing_style_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft 2>&1 || true)
+grep -Fq 'course video style is missing or empty: video-style.md' <<<"$missing_style_output"
+printf '# Course video style\n\nUse a clear shared visual grammar with lesson-specific scenes.\n\n[Reference frame](style-reference.svg)\n' >"$course/video-style.md"
+missing_style_reference_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft 2>&1 || true)
+grep -Fq 'course video style reference is missing: style-reference.svg' <<<"$missing_style_reference_output"
+printf '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 9"/>\n' >"$course/style-reference.svg"
 node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft >/dev/null
 if node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-approved >/dev/null 2>&1; then
     echo "script approval advanced without explicit approval evidence" >&2
     exit 1
 fi
+mv "$course/lessons/lesson-01/storyboard.md" "$fixture/storyboard.saved"
+missing_approved_storyboard_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-approved \
+    --approval-source "Fixture owner approved version 1" 2>&1 || true)
+grep -Fq 'missing provisional storyboard: lessons/lesson-01/storyboard.md' <<<"$missing_approved_storyboard_output"
+mv "$fixture/storyboard.saved" "$course/lessons/lesson-01/storyboard.md"
 node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-approved \
     --approval-source "Fixture owner approved version 1" >/dev/null
+mv "$course/video-style.md" "$fixture/video-style.saved"
+node "$scripts/validate-course.mjs" "$course" --json >"$fixture/missing-style.json" || true
+node -e '
+const report=require(process.argv[1]);
+if (!report.errors.some(x=>x.code==="STALE_STAGE" && x.lessonId==="lesson-01" && x.message.includes("course video style is missing or empty"))) process.exit(1);
+' "$fixture/missing-style.json"
+mv "$fixture/video-style.saved" "$course/video-style.md"
+mv "$course/style-reference.svg" "$fixture/style-reference.saved"
+node "$scripts/validate-course.mjs" "$course" --json >"$fixture/missing-style-reference.json" || true
+node -e '
+const report=require(process.argv[1]);
+if (!report.errors.some(x=>x.code==="STALE_STAGE" && x.lessonId==="lesson-01" && x.message.includes("course video style reference is missing"))) process.exit(1);
+' "$fixture/missing-style-reference.json"
+mv "$fixture/style-reference.saved" "$course/style-reference.svg"
+printf '\nA visual-only refinement does not change approved narration.\n' >>"$course/video-style.md"
+node "$scripts/validate-course.mjs" "$course" >/dev/null
+mv "$course/lessons/lesson-01/storyboard-preview.html" "$fixture/storyboard-preview.saved"
+missing_approved_preview_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-approved \
+    --approval-source "Fixture owner approved version 1" 2>&1 || true)
+grep -Fq 'missing visual storyboard preview: lessons/lesson-01/storyboard-preview.html' <<<"$missing_approved_preview_output"
+mv "$fixture/storyboard-preview.saved" "$course/lessons/lesson-01/storyboard-preview.html"
 
 printf 'final audio\n' >"$course/lessons/lesson-01/narration.wav"
 node "$scripts/record-course-stage.mjs" "$course" lesson-01 narration-final >/dev/null
+printf '<!-- visual refinement after audio -->\n' >>"$course/lessons/lesson-01/storyboard-preview.html"
 
 node "$scripts/validate-course.mjs" "$course" --json >"$fixture/narration-final.json"
 node -e '
@@ -178,12 +401,30 @@ grep -Fq 'storyboard audio ranges overlap or are out of order' <<<"$overlapping_
 cat >"$course/lessons/lesson-01/storyboard.md" <<'EOF'
 # Storyboard
 
+| Shot S01 | P01 | 00:00:00.000 --> 00:00:01.000 | Hello world. |
+| Beat B01 | Hello | 00:00:00.000 --> 00:00:00.400 | Show code |
+| Beat B02 | world. | 00:00:00.500 --> 00:00:01.000 | Show result |
+EOF
+beat_gap_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 storyboard-final 2>&1 || true)
+grep -Fq 'storyboard beat ranges must be ordered and gapless' <<<"$beat_gap_output"
+cat >"$course/lessons/lesson-01/storyboard.md" <<'EOF'
+# Storyboard
+
+| Shot S01 | P01 | 00:00:00.000 --> 00:00:01.000 | Hello world. |
+| Beat B01 | Hello | 00:00:00.000 --> 00:00:01.100 | Show result |
+EOF
+beat_boundary_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 storyboard-final 2>&1 || true)
+grep -Fq 'storyboard beat must stay inside its shot audio range' <<<"$beat_boundary_output"
+cat >"$course/lessons/lesson-01/storyboard.md" <<'EOF'
+# Storyboard
+
 ## Final timing
 
-| Shot | Paragraph | Audio range | Spoken cue |
-| --- | --- | --- | --- |
-| S01 | P01 | 00:00:00.000 --> 00:00:00.500 | Hello |
-| S02 | P01 | 00:00:00.500 --> 00:00:01.000 | world. |
+| Shot S01 | P01 | 00:00:00.000 --> 00:00:00.500 | Hello |
+| Beat B01 | Hello | 00:00:00.000 --> 00:00:00.200 | Show code |
+| Beat B02 | Hello | 00:00:00.200 --> 00:00:00.500 | Hold code |
+| Shot S02 | P01 | 00:00:00.500 --> 00:00:01.000 | world. |
+| Beat B03 | world. | 00:00:00.500 --> 00:00:01.000 | Show result |
 EOF
 node "$scripts/record-course-stage.mjs" "$course" lesson-01 storyboard-final >/dev/null
 printf 'video\n' >"$course/lessons/lesson-01/video.mp4"
@@ -225,9 +466,11 @@ node "$scripts/validate-course.mjs" "$course" >/dev/null
 cp "$course/lessons/lesson-01/video.mp4" "$course/release/lessons/lesson-01/video.mp4"
 cp "$course/lessons/lesson-01/cover.png" "$course/release/lessons/lesson-01/cover.png"
 cp "$course/course-cover.png" "$course/release/course-cover.png"
+cp "$course/practice.md" "$course/release/practice.md"
 cat >"$course/release/index.html" <<'EOF'
 <!doctype html>
 <img src="course-cover.png" alt="Workflow fixture course cover">
+<a href="practice.md">Core practice and final task</a>
 <video controls poster="lessons/lesson-01/cover.png">
   <source src="lessons/lesson-01/video.mp4" type="video/mp4">
   <track src="lessons/lesson-01/captions.vtt" kind="captions" srclang="en">
@@ -235,6 +478,10 @@ cat >"$course/release/index.html" <<'EOF'
 <section data-post-lesson-question="lesson-01">
   <h2>Post-lesson question</h2>
   <p>What did this lesson demonstrate?</p>
+</section>
+<section data-visual-descriptions="lesson-01">
+  <h2>Visual descriptions</h2>
+  <p>The result panel shows Hello followed by world.</p>
 </section>
 EOF
 printf 'zip fixture\n' >"$course/workflow-fixture.zip"
@@ -250,6 +497,44 @@ cp "$course/release/index.html" "$fixture/index.saved"
 sed -i 's#lessons/lesson-01/video.mp4#https://example.invalid/video.mp4#' "$course/release/index.html"
 network_output=$(node "$scripts/validate-course.mjs" "$course" 2>&1 || true)
 grep -Fq 'NETWORK_MEDIA' <<<"$network_output"
+cp "$fixture/index.saved" "$course/release/index.html"
+node "$scripts/validate-course.mjs" "$course" >/dev/null
+
+cp "$course/release/index.html" "$fixture/index.saved"
+sed -i 's/data-visual-descriptions/data-omitted-descriptions/' "$course/release/index.html"
+visual_marker_output=$(node "$scripts/validate-course.mjs" "$course" 2>&1 || true)
+grep -Fq 'RELEASE_COVERAGE [lesson-01]: index.html does not expose the current visual descriptions' <<<"$visual_marker_output"
+cp "$fixture/index.saved" "$course/release/index.html"
+node "$scripts/validate-course.mjs" "$course" >/dev/null
+
+cp "$course/release/index.html" "$fixture/index.saved"
+sed -i 's/data-visual-descriptions/data-omitted-descriptions/' "$course/release/index.html"
+cat >>"$course/release/index.html" <<'EOF'
+<!-- <section data-visual-descriptions="lesson-01">The result panel shows Hello followed by world.</section> -->
+EOF
+commented_marker_output=$(node "$scripts/validate-course.mjs" "$course" 2>&1 || true)
+grep -Fq 'RELEASE_COVERAGE [lesson-01]: index.html does not expose the current visual descriptions' <<<"$commented_marker_output"
+cp "$fixture/index.saved" "$course/release/index.html"
+node "$scripts/validate-course.mjs" "$course" >/dev/null
+
+cp "$course/release/index.html" "$fixture/index.saved"
+sed -i 's/The result panel shows Hello followed by world./Different visual claim./' "$course/release/index.html"
+visual_text_output=$(node "$scripts/validate-course.mjs" "$course" 2>&1 || true)
+grep -Fq 'RELEASE_COVERAGE [lesson-01]: index.html does not expose the current visual descriptions' <<<"$visual_text_output"
+cp "$fixture/index.saved" "$course/release/index.html"
+node "$scripts/validate-course.mjs" "$course" >/dev/null
+
+cp "$course/release/index.html" "$fixture/index.saved"
+sed -i 's/The result panel shows Hello followed by world./Different visual claim.<!-- The result panel shows Hello followed by world. -->/' "$course/release/index.html"
+hidden_visual_output=$(node "$scripts/validate-course.mjs" "$course" 2>&1 || true)
+grep -Fq 'RELEASE_COVERAGE [lesson-01]: index.html does not expose the current visual descriptions' <<<"$hidden_visual_output"
+cp "$fixture/index.saved" "$course/release/index.html"
+node "$scripts/validate-course.mjs" "$course" >/dev/null
+
+cp "$course/release/index.html" "$fixture/index.saved"
+sed -i '/href="practice.md"/d' "$course/release/index.html"
+practice_link_output=$(node "$scripts/validate-course.mjs" "$course" 2>&1 || true)
+grep -Fq 'RELEASE_COVERAGE: index.html does not reference current learner document practice.md' <<<"$practice_link_output"
 cp "$fixture/index.saved" "$course/release/index.html"
 node "$scripts/validate-course.mjs" "$course" >/dev/null
 
@@ -328,6 +613,14 @@ fs.writeFileSync(file, JSON.stringify(state,null,2)+"\n");
 ' "$course/course-state.json"
 node "$scripts/validate-course.mjs" "$course" >/dev/null
 
+cp "$course/lessons/lesson-01/lesson-outline.md" "$fixture/outline.saved"
+printf '# Changed lesson outline\n' >"$course/lessons/lesson-01/lesson-outline.md"
+stale_outline_output=$(node "$scripts/validate-course.mjs" "$course" 2>&1 || true)
+grep -Fq 'outline-draft: fingerprint changed: lessons/lesson-01/lesson-outline.md' <<<"$stale_outline_output"
+grep -Fq 'STALE_RELEASE' <<<"$stale_outline_output"
+cp "$fixture/outline.saved" "$course/lessons/lesson-01/lesson-outline.md"
+node "$scripts/validate-course.mjs" "$course" >/dev/null
+
 printf 'Hello changed world.\n' >"$course/lessons/lesson-01/narration.txt"
 stale_output=$(node "$scripts/validate-course.mjs" "$course" 2>&1 || true)
 grep -Fq 'STALE_STAGE [lesson-01]' <<<"$stale_output"
@@ -338,10 +631,25 @@ node -e '
 const state=require(process.argv[1]);
 const lesson=state.lessons[0];
 if (lesson.status !== "script-draft") process.exit(1);
-if (Object.keys(lesson.records).some((key) => key !== "script-draft")) process.exit(2);
+if (Object.keys(lesson.records).some((key) => !["outline-draft", "outline-approved", "script-draft"].includes(key))) process.exit(2);
 if (state.release.status !== "not-packaged") process.exit(3);
 ' "$course/course-state.json"
 node "$scripts/validate-course.mjs" "$course" >/dev/null
+
+legacy="$fixture/legacy-course"
+cp -a "$course" "$legacy"
+node -e '
+const fs=require("fs"), file=process.argv[1], state=JSON.parse(fs.readFileSync(file,"utf8"));
+const lesson=state.lessons[0];
+delete lesson.records["outline-draft"];
+delete lesson.records["outline-approved"];
+delete lesson.records["script-draft"].fingerprints["lessons/lesson-01/lesson-outline.md"];
+fs.writeFileSync(file, JSON.stringify(state,null,2)+"\n");
+' "$legacy/course-state.json"
+rm "$legacy/lessons/lesson-01/lesson-outline.md"
+node "$scripts/validate-course.mjs" "$legacy" >/dev/null
+node "$scripts/record-course-stage.mjs" "$legacy" lesson-01 script-draft >/dev/null
+node "$scripts/validate-course.mjs" "$legacy" >/dev/null
 
 cycle="$fixture/cycle"
 mkdir -p "$cycle"

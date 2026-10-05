@@ -16,13 +16,12 @@ diagnostic routine, or analogy may occupy several minutes without becoming the e
 If the example is likely to be more memorable than the title's answer, reduce its detail, reconnect
 each observation to the main claim, or choose an example whose structure directly mirrors that claim.
 
-Begin with a brief human entry that acknowledges the learner and makes the episode feel intentionally
-started, then connect it immediately to a concrete consequence, question, or result. Introduce the
-instructor once when the audience has not met them; do not repeat a biography in every episode.
-Adapt the entry to continuous, standalone, or independently accessible viewing instead of copying
-one greeting across the course. Reveal terminology after the learner has encountered the phenomenon
-when that improves understanding. Do not delay relevance or a necessary definition merely to
-manufacture suspense.
+Begin directly with a concrete consequence, question, result, or action. Do not add a greeting,
+welcome, or ceremonial lead-in to the spoken script. Include an instructor name or role only when
+the brief requests it or it helps the learner understand the lesson. Supply the context needed for
+continuous, standalone, or independently accessible viewing without delaying the teaching point.
+Reveal terminology after the learner has encountered the phenomenon when that improves
+understanding; do not delay a necessary definition merely to manufacture suspense.
 
 ## Design internal segments
 

@@ -1,0 +1,47 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+smoke_scenarios:
+  - "Plan a problem-driven series with explicit prerequisite routes"
+
+scenarios:
+  - name: "Plan a problem-driven series with explicit prerequisite routes"
+    prompt: >-
+      Use $plan-tutorial-series to evaluate this proposed Mandarin home-gardening tutorial series in this
+      conversation only. Do not create or change files. The audience already knows how to grow one
+      common houseplant. The minimum graduation promise is that a learner can assess a balcony's
+      conditions, plan a small container garden, diagnose a setback, and maintain healthy plants.
+      Advanced material currently exists as separate topic courses for soil, irrigation, propagation,
+      pest diagnosis, seasonal planning, indoor growing, and greenhouse growing. The owner wants fewer
+      coherent courses, problem-to-solution teaching, one or
+      two evolving cases, and explicit guidance about which courses must be completed before later
+      courses. Existing course READMEs repeat the same audience baseline, Core/Extension explanation,
+      teaching method, and viewing conventions; the series README should own all unchanged common
+      information so each course README needs only a link and course-specific differences. Recommend
+      a series boundary and prerequisite graph. Distinguish a series-level
+      graduation or extension course from core or extension lessons inside that course. Preserve an
+      already-produced first lesson in the baseline course. The current charter says every course's
+      Core lessons are required for graduation, while its roadmap calls greenhouse growing, advanced
+      propagation, and one climate-specific course optional need-based branches; identify and resolve that contradiction, and
+      distinguish minimum graduation from full-series completion. Do not turn course numbering into
+      fake prerequisites and do not write detailed lesson lists.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "毕业" }
+      - { type: "output_contains", value: "前置" }
+      - { type: "output_contains", value: "并行" }
+      - { type: "output_contains", value: "01.01" }
+      - { type: "command", run: "test -z \"$(find . -mindepth 1 -maxdepth 1 -type f -print -quit)\"" }
+    rubric:
+      - "The response proposes a small set of courses from coherent learner problems and exit capabilities rather than preserving one course per named technology."
+      - "It makes the series README authoritative for information shared unchanged by every course, and leaves course READMEs with a link plus course-specific facts and explicit exceptions rather than duplicated common prose."
+      - "It distinguishes series-level graduation and extension course roles from core and extension lesson types inside a course."
+      - "It catches the contradiction between all-course graduation wording and optional branch wording, estimates or requests the minimum-completion burden when evidence exists, and names full-series completion separately from the minimum graduation promise."
+      - "Every proposed course brief includes one observable Core completion outcome, any applicable evidence-backed optional Extension routes, and a required 00.00 course-guide brief covering the whole course's content, audience, gains, features, major parts, and routes."
+      - "Every prerequisite edge names the capability supplied by the earlier course; independent courses are shown as parallel options rather than connected by numbering alone."
+      - "The graduation route does not depend on an extension course, and a later greenhouse course combines only capabilities it genuinely consumes."
+      - "The teaching strategy uses one or two evolving cases where useful and preserves problem, evidence, comparison, verification, and when-not-to-use reasoning."
+      - "The produced first lesson is treated as a migration constraint, and the response stays at series and course-boundary level instead of inventing detailed lesson lists."
+      - "The proposed learner-facing series entry puts audience, required route, optional specializations, outcomes, and prerequisite map before long production or internal review standards."
+    timeout: 360

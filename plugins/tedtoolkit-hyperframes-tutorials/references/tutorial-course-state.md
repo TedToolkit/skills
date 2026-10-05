@@ -35,6 +35,9 @@ the actual dependency model.
 The required `course.config.json` fields are `courseId`, `title`, `slug`, `contentLanguage`, and
 `outline`. `outline` is a course-root-relative path to the readable course plan. `courseId` must
 match `course-state.json`.
+Optional `learnerDocuments` is an array of distinct course-root-relative learner-facing files.
+New courses list their practice document there. The validator checks that each listed file exists;
+a packaged release must contain its current bytes and expose a local link in `index.html`.
 
 New courses also record the production contract below. Existing courses that omit `video` or
 `cover` use these same defaults so the configuration change is backward compatible.
@@ -71,17 +74,23 @@ Use these ordered states:
 
 | State | Meaning | Next owner |
 | --- | --- | --- |
-| `planned` | The outline and dependency graph contain the lesson; no script is claimed. | `design-tutorial` |
-| `script-draft` | `lesson.md`, `narration.txt`, and every declared demonstration source exist as a draft. | `review-tutorial-script` |
-| `script-approved` | The reviewed script has explicit human approval for Fish narration generation. | `generate-tutorial-narration` |
+| `planned` | The course outline and dependency graph contain the lesson; no lesson narrative spine is claimed. | `outline-tutorial-lesson` |
+| `outline-draft` | `lesson-outline.md` contains a reviewable teaching progression. | `outline-tutorial-lesson` for revision or human approval |
+| `outline-approved` | The current lesson outline has explicit human approval. | `design-tutorial` |
+| `script-draft` | `lesson.md`, `narration.txt`, every declared demonstration source, provisional `storyboard.md`, and viewable `storyboard-preview.html` exist as a draft. | `review-tutorial-script` |
+| `script-approved` | The reviewed script and visual shot preview have explicit human approval for Fish narration generation. | `generate-tutorial-narration` |
 | `narration-final` | Fish Audio generated `narration.wav` from the approved script. | `design-tutorial` aligns and finalizes the storyboard |
 | `storyboard-final` | The final storyboard contains verified shot ranges aligned to the generated narration. | `build-tutorial` |
 | `video-verified` | The formal video and WebVTT track passed production verification. | `create-tutorial-cover` |
 | `cover-verified` | The lesson cover represents the current verified video and passed full-size, thumbnail, and course-family review. | `package-tutorial-course` |
 
-Only explicit human approval may advance `script-draft` to `script-approved`. A review result such
-as “passed,” silence, or a request to continue is not approval. Record the user's approval source in
-the `script-approved` record. Other stages advance only after their owning skill completes its stated
+`video-verified` is a production status. It does not claim that representative learners were
+available for a trial or that the lesson has demonstrated a learning effect. Report trial evidence
+separately from the stage state when it exists.
+
+Only explicit human approval may advance `outline-draft` to `outline-approved` or `script-draft` to
+`script-approved`. A review result such as “passed,” silence, or a request to continue is not approval.
+Record the user's approval source in each approval record. Other stages advance only after their owning skill completes its stated
 verification.
 
 Course release state is separate: `not-packaged` or `packaged`. A packaged release does not rewrite
@@ -103,6 +112,8 @@ Required cumulative lesson artifacts are:
 
 | State | Additional artifacts |
 | --- | --- |
+| `outline-draft` | `lesson-outline.md` |
+| `outline-approved` | No new file; a fresh outline snapshot plus `approvalSource` |
 | `script-draft` | `lesson.md`, `narration.txt`, plus every path in `sourcePaths` |
 | `script-approved` | No new file; a fresh script snapshot plus `approvalSource` |
 | `narration-final` | `narration.wav` |
@@ -110,13 +121,31 @@ Required cumulative lesson artifacts are:
 | `video-verified` | `video.mp4`, `captions.vtt` |
 | `cover-verified` | Root `cover-system.md`, root `course-cover.png`, and lesson `cover.png` |
 
-`design-tutorial` creates a provisional `storyboard.md` with the script before `script-draft` is
-recorded; the stage recorder enforces this for new or re-recorded drafts. That file intentionally
-enters the cumulative fingerprints only at `storyboard-final`: the same storyboard is expected to
-gain real time ranges and pacing adjustments after `narration-final`. Its provisional existence is
-an authoring and review requirement, not a claim of verified timing. A legacy stage record created
-before this contract remains readable and can acquire its storyboard when the lesson next enters
-design or final timing work.
+The Fish helper also keeps `narration.wav.fish-request.json` beside the WAV as local request
+recovery data. It is outside stage fingerprints and the learner release. Preserve it with the WAV
+so an uncertain request cannot be repeated blindly; `narration.wav` remains the authoritative audio
+artifact for `narration-final`.
+
+An approved outline is fingerprinted through every later stage. Outline records track lesson identity,
+type, and prerequisites; demonstration `sourcePaths` enter the contract at `script-draft`, when the
+script's evidence files are known. Changing the outline returns a new lesson to
+`outline-draft` for review and invalidates its script and production records. Legacy lessons that
+already reached `script-draft` without this new stage remain readable and may continue later-stage
+work; a material rewrite should establish an outline and obtain approval first.
+
+`design-tutorial` creates a provisional `storyboard.md` and viewable `storyboard-preview.html` with
+the script before `script-draft` is recorded; the stage recorder enforces both for new or re-recorded
+drafts. Review every shot's frame composition before human script approval. The storyboard enters
+the cumulative fingerprints only at `storyboard-final`, because it gains real time ranges after
+`narration-final`. The preview is an untimed author review artifact and is not fingerprinted; a
+visual-only refinement need not invalidate approved spoken audio. A change to `narration.txt` still
+invalidates approval and downstream records. Legacy stage records remain readable and can acquire
+these preview artifacts when the lesson next enters design work.
+New or re-recorded `script-draft` records also require a non-empty root `video-style.md` and record
+its canonical path. Validation checks that the contract and its local Markdown reference files remain
+available, without
+fingerprinting its wording: a visual-only style revision calls for a cross-lesson review, not an
+automatic narration or video rebuild. Older stage records without this marker remain valid.
 
 Run [`validate-course.mjs`](../scripts/validate-course.mjs) before resuming work and before packaging.
 It recomputes fingerprints rather than trusting declared status. A changed or missing file makes its
@@ -129,16 +158,22 @@ cover-only contract returns to `video-verified`. A changed cover system or cours
 lesson covers to `video-verified` for continuity review. Legacy courses without explicit production objects
 continue to use the documented defaults and do not invalidate an existing pre-contract video record.
 In addition to file presence and fingerprints, every lesson at `script-draft` or later must have
-exactly one non-empty `## Post-lesson question` section in `lesson.md`. A packaged core lesson must
+exactly one non-empty `## Post-lesson question` section in `lesson.md`. A packaged lesson must
 also expose that question as visible static page text in a container identified by
 `data-post-lesson-question="<lesson-id>"`.
+An optional `## Visual descriptions` section must be unique and non-empty. When it exists in a
+packaged lesson, the release must expose its current text in a container identified by
+`data-visual-descriptions="<lesson-id>"`.
 
 ## Storyboard timing required for deterministic validation
 
 `design-tutorial` writes the verified production timeline directly into `storyboard.md`. Every final
 shot uses an audio range in `HH:MM:SS.mmm --> HH:MM:SS.mmm` form and identifies its paragraph IDs
 and spoken cue. Ranges must be finite, ordered, and non-overlapping; together they must cover every
-approved spoken paragraph. The validator checks the stored ranges without requiring a second timing
+approved spoken paragraph. A line or table row beginning with `Beat` is an internal audio range
+inside the preceding shot. If any beat is present, every shot's beats must be ordered, gapless, and
+cover that shot; explicit hold beats account for unchanged visuals. Shot-only legacy files still
+validate. The validator checks the stored ranges without requiring a second timing
 artifact. `captions.vtt` must be valid, ordered, non-overlapping WebVTT whose spoken text matches
 `narration.txt`, and its cues must remain inside the final storyboard timeline.
 

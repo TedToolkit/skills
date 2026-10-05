@@ -1,0 +1,4 @@
+interface:
+  display_name: "Package Tutorial Course"
+  short_description: "Package and verify an offline tutorial release"
+  default_prompt: "Use $package-tutorial-course to build and verify a self-contained offline release for this tutorial course."

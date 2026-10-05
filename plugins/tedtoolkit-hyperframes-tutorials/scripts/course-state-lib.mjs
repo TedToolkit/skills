@@ -4,6 +4,8 @@ import path from "node:path";
 
 export const LESSON_STAGES = [
   "planned",
+  "outline-draft",
+  "outline-approved",
   "script-draft",
   "script-approved",
   "narration-final",
@@ -13,7 +15,9 @@ export const LESSON_STAGES = [
 ];
 
 export const NEXT_SKILL = {
-  planned: "design-tutorial",
+  planned: "outline-tutorial-lesson",
+  "outline-draft": "outline-tutorial-lesson",
+  "outline-approved": "design-tutorial",
   "script-draft": "review-tutorial-script",
   "script-approved": "generate-tutorial-narration",
   "narration-final": "design-tutorial",
@@ -50,12 +54,18 @@ export function stageIndex(stage) {
   return LESSON_STAGES.indexOf(stage);
 }
 
-export function lessonContractSha256(lesson) {
+function isLegacyScriptLesson(lesson) {
+  return Boolean(lesson.records?.["script-draft"] &&
+    !lesson.records?.["outline-draft"] && !lesson.records?.["outline-approved"]);
+}
+
+export function lessonContractSha256(lesson, stage) {
+  const outlineStage = stage === "outline-draft" || stage === "outline-approved";
   const contract = JSON.stringify({
     id: lesson.id,
     type: lesson.type,
     requires: lesson.requires,
-    sourcePaths: lesson.sourcePaths,
+    ...(!outlineStage ? { sourcePaths: lesson.sourcePaths } : {}),
   });
   return `sha256:${crypto.createHash("sha256").update(contract).digest("hex")}`;
 }
@@ -93,6 +103,32 @@ export function safeCoursePath(root, relativePath) {
   return { relative: normalized, absolute };
 }
 
+export function videoStyleIssues(root) {
+  const relativePath = "video-style.md";
+  const stylePath = safeCoursePath(root, relativePath).absolute;
+  if (!fs.existsSync(stylePath) || !fs.statSync(stylePath).isFile()) {
+    return [`course video style is missing or empty: ${relativePath}`];
+  }
+  const content = fs.readFileSync(stylePath, "utf8");
+  if (content.trim() === "") return [`course video style is missing or empty: ${relativePath}`];
+  const problems = [];
+  for (const match of content.matchAll(/!?\[[^\]]*\]\(([^)]+)\)/g)) {
+    const raw = match[1].trim();
+    const target = raw.startsWith("<") ? raw.slice(1, raw.indexOf(">")) : raw.split(/\s+/)[0];
+    if (!target || target.startsWith("#") || /^([a-z][a-z0-9+.-]*:|\/\/)/i.test(target)) continue;
+    try {
+      const localPath = decodeURIComponent(target.split(/[?#]/)[0]);
+      const resolved = safeCoursePath(root, localPath);
+      if (!fs.existsSync(resolved.absolute) || !fs.statSync(resolved.absolute).isFile()) {
+        problems.push(`course video style reference is missing: ${resolved.relative}`);
+      }
+    } catch (error) {
+      problems.push(`course video style reference is invalid: ${error.message}`);
+    }
+  }
+  return problems;
+}
+
 export function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
@@ -121,9 +157,13 @@ export async function hashFile(filePath) {
 
 export function requiredLessonFiles(lesson, stage) {
   const index = stageIndex(stage);
-  if (index < 1) return [];
+  if (index < stageIndex("outline-draft")) return [];
   const base = `lessons/${lesson.id}`;
-  const files = [`${base}/lesson.md`, `${base}/narration.txt`, ...(lesson.sourcePaths || [])];
+  const files = index >= stageIndex("script-draft") && isLegacyScriptLesson(lesson)
+    ? [] : [`${base}/lesson-outline.md`];
+  if (index >= stageIndex("script-draft")) {
+    files.push(`${base}/lesson.md`, `${base}/narration.txt`, ...(lesson.sourcePaths || []));
+  }
   if (index >= stageIndex("narration-final")) {
     files.push(`${base}/narration.wav`);
   }
@@ -181,6 +221,12 @@ export function validateStateShape(config, state) {
   }
   if (typeof state?.courseId !== "string" || state.courseId !== config.courseId) {
     errors.push(issue("COURSE_ID", "course-state.json courseId must match course.config.json"));
+  }
+  if (config.learnerDocuments !== undefined &&
+      (!Array.isArray(config.learnerDocuments) ||
+       config.learnerDocuments.some((item) => typeof item !== "string" || item.trim() === "") ||
+       new Set(config.learnerDocuments).size !== config.learnerDocuments.length)) {
+    errors.push(issue("LEARNER_DOCUMENTS", "learnerDocuments must be an array of distinct course-relative paths"));
   }
   errors.push(...validateProductionConfig(config));
   if (!Array.isArray(state?.lessons)) {
@@ -368,9 +414,29 @@ export function extractPostLessonQuestion(markdown) {
   return question;
 }
 
+export function extractVisualDescriptions(markdown) {
+  const normalized = markdown.replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n");
+  const matches = [...normalized.matchAll(/^##[ \t]+Visual descriptions[ \t]*$/gm)];
+  if (matches.length > 1) {
+    throw new Error("lesson.md must contain at most one ## Visual descriptions section");
+  }
+  if (matches.length === 0) return null;
+  const remainder = normalized.slice(matches[0].index + matches[0][0].length);
+  const nextSection = /^#{1,2}[ \t]+\S.*$/m.exec(remainder);
+  const descriptions = remainder
+    .slice(0, nextSection?.index ?? remainder.length)
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .trim();
+  if (!descriptions || normalizeSpokenText(descriptions) === "") {
+    throw new Error("## Visual descriptions must contain learner-facing text");
+  }
+  return descriptions;
+}
+
 function releaseVisibleText(html) {
   return normalizeSpokenText(
     html
+      .replace(/<!--[\s\S]*?-->/g, " ")
       .replace(/<(script|style|template)\b[^>]*>[\s\S]*?<\/\1>/gi, " ")
       .replace(/&#x([0-9a-f]+);/gi, (_, value) => String.fromCodePoint(Number.parseInt(value, 16)))
       .replace(/&#([0-9]+);/g, (_, value) => String.fromCodePoint(Number.parseInt(value, 10)))
@@ -382,6 +448,32 @@ function releaseVisibleText(html) {
 
 function escapeRegularExpression(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function markedSectionVisibleText(html, attribute, lessonId) {
+  const markup = html
+    .replace(/<!--[\s\S]*?-->/g, " ")
+    .replace(/<(script|style|template)\b[^>]*>[\s\S]*?<\/\1>/gi, " ");
+  const openings = /<([A-Za-z][\w:-]*)\b([^>]*)>/g;
+  const marker = new RegExp(`(?:^|\\s)${escapeRegularExpression(attribute)}\\s*=\\s*(["'])${escapeRegularExpression(lessonId)}\\1`, "i");
+  const matches = [...markup.matchAll(openings)].filter((match) => marker.test(match[2]));
+  if (matches.length !== 1) return null;
+  const opening = matches[0];
+  if (/(?:^|\s)hidden(?:\s|=|$)|(?:^|\s)aria-hidden\s*=\s*["']?true\b|display\s*:\s*none/i.test(opening[2])) {
+    return null;
+  }
+  const tag = opening[1];
+  const boundary = new RegExp(`<\\/?${escapeRegularExpression(tag)}\\b[^>]*>`, "gi");
+  const start = opening.index + opening[0].length;
+  const remainder = markup.slice(start);
+  let depth = 1;
+  for (const match of remainder.matchAll(boundary)) {
+    depth += match[0].startsWith("</") ? -1 : 1;
+    if (depth === 0) {
+      return releaseVisibleText(remainder.slice(0, match.index));
+    }
+  }
+  return null;
 }
 
 function parseVttTimestamp(text) {
@@ -428,24 +520,52 @@ export function parseWebVtt(contents) {
 export function parseStoryboardTiming(contents) {
   const normalized = contents.replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n");
   const pattern = /((?:\d{2,}:)?\d{2}:\d{2}\.\d{3})\s+-->\s+((?:\d{2,}:)?\d{2}:\d{2}\.\d{3})/g;
-  const ranges = [...normalized.matchAll(pattern)].map((match) => ({
-    start: parseVttTimestamp(match[1]),
-    end: parseVttTimestamp(match[2]),
-    source: match[0],
-  }));
-  if (ranges.length === 0) {
-    throw new Error("final storyboard.md contains no audio ranges; use HH:MM:SS.mmm --> HH:MM:SS.mmm");
-  }
-  for (let index = 0; index < ranges.length; index += 1) {
-    const range = ranges[index];
+  const shots = [];
+  let hasBeatRows = false;
+  for (const line of normalized.split("\n")) {
+    const matches = [...line.matchAll(pattern)];
+    if (matches.length === 0) continue;
+    if (matches.length !== 1) throw new Error("storyboard timing line must contain exactly one audio range");
+    const match = matches[0];
+    const range = {
+      start: parseVttTimestamp(match[1]),
+      end: parseVttTimestamp(match[2]),
+      source: match[0],
+    };
     if (!Number.isFinite(range.start) || !Number.isFinite(range.end) || range.end <= range.start) {
       throw new Error(`invalid storyboard audio range: ${range.source}`);
     }
-    if (index > 0 && range.start < ranges[index - 1].end - 0.001) {
-      throw new Error(`storyboard audio ranges overlap or are out of order at range ${index + 1}`);
+    if (/^\s*(?:\|\s*)?Beat\b/i.test(line)) {
+      hasBeatRows = true;
+      const shot = shots.at(-1);
+      if (!shot) throw new Error("storyboard beat appears before its shot");
+      if (range.start < shot.start - 0.001 || range.end > shot.end + 0.001) {
+        throw new Error("storyboard beat must stay inside its shot audio range");
+      }
+      const previous = shot.beats.at(-1);
+      if (Math.abs(range.start - (previous?.end ?? shot.start)) > 0.001) {
+        throw new Error("storyboard beat ranges must be ordered and gapless within each shot");
+      }
+      shot.beats.push(range);
+    } else {
+      const previous = shots.at(-1);
+      if (previous && range.start < previous.end - 0.001) {
+        throw new Error(`storyboard audio ranges overlap or are out of order at range ${shots.length + 1}`);
+      }
+      shots.push({ ...range, beats: [] });
     }
   }
-  return ranges;
+  if (shots.length === 0) {
+    throw new Error("final storyboard.md contains no audio ranges; use HH:MM:SS.mmm --> HH:MM:SS.mmm");
+  }
+  if (hasBeatRows) {
+    for (const shot of shots) {
+      if (shot.beats.length === 0 || Math.abs(shot.beats.at(-1).end - shot.end) > 0.001) {
+        throw new Error("storyboard beat ranges must cover every shot without gaps");
+      }
+    }
+  }
+  return shots;
 }
 
 export function validateLessonArtifacts(root, lesson, stage) {
@@ -463,12 +583,25 @@ export function validateLessonArtifacts(root, lesson, stage) {
   }
   if (errors.length > 0) return errors;
 
+  if (stageIndex(stage) >= stageIndex("outline-draft") && !isLegacyScriptLesson(lesson)) {
+    const outlinePath = safeCoursePath(root, `lessons/${id}/lesson-outline.md`).absolute;
+    if (fs.readFileSync(outlinePath, "utf8").trim() === "") {
+      errors.push(issue("EMPTY_OUTLINE", "lesson-outline.md must contain a reviewable teaching arc", id));
+    }
+  }
+
   if (stageIndex(stage) >= stageIndex("script-draft")) {
+    const lessonPath = safeCoursePath(root, `lessons/${id}/lesson.md`).absolute;
+    const lessonCard = fs.readFileSync(lessonPath, "utf8");
     try {
-      const lessonPath = safeCoursePath(root, `lessons/${id}/lesson.md`).absolute;
-      extractPostLessonQuestion(fs.readFileSync(lessonPath, "utf8"));
+      extractPostLessonQuestion(lessonCard);
     } catch (error) {
       errors.push(issue("POST_LESSON_QUESTION", error.message, id));
+    }
+    try {
+      extractVisualDescriptions(lessonCard);
+    } catch (error) {
+      errors.push(issue("VISUAL_DESCRIPTIONS", error.message, id));
     }
   }
 
@@ -508,8 +641,17 @@ export async function checkFingerprintRecord(root, record, expectedFiles, lesson
   if (!record.fingerprints || typeof record.fingerprints !== "object" || Array.isArray(record.fingerprints)) {
     return { fresh: false, errors: ["fingerprints are missing"] };
   }
-  if (lesson && record.lessonContractSha256 !== lessonContractSha256(lesson)) {
-    errors.push("lesson identity, type, prerequisites, or source paths changed");
+  if (record.videoStylePath !== undefined) {
+    if (record.videoStylePath !== "video-style.md") {
+      errors.push("video style reference must be video-style.md");
+    } else {
+      errors.push(...videoStyleIssues(root));
+    }
+  }
+  if (lesson && record.lessonContractSha256 !== lessonContractSha256(lesson, stage)) {
+    errors.push(stage === "outline-draft" || stage === "outline-approved"
+      ? "lesson identity, type, or prerequisites changed"
+      : "lesson identity, type, prerequisites, or source paths changed");
   }
   const expectedProductionContract = config && stage
     ? productionContractSha256(config, stage)
@@ -560,6 +702,16 @@ function draftArtifactsExist(root, lesson) {
   });
 }
 
+function outlineDraftExists(root, lesson) {
+  try {
+    const outline = safeCoursePath(root, `lessons/${lesson.id}/lesson-outline.md`).absolute;
+    return fs.existsSync(outline) && fs.statSync(outline).isFile() &&
+      fs.readFileSync(outline, "utf8").trim() !== "";
+  } catch {
+    return false;
+  }
+}
+
 function validateReleaseReferences(root, releaseDirectory) {
   const errors = [];
   let directory;
@@ -601,6 +753,16 @@ export async function validateCourse(rootInput, stateOverride) {
   } catch (error) {
     errors.push(issue("OUTLINE", error.message));
   }
+  for (const documentPath of Array.isArray(config.learnerDocuments) ? config.learnerDocuments : []) {
+    try {
+      const document = safeCoursePath(root, documentPath);
+      if (!fs.existsSync(document.absolute) || !fs.statSync(document.absolute).isFile()) {
+        errors.push(issue("LEARNER_DOCUMENTS", `learner document does not exist: ${documentPath}`));
+      }
+    } catch (error) {
+      errors.push(issue("LEARNER_DOCUMENTS", error.message));
+    }
+  }
   const graph = validateDependencyGraph(state);
   errors.push(...graph.errors);
   const lessons = [];
@@ -622,10 +784,12 @@ export async function validateCourse(rootInput, stateOverride) {
     for (let index = 1; index <= declaredIndex; index += 1) {
       const stage = LESSON_STAGES[index];
       const record = lesson.records[stage];
-      if (stage === "script-approved" &&
+      if (isLegacyScriptLesson(lesson) &&
+          (stage === "outline-draft" || stage === "outline-approved")) continue;
+      if ((stage === "outline-approved" || stage === "script-approved") &&
           (typeof record?.approvalSource !== "string" || record.approvalSource.trim() === "")) {
         staleStage = stage;
-        recordProblems.push("script-approved: approvalSource is missing");
+        recordProblems.push(`${stage}: approvalSource is missing`);
         break;
       }
       const checked = await checkFingerprintRecord(
@@ -639,6 +803,7 @@ export async function validateCourse(rootInput, stateOverride) {
       if (!checked.fresh) {
         staleStage = stage;
         recordProblems.push(...checked.errors.map((message) => `${stage}: ${message}`));
+        if (stage === "outline-draft" && outlineDraftExists(root, lesson)) effectiveStatus = "outline-draft";
         if (stage === "script-draft" && draftArtifactsExist(root, lesson)) effectiveStatus = "script-draft";
         break;
       }
@@ -669,7 +834,7 @@ export async function validateCourse(rootInput, stateOverride) {
   const stateLessonById = new Map((state.lessons || []).map((lesson) => [lesson.id, lesson]));
   for (const lesson of lessons) {
     const stateLesson = stateLessonById.get(lesson.id);
-    lesson.blockedBy = lesson.effectiveStatus === "planned"
+    lesson.blockedBy = lesson.effectiveStatus === "outline-approved"
       ? (stateLesson.requires || []).filter((dependency) => {
           const prerequisite = lessonReportById.get(dependency);
           return !prerequisite || stageIndex(prerequisite.effectiveStatus) < stageIndex("script-approved");
@@ -731,10 +896,9 @@ export async function validateCourse(rootInput, stateOverride) {
 
         const releaseDirectory = safeCoursePath(root, state.release.directory);
         const indexHtml = fs.readFileSync(path.join(releaseDirectory.absolute, "index.html"), "utf8");
-        const visibleReleaseText = releaseVisibleText(indexHtml);
-        for (const lesson of lessons.filter(
-          (item) => item.type === "core" && item.effectiveStatus === "cover-verified",
-        )) {
+        const learnerLinks = [...indexHtml.matchAll(/<a\b[^>]*?\bhref\s*=\s*["']([^"']+)["'][^>]*>/gi)]
+          .map((match) => match[1].split(/[?#]/, 1)[0]);
+        for (const lesson of lessons.filter((item) => item.effectiveStatus === "cover-verified")) {
           for (const filename of ["video.mp4", "captions.vtt", "cover.png"]) {
             const sourcePath = `lessons/${lesson.id}/${filename}`;
             const sourceHash = await hashFile(safeCoursePath(root, sourcePath).absolute);
@@ -747,16 +911,13 @@ export async function validateCourse(rootInput, stateOverride) {
               errors.push(issue("RELEASE_COVERAGE", `index.html does not reference current ${sourcePath}`, lesson.id));
             }
           }
-          const marker = new RegExp(
-            `\\bdata-post-lesson-question\\s*=\\s*(["'])${escapeRegularExpression(lesson.id)}\\1`,
-            "i",
-          );
           const lessonCard = fs.readFileSync(
             safeCoursePath(root, `lessons/${lesson.id}/lesson.md`).absolute,
             "utf8",
           );
           const question = extractPostLessonQuestion(lessonCard);
-          if (!marker.test(indexHtml) || !visibleReleaseText.includes(normalizeSpokenText(question))) {
+          const questionText = markedSectionVisibleText(indexHtml, "data-post-lesson-question", lesson.id);
+          if (!questionText?.includes(normalizeSpokenText(question))) {
             errors.push(
               issue(
                 "RELEASE_COVERAGE",
@@ -764,6 +925,31 @@ export async function validateCourse(rootInput, stateOverride) {
                 lesson.id,
               ),
             );
+          }
+          const descriptions = extractVisualDescriptions(lessonCard);
+          if (descriptions !== null) {
+            const descriptionText = markedSectionVisibleText(indexHtml, "data-visual-descriptions", lesson.id);
+            if (!descriptionText?.includes(normalizeSpokenText(descriptions))) {
+              errors.push(
+                issue(
+                  "RELEASE_COVERAGE",
+                  "index.html does not expose the current visual descriptions",
+                  lesson.id,
+                ),
+              );
+            }
+          }
+        }
+
+        for (const documentPath of Array.isArray(config.learnerDocuments) ? config.learnerDocuments : []) {
+          const sourceHash = await hashFile(safeCoursePath(root, documentPath).absolute);
+          const packagedPaths = Object.entries(current)
+            .filter(([, value]) => value === sourceHash)
+            .map(([relativePath]) => path.posix.relative(releaseDirectory.relative, relativePath));
+          if (packagedPaths.length === 0) {
+            errors.push(issue("RELEASE_COVERAGE", `release does not contain current learner document ${documentPath}`));
+          } else if (!packagedPaths.some((relativePath) => learnerLinks.includes(relativePath))) {
+            errors.push(issue("RELEASE_COVERAGE", `index.html does not reference current learner document ${documentPath}`));
           }
         }
 

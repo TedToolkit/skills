@@ -44,8 +44,9 @@ does not need that reference. A missing linked reference is a stop condition.
 When the current directory or one of its parents contains `course.config.json`, treat that file as
 the current course unless the user names a different course. Resolve the course root first, then
 read the configured title and outline, the audience and observable outcome, any existing
-`cover-system.md`, the established course and video style, and relevant brand, logo, font, or
-iconography assets. Use `README.md` and focused style or asset documents when present; do not ask
+`cover-system.md`, `video-style.md` when present, the established course and video style, and
+relevant brand, logo, font, or iconography assets. Use `README.md` and focused style or asset
+documents when present; do not ask
 the user to repeat a course name, directory, audience, outcome, visual mode, or production setting
 that the workspace answers reliably.
 
@@ -98,6 +99,9 @@ distinct from the canonical cover. Record the required crop and safe-area behavi
 
 ## Define continuity explicitly
 
+Derive its shared identity from `video-style.md` and verified lesson frames when available. Adapt
+that identity for a thumbnail's different reading size and composition; do not make an unrelated
+cover style or force the video to imitate the cover layout.
 Write `cover-system.md` before producing a cover family. Record only decisions that another cover
 can reproduce:
 
@@ -143,7 +147,7 @@ For a Bilibili-bound cover, optimize for the mobile information feed rather than
 
 - when text is used, use one short Chinese display headline, preferably `4–10` Han characters and
   normally no more than `15` full-width-character equivalents; count a compact Latin or code token
-  such as `.NET` or `C#` as one semantic unit rather than splitting it;
+  such as `pH` or `ISO 400` as one semantic unit rather than splitting it;
 - use at most two lines and one to three emphasized semantic chunks; remove subtitles and low-value
   badges before reducing the headline;
 - give the headline a bold or heavy, high-contrast face and enough visual scale that its Han-character

@@ -27,6 +27,7 @@ EXPECTED_MARKETPLACE_PLUGINS = {
     "tedtoolkit-annotations",
     "tedtoolkit-career",
     "tedtoolkit-hiring",
+    "tedtoolkit-hyperframes-tutorials",
     "tedtoolkit-project-development",
     "tedtoolkit-roslynhelper",
     "tedtoolkit-shared",

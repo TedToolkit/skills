@@ -15,6 +15,7 @@ import {
   validateDependencyGraph,
   validateLessonArtifacts,
   validateStateShape,
+  videoStyleIssues,
   writeJsonAtomic,
 } from "./course-state-lib.mjs";
 
@@ -52,7 +53,11 @@ try {
   if (targetIndex > currentIndex + 1) {
     throw new Error(`cannot skip from ${lesson.status} to ${targetStage}`);
   }
-  if (targetIndex > 1) {
+  const legacyScriptRevision = targetStage === "script-draft" &&
+    currentIndex >= stageIndex("script-draft") &&
+    lesson.records["script-draft"] && !lesson.records["outline-approved"] &&
+    !lesson.records["outline-draft"];
+  if (targetIndex > 1 && !legacyScriptRevision) {
     const previousStage = LESSON_STAGES[targetIndex - 1];
     const checked = await checkFingerprintRecord(
       root,
@@ -66,17 +71,30 @@ try {
       throw new Error(`cannot record ${targetStage}; ${previousStage} is not fresh: ${checked.errors.join("; ")}`);
     }
   }
-  if (targetStage === "script-approved" && (!approvalSource || approvalSource.trim() === "")) {
-    throw new Error("script-approved requires --approval-source with explicit human approval evidence");
+  if (["outline-approved", "script-approved"].includes(targetStage) &&
+      (!approvalSource || approvalSource.trim() === "")) {
+    throw new Error(`${targetStage} requires --approval-source with explicit human approval evidence`);
   }
   const artifactErrors = validateLessonArtifacts(root, lesson, targetStage);
   if (artifactErrors.length) throw new Error(artifactErrors.map((item) => item.message).join("; "));
-  if (targetStage === "script-draft") {
+  if (targetStage === "script-draft" || targetStage === "script-approved") {
     const relativePath = `lessons/${lesson.id}/storyboard.md`;
     const storyboardPath = safeCoursePath(root, relativePath).absolute;
     if (!fs.existsSync(storyboardPath) || !fs.statSync(storyboardPath).isFile()) {
       throw new Error(`missing provisional storyboard: ${relativePath}`);
     }
+  }
+  if (targetStage === "script-draft" || targetStage === "script-approved") {
+    const relativePath = `lessons/${lesson.id}/storyboard-preview.html`;
+    const previewPath = safeCoursePath(root, relativePath).absolute;
+    if (!fs.existsSync(previewPath) || !fs.statSync(previewPath).isFile() ||
+        fs.statSync(previewPath).size === 0) {
+      throw new Error(`missing visual storyboard preview: ${relativePath}`);
+    }
+  }
+  if (targetStage === "script-draft") {
+    const styleProblems = videoStyleIssues(root);
+    if (styleProblems.length) throw new Error(styleProblems.join("; "));
   }
   const fingerprints = await fingerprintFiles(root, requiredLessonFiles(lesson, targetStage));
 
@@ -85,11 +103,13 @@ try {
   }
   lesson.records[targetStage] = {
     recordedAt: new Date().toISOString(),
-    lessonContractSha256: lessonContractSha256(lesson),
+    lessonContractSha256: lessonContractSha256(lesson, targetStage),
     ...(productionContractSha256(config, targetStage)
       ? { productionContractSha256: productionContractSha256(config, targetStage) }
       : {}),
-    ...(targetStage === "script-approved" ? { approvalSource: approvalSource.trim() } : {}),
+    ...(["outline-approved", "script-approved"].includes(targetStage)
+      ? { approvalSource: approvalSource.trim() } : {}),
+    ...(targetStage === "script-draft" ? { videoStylePath: "video-style.md" } : {}),
     fingerprints,
   };
   lesson.status = targetStage;

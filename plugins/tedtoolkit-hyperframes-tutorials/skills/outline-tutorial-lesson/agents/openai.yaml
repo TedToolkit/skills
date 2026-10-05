@@ -1,0 +1,4 @@
+interface:
+  display_name: "Outline Tutorial Lesson"
+  short_description: "Plan and review one lesson's narrative spine"
+  default_prompt: "Use $outline-tutorial-lesson to draft this lesson's narrative spine for my review before writing the spoken script."

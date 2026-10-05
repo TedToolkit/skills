@@ -1,0 +1,36 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+smoke_scenarios:
+  - "Catch transient collisions and competing animations before video verification"
+
+scenarios:
+  - name: "Catch transient collisions and competing animations before video verification"
+    prompt: >-
+      Use $build-tutorial for a read-only pre-render production review of the following excerpt
+      from an existing narrated lesson. Do not create files, render a video, or mark the lesson
+      verified. The shot lasts from 10.0 to 15.0 seconds on a 1920x1080 canvas. A card entering
+      the filter gate is intentional, but labels, cards, and connector arrows must remain readable.
+      The source has `<div class="input">A</div>`, `<div class="input input2">B</div>`,
+      `<div class="old-title">Old rule</div>`, `<div class="new-title">New rule</div>`, and
+      `<div class="arrow">→</div>`. The old and new titles occupy the same rectangle.
+      The arrow occupies x=500..620 at y=430..500. B starts at x=350..550 and moves 190px
+      to the right through that arrow's area. The timeline includes
+      `tl.to('.input', {opacity: 0, duration: 0.4}, 12.0);`
+      `tl.fromTo('.input2', {x: 0, opacity: 0}, {x: 190, opacity: 1, duration: 1.0}, 12.1);`
+      `tl.to('.old-title', {opacity: 0, duration: 0.5}, 13.0);` and
+      `tl.fromTo('.new-title', {opacity: 0}, {opacity: 1, duration: 0.5}, 13.1);`.
+      Identify the material production risks, give concrete source and timing corrections,
+      and explain how to verify the corrected encoded video before calling it complete.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "input2" }
+      - { type: "output_contains", value: "arrow" }
+    rubric:
+      - "Finds that `.input` matches both A and B, so B receives competing opacity animation from `.input` and `.input2`; proposes selectors with checked expected match counts or another explicit single-owner resolution."
+      - "Finds B's path through the arrow area, not merely a collision in its starting or ending frame; proposes rerouting or retiming the arrow or B while preserving the intended gate interaction."
+      - "Finds the old and new titles overlap visibly between 13.1 and 13.5 seconds and makes the shared area clear before the new title appears, unless a deliberately readable transition is designed."
+      - "Requires inspection of the corrected encoded video at normal speed and nearby consecutive frames through each risk interval, including the arrow path and title handoff; does not claim that lint or sparse stills alone prove the issues fixed."
+      - "Does not report every intentional overlap as a defect and does not mark the lesson video-verified from this excerpt."
+    timeout: 360
