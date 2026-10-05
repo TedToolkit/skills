@@ -123,6 +123,19 @@ procedural or judgment lesson should usually ask for a prediction, choice, or ex
 small change in the taught example. Revise a question that can be answered by repeating labels
 while missing the lesson's main capability.
 
+Keep the dependency graph and recommended routes in the planning and navigation artifacts, not in
+the teaching content of individual videos. Plan each lesson as a complete unit for its own promised
+outcome: its opening establishes the local question and any necessary starting state, its example
+supplies the evidence, and its ending resolves that question. A real prerequisite remains in the
+graph, but the lesson must not rely on phrases such as "as we learned last time," a named previous
+video, or a promised next video to make its explanation work. Reuse a concept or case when useful by
+briefly supplying the exact context needed here; do not retell another lesson or assume its final
+screen is still visible. Keep lesson IDs, watch-next suggestions, and branch choices in the course
+page or lesson card. A learner should be able to open a lesson directly and understand its question,
+required starting conditions, and result without knowing which videos were watched before it. If
+the needed background is too large for a brief local reminder, state the required capability and
+let the learner page route to its prerequisite; do not turn this video into a recap.
+
 ### Classify progression and learning paths
 
 Classify chapters and lessons on two independent axes: every chapter has one progression level, and
@@ -172,9 +185,9 @@ Audit narrative continuity in two projections, not only dependency validity:
 - **Comprehensive route:** place every extension after its real prerequisites and derive at least one
   recommended route containing all core and extension lessons. That route must also read as one
   logically ordered course: extensions deepen an established idea at the point they are useful,
-  transitions acknowledge the branch, and later lessons do not repeat, contradict, reset, or assume a
-  different case state. Apply the same check to each named Extension route when extensions form
-  independent branches.
+  while later lessons do not repeat, contradict, reset without explanation, or assume a different
+  case state. Express branch transitions in navigation rather than narration. Apply the same check
+  to each named Extension route when extensions form independent branches.
 
 Reorder, bridge, or revise lessons when either projection is only a valid topological order but not a
 coherent learning experience. Do not repair the Core-only route by summarizing a skipped extension or
@@ -268,17 +281,19 @@ its teaching approach, and how its main parts fit together. Its content must:
 - state the intended learners, who the course is not designed for, entry prerequisites, and any
   earlier courses or capabilities it assumes;
 - give a meaningful overview of every chapter or major content part and the relationships among
-  them, without teaching all of their mechanisms in advance;
+  them as learner capabilities, without teaching their mechanisms or walking through examples from
+  later lessons;
 - state what completing the Core route enables and proves, and what each optional Extension route
   adds;
 - explain the course's distinctive teaching features, such as problem-to-solution progression,
   comparative evidence, a sustained case, Core and Extension branches, or a particular practice
   format;
-- explain the recommended learning route, optional choices, useful stopping points, and later
-  courses or capabilities this course unlocks when relevant.
+- explain the recommended learning route, optional choices, and useful stopping points at a broad
+  level; keep detailed lesson and later-course links in the learner page.
 
 If the course opens with required `00.01+` preparation, have `00.00` say in its spoken narration
-which videos teach that preparation and when their readiness checks must be complete. The guide may be
+what readiness is needed before subject practice and what success looks like. Put the specific
+preparation video IDs, links, and ordering in the learner page. The guide may be
 watched before installation when it does not use that tool itself. Keep the full installation
 walkthrough in the preparation video rather than crowding it into the course guide.
 
@@ -301,9 +316,11 @@ lesson rows.
 
 Do not turn `00.00` into a marketing trailer, a brief readiness notice, a teacher biography, or a
 mechanical recital of lesson numbers. It is a real course guide that covers what will be learned and
-what the learner will gain, without teaching every mechanism in detail or compressing the first
-technical lesson into the guide. Keep it concise but complete relative to the course's size; use the
-course's ordinary episode-duration range unless the approved course format sets another guide length.
+what the learner will gain. Use at most a small, nontechnical illustration of the learning method;
+do not solve a later lesson's problem, rehearse its rules, or compress the first technical lesson
+into the guide. Keep it concise relative to the course's size; its estimate can be shorter than an
+ordinary teaching episode when the guide's job is complete. Do not add examples merely to fill the
+ordinary episode-duration range.
 
 Use its required post-lesson question to check whether the learner can explain the course scope,
 audience, expected gains, distinctive approach, or Core and Extension routes. Do not use a

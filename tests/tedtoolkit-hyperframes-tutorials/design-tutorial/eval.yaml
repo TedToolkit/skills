@@ -16,9 +16,10 @@ scenarios:
       several small high-contrast shapes may support the explanation, and a three-question
       observation routine may help the learner apply it, but neither the example nor the routine is
       the lesson topic. The instructor was introduced elsewhere, but this independently accessible
-      lesson still needs a brief natural entry without repeating a biography. Mention that learners
-      may choose different practice branches after this lesson; the course has no single fixed
-      successor. This is a coherent long-form teaching episode, not a short-form teaser. Do not
+      lesson still needs a brief natural entry without repeating a biography. The course offers
+      different practice branches and has no single fixed successor; keep those navigation choices
+      in the learner page, not the narration. This is a coherent long-form teaching episode, not a
+      short-form teaser. Do not
       create or change files. The lesson's narrative spine has already been approved in this
       conversation: open with two visibly different compositions that can both feel balanced;
       examine how size, contrast, and position affect perceived weight; use the large-muted versus
@@ -33,10 +34,10 @@ scenarios:
     rubric:
       - "The title's question, the dominant explanation, and the closing share one primary promise: visual balance depends on perceived weight rather than bilateral symmetry."
       - "The shape arrangement is supporting evidence rather than the topic learners are most likely to remember."
-      - "The observation routine and optional-practice guidance remain supporting material and do not create competing lesson centers."
+      - "The observation routine remains supporting material and does not create a competing lesson center; optional-practice navigation stays outside the narration."
       - "The opening reaches the title's problem directly without a greeting or instructor biography, orients the learner, and leaves the deciding evidence for the visual explanation."
       - "The full script uses coherent long-form sections instead of repeated hooks or short-form teaser language."
-      - "The narration is natural to speak and does not invent a fixed successor for a branching course."
+      - "The narration is natural to speak, resolves this lesson's question, and does not refer to earlier or future videos or invent a fixed successor."
       - "The Mandarin narration does not leave ordinary descriptive words in English when they can be spoken naturally in Chinese; exact source text and necessary technical names may remain unchanged."
       - "A provisional storyboard maps the spoken progression to visible explanations and motion without inventing precise timestamps before narration generation."
       - "When the lesson compares an expected and observed result, the learner knows the expected result before the reveal and the storyboard visibly carries that comparison instead of cycling through labeled summary cards."

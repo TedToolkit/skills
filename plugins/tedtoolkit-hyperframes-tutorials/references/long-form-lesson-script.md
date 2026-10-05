@@ -73,9 +73,8 @@ then use that result in the next section. Synthesis should reorganize or apply p
 than repeat the same definition.
 
 Close by resolving the driving question and transferring the method to one nearby situation. Keep
-course navigation outside the spoken ending for dependency-driven or branching courses. In a truly
-linear course, mention a later lesson only when the course brief requests it and the preview follows
-from the current unresolved problem.
+course navigation outside the spoken ending regardless of the recommended viewing order; do not
+make the conclusion depend on a later lesson.
 
 ## Review as a long-form episode
 

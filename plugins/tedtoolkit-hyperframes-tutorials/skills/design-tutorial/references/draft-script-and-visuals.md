@@ -15,8 +15,12 @@ while already fluent in programming; avoid teaching beneath that stated baseline
 Read the course's ordering model as well as its outline order. Lesson IDs and file order identify
 content; they do not by themselves define what the learner takes next. When the course is organized
 by prerequisites, waves, optional branches, or another non-linear model, keep navigation choices in
-the course interface or lesson card. Do not call another lesson "the next lesson" or preview its
-content unless the course brief explicitly defines one linear continuation from the current lesson.
+the course interface or lesson card. For any course order, keep references to other lessons and
+their content out of the spoken script and on-screen teaching sequence. A direct entry into this
+lesson must make its question and required starting conditions clear without assuming the viewer
+watched a particular video. If essential background is too large to recap briefly, state the
+required capability and let the learner page route to it. Do not create or plan a future lesson
+while drafting this one.
 Follow the course's chosen demonstration medium. If it names an IDE, explain the actions needed
 to run, observe, or verify this lesson. Show required menu choices in the video when learners must
 repeat them; a separate tool guide may retain version-specific details for later reference.
@@ -27,8 +31,8 @@ montage; explain any platform branch needed to reach the common check without ma
 perform every branch. Keep the video's single readiness outcome distinct from the course overview
 in `00.00` and the subject teaching in Chapter 01.
 Keep a companion setup page for changing links or platform detail, never as the only place a viewer
-can discover a required step. In the first video that uses the tool, briefly recall the readiness
-result before starting the demonstration.
+can discover a required step. In the first video that uses the tool, state the ready starting
+condition before the demonstration without referring back to the preparation video.
 If it supplies demonstration files, keep exact code, diagrams, commands, and observable results in
 their real source files and align the spoken explanation to them. Make source files and results understandable
 without prior expertise in the example's business domain; define any new rule before relying on it.
@@ -78,8 +82,9 @@ demonstration is supporting material unless it is itself the promised outcome. G
 material only the space needed to prove or illuminate the main idea; do not let an increasingly
 detailed example become the topic learners are most likely to remember. The opening, largest
 explanatory movement, closing, and post-lesson question should all point to the same primary promise.
-Choose the smallest code slice that proves the mechanism. Reuse a course case as a familiar
-thread without claiming that all lessons modify one continuously growing codebase. Mark a pattern
+Choose the smallest code slice that proves the mechanism. Reuse a course case only after showing
+the exact starting state this lesson needs; do not require memory of another video's ending or
+claim that all lessons modify one continuously growing codebase. Mark a pattern
 comparison as an alternative implementation rather than silently folding it into the main example.
 Set the amount of guidance from the audience's prior knowledge of this mechanism, not merely from
 their familiarity with the programming language. When essential components or states are unfamiliar,
@@ -103,10 +108,9 @@ selected test framework or another observable check; avoid a stand-alone termino
 
 Write the actual words to be synthesized, in natural spoken language. Give the lesson a coherent arc:
 an opening question or concrete problem, the relevant mechanism and example, an observable check,
-the limits or cost of the solution, and a natural closing takeaway. A transition to the next lesson
-may follow only when the course has an explicit linear continuation and it introduces a real next
-problem. Otherwise close on the current lesson's usable result. Adapt this arc to an introduction or
-other non-procedural lesson rather than forcing a demonstration.
+the limits or cost of the solution, and a natural closing takeaway. Close on the current lesson's
+usable result, without a recap of another lesson or a preview of a future one. Adapt this arc to an
+introduction or other non-procedural lesson rather than forcing a demonstration.
 
 For the required `00.00` course guide, make the whole course the primary subject. Across the spoken
 script and synchronized storyboard, explain what the course teaches, the real problem and scope,
@@ -116,15 +120,14 @@ features, and how its chapters, routes, and sustained case fit together. Give ev
 part meaningful context instead of merely reading headings or lesson numbers. Keep the guide
 concise relative to the course
 without turning it into a trailer or compressing the first technical lesson into the introduction.
-If a required setup video follows the guide, name it in the narration and say when its check must
-pass; a visible link or lesson list alone does not establish this handoff.
+If the course requires setup before practice, state the readiness condition and a concrete success
+check in the guide; put the specific preparation video link in the learner page.
 Keep detailed dependency tables, evidence matrices, and production metadata on the course page or
 lesson card unless a learner needs a specific item to understand the route. Its post-lesson question
 should check whether the learner can explain the course scope, audience, gains, features, or learning
 route using information actually provided in the guide.
-When the guide names a distinctive practice method, make one small learner action and its feedback
-visible in the provisional storyboard. Show enough of the method to make its use concrete without
-teaching the first technical lesson early.
+When the guide names a distinctive practice method, a small nontechnical learner action and its
+feedback can make the method concrete. Stop before teaching a later lesson's rule or example.
 
 For a course guide that should feel light or game-like, carry one familiar learner-facing problem
 through the route: show the starting state, the useful capability gained at each major part, and the
@@ -136,8 +139,8 @@ route and outcome without translating a string of jokes.
 
 Start every spoken script directly with a recognizable consequence, question, result, or action that
 begins the lesson. Do not add greetings, welcomes, or ceremonial lead-ins to `narration.txt`. Give
-only the context needed to understand that opening; a continuous lesson may connect to prior
-understanding, while an independently accessible lesson must not claim a previous or next lesson.
+only the context needed to understand that opening. Use the learner's relevant knowledge as
+context without claiming they watched a previous or next lesson.
 Include an instructor name or role only when the brief requests it or it helps explain the content.
 Keep agendas, design rationale, navigation, course metadata, repeated credentials, and manufactured
 mystery from delaying the teaching point. Maintain a consistent course voice without forcing
@@ -236,8 +239,8 @@ unclear even with the planned visual, contain several nested clauses,
 stack abstract nouns, or present a dense list of terms or numbers. Turn necessary lists into a
 conversational progression rather than a recital. Confirm that every name, acronym, identifier,
 notation, and numeral has an obvious spoken form and a reason to be heard. Cut repeated setup,
-restated definitions, and transitions that merely announce the next lesson. Keep a transition when
-it poses a real unanswered question.
+restated definitions, and transitions that merely announce another lesson. Keep a transition
+within this lesson when it poses a real unanswered question.
 Write narration and learner-facing storyboard text in the course's chosen language. Retain literal
 code, commands, source strings, and necessary terms in their original form, but translate ordinary
 descriptive words that would otherwise make the speaker switch languages mid-sentence. Read those

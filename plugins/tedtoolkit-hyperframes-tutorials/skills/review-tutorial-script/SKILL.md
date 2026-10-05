@@ -98,8 +98,9 @@ later concept as an unexplained prerequisite.
 For a video-led course, trace every required setup action through the required viewing route.
 Fail a preparation lesson that omits the spoken and visible action, readiness result, or failure
 route; fail the first tool-using lesson when it assumes setup taught only in a linked document.
-Check that the guide audibly directs viewers to any required preparation video before the tool is
-needed. A document or on-screen link may support the route but cannot carry it alone.
+Check that the guide states the required readiness condition and success check before subject
+practice; the learner page supplies the preparation video link. The preparation video's own
+instructions and verification must be audible and visible, not left solely to a linked document.
 Check that `00.00` remains a whole-course explanation and each `00.01+` lesson has a distinct
 readiness outcome. Flag a preparation video that merely lists prerequisites, duplicates the guide,
 or tries to compress substantial missing subject knowledge into a setup walkthrough.
@@ -132,9 +133,10 @@ For `00.00`, also check that the coordinated narration and storyboard cover ever
 at guide depth and explain their relationships rather than merely reciting headings. It should center the subject and
 scope, audience fit, prerequisites, Core completion outcome, optional Extension gains, course
 characteristics, learning routes,
-and case model. Flag lesson-number recitals, ceremonial biography, marketing-only promises, or a
-compressed first technical lesson. The post-lesson question should test the learner's grasp of the
-course scope, audience, gains, features, or route rather than confidence.
+and case model. Flag lesson-number recitals, ceremonial biography, marketing-only promises, a
+compressed first technical lesson, a solved later-lesson example, or named future-video promises.
+The post-lesson question should test the learner's grasp of the course scope, audience, gains,
+features, or route rather than confidence.
 
 When a lighter or game-like voice is requested, check that one concrete learner problem carries the
 guide from its starting point to the final capability. The major parts should feel like meaningful
@@ -142,17 +144,16 @@ progress rather than a sequence of course headings. Flag repeated topic inventor
 fact is accurate, jokes that interrupt the explanation, and game language that implies features the
 course does not provide. A listener should be able to retell the actual route without the metaphor.
 When the guide claims a distinctive learning method, check that the narration and provisional
-storyboard make it tangible with one small learner action and observable feedback. For a
-predict–run–modify–explain course, a brief example can show a prediction, the result, one change,
-and the resulting explanation without turning the guide into the first technical lesson. A list of
-method names alone does not show how the learner will use them.
+storyboard make it tangible without teaching a later lesson's rule. A brief nontechnical learner
+action and observable feedback can show the method; a list of method names alone does not show how
+the learner will use them.
 
 Check the opening independently. The spoken script should begin with a concrete consequence,
 question, useful result, or action, with enough context to understand it. Flag greetings, welcomes,
 and ceremonial lead-ins in `narration.txt`, as well as openings that drop into unexplained material.
-A continuous lesson may reconnect to prior understanding; an independently accessible lesson must
-orient itself without inventing a previous or next lesson. Include an instructor name or role only
-when the brief requests it or it helps the learner understand the content; avoid repeated biography
+A lesson may use prerequisite knowledge, but must orient itself without referring to a previous
+or next video. Include an instructor name or role only when the brief requests it or it helps the
+learner understand the content; avoid repeated biography
 or credentials. Flag course metadata, agendas, design rationale, slow throat-clearing, and
 manufactured mystery when they delay the teaching point.
 When a later demonstration supplies the decisive evidence, flag an opening that narrates its full
@@ -305,12 +306,15 @@ to the paragraph map in `lesson.md`; make the card's sources, teaching purpose, 
 on-screen evidence agree with the provisional storyboard. Do not ask the speaker to read a title
 merely because it appears in the card.
 
-Check every spoken preview or forward transition against the course's actual ordering model. Do not
-infer a successor from lesson number, outline position, or array order. In a prerequisite graph,
-parallel wave, or branching course, reject "next lesson" language and previews that imply one fixed
-route; close on the current takeaway unless the course brief explicitly requests optional navigation
-guidance. Even in a linear course, a preview must stay within the declared scope and introduce a
-real continuation rather than a convenient teaser.
+Audit each lesson's narration and storyboard as though a learner opened that lesson directly,
+without a known viewing history. Its required starting capability should be clear; route a viewer
+who lacks it through the learner page rather than a spoken cross-reference. Reject references to
+prior or future lesson IDs, "last time" or "next time" language, recaps that require another video's context, and previews that assign
+content to an unrequested future lesson. A reused case must show the starting state needed here;
+close on the current lesson's usable result. Keep navigation and route suggestions in the learner
+page or lesson card even when the course recommends a linear order. During a one-lesson review,
+do not draft or revise unrelated future lessons to repair a transition; report a genuine course
+plan conflict separately.
 
 ## Course-wide pass and result
 

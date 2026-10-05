@@ -32,9 +32,9 @@ If the lesson is the first to require a tool, check that a viewer following the 
 has already seen how to prepare and verify it, or that this lesson teaches those actions before
 using the tool. Surface a missing or contradictory video handoff to course planning; a linked
 setup page alone is insufficient for a video-led course.
-For `00.00`, outline the whole-course explanation and an audible handoff to any required `00.01+`
-videos. For a `00.01+` preparation lesson, outline one readiness result, the necessary on-screen
-actions, a success check, and a failure path. Keep substantial subject teaching in its regular
+For `00.00`, outline the whole-course explanation and state any readiness needed before subject
+practice without naming a particular preparation video. For a `00.01+` preparation lesson, outline
+one readiness result, the necessary on-screen actions, a success check, and a failure path. Keep substantial subject teaching in its regular
 chapter rather than hiding it in the preparation sequence.
 
 State the single primary promise as an answerable question or observable capability. Distinguish it
@@ -47,6 +47,11 @@ how to teach that scope; it may sharpen the opening question or example without 
 the promised outcome or the course's post-lesson question. If the course-level lesson entry cannot
 support a coherent teaching path, surface the mismatch for course planning rather than hiding it
 inside a more appealing story.
+When the request selects one lesson, draft or revise only that lesson's outline. Do not create an
+outline for a later lesson, assign its example, or add a future-lesson promise as a way to finish the
+current lesson. Note a needed course-level correction for the user without writing unrelated lesson
+artifacts. Treat actual prerequisites as inputs, not as a presumption that viewers watched every
+lower-numbered lesson.
 
 ## Write the short outline
 
@@ -62,6 +67,14 @@ with short labels only where they help. Cover:
   and the point that equips the learner to answer it;
 - a scope limit, source uncertainty, audience assumption, or duration constraint only when it
   materially changes the script.
+
+Make the outline locally complete: state the starting situation needed for this lesson, teach its
+own promised result, and end with that result. Keep references to prior or future lesson IDs,
+recaps, and watch-next directions out of the teaching sequence. If a previous lesson established a
+concept or artifact needed here, include only the minimal context needed to use it. If the full
+background cannot fit, name the required starting capability and leave the dependency and
+navigation link in the course outline or learner page. This applies even when the course has a
+recommended viewing order.
 
 Put the key evidence or visual demonstration beside the beat it supports. Keep an exact command or
 value when it is essential to the lesson; if provenance matters, link the source or name the runnable

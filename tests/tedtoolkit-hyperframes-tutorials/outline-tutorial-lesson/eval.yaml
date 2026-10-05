@@ -1,0 +1,25 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Keep one preparation lesson independent of future lessons"
+    prompt: >-
+      Use $outline-tutorial-lesson to draft only the short outline for a Mandarin course's 00.01
+      preparation video in this conversation. The course uses Rider for IDE demonstrations. In
+      00.01, the learner must make Rider launch, verify that the .NET SDK is available, and confirm
+      that the practice folder is writable. The course also contains a first-run lesson with source
+      files and a terminal; later IDE teaching has not been designed. Learners may open this video
+      directly and may not watch the course in numerical order. Show the reviewable 00.01 teaching
+      sequence and its one readiness result. Do not create or change files.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "Rider" }
+      - { type: "output_contains", value: "00.01" }
+      - { type: "command", run: "test -z \"$(find . -mindepth 1 -maxdepth 1 -type f -print -quit)\"" }
+    rubric:
+      - "The outline addresses only 00.01 and gives a clear starting situation, on-screen setup actions, three observable readiness checks, and a failure path."
+      - "Its conclusion resolves the current preparation outcome without promising or assigning content to a future IDE lesson."
+      - "It does not create a later lesson outline or rely on the viewer having watched 00.00 or another numbered video."
+      - "Any true dependency or route guidance is kept outside the proposed spoken teaching sequence."
+    timeout: 360

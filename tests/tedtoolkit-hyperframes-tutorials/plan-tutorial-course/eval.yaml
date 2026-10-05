@@ -32,7 +32,7 @@ scenarios:
       - "The Core route has one observable course-completion outcome backed by a finished artifact, demonstration, diagnosis, comparison, or decision rather than a topic list."
       - "Portrait lighting, color editing, and print preparation are separate evidence-backed Extension routes; none is required for course completion and learners need not watch every optional lesson."
       - "The course receives a required 00.00 course-guide lesson whose outcome is that learners can explain what the whole course teaches, who it suits, what completing it enables, what distinguishes it, and how its major parts and routes fit together."
-      - "00.00 is kept outside the chapter taxonomy and is not treated as a technical prerequisite for domain lessons unless it produces a real artifact that they consume."
+      - "00.00 is kept outside the chapter taxonomy and is not treated as a technical prerequisite for domain lessons unless it produces a real artifact that they consume. Its overview does not teach later lessons' examples or rules."
       - "The guide covers every chapter or major content part at guide depth and relates those parts meaningfully, without becoming a marketing trailer, instructor biography, mechanical syllabus recital, or compressed first technical lesson."
       - "It separately audits a Core-only route and a comprehensive Core-plus-all-Extensions route: both are coherent learning experiences, not merely valid topological orders, and the Core-only route never refers to skipped Extension content."
     timeout: 360
@@ -76,7 +76,7 @@ scenarios:
       - { type: "output_contains", value: "01.01" }
       - { type: "command", run: "test -z \"$(find . -mindepth 1 -maxdepth 1 -type f -print -quit)\"" }
     rubric:
-      - "00.00 explains the course and audibly hands learners to the required preparation video; it does not become the installation walkthrough."
+      - "00.00 explains the course and states the preparation readiness condition without naming a later video in narration; the learner page carries the video link. It does not become the installation walkthrough."
       - "00.01 is a required Core preparation video before 01.01, with visible installation or access steps, an observable editor readiness check, success criteria, and a failure route."
       - "01.01 consumes the readiness result from 00.01; the written page is supplementary rather than the only source of mandatory setup instructions."
       - "The preparation video is counted in the Core route and duration outside the subject chapters; prerequisite subject knowledge is distinguished from operational setup."
