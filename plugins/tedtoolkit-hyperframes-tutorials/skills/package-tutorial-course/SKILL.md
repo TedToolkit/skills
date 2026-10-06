@@ -24,7 +24,7 @@ Read the [course state contract](../../references/tutorial-course-state.md) and 
 Inspect the course outline, lesson directories, existing page generator, language setting, and
 release conventions before changing anything. In a course using this toolkit's file layout, use
 `course.config.json` for the course ID, title, slug, and content language; use the outline for
-lesson IDs, types, titles, and prerequisites; use `lessons/<id>/video.mp4`, `captions.vtt`, and
+lesson IDs, types, titles, and prerequisites; use `lessons/<id>/video.mp4`, `captions.txt`, and
 `cover.png` as publication artifacts and effective `cover-verified` state as the publication gate.
 Read every path in `learnerDocuments` when present. For a new course, require its learner-facing
 chapter checkpoints and final Core completion task in the listed practice document; report a missing
@@ -51,8 +51,10 @@ the actual content, not merely alter the HTML `lang` attribute.
 Prefer the course-local `tools/package-course.mjs`; invoke it from the course root. It must call
 `tools/build-course-player.mjs` first so the page reflects current outline, text, and video
 metadata, then collect learner-facing Markdown/plain text, referenced assets/examples, formal
-videos, caption tracks, `course-cover.png`, and lesson covers into a generated output directory and ZIP. If a different course lacks these scripts,
-adapt or create project-local scripts for its real schema before packaging; do not assume that
+videos, caption text, `course-cover.png`, and lesson covers into a generated output directory and ZIP.
+If existing course-local scripts still require a VTT track or build a transcript from spoken text,
+update them to parse and package `captions.txt` before building the release. If a different course
+lacks these scripts, adapt or create project-local scripts for its real schema before packaging; do not assume that
 one course's Chinese outline parser works for every course. Keep author-only demo clips and raw
 production files out of the release unless the user explicitly wants them.
 Copy each configured `learnerDocuments` file into the release and expose a visible local link from
@@ -61,7 +63,7 @@ at the corresponding chapter exit. Preserve task prompts and self-check guidance
 replace them with a completion checkbox. The release validator checks file identity and the local
 link, while the packaging review checks the pedagogical content.
 
-Treat a lesson without its formal video, canonical captions, or verified cover as `unpublished`,
+Treat a lesson without its formal video, canonical caption text, or verified cover as `unpublished`,
 even when all prerequisites are complete.
 It must not be clickable, playable, markable as completed, or counted as a completed prerequisite.
 Previously stored completion for an unpublished lesson must not unlock descendants. A published
@@ -86,21 +88,20 @@ language. Wrap the learner-facing block in an element with
 question is present without adding interaction. A missing, empty, duplicate, unmarked, or omitted
 question prevents a finished release.
 
-For every published narrated lesson, include `captions.vtt` as a local WebVTT track on the video and
-use those same cues to render the learner transcript; do not create a second independently timed
-subtitle source from `narration.txt`. On a sufficiently wide viewport, the transcript may occupy a
+For every published narrated lesson, parse `captions.txt` for the learner transcript and seeking;
+do not create a second independently timed subtitle source from `narration.txt`. The MP4 already
+contains the visible subtitles. On a sufficiently wide viewport, the transcript may occupy a
 right-side panel while the video retains a useful viewing width. On smaller viewports, move it below
 the video as a collapsible section. Highlight the active cue, keep it in view during playback, and
 let a learner select a cue to seek the video. Do not fight deliberate manual scrolling: pause
-auto-follow until the learner explicitly resumes it or selects or seeks to a cue. Keep native caption
-controls available for learners who prefer subtitles over the transcript panel, but do not show both
-the overlay captions and the transcript panel as duplicate text by default.
+auto-follow until the learner explicitly resumes it or selects or seeks to a cue. Do not add a
+duplicate native text track over the burned-in subtitles.
 
 If a published lesson has a `## Visual descriptions` section in `lesson.md`, render that section as
 learner-facing text near the video and transcript, in the same order as the described scenes. Give it
 an accessible heading and make it reachable without playing the video. Extract only this section;
 do not expose the rest of the production card. Check that the text conveys necessary visual-only
-details, including exact labels or code where these affect the lesson outcome; a speech-only WebVTT
+details, including exact labels or code where these affect the lesson outcome; speech-only captions
 transcript does not supply them. If the lesson needs such details but the section is absent or empty,
 return it to `design-tutorial` before finishing the release.
 For a file-based release, mark each rendered section with
@@ -111,15 +112,14 @@ Prefer integrated spoken description for visual meaning needed to follow the les
 for remaining exact details helps readers but does not by itself establish an audio-description
 conformance level; evaluate that separately if the course has a stated accessibility target.
 
-Package the clean `video.mp4` together with its sidecar `captions.vtt`. WebVTT is the canonical
-course experience and supports switching, restyling, accessibility, synchronized transcript display,
-and later localization. Never render subtitle text into the video pixels or package a second
-captioned video variant.
+Package the captioned `video.mp4` together with its source `captions.txt`. The timed text supports
+synchronized transcript display, seeking, and later localization. Do not package a second
+independently timed subtitle variant.
 
 Package the current `cover.png` for every published lesson and set it as that video's local `poster`
 image. Use the cover in lesson navigation when the layout includes thumbnails, but do not duplicate
 large decorative imagery around the player. A missing, stale, or unreferenced cover prevents a
-finished release just like a missing video or caption track.
+finished release just like a missing video or caption text.
 
 Place the current `course-cover.png` in the course landing or hero area with useful alternative text.
 For each lesson player, use the local lesson cover with the native `poster` attribute, keep controls
@@ -146,14 +146,14 @@ do not describe a lesson as the next course.
 
 Run the packaging script and test ZIP integrity. Inspect the archive listing and confirm that its
 top-level folder contains `index.html`, course text, `course-cover.png`, and each video, caption
-track, and lesson cover referenced by the HTML; there must be no absolute or network-dependent
+text, and lesson cover referenced by the HTML; there must be no absolute or network-dependent
 media path. Open the extracted HTML as a local file when
 the environment supports it, and check the unpublished/locked/completed behavior, compact lesson
-metadata, conditional next-lesson navigation, native subtitle track, active-cue highlighting,
+metadata, conditional next-lesson navigation, burned-in subtitles, active-cue highlighting,
 seeking, responsive transcript placement, manual-scroll behavior, one static post-lesson question
 per published lesson, any authored visual descriptions beside the learner transcript, initial poster
 display, and the absence of autoplay. A published narrated
-lesson without a valid local caption track, cover, or post-lesson question prevents a finished
+lesson without valid local caption text, cover, or post-lesson question prevents a finished
 release; report it as a missing artifact.
 For every configured learner document, verify that the current file is in the ZIP, its link opens
 offline, and its tasks still provide the promised independent action, evidence, and self-check.

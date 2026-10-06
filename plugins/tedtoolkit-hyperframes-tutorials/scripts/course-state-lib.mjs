@@ -171,7 +171,7 @@ export function requiredLessonFiles(lesson, stage) {
     files.push(`${base}/storyboard.md`);
   }
   if (index >= stageIndex("video-verified")) {
-    files.push(`${base}/video.mp4`, `${base}/captions.vtt`);
+    files.push(`${base}/video.mp4`, `${base}/captions.txt`);
   }
   if (index >= stageIndex("cover-verified")) {
     files.push("cover-system.md", "course-cover.png", `${base}/cover.png`);
@@ -487,31 +487,37 @@ function parseVttTimestamp(text) {
   return hours * 3600 + minutes * 60 + seconds + millis / 1000;
 }
 
-export function parseWebVtt(contents) {
+export function parseCaptionText(contents) {
   const normalized = contents.replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n");
-  if (!normalized.startsWith("WEBVTT")) throw new Error("captions.vtt must start with WEBVTT");
-  const blocks = normalized.split(/\n{2,}/).slice(1);
+  const blocks = normalized.trim().split(/\n{2,}/);
   const cues = [];
+  const identifiers = new Set();
   for (const block of blocks) {
     const lines = block.split("\n").filter((line) => line.length > 0);
-    if (lines.length === 0 || /^(NOTE|STYLE|REGION)(?:\s|$)/.test(lines[0])) continue;
+    if (lines.length === 0) continue;
+    const identifier = lines[0].trim();
+    if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(identifier) || identifiers.has(identifier)) {
+      throw new Error(`caption cue needs a unique identifier: ${identifier}`);
+    }
+    identifiers.add(identifier);
     const timingIndex = lines.findIndex((line) => line.includes("-->"));
-    if (timingIndex < 0) throw new Error(`WebVTT cue has no timing line: ${lines[0]}`);
+    if (timingIndex !== 1) throw new Error(`caption cue needs a timing line after ${identifier}`);
     const match = /^(\S+)\s+-->\s+(\S+)(?:\s+.*)?$/.exec(lines[timingIndex]);
-    if (!match) throw new Error(`invalid WebVTT timing line: ${lines[timingIndex]}`);
+    if (!match) throw new Error(`invalid caption timing line: ${lines[timingIndex]}`);
     const start = parseVttTimestamp(match[1]);
     const end = parseVttTimestamp(match[2]);
     if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
-      throw new Error(`invalid WebVTT cue range: ${lines[timingIndex]}`);
+      throw new Error(`invalid caption cue range: ${lines[timingIndex]}`);
     }
-    const text = lines.slice(timingIndex + 1).join("\n").trim();
-    if (!text) throw new Error(`WebVTT cue has no text: ${lines[timingIndex]}`);
+    if (lines.length !== 3) throw new Error(`caption cue must have one text line: ${identifier}`);
+    const text = lines[2].trim();
+    if (!text) throw new Error(`caption cue has no text: ${lines[timingIndex]}`);
     cues.push({ start, end, text });
   }
-  if (cues.length === 0) throw new Error("captions.vtt contains no cues");
+  if (cues.length === 0) throw new Error("captions.txt contains no cues");
   for (let index = 1; index < cues.length; index += 1) {
     if (cues[index].start < cues[index - 1].end - 0.001) {
-      throw new Error(`WebVTT cues overlap or are out of order at cue ${index + 1}`);
+      throw new Error(`caption cues overlap or are out of order at cue ${index + 1}`);
     }
   }
   return cues;
@@ -609,21 +615,21 @@ export function validateLessonArtifacts(root, lesson, stage) {
     const base = `lessons/${id}`;
     try {
       const storyboardPath = safeCoursePath(root, `${base}/storyboard.md`).absolute;
-      const scriptPath = safeCoursePath(root, `${base}/narration.txt`).absolute;
       const storyboardRanges = parseStoryboardTiming(fs.readFileSync(storyboardPath, "utf8"));
-      const narration = fs.readFileSync(scriptPath, "utf8");
 
       if (stageIndex(stage) >= stageIndex("video-verified")) {
-        const captionsPath = safeCoursePath(root, `${base}/captions.vtt`).absolute;
-        const cues = parseWebVtt(fs.readFileSync(captionsPath, "utf8"));
-        const captionText = normalizeSpokenText(cues.map((cue) => cue.text).join(" "));
-        const narrationText = normalizeSpokenText(narration);
-        if (captionText !== narrationText) throw new Error("WebVTT spoken text does not match narration.txt");
+        const captionsPath = safeCoursePath(root, `${base}/captions.txt`).absolute;
+        const cues = parseCaptionText(fs.readFileSync(captionsPath, "utf8"));
+        // Subtitle copy is edited for reading; exact equality with the spoken script is not a gate.
+        // Meaning and technical terms require audio review by the lesson producer.
+        if (cues.some((cue) => /^\s*(?:#{1,6}\s|P\d{2}(?:-\d+)?\s|\|)/m.test(cue.text))) {
+          throw new Error("caption text contains an authoring label or Markdown formatting");
+        }
         if (cues[0].start < storyboardRanges[0].start - 0.25) {
-          throw new Error("WebVTT begins before the final storyboard timeline");
+          throw new Error("captions begin before the final storyboard timeline");
         }
         if (cues.at(-1).end > storyboardRanges.at(-1).end + 0.75) {
-          throw new Error("WebVTT extends beyond the final storyboard timeline");
+          throw new Error("captions extend beyond the final storyboard timeline");
         }
       }
     } catch (error) {
@@ -899,7 +905,7 @@ export async function validateCourse(rootInput, stateOverride) {
         const learnerLinks = [...indexHtml.matchAll(/<a\b[^>]*?\bhref\s*=\s*["']([^"']+)["'][^>]*>/gi)]
           .map((match) => match[1].split(/[?#]/, 1)[0]);
         for (const lesson of lessons.filter((item) => item.effectiveStatus === "cover-verified")) {
-          for (const filename of ["video.mp4", "captions.vtt", "cover.png"]) {
+          for (const filename of ["video.mp4", "captions.txt", "cover.png"]) {
             const sourcePath = `lessons/${lesson.id}/${filename}`;
             const sourceHash = await hashFile(safeCoursePath(root, sourcePath).absolute);
             const packagedPaths = Object.entries(current)

@@ -9,6 +9,11 @@ Use the installed `media-use` workflow when available to inspect or transiently 
 `narration.wav`. Compare the spoken content with `narration.txt`, but do not save a separate
 transcript artifact. Surface missing, added, or meaning-changing speech instead of animating a false
 step.
+If `build-tutorial` returns a measured pause map for editing room, use the paced audio asset and
+its cumulative offsets as the timing source for the final storyboard. Preserve the original Fish
+WAV, verify that each added silence falls at a speech boundary, and retime affected shots and beats
+before recording `storyboard-final` again. Do not change the approved spoken words just to make the
+timestamps fit.
 
 Replace provisional timing notes with the actual audio range and spoken cue for every shot. Write
 each range in `HH:MM:SS.mmm --> HH:MM:SS.mmm` form. Keep the ranges ordered and non-overlapping, and

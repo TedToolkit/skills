@@ -37,7 +37,7 @@ common sections.
 
 Give each lesson a stable `lessons/<lesson-id>/` directory. Canonical course-cover artifacts are
 root `cover-system.md` and `course-cover.png`; canonical lesson artifacts are `lesson.md`,
-`narration.txt`, `narration.wav`, `storyboard.md`, `video.mp4`, `captions.vtt`, and `cover.png`.
+`narration.txt`, `narration.wav`, `storyboard.md`, `video.mp4`, `captions.txt`, and `cover.png`.
 Create an artifact only when its owning workflow produces real content. Do not create a canonical
 `demo.md`: record demonstration source paths in `lesson.md`, keep substantial evidence in its actual
 project or asset file, and let `storyboard.md` own short exact on-screen text and source ranges.

@@ -101,10 +101,20 @@ passage if motion is what they need to judge. For a new or substantially changed
 exploration early enough to influence the build. It does not create another formal course stage or
 require a preview for every ordinary scene revision.
 
-Align scene boundaries and key teaching actions to `narration.wav`. Do not recut or repair the
-voice audio inside this skill; send narration changes back to `generate-tutorial-narration` and then
-refresh the affected storyboard timing. Use local assets where practical and track their
-source. Implement storyboarded states and transitions with seekable, deterministic animation so
+Start scene and teaching-action alignment from `narration.wav`. Preserve the original Fish WAV.
+For requested breathing room, listen at phrase and sentence boundaries, especially after commas,
+semicolons, questions, and before a learner must inspect or predict. Prefer natural pauses already in
+the recording. Where a pause is still too short, insert a small measured silence at a verified
+speech boundary in an edited audio asset; retime every downstream scene, teaching beat, caption cue,
+and the total composition duration by the same cumulative offsets. Return the measured pause map
+to `design-tutorial` so the final storyboard ranges are updated and revalidated before the formal
+render; do not leave the production timeline and storyboard with different timestamps. Keep a pause
+map with source time, added duration, and teaching reason beside the editable project. Do not cut a word, stretch
+speech, insert silence in the middle of a syllable, or add an automatic pause after every comma.
+Review the result at normal speed; a brief comma pause and a longer prediction or result hold serve
+different purposes. If the spoken wording or delivery itself needs to change, return to
+`generate-tutorial-narration` and refresh the storyboard timing. Use local assets where practical and
+track their source. Implement storyboarded states and transitions with seekable, deterministic animation so
 arbitrary-frame preview and render agree. Keep exact procedural text, code, and visual results
 faithful to the verified script, storyboard, and declared demonstration sources. Render short exact
 on-screen text from `storyboard.md`; render runnable code and substantial result panels from their
@@ -128,7 +138,7 @@ outcome. For a file-based course, necessary exact visual details need a learner-
 `lesson.md`'s `## Visual descriptions` section for packaging; for a standalone lesson, deliver that
 text with the video. Return missing content to `design-tutorial` instead of treating author-only
 storyboard notes or speech-only captions as the equivalent. Avoid placing full narration text over
-an active diagram; the selectable WebVTT track remains available separately.
+an active diagram; the concise burned-in subtitles and separate transcript remain available.
 Give the depicted change a readable movement when it helps the learner follow the mechanism. Keep
 an inspectable stable state for exact code or comparison, and preserve a before/after pair or compact
 trace when understanding depends on both states. If actual audio timing leaves too little time to
@@ -145,21 +155,32 @@ keep any retained indicator consistent and visually subordinate to the teaching 
 playback progress, pause, and seeking to the actual player unless the approved storyboard requires
 a distinct instructional cue.
 
-For a file-based course, create `lessons/<lesson-id>/captions.vtt` from `narration.txt`, the final
-`narration.wav`, and the verified shot ranges and narration cues in `storyboard.md`. Use readable
-phrase or sentence cues rather than whole paragraphs, omit authoring labels and Markdown, make the
-cue text match what is actually spoken, and use stable WebVTT cue identifiers derived from the
-lesson paragraph IDs when available.
-Map narration timing onto the formal video timeline, including any intentional lead-in, and verify
-the WebVTT against the rendered video. If reliable word or phrase alignment is missing, align the
-audio and return the corrected ranges to `design-tutorial`; do not silently rewrite storyboard
+For a file-based course, create `lessons/<lesson-id>/captions.txt` as a separate, edited subtitle
+text with verified timing from the final audio and storyboard. `narration.txt` is the spoken script,
+not the subtitle copy. Show exactly one concise line per cue. If it is too long at the intended
+player size, shorten the copy without losing meaning or split it at a verified phrase boundary;
+replace spoken spellings of exact commands, filenames, and symbols with their written forms where
+the meaning remains clear (for example, `Program.cs` rather than “Program 点 C S”). Remove verbal
+filler and harmless repetition, but preserve the teaching claim, negation, order, and factual
+detail. Do not add unspoken facts or use subtitles to replace necessary visual descriptions. Omit
+authoring labels and Markdown in cue text. Use simple blocks separated by a blank line: a stable
+paragraph-derived cue ID, a `HH:MM:SS.mmm --> HH:MM:SS.mmm` timing line, then one subtitle
+line. Review edited text against the actual audio phrase by phrase, including technical
+terms, then check legibility and duration at the intended viewing size.
+Map narration timing onto the formal video timeline, including any intentional lead-in and inserted
+pauses, and verify the caption cues against the rendered video. If reliable word or phrase alignment
+is missing, align the audio and return the corrected ranges to `design-tutorial`; do not silently rewrite storyboard
 timing during production. Never estimate cue boundaries by spreading a paragraph evenly over its duration.
-Treat WebVTT as the canonical browser track. Produce SRT only for a named downstream platform that
-requires it, deriving it from the same verified cues rather than maintaining a second timing source.
-
-Keep `video.mp4` as a clean master and keep WebVTT as the learner subtitle source so the player can
-switch, restyle, localize, search, and reuse it for a synchronized transcript. Never render subtitle
-text into the video pixels or create a second captioned video variant in this workflow.
+Treat `captions.txt` as the canonical editable subtitle source. Generate any encoder-specific ASS
+or SRT in a temporary location from those same cues; do not maintain a second subtitle source.
+Burn these verified cues into the formal `video.mp4`. Prefer restrained, plain text with a slim
+contrasting outline and no opaque background box. On a light course canvas, try medium-gray text
+with a subtle light outline before using a heavy black edge; keep the font and placement consistent
+across shots. Check contrast and single-line fit at the actual embedded-player size over
+representative frames, and keep subtitles clear of code, results, and controls. Keep `captions.txt` beside
+the video for search, transcript navigation, and later revision. Check the encoded pixels at several
+cue starts, endings, and line breaks; the mere presence of a subtitle stream does not prove that
+text was burned into the picture.
 
 Implement the selected course visual mode explicitly and deterministically. Use the course style,
 its series inheritance, and the reviewed shot preview; do not infer video colors from the learner
@@ -173,7 +194,7 @@ labels and contrast readable.
 
 Run the available HyperFrames validation and render commands. Inspect representative frames at
 the start, middle, and end of each shot, through important stable holds, and around transitions;
-listen to the finished audio and check shot, action, and WebVTT cue timing against the rendered video.
+listen to the finished audio and check shot, action, and caption cue timing against the rendered video.
 For every entrance, exit, handoff, and movement of a teaching object, inspect the encoded video's
 transition interval at normal speed and step through nearby consecutive frames when a collision or
 flicker could be brief. Check readable text, labels, cards, arrows and their endpoints, plus the
@@ -240,14 +261,14 @@ narration. On later revision requests, change only affected scenes and repeat ch
 scenes plus their boundaries.
 
 In a file-based course, write the formal lesson render as `lessons/<lesson-id>/video.mp4`; this file
-is the publication signal used by course packaging. Also deliver the aligned `captions.vtt`.
+is the publication signal used by course packaging. Also deliver the aligned `captions.txt`.
 Deliver the editable project, rendered video, and a concise note of validation performed and any
 remaining limitation. State separately whether representative learners tried the video and what
 their explanations or transfer attempts showed. If no learner trial occurred, say so without
 presenting production verification as a learning-effect result. If rendering cannot run in the
 environment, preserve the project and report the exact blocker rather than presenting a preview as
 a final video.
-After the formal video and canonical WebVTT pass every production check, record `video-verified`
+After the formal video and canonical caption text pass every production check, record `video-verified`
 with the packaged recorder and re-run the validator. A preview does not advance this state without
-the clean master and verified sidecar. `video-verified` attests to production checks, not to a
+the captioned video and verified caption text. `video-verified` attests to production checks, not to a
 measured learning gain or universal appeal to the target audience.

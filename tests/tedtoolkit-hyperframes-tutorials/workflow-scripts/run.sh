@@ -428,25 +428,39 @@ cat >"$course/lessons/lesson-01/storyboard.md" <<'EOF'
 EOF
 node "$scripts/record-course-stage.mjs" "$course" lesson-01 storyboard-final >/dev/null
 printf 'video\n' >"$course/lessons/lesson-01/video.mp4"
-cat >"$course/lessons/lesson-01/captions.vtt" <<'EOF'
-WEBVTT
-
+cat >"$course/lessons/lesson-01/captions.txt" <<'EOF'
+P01-01
 00:00:00.000 --> 00:00:00.800
 Hello
 
+P01-02
 00:00:00.700 --> 00:00:01.000
 world.
 EOF
 if node "$scripts/record-course-stage.mjs" "$course" lesson-01 video-verified >/dev/null 2>&1; then
-    echo "overlapping WebVTT cues were incorrectly accepted" >&2
+    echo "overlapping caption cues were incorrectly accepted" >&2
     exit 1
 fi
-cat >"$course/lessons/lesson-01/captions.vtt" <<'EOF'
-WEBVTT
-
+cat >"$course/lessons/lesson-01/captions.txt" <<'EOF'
+P01-01
 00:00:00.000 --> 00:00:00.500
 Hello
+again
 
+P01-02
+00:00:00.500 --> 00:00:01.000
+world.
+EOF
+if node "$scripts/record-course-stage.mjs" "$course" lesson-01 video-verified >/dev/null 2>&1; then
+    echo "two-line caption cue was incorrectly accepted" >&2
+    exit 1
+fi
+cat >"$course/lessons/lesson-01/captions.txt" <<'EOF'
+P01-01
+00:00:00.000 --> 00:00:00.500
+Hi
+
+P01-02
 00:00:00.500 --> 00:00:01.000
 world.
 EOF
@@ -473,8 +487,8 @@ cat >"$course/release/index.html" <<'EOF'
 <a href="practice.md">Core practice and final task</a>
 <video controls poster="lessons/lesson-01/cover.png">
   <source src="lessons/lesson-01/video.mp4" type="video/mp4">
-  <track src="lessons/lesson-01/captions.vtt" kind="captions" srclang="en">
 </video>
+<section data-transcript-source="lessons/lesson-01/captions.txt">Hi world.</section>
 <section data-post-lesson-question="lesson-01">
   <h2>Post-lesson question</h2>
   <p>What did this lesson demonstrate?</p>
@@ -486,10 +500,10 @@ cat >"$course/release/index.html" <<'EOF'
 EOF
 printf 'zip fixture\n' >"$course/workflow-fixture.zip"
 if node "$scripts/record-course-release.mjs" "$course" release workflow-fixture.zip >/dev/null 2>&1; then
-    echo "release without its referenced caption track was incorrectly accepted" >&2
+    echo "release without its referenced caption text was incorrectly accepted" >&2
     exit 1
 fi
-cp "$course/lessons/lesson-01/captions.vtt" "$course/release/lessons/lesson-01/captions.vtt"
+cp "$course/lessons/lesson-01/captions.txt" "$course/release/lessons/lesson-01/captions.txt"
 node "$scripts/record-course-release.mjs" "$course" release workflow-fixture.zip >/dev/null
 node "$scripts/validate-course.mjs" "$course" >/dev/null
 

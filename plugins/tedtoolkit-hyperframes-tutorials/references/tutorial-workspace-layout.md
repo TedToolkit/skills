@@ -31,7 +31,7 @@ delta.
 │       ├── narration.txt
 │       ├── narration.wav
 │       ├── narration.wav.fish-request.json
-│       ├── captions.vtt
+│       ├── captions.txt
 │       ├── storyboard.md
 │       ├── storyboard-preview.html
 │       ├── cover.png
@@ -69,8 +69,7 @@ status source; lesson cards must not maintain another status field.
 | `narration.txt` | `design-tutorial`; approved spoken words only. |
 | `narration.wav` | `generate-tutorial-narration`; Fish Audio output generated directly from the approved `narration.txt`. |
 | `narration.wav.fish-request.json` | `fish-tts.mjs`; local attempt history that prevents blind duplicate requests and contains no narration or voice ID. Keep with its WAV; it is not published or a course stage record. |
-| `captions.vtt` | `build-tutorial`; learner-facing WebVTT cues aligned to the formal video timeline. |
-| `captions.srt` | Optional `build-tutorial` export for a named destination that requires SubRip captions. |
+| `captions.txt` | `build-tutorial`; separately edited, timed learner-facing subtitle text used for the burned-in video subtitles. |
 | `storyboard.md` | `design-tutorial`; the provisional visual plan created with the script and later finalized against verified generated narration. |
 | `storyboard-preview.html` | `design-tutorial`; locally viewable, untimed frames for every provisional shot, reviewed with the script before narration. |
 | Editable composition | `build-tutorial`; implementation of the final storyboard. |
@@ -89,7 +88,7 @@ necessary exact visual details that should remain on screen rather than in speec
 without production IDs. `package-tutorial-course` extracts this section near the video and transcript;
 the rest of the production card remains author-only. Mark the rendered section with
 `data-visual-descriptions="<lesson-id>"` so release validation can check the handoff. The spoken
-WebVTT cues alone do not describe visual-only facts.
+Caption cues alone do not describe visual-only facts.
 The validator rejects duplicate or empty authored sections and checks that a packaged lesson
 shows the current text inside its marked section. Keep essential meaning in the main narration;
 the page section is not a substitute for an audio-description review when one is required.
@@ -108,9 +107,11 @@ subsequent line or row beginning with `Beat` (for example, `| Beat B01 | P01 | 0
 00:00:00.500 | Show the changed line |`). When beat rows are used, every shot must have ordered,
 gapless beats that cover its full range; a hold is an explicit beat. This label lets the validator
 distinguish nested beats from adjacent shots. Older shot-only storyboards remain valid.
-`captions.vtt` is the canonical learner-facing sidecar because the course
-player is HTML-based. Generate SRT from the same verified cues only when a target platform requires
-it; never maintain VTT and SRT as independent timing sources.
+`captions.txt` is the canonical editable subtitle source, with concise reading text that may differ
+from the spoken wording in `narration.txt` while preserving meaning. Each blank-line-separated block
+contains a stable cue ID, a timestamp range, and one line of display text. Burn its cues into
+`video.mp4`. The course player may parse the same text for transcript navigation. Generate temporary
+encoder formats from these cues only when needed; do not maintain parallel subtitle sources.
 
 ## Production gates
 
@@ -120,7 +121,7 @@ The normal order is:
 2. Existing series visual system when present, course `video-style.md`, then `lesson.md`, `narration.txt`, provisional `storyboard.md`, visual `storyboard-preview.html`, and all referenced demonstration sources. Review the script and shot images against the applicable style rules together before approval; inspect a short motion specimen when movement itself defines the style or teaching relationship.
 3. Fish Audio generates `narration.wav` from the approved text and saved voice model ID.
 4. `design-tutorial` listens to that audio and writes verified shot ranges into `storyboard.md`.
-5. Editable HyperFrames composition, formal `video.mp4`, and aligned `captions.vtt`.
+5. Editable HyperFrames composition, formal `video.mp4`, and aligned `captions.txt`.
 6. Course `cover-system.md` and `course-cover.png`, plus a verified lesson `cover.png` based on the current formal video.
 7. Generated offline learner release and ZIP.
 
@@ -137,10 +138,10 @@ requires `course-cover.png` and `cover.png` for every published lesson. A change
 timing, captions, video, cover, and packaging artifacts; refresh them in order rather than
 patching around the mismatch during rendering.
 
-Keep `video.mp4` as the clean reusable master and `captions.vtt` as the only canonical learner
-subtitle source. Never render subtitle text into the video pixels or create a second captioned video
-variant. A delivery destination that cannot consume sidecar subtitles is outside this course
-workflow and must not change the canonical lesson artifacts.
+Keep the original Fish WAV and editable HyperFrames project as production sources. The formal
+`video.mp4` includes subtitles burned from `captions.txt`; that text remains the only canonical
+subtitle text and timing source. Preserve an uncaptioned render as an optional project-local
+intermediate when useful, but do not require a second published video variant.
 
 Keep authoring sources and generated learner releases in separate directories. Never overwrite an
 unknown output directory, and do not include internal production files or author-only assets in a
