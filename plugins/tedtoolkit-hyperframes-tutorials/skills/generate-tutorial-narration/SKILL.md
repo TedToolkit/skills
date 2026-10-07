@@ -16,6 +16,10 @@ or punctuation for pacing, return that edit to `design-tutorial` for script revi
 from the newly approved text. Listen to the WAV before finalizing it: punctuation may still produce
 pauses that are too short or inconsistent. Leave precise extra silence to the measured editing and
 timeline synchronization in `build-tutorial`.
+For a lesson with planned prediction, comparison, or inspection holds, compare the approved
+storyboard's pause intents with the recorded delivery using the shared
+[intentional pause guide](../../references/intentional-pauses.md). Report any insufficient gap by
+spoken cue to `design-tutorial` and `build-tutorial`; do not claim the text guarantees that pause.
 Request 44.1 kHz WAV from Fish. The course's `video.audioSampleRate` is the final video
 encoding setting and does not change the Fish request.
 

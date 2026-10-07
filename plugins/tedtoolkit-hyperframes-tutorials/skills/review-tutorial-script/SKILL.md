@@ -24,6 +24,9 @@ when judging spoken engagement and practice. Read the
 [visual and motion decisions](../../references/evidence-informed-guide/visual-and-motion.md)
 when the storyboard's visual evidence or recurring screen elements need review. Open the
 [source list](../../references/evidence-informed-guide/sources.md) only when checking a cited claim.
+When a lesson uses a prediction, comparison, or inspection hold, use the shared
+[intentional pause guide](../../references/intentional-pauses.md) to review its spoken cue and
+provisional visual plan.
 
 ## Establish the review set
 
@@ -259,6 +262,10 @@ target without searching through unrelated labels or panels. Suggest removing co
 adding arrows or highlights; keep a targeted cue when the full display is needed for the lesson.
 For a change the learner must explain, require a planned stable result and enough prior state or
 trace to compare it with. Do not impose a fixed label count, pause length, or shot template.
+For a consequential pause, check that the provisional storyboard names what remains visible, what
+the learner can think through or inspect, and when the next claim or reveal resumes. Flag a prompt
+that is immediately answered or replaced by another demand without usable thinking space; do not
+require a hold after every question. Judge its actual duration only after generated audio exists.
 For each primary outcome, point to the beat that supplies enough spoken and visible evidence to
 answer an explanation or application question. If the outcome exists only in the lesson card or
 spoken promise, mark it untaught even when the storyboard looks engaging.

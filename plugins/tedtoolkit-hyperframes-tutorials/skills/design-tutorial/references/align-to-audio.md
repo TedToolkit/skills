@@ -9,6 +9,10 @@ Use the installed `media-use` workflow when available to inspect or transiently 
 `narration.wav`. Compare the spoken content with `narration.txt`, but do not save a separate
 transcript artifact. Surface missing, added, or meaning-changing speech instead of animating a false
 step.
+Revisit consequential pause intents using the shared
+[intentional pause guide](../../../references/intentional-pauses.md). Verify whether the recorded
+voice and visible state give the learner usable time to predict, compare, or inspect. Mark a short
+gap for measured production editing rather than treating punctuation as proof of adequate timing.
 If `build-tutorial` returns a measured pause map for editing room, use the paced audio asset and
 its cumulative offsets as the timing source for the final storyboard. Preserve the original Fish
 WAV, verify that each added silence falls at a speech boundary, and retime affected shots and beats

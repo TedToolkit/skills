@@ -232,6 +232,10 @@ brief visual beat for that thinking time without adding a forced quiz or pause i
 `narration.txt`. Do not fill an on-screen prediction with the intended answer before that thinking
 beat has occurred. After the reveal, explain what the result proves once; revisit it only to draw a
 new distinction or apply it to another case.
+For prediction, comparison, or inspection beats that need quiet time, follow the shared
+[intentional pause guide](../../../references/intentional-pauses.md). Record the cue, learner action,
+stable visual state, and reveal or resumption in the provisional storyboard; punctuation alone is
+not the pause plan.
 Before handoff, perform an oral-readability pass from `narration.txt` alone, then read the script
 alongside the provisional storyboard. Generated audio and exact synchronization are checked after
 narration generation. Read the words aloud when possible. Rewrite sentences whose referent is
@@ -368,7 +372,8 @@ cards. Do not imply that separate examples share one evolving codebase when they
 
 Mark the pre-generation storyboard as provisional. Preserve shot order and paragraph anchors, but do
 not invent timestamps or precise durations. Use qualitative pacing only when it changes the teaching
-intent, such as holding for a comparison or revealing a result after a prediction. The generated
+intent, such as holding for a comparison or revealing a result after a prediction. Include a pause
+intent at those beats when the learner needs time to act before speech or visuals advance. The generated
 `narration.wav` and timing derived from it will determine final shot boundaries, reading time,
 motion beats, and transitions.
 

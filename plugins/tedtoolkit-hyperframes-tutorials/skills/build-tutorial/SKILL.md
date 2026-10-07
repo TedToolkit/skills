@@ -102,18 +102,21 @@ exploration early enough to influence the build. It does not create another form
 require a preview for every ordinary scene revision.
 
 Start scene and teaching-action alignment from `narration.wav`. Preserve the original Fish WAV.
-For requested breathing room, listen at phrase and sentence boundaries, especially after commas,
-semicolons, questions, and before a learner must inspect or predict. Prefer natural pauses already in
-the recording. Where a pause is still too short, insert a small measured silence at a verified
-speech boundary in an edited audio asset; retime every downstream scene, teaching beat, caption cue,
+Use the storyboard's pause intents and the shared
+[intentional pause guide](../../references/intentional-pauses.md) to check where the learner needs
+quiet time to predict, compare, inspect, or absorb a result. Also listen for natural breathing room
+at phrase and sentence boundaries. Prefer pauses already in the recording. Where a consequential
+pause is still too short, insert measured silence at a verified speech boundary in an edited audio
+asset; retime every downstream scene, teaching beat, caption cue,
 and the total composition duration by the same cumulative offsets. Return the measured pause map
 to `design-tutorial` so the final storyboard ranges are updated and revalidated before the formal
 render; do not leave the production timeline and storyboard with different timestamps. Keep a pause
-map with source time, added duration, and teaching reason beside the editable project. Do not cut a word, stretch
-speech, insert silence in the middle of a syllable, or add an automatic pause after every comma.
-Review the result at normal speed; a brief comma pause and a longer prediction or result hold serve
-different purposes. If the spoken wording or delivery itself needs to change, return to
-`generate-tutorial-narration` and refresh the storyboard timing. Use local assets where practical and
+map with source time, added duration, and teaching reason beside the editable project. Do not cut a
+word, stretch speech, insert silence in the middle of a syllable, or add an automatic pause after
+every comma.
+Review the result at normal speed with the held visual and captions; a brief speech pause and a
+longer thinking or result hold serve different purposes. If the spoken wording or delivery itself
+needs to change, return to `generate-tutorial-narration` and refresh the storyboard timing. Use local assets where practical and
 track their source. Implement storyboarded states and transitions with seekable, deterministic animation so
 arbitrary-frame preview and render agree. Keep exact procedural text, code, and visual results
 faithful to the verified script, storyboard, and declared demonstration sources. Render short exact
