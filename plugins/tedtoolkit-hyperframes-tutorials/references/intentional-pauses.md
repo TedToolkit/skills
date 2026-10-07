@@ -1,16 +1,16 @@
 # Intentional pauses in narrated lessons
 
-Design a pause around the learner's next action, not around punctuation alone. A spoken comma or
-sentence ending may need only natural phrasing; a prediction, comparison, inspection, or result may
+Design a pause around the learner's next action. A prediction, comparison, inspection, or result may
 need quiet time with a stable visual state. Not every question needs a hold. Decide whether the
 learner has something specific to examine or infer before the next spoken claim or reveal.
 
 ## Before narration
 
-Write natural, speakable punctuation and paragraph breaks in `narration.txt`. Keep pause lengths,
-stage directions, and silent-beat labels out of the read-aloud file. For a consequential pause, put
-its intent in the provisional `storyboard.md`: the spoken cue after which it begins, what remains
-visible, what the learner can do during it, and the next cue or reveal that ends it. For example:
+Write punctuation and paragraph breaks for natural spoken language, not to control the length of
+instructional pauses. Keep pause lengths, stage directions, and silent-beat labels out of
+`narration.txt`. For a consequential pause, put its intent in the provisional `storyboard.md`: the
+spoken cue after which it begins, what remains visible, what the learner can do during it, and the
+next cue or reveal that ends it. For example:
 
 > Pause intent after the prediction prompt: hold the source and an unanswered result area while the
 > learner forms an expectation; reveal the observed output only when narration reaches the run.
@@ -26,9 +26,10 @@ pause, distinguish the natural speech gap from the time needed for the stated le
 question followed immediately by another spoken instruction may still leave inadequate quiet time;
 a longer demonstration may already provide enough. If the recorded delivery is sufficient, use its
 actual timing. If it is short, identify the speech boundary and the visual hold that would make an
-added pause useful. Do not infer pause quality from punctuation or a waveform threshold alone.
+added pause useful. Judge the recorded timing with the visual state rather than inferring it from
+the script or a waveform threshold alone.
 
-`build-tutorial` may add measured silence to an edited audio asset at verified speech boundaries.
+`build-tutorial` adds any needed instructional silence during editing, at verified speech boundaries.
 Preserve the original Fish WAV. Record each addition's source time, duration, and teaching reason in
 a project-local pause map. Use the paced audio and cumulative offsets to update the final storyboard,
 all affected visual beats, captions, and composition duration before the formal render. Check the

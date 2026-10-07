@@ -112,8 +112,8 @@ and the total composition duration by the same cumulative offsets. Return the me
 to `design-tutorial` so the final storyboard ranges are updated and revalidated before the formal
 render; do not leave the production timeline and storyboard with different timestamps. Keep a pause
 map with source time, added duration, and teaching reason beside the editable project. Do not cut a
-word, stretch speech, insert silence in the middle of a syllable, or add an automatic pause after
-every comma.
+word, stretch speech, insert silence in the middle of a syllable, or add silence without a specific
+learner action that needs it.
 Review the result at normal speed with the held visual and captions; a brief speech pause and a
 longer thinking or result hold serve different purposes. If the spoken wording or delivery itself
 needs to change, return to `generate-tutorial-narration` and refresh the storyboard timing. Use local assets where practical and

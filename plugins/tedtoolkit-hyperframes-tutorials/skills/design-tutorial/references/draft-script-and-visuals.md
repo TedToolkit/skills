@@ -234,8 +234,8 @@ beat has occurred. After the reveal, explain what the result proves once; revisi
 new distinction or apply it to another case.
 For prediction, comparison, or inspection beats that need quiet time, follow the shared
 [intentional pause guide](../../../references/intentional-pauses.md). Record the cue, learner action,
-stable visual state, and reveal or resumption in the provisional storyboard; punctuation alone is
-not the pause plan.
+stable visual state, and reveal or resumption in the provisional storyboard. Add the needed silence
+during production editing instead of encoding its timing with punctuation.
 Before handoff, perform an oral-readability pass from `narration.txt` alone, then read the script
 alongside the provisional storyboard. Generated audio and exact synchronization are checked after
 narration generation. Read the words aloud when possible. Rewrite sentences whose referent is

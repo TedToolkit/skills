@@ -9,17 +9,15 @@ description: >-
 # Generate Tutorial Narration
 
 Turn `narration.txt` into `narration.wav` with Fish Audio. This skill owns only that conversion.
-Before generation, review the approved text's punctuation and paragraph breaks for natural
-breathing room. Fish documents punctuation as a cue for natural pauses; it does not provide a
-verified per-comma millisecond pause control for this request. If the user asks to revise wording
-or punctuation for pacing, return that edit to `design-tutorial` for script review, then generate
-from the newly approved text. Listen to the WAV before finalizing it: punctuation may still produce
-pauses that are too short or inconsistent. Leave precise extra silence to the measured editing and
-timeline synchronization in `build-tutorial`.
+Generate from the approved spoken text without changing punctuation to manufacture instructional
+pauses. If the approved text needs correction for meaning or clarity, return the edit to
+`design-tutorial` for script review, then generate from the newly approved text. Listen to the WAV
+before finalizing it. Leave any additional instructional silence to measured editing and timeline
+synchronization in `build-tutorial`.
 For a lesson with planned prediction, comparison, or inspection holds, compare the approved
 storyboard's pause intents with the recorded delivery using the shared
 [intentional pause guide](../../references/intentional-pauses.md). Report any insufficient gap by
-spoken cue to `design-tutorial` and `build-tutorial`; do not claim the text guarantees that pause.
+spoken cue to `design-tutorial` and `build-tutorial` for post-production editing.
 Request 44.1 kHz WAV from Fish. The course's `video.audioSampleRate` is the final video
 encoding setting and does not change the Fish request.
 
