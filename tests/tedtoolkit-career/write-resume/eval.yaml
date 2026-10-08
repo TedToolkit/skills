@@ -26,14 +26,15 @@ scenarios:
 
   - name: "Tailor an experienced technical resume for recruiter and engineer readers"
     prompt: >-
-      Write the finished two-page-target Markdown resume now; this exact conversational artifact is
+      Write the finished Markdown resume now, using two pages as a recommendation rather than a
+      limit; this exact conversational artifact is
       approved. Identified target: Acme Robotics, Senior C# Equipment Software Engineer. Its supplied
       job-posting priorities are WPF desktop software,
       multithreading, native device SDK integration, unit tests, and field defect repair. Evidence:
       Project Atlas shipped a WPF inspection client, used CancellationToken for long scans, wrapped a
       vendor SDK with SafeHandle, and added regression tests for a device disconnect defect. Project
-      Forge built a reusable Roslyn analyzer used by two internal libraries. Project GameSkin changed
-      game textures and has no connection to the target. No metrics beyond the stated reuse were
+      Forge built a reusable Roslyn analyzer used by two internal libraries. Project GameSkin released
+      a game texture pack and has no direct connection to the target. No metrics beyond the stated reuse were
       supplied. Make the candidate distinctive through supported engineering choices, not hobbies or
       personality adjectives.
     assertions:
@@ -42,14 +43,14 @@ scenarios:
       - { type: "output_contains", value: "CancellationToken" }
       - { type: "output_contains", value: "SafeHandle" }
       - { type: "output_contains", value: "Project Forge" }
-      - { type: "output_not_contains", value: "Project GameSkin" }
+      - { type: "output_contains", value: "Project GameSkin" }
       - { type: "output_not_contains", value: "rockstar" }
       - { type: "output_not_contains", value: "50%" }
     rubric:
-      - "Keeps only projects with visible relevance to the equipment-software target and omits the unrelated portfolio item."
+      - "Covers every supported project, giving Project Atlas and Project Forge more space while describing Project GameSkin briefly and accurately."
       - "Makes role fit and outcomes legible to a recruiter while preserving enough implementation proof for a technical reader."
       - "Surfaces a supported technical signature such as stabilizing integration boundaries or converting defects into regression proof without inventing personality traits or metrics."
-      - "Uses a deliberate two-page information budget for the experienced technical target without padding weak evidence."
+      - "Treats two pages as a recommendation and uses more space if complete, readable coverage needs it."
     timeout: 360
 
   - name: "Keep truthful ongoing evidence and reject an unsupported metric"

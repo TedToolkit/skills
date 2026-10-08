@@ -4,9 +4,10 @@
 
 A good resume is:
 
-- **Targeted:** it makes fit for one role family clear instead of cataloguing an entire life.
+- **Targeted:** it makes fit for one role family clear while covering the candidate's supported
+  professional capabilities and projects.
 - **Specific:** it shows ownership, action, constraints, scale, and results instead of self-ratings.
-- **Selective:** it gives space according to relevance and evidence strength, not chronology alone.
+- **Weighted:** it gives more space to target-relevant evidence while preserving meaningful breadth.
 - **Scannable:** the first third communicates role, level, domain, and differentiating evidence.
 - **Consistent:** dates, titles, terminology, tense, punctuation, and link style agree throughout.
 - **Layered:** a recruiter can find fit quickly while a technical reader can verify depth from the
@@ -35,13 +36,13 @@ Use this default order and change it only when another order better supports the
 2. Professional summary: two to four lines connecting domain, level, strengths, and proof.
 3. Core skills grouped by capability, with the most relevant group first.
 4. Professional experience in reverse chronology.
-5. Selected projects when they add evidence beyond employment.
-6. Open-source work, patents, publications, awards, or certifications when material.
+5. Projects beyond employment, including independent and open-source work.
+6. Patents, publications, awards, or certifications when supported.
 7. Education, normally concise after professional experience.
 
-Remove empty, generic, outdated, duplicated, or target-irrelevant sections. An academic CV may use
-a different order and length, but only when the user explicitly requests a CV rather than a
-professional resume.
+Remove empty, generic, unsupported, or duplicated material. Keep supported capabilities
+and projects even when the target role does not explicitly request them; use concise placement for
+less relevant material. An academic CV may use a different order and length when requested.
 
 ## Professional summary contract
 
@@ -72,8 +73,8 @@ seniority, tenure, ownership, or results.
 
 ## Core skills and practical breadth
 
-The core-skills section should reveal both target fit and the candidate's broader usable ability.
-Organize supported skills in decreasing hiring relevance:
+The core-skills section should cover all supported capabilities while revealing both
+target fit and the candidate's broader usable ability. Organize them in decreasing hiring relevance:
 
 1. **Primary capabilities:** the main stack, domain, and engineering abilities central to the target
    and the candidate's professional identity.
@@ -85,10 +86,10 @@ Organize supported skills in decreasing hiring relevance:
    architecture, root-cause diagnosis, refactoring, testing, delivery, field support, mentoring, or
    cross-team technical coordination.
 
-A skill does not have to appear in the job posting to earn space. Retain it when evidence shows
-substantial hands-on use and it strengthens target fit, practical range, or a distinctive technical
-identity with plausible future value. Show the capability without claiming an unevidenced future
-need at the employer. Connect important technologies to their application scope; for example, native interop, desktop
+A skill does not have to appear in the job posting to earn space. Cover every supported
+ability, giving less relevant ones concise treatment while preserving the kind and depth of work
+performed. Show the capability without claiming an unevidenced future need at the employer. Connect
+important technologies to their application scope; for example, native interop, desktop
 delivery, data processing, device integration, build tooling, or production support. Describe
 personal abilities as observable work the candidate can perform, not adjectives such as “strong,”
 “excellent,” or “expert.”
@@ -96,8 +97,8 @@ personal abilities as observable work the candidate can perform, not adjectives 
 Do not imply the same depth for every item. Prefer capabilities backed by delivery, repeated use,
 problem solving, or a substantial project. Clearly subordinate bounded working familiarity when it
 is useful, and omit technologies that were only encountered or cannot be connected to supported
-practice. Keep enough breadth to represent the person truthfully, but remove trivial, obsolete, or
-repetitive items that dilute the main capability.
+practice. Group related abilities to keep the full range readable; remove unsupported or repeated
+claims that dilute the main capability.
 
 ## Evidence-led bullets
 
@@ -177,14 +178,15 @@ target-industry term merely because the functions appear analogous; that would f
 target-domain experience. The final wording should let a target-industry reader see both what the
 candidate actually did and why the capability transfers.
 
-## Project relevance gate
+## Project coverage and emphasis
 
-For a targeted resume, every retained project must visibly support a material job need or prove a
-distinctive, substantial strength with credible transferability or future usefulness. Current
-requirements should lead, but they do not exhaust the candidate's value. Remove or compress a
-technically impressive project when its contribution or value is unclear to the reader.
+For a targeted resume, cover every supported project. Current requirements determine
+which projects lead and receive more detail; they do not determine whether a supported project is
+included. Show the distinct capability, contribution, and result of less relevant projects
+concisely. Related projects may share a heading if each remains identifiable. Remove only
+unsupported or genuinely repeated claims.
 
-Across retained projects, cover the target's highest-priority themes without repeating the same
+Across covered projects, cover the target's highest-priority themes without repeating the same
 proof. A useful portfolio often assigns each project a primary role, such as desktop delivery,
 device or native integration, concurrency, system design, test/reliability, or domain algorithms.
 
@@ -220,28 +222,28 @@ Use a `####` project heading when several projects belong to one `###` employer-
 `###` heading for a standalone project. Keep role-wide achievements outside individual projects and
 label them clearly so they are not mistaken for an unstructured project bullet.
 
-## Length and selection
+## Length and coverage
 
-- Use the shortest length that preserves clear target fit, meaningful practical breadth,
-  distinctive strengths, and strong evidence; tenure and seniority do not determine page count.
-- Use one page when the hiring case remains specific and readable after weak or repeated material is
-  removed.
-- Use two pages only when the second page adds distinct experience, applied capabilities,
-  exceptional strengths, or credentials that could affect the hiring decision.
-- Academic, research, publication, or regulated CVs may run longer only by explicit choice.
+- Treat two pages as a recommendation, not a hard limit; tenure and seniority do not determine page
+  count.
+- Use one page when every supported capability and project remains clear and readable.
+- Use two pages when that is enough for complete, readable coverage.
+- Use three or more pages when the candidate's supported capabilities and projects require them.
 
-Shorten by removing weak and repeated evidence before compressing strong evidence into vague prose.
+Shorten by removing unsupported and repeated claims before compressing strong evidence into vague
+prose. Do not omit supported capabilities or projects merely to meet a page target.
 Do not repeat the same achievement in the summary, employment, project, and achievement sections.
 
-When two pages are justified, budget them deliberately:
+When using multiple pages, budget them deliberately:
 
 - **Page one:** identity, target, evidence-led summary, core requirements, and the strongest recent
   experience or project proof.
-- **Page two:** remaining target-relevant projects, technical signature evidence, selected
-  open-source/achievements, and concise education or credentials.
+- **Later pages:** remaining projects and capabilities, technical signature evidence, open-source
+  work and achievements, and education or credentials, with a clear order and consistent scanning
+  structure.
 
-Do not let page two become a catch-all portfolio appendix. Do not pad to two pages when the evidence
-fits one.
+Do not let later pages become an unstructured portfolio appendix. Do not pad to two pages when the
+evidence fits one.
 
 ## Markdown style
 

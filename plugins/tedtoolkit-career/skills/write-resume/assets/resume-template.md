@@ -18,6 +18,10 @@ source-industry terminology.]
 
 ## Core Skills
 
+[Cover every supported capability. Put those most relevant to the target first and give them more
+detail; group other abilities concisely without dropping them solely because the posting does not
+request them.]
+
 - **Primary capabilities:** [Main stack, domain, and engineering abilities central to the target and
   the candidate's professional identity]
 - **Applied systems and integration:** [Languages, frameworks, platforms, tools, device/native/data
@@ -48,6 +52,10 @@ source-industry terminology.]
 - [Personal ownership and why the work mattered.]
 - [Technical depth that supports a role requirement or demonstrates a substantial personal strength.]
 - [Supported outcome or current state, with collaboration boundaries preserved.]
+
+[Continue with every other supported project. Give target-relevant projects more detail and use
+compact, identifiable entries for the others. Add pages when complete coverage needs the space;
+two pages is a recommendation, not a limit.]
 
 #### [Optional architecture, refactoring, or delivery initiative]
 

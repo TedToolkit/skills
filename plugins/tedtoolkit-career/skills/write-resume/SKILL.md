@@ -10,7 +10,8 @@ description: >-
 
 # Write Resume
 
-Create a concise resume whose target fit is clear and whose claims are defensible. Read
+Create a resume that covers the candidate's supported capabilities and projects, makes target fit
+clear, and keeps every claim defensible. Read
 [career-integrity.md](../../references/career-integrity.md) and
 [resume-standard.md](references/resume-standard.md). When a workspace or target dossier is supplied,
 also read [career-profile-schema.md](../../references/career-profile-schema.md) and
@@ -34,12 +35,11 @@ After that gate, identify seniority, audience, locale, language, and desired det
 context. For a technical role, plan explicitly for both the recruiter or hiring-manager scan and the
 technical reader's evidence check.
 
-Choose the page budget from evidence density and hiring value after selection, not from years of
-experience alone. Use the shortest version that preserves the candidate's meaningful fit, practical
-breadth, distinctive strengths, and strongest proof. One or two pages are both normal; use a
-second page when it adds distinct proof of current fit or a substantial transferable strength.
-Never pad weak evidence to reach a page count or compress strong
-evidence into vague claims merely to force one page.
+Choose the page budget from the amount of supported material needed for complete coverage, not from
+years of experience alone. Two pages is a recommendation, not a limit: use one page when everything
+fits clearly, or more than two when supported capabilities and projects need the space. Never pad
+weak evidence to reach a page count or compress or omit supported evidence merely to fit a page
+target.
 
 Ask one focused question only when the answer would materially change positioning or make the
 requested copy unsafe to produce under the shared integrity rules. Route career-history recording
@@ -70,30 +70,31 @@ name is externally meaningful or the technical reader genuinely needs it to vali
 
 ## Evaluate project evidence
 
-Apply the shared project-and-outcome claim rules. Rank retained projects by target relevance,
-evidence strength, and the distinctiveness of the capability they prove. Retain a project when it
-supports a material target need or demonstrates a substantial personal strength with credible
-transferability or future value, even if the current role does not ask for it. Make its value clear
-without claiming an unevidenced future employer need. Merge, compress, or remove projects whose
-only merit is general technical interest.
+Apply the shared project-and-outcome claim rules. Inventory every supported project and
+capability before deciding order and emphasis. Cover them all in the resume, including strengths the
+current role does not request. Give target-relevant work more prominence and detail; describe other
+work concisely while preserving its distinct contribution and value. Related projects may share a
+heading, but each must remain identifiable. Remove unsupported or genuinely repeated claims,
+without claiming an unevidenced future employer need.
 
-Require each retained project to carry at least one supported outcome, delivered capability, reuse
-signal, verified defect removal, release or migration state, test/acceptance result, or bounded
-current state. Ask about a missing outcome only when it would materially affect selection;
-otherwise recommend omission or compression in the strategy. A quantified metric is preferable
-when supplied, but it is not a license to invent one.
+For each covered project, use the strongest supported outcome, delivered capability, reuse signal,
+verified defect removal, release or migration state, test/acceptance result, or bounded current
+state. If only the contribution is known, describe that scope precisely without implying delivery
+or impact. Ask about a missing outcome only when it would materially change the description. A
+quantified metric is preferable when supplied, but it is not a license to invent one.
 
 ## Plan or present the strategy
 
 Before writing the complete resume, build this strategy:
 
 1. target positioning and audience;
-2. section order, page budget, and whether one or two pages are justified;
-3. requirement-to-project mapping, plus exceptional capabilities worth showing beyond the
-   current requirements and the evidence that earns their space;
+2. section order and a page budget that allows complete supported coverage, whether one, two, or
+   more pages;
+3. requirement-to-project mapping and a coverage map for every supported capability
+   and project, including those beyond the current requirements;
 4. recruiter-scan message and technical-reader proof;
 5. evidence-backed technical signature or working style to surface;
-6. content to remove, merge, or de-emphasize;
+6. content to merge or de-emphasize, and unsupported or repeated claims to remove;
 7. outcome gaps, material fact gaps, or contradictions; and
 8. one sample rewrite when tone is subjective.
 
@@ -105,19 +106,21 @@ never authorizes a claim that fails the shared integrity rules.
 
 ## Write
 
-Make the strongest relevant evidence visible in the first third. Prefer reverse chronology and
-retain only sections that improve the hiring decision.
+Make the strongest relevant evidence visible in the first third. Prefer reverse chronology. Tailor
+the wording, emphasis, order, and space allocated to each item so a recruiter can quickly find the
+evidence they seek. Tailoring does not remove supported capabilities or projects because the role
+does not mention them.
 
 - Keep the summary to two to four evidence-led lines. Lead with one clear professional identity,
   then cover the supported relevant experience span, principal direction, core stack and where it
   has been applied, the candidate's strongest capability, current or most important role and scope,
   and one or two highest-value outcomes. Rank these facts around what is most distinctive for the
   target or candidate instead of giving every skill equal weight or turning the summary into a keyword list.
-- Build a layered core-skills section: lead with target-critical capabilities, then include supported
-  hands-on abilities and adjacent technologies. Give evidence-backed distinctive or exceptional
-  capabilities space even when the current posting does not request them, when they show depth,
-  transferable judgment, or plausible future usefulness. Group skills by application or
-  capability instead of presenting an undifferentiated inventory.
+- Build a layered core-skills section that covers every supported capability: lead with
+  target-critical abilities, then include other hands-on abilities and adjacent technologies. Give
+  evidence-backed distinctive or exceptional capabilities space even when the current posting does
+  not request them. Group skills by application or capability and vary detail by target relevance
+  instead of presenting an undifferentiated inventory.
 - Express personal capabilities through demonstrated engineering practice—such as diagnosis,
   design, integration, delivery, or technical ownership—not unsupported traits or self-ratings.
 - Write bullets as action plus object or constraint plus outcome, deliverable, or current state.
@@ -138,9 +141,9 @@ retain only sections that improve the hiring decision.
   exceptional capabilities or recurring engineering patterns such as root-cause repair,
   contract-first design, difficult integration boundaries, or reusable tooling. Express personality through demonstrated choices and working style, not
   unsupported adjectives, hobbies, slogans, or self-ratings.
-- Give every retained project a visible reason for inclusion: current target fit or a distinctive,
-  transferable strength. Require at least one outcome or current-state proof. Prefer fewer projects
-  with stronger proof over a broad portfolio inventory.
+- Cover every supported project. State its distinct capability or contribution and the strongest
+  supported outcome or current state when known. Give target-relevant projects fuller evidence; use compact
+  descriptions for other projects rather than dropping them solely for lower target relevance.
 - Use repeated **Responsibilities and implementation** / **Outcome or current state** labels only
   when they make several named projects easier to scan; compact achievement bullets are also valid.
 - Remove filler, self-praise, repetition, and detail that belongs in an interview.
@@ -171,19 +174,18 @@ Return a single-column Markdown resume with one `#` name heading, compact contac
 columns, images, icons, emoji, badges, progress bars, raw HTML, or decorative separators. Do not
 create PDF or DOCX in this skill.
 
-Use one page when target fit, practical breadth, distinctive strengths, and proof remain clear
-without over-compression. Use two pages when a second page contributes distinct experience,
-applied capabilities, exceptional strengths, or credentials that could change the hiring decision.
-Do not infer the
-page count from tenure or seniority alone. Longer output requires an explicit academic, publication,
-portfolio, or jurisdiction-specific need.
+Use two pages as a recommended starting point, not a hard limit. Use one page when all supported
+capabilities and projects remain clear without over-compression; use three or more when
+complete, readable coverage needs the space. Do not infer the page count from tenure or seniority
+alone.
 
 ## Verify and deliver
 
 Check every final claim against the shared integrity ledger, then verify links, tense, language,
-target terminology, duplication, and unsupported skills. Confirm that every retained project maps
-to a material target need or demonstrates a distinctive transferable strength, and that every
-project has outcome/current-state evidence, the first third works
+target terminology, duplication, and unsupported skills. Cross-check the resume against the evidence
+inventory to confirm that every supported capability and project is covered, with
+target-relevant items receiving greater prominence and detail. Confirm that project results and
+current states are supported where stated, the first third works
 for a recruiter scan, and the technical detail is sufficient without becoming implementation
 transcript. Also confirm that no bullet requires familiarity with a private repository, internal
 class hierarchy, commit history, or source-industry vocabulary to understand its problem, action,
