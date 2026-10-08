@@ -263,6 +263,9 @@ combine it with closely related content or add only an essential demonstration, 
 explanation; do not pad it. Count the resulting lessons by chapter and for the whole course. A brief
 overview may introduce an idea early, but schedule its full mechanism after the concepts needed to
 understand it. Separate estimated video time from exercises the learner completes afterward.
+Check each outline's duration against the full planned teaching work, including explanation,
+demonstration, inspection, and useful pauses. Resolve a mismatch in the course plan before approving
+the outline; do not assume script writing will compress the lesson into its allotted time.
 
 ### Plan the `00.xx` course opening
 

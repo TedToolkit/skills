@@ -24,7 +24,9 @@ each range in `HH:MM:SS.mmm --> HH:MM:SS.mmm` form. Keep the ranges ordered and 
 make their paragraph IDs and cues cover every approved spoken paragraph. Use the
 speaker's pauses, emphasis, and delivery to split or combine provisional shots, while preserving the
 approved teaching purpose and visual evidence. Confirm that on-screen text and source material remain
-readable for their real durations. If the generated narration exceeds an agreed episode limit, identify a
+readable for their real durations. If the generated narration exceeds the outline's estimated
+duration, report the actual duration without splitting or shortening a clear explanation solely to
+match that estimate. If the user set a hard final-video limit, surface the conflict and identify a
 coherent split point or script revision rather than compressing instructional visuals or speeding up
 speech.
 Also check whether the actual delivery leaves time to inspect essential code, labels, and state

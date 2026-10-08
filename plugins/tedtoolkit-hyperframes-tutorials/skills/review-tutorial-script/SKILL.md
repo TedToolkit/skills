@@ -292,11 +292,14 @@ Read the script aloud when possible; otherwise simulate a natural technical spea
 demonstration pauses. The estimate is provisional until generated audio exists. Flag sentences that
 are hard to say in one pass, paragraphs with more than one main job, transitions that sound like
 headings, inventory-like lists, and explanations that become clear only after rereading. Also flag
-lessons likely outside the agreed duration, rushed explanations, repeated filler, monotonous
+rushed explanations, repeated filler, monotonous
 templates, strained jokes, or allusions that obscure the point. Check whether humor clarifies the
 mechanism, whether the same idea is explained twice, and whether transitions pose the next problem
 rather than repeat a fixed formula. Respect the stated audience and course voice; do not impose
 humor when the course did not request it or when a serious failure path calls for a plain explanation.
+Report a substantial estimated overrun for planning, but do not treat it alone as a script defect
+or require cutting approved outline content. Judge whether the explanation earns its time and teaches every
+approved beat clearly.
 Audit paragraph continuity, not only sentence quality. Privately summarize each paragraph's single
 job and verify that the following paragraph answers, advances, tests, or usefully reframes it. Flag
 two passages that independently establish the same context, conflict, or conclusion even when their

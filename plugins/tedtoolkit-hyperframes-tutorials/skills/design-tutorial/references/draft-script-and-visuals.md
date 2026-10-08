@@ -260,13 +260,15 @@ Confirm that the post-lesson question can be answered from what the lesson actua
 requiring unannounced knowledge. Do not force a joke into every paragraph or lesson; a precise
 example or a brief wry observation can carry the requested voice without slowing the explanation.
 
-Estimate whether the spoken text and demonstration fit the episode's time budget. Base the estimate
-on the script's actual language and density, state the counted unit and assumed natural speaking
-rate, and add explicit allowance for demonstrations, predictions, and useful silence. Report a
+Estimate the likely duration of the spoken text and demonstration against the episode's planned
+time. Base the estimate on the script's actual language and density, state the counted unit and
+assumed natural speaking rate, and add explicit allowance for demonstrations, predictions, and useful silence. Report a
 defensible range with those assumptions rather than a falsely precise single duration. If the range
-does not fit, split the teaching outcome into two lessons or propose a narrower scope; do not
-accelerate speech or remove an essential explanation merely to hit the limit. Treat every estimate
-as provisional until Fish Audio generates the narration audio.
+exceeds the outline's planned duration, report the difference as a planning observation and keep the
+approved teaching beats clear and complete. An estimate alone is not a reason to split the lesson,
+narrow its scope, accelerate speech, or remove an essential explanation. Revise the outline only when
+the teaching outcome or reasoning path itself needs to change. Treat every estimate as provisional
+until Fish Audio generates the narration audio.
 
 Preserve exact commands, labels, and results when correctness depends on them. Do not generate
 narration before the reviewed script receives explicit human approval.

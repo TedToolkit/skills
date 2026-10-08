@@ -91,8 +91,15 @@ read the [long-form spoken lesson guide](../../references/long-form-lesson-scrip
 Keep spoken lines, paragraph IDs, shot specifications, timestamps, and animation directions for
 `design-tutorial`.
 
+At this outline stage, make the teaching sequence fit the lesson's specified duration. Estimate the
+time needed for explanation, demonstration, learner inspection, and useful pauses; do not count only
+the number of bullets. If the essential beats cannot be taught clearly within that duration, revise
+the outline or surface a needed course-level split or duration change before seeking outline approval.
+Do not defer an already visible time-design conflict to script writing.
+
 Before handoff, check internally that the opening, main explanation, conclusion, and post-lesson
-question serve the same promise; each beat has its needed prerequisite and evidence. Revise a gap
+question serve the same promise; each beat has its needed prerequisite and evidence, and the planned
+teaching fits the specified duration. Revise a gap
 instead of adding a long rationale to the outline. `design-tutorial` reads this approved list
 together with the course brief and sources, then expands it into the script and storyboard. Wording,
 visual treatment, and supporting examples may change during scripting while the promise and
