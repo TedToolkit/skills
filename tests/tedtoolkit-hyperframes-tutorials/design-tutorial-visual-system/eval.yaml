@@ -1,0 +1,26 @@
+config:
+  max_parallel_scenarios: 1
+  max_parallel_runs: 1
+
+scenarios:
+  - name: "Recommend a series visual direction without changing course plans"
+    prompt: >-
+      Use $design-tutorial-visual-system to advise on a visual system for a three-course Mandarin
+      tutorial series about balcony gardening. This is a read-only design review in this conversation;
+      do not create or change files. The courses teach assessment and setup, diagnosis and recovery,
+      then climate-specific adaptations. Existing videos use real plant footage, measured light and
+      moisture readings, and occasional conceptual diagrams. The first two courses have different
+      accent colors and subtitle styles, but no written shared style contract. Recommend what should stay recognizable
+      across courses, what may vary, and how to distinguish observed results from predictions.
+      Explain which project artifacts would own those decisions if the owner later requests them.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "command", run: "test -z \"$(find . -mindepth 1 -maxdepth 1 -type f -print -quit)\"" }
+    rubric:
+      - "The response proposes a coherent shared visual grammar grounded in the supplied footage, measurements, diagrams, and three different course subjects."
+      - "It distinguishes cross-course invariants from purposeful course variation without imposing one layout or effect on every lesson."
+      - "It gives observed footage and measured results recognizable provenance and labels conceptual or predicted visuals so they cannot be mistaken for verified evidence."
+      - "It treats subtitle appearance, contrast across footage and diagrams, and safe placement as shared visual rules while leaving subtitle text and timing with each lesson."
+      - "It identifies a series visual contract and shared assets as the owners of reusable rules, with course video-style documents for exceptions and storyboards for lesson shots."
+      - "It does not restructure the curriculum, invent approval state, create files, or claim that it inspected actual videos."
+    timeout: 240

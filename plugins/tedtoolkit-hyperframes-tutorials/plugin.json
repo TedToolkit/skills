@@ -1,6 +1,6 @@
 {
   "name": "tedtoolkit-hyperframes-tutorials",
-  "version": "0.4.2",
-  "description": "Plan tutorial series and courses, review each lesson's narrative outline, then script, narrate, storyboard, produce, cover, validate, and package animated HyperFrames tutorials.",
+  "version": "0.5.0",
+  "description": "Plan tutorial series and courses, design their shared visual system, then review lesson outlines, script, narrate, storyboard, produce, cover, validate, and package animated HyperFrames tutorials.",
   "skills": ["./skills/"]
 }

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design Tutorial Visual System"
+  short_description: "Unify the visual identity of a tutorial series"
+  default_prompt: "Use $design-tutorial-visual-system to design a reusable visual system for this tutorial series."

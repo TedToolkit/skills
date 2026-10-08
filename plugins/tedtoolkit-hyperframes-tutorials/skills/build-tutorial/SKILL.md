@@ -47,6 +47,45 @@ artifact before final rendering.
 Use the pre-audio `storyboard-preview.html` as the reviewed visual direction when it exists. Adapt
 framing and motion to the final audio and viewing size; a visual refinement that preserves the
 approved spoken meaning does not require regenerating `narration.wav`.
+Track the final storyboard's stable `Shot S01` identifiers through the editable composition. For a
+new file-based lesson, put one static `data-shot-id` on each rendered HTML scene root so the
+recorder can compare it with the final storyboard. For a standalone lesson using other composition
+tooling, keep an equivalent inspectable scene-to-shot mapping. Reuse the preview's shared components and
+assets where they still represent the approved evidence. If production needs a materially different
+visual explanation, return it to `design-tutorial` for a revised storyboard and preview before the
+formal render.
+Inspect the reusable CSS/HTML assets linked from `video-style.md` and identify how their type roles,
+surface depth, semantic labels, and safe areas map into the editable composition. Reuse the assets
+directly when the renderer supports them; otherwise implement equivalent visual rules and compare
+captured frames with the approved preview. Do not treat a stylesheet import or a successful render
+as evidence that the intended font was resolved or that the foreground stayed prominent.
+For HTML/CSS compositions, load the shared entry directly and keep lesson content and scene logic in
+HTML; do not recreate its aesthetic rules in a project-local stylesheet. An isolated renderer may
+use a generated copy of the shared tree with corrected relative paths. Check CSS imports and font
+URLs after copying, and wait for fonts to load before any frame is captured.
+For a new file-based production, keep the editable HTML composition and its source files under
+`lessons/<lesson-id>/composition/`. Write `lessons/<lesson-id>/video-source.json` with only an
+`htmlEntries` array listing every HTML file relative to the lesson directory, such as
+`["composition/index.html"]`. Each entry must load only stylesheets declared in `video-style.md`;
+put course variations in the declared shared asset directory, give each shot one static
+`data-shot-id` root matching the final storyboard order, and keep local CSS files out of the
+composition. Keep generated renders and dependency caches outside this source tree. The recorder
+fingerprints all files in the tree at `video-verified`, so later edits require rechecking the video.
+Keep static HTML resource links inside the source tree, in declared `sourcePaths` evidence, or in
+shared assets linked from `video-style.md`; do not rely on network resources. Review dynamic paths
+constructed by JavaScript because the static validator cannot discover every runtime dependency.
+Keep inline `<style>` blocks, `style` attributes, and script style writes to scene placement and
+motion properties. Move typography, palette, surface, border, shadow, and font decisions into the
+declared shared CSS. The validator rejects direct local aesthetic overrides and stylesheet injection;
+review runtime-generated styles against the visual contract in the encoded video.
+Confirm that the declared source is the one actually used to render; the validator cannot infer
+that relationship from the MP4 pixels alone.
+Before video verification, inspect the editable HTML/CSS sources that actually render the lesson.
+Confirm each rendered HTML entry loads the declared shared stylesheet or its generated render copy,
+and that recurring typography, palette, surfaces, and component rules have not been redefined in
+lesson-local CSS or inline styles. Reuse shared semantic markup or render components where a pattern
+truly recurs; keep scene-specific structure and motion local. Compare the encoded frames with the
+approved preview because source reuse alone does not establish visual consistency.
 Read the video production contract from `course.config.json`; for an older course that omits it,
 use the defaults in the course state contract. Configure the composition and formal render to the
 declared aspect ratio, pixel dimensions, integer fps, container, codecs, pixel format, and audio
@@ -176,13 +215,15 @@ is missing, align the audio and return the corrected ranges to `design-tutorial`
 timing during production. Never estimate cue boundaries by spreading a paragraph evenly over its duration.
 Treat `captions.txt` as the canonical editable subtitle source. Generate any encoder-specific ASS
 or SRT in a temporary location from those same cues; do not maintain a second subtitle source.
-Burn these verified cues into the formal `video.mp4`. Prefer restrained, plain text with a slim
-contrasting outline and no opaque background box. On a light course canvas, try medium-gray text
-with a subtle light outline before using a heavy black edge; keep the font and placement consistent
-across shots. Check contrast and single-line fit at the actual embedded-player size over
-representative frames, and keep subtitles clear of code, results, and controls. Keep `captions.txt` beside
-the video for search, transcript navigation, and later revision. Check the encoded pixels at several
-cue starts, endings, and line breaks; the mere presence of a subtitle stream does not prove that
+Burn these verified cues into the formal `video.mp4`. Derive the encoder's font, weight, scale,
+placement, and contrast treatment from the applicable series visual system and course
+`video-style.md`; use an explicit course exception only when the series contract allows it. Match
+the approved subtitle specimens in the shared HTML example and shot previews. CSS in an HTML
+preview does not automatically style subtitles burned by the video encoder. Check contrast and
+single-line fit at the actual embedded-player size over representative light, dark, footage, code,
+and result frames as applicable, and keep subtitles clear of essential evidence and controls.
+Keep `captions.txt` beside the video for search, transcript navigation, and later revision. Check
+the encoded pixels at several cue starts, endings, and line breaks; the mere presence of a subtitle stream does not prove that
 text was burned into the picture.
 
 Implement the selected course visual mode explicitly and deterministically. Use the course style,
@@ -192,6 +233,20 @@ presentation, and recurring chrome consistent across lessons while allowing evid
 needs to change a scene's treatment. Preserve the authentic appearance of screenshots,
 applications, and other source evidence when recoloring would misrepresent it; keep the surrounding
 labels and contrast readable.
+Before declaring the formal render verified, compare encoded representative frames with the
+reviewed preview and course HTML example at the intended player size. Check the actual rendered
+glyphs and weights, the project's intended visual hierarchy, evidence
+labels, and caption/control clearance. Correct a composition-only mismatch here; return a changed
+shared rule to its owning style asset and recheck affected lessons. Follow an explicit project
+production contract when it differs from a generic rendering default, and surface the conflict.
+For each new file-based lesson, write `video-shot-review.md` after inspecting the encoded video.
+Use one table row per storyboard shot in order: `Shot S01`, a checked encoded-frame time in
+`HH:MM:SS.mmm` form, `Pass` after any correction, and the observed match or justified
+difference from the preview. Include the important moving interval and settled state in that review,
+not only a contact-sheet thumbnail. The recorder checks complete shot coverage and fingerprints
+this author-only record; it cannot determine whether the human judgment was correct. Do not record
+`video-verified` while any shot has an unresolved material mismatch. Keep the review record out of
+the learner release.
 
 ## Verify and deliver
 

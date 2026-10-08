@@ -19,6 +19,11 @@ delta.
 ├── <course-outline>.md
 ├── practice.md
 ├── video-style.md
+├── visual/                         # standalone course; series courses share ../series-standards/
+│   ├── <shared style entry>.css
+│   ├── <reusable markup example>.html
+│   └── fonts/
+│       └── <font files and source/license records>
 ├── cover-system.md
 ├── course-cover.png
 ├── tools/
@@ -34,6 +39,9 @@ delta.
 │       ├── captions.txt
 │       ├── storyboard.md
 │       ├── storyboard-preview.html
+│       ├── video-shot-review.md
+│       ├── video-source.json
+│       ├── composition/            # editable, source-only HTML video project
 │       ├── cover.png
 │       ├── sources/
 │       │   └── <lesson evidence files>
@@ -61,7 +69,8 @@ status source; lesson cards must not maintain another status field.
 | Artifact | Owner and meaning |
 | --- | --- |
 | `course-state.json` | `plan-tutorial-course` initializes identity and dependencies; stage owners advance it only through the packaged recorders. |
-| `video-style.md` | `design-tutorial` drafts or maintains the course video identity, inherited series rules, lesson variation, motion vocabulary, and visual references; `plan-tutorial-series` may seed selected course style drafts when a series visual request explicitly includes them. Review the contract with the first script and shot preview. See the [video style contract](tutorial-video-style.md). |
+| `video-style.md` | `design-tutorial` drafts or maintains the course video identity, inherited series rules, lesson variation, motion vocabulary, and visual references; `design-tutorial-visual-system` may seed selected course style drafts when a series visual request explicitly includes them. Review the contract with the first script and shot preview. See the [video style contract](tutorial-video-style.md). |
+| Shared visual CSS, HTML examples, and font assets | `design-tutorial-visual-system` owns the series bundle in `series-standards/` when visual work is requested; `design-tutorial` reuses it or maintains `visual/` for a standalone course. Each course's `video-style.md` links the same shared assets; lesson HTML loads the CSS directly. See the [video style contract](tutorial-video-style.md). |
 | `cover-system.md` | `create-tutorial-cover`; reproducible course-wide layout, typography, palette, safe-area, and variation rules. |
 | `course-cover.png` | `create-tutorial-cover`; course-level visual anchor used by the learner page and cover family. |
 | `lesson-outline.md` | `outline-tutorial-lesson`; the separately reviewable narrative spine approved before scripting. |
@@ -72,7 +81,9 @@ status source; lesson cards must not maintain another status field.
 | `captions.txt` | `build-tutorial`; separately edited, timed learner-facing subtitle text used for the burned-in video subtitles. |
 | `storyboard.md` | `design-tutorial`; the provisional visual plan created with the script and later finalized against verified generated narration. |
 | `storyboard-preview.html` | `design-tutorial`; locally viewable, untimed frames for every provisional shot, reviewed with the script before narration. |
-| Editable composition | `build-tutorial`; implementation of the final storyboard. |
+| `video-shot-review.md` | `build-tutorial`; author-only mapping from every stable shot ID to an inspected encoded frame, moving interval, and preview comparison for new productions. |
+| `video-source.json` and `composition/` | `build-tutorial`; list every editable composition HTML entry in `htmlEntries` (for example `composition/index.html`), load only declared shared CSS, preserve static shot IDs, and keep editable source files here for fingerprinting. |
+| Editable composition | `build-tutorial`; implementation of the final storyboard, registered in the source manifest for new productions. |
 | `video.mp4` | `build-tutorial`; formal render and the packaging workflow's publication signal. |
 | `cover.png` | `create-tutorial-cover`; verified lesson-level poster created from the current formal video and lesson identity. |
 
@@ -112,16 +123,18 @@ from the spoken wording in `narration.txt` while preserving meaning. Each blank-
 contains a stable cue ID, a timestamp range, and one line of display text. Burn its cues into
 `video.mp4`. The course player may parse the same text for transcript navigation. Generate temporary
 encoder formats from these cues only when needed; do not maintain parallel subtitle sources.
+Subtitle appearance comes from the applicable series visual system and course `video-style.md`;
+the preview and encoder implement that visual contract without duplicating cue text or timing.
 
 ## Production gates
 
 The normal order is:
 
 1. `lesson-outline.md` is drafted, reviewed, and explicitly approved.
-2. Existing series visual system when present, course `video-style.md`, then `lesson.md`, `narration.txt`, provisional `storyboard.md`, visual `storyboard-preview.html`, and all referenced demonstration sources. Review the script and shot images against the applicable style rules together before approval; inspect a short motion specimen when movement itself defines the style or teaching relationship.
+2. Existing series visual system when present, course `video-style.md` and its reusable CSS/HTML assets, then `lesson.md`, `narration.txt`, provisional `storyboard.md`, visual `storyboard-preview.html`, and all referenced demonstration sources. Review the script and shot images against the applicable style rules together before approval; inspect a short motion specimen when movement itself defines the style or teaching relationship.
 3. Fish Audio generates `narration.wav` from the approved text and saved voice model ID.
 4. `design-tutorial` listens to that audio and writes verified shot ranges into `storyboard.md`.
-5. Editable HyperFrames composition, formal `video.mp4`, and aligned `captions.txt`.
+5. Editable HyperFrames composition, formal `video.mp4`, aligned `captions.txt`, and per-shot encoded review for new productions.
 6. Course `cover-system.md` and `course-cover.png`, plus a verified lesson `cover.png` based on the current formal video.
 7. Generated offline learner release and ZIP.
 

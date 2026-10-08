@@ -81,7 +81,7 @@ Use these ordered states:
 | `script-approved` | The reviewed script and visual shot preview have explicit human approval for Fish narration generation. | `generate-tutorial-narration` |
 | `narration-final` | Fish Audio generated `narration.wav` from the approved script. | `design-tutorial` aligns and finalizes the storyboard |
 | `storyboard-final` | The final storyboard contains verified shot ranges aligned to the generated narration. | `build-tutorial` |
-| `video-verified` | The formal video with burned-in subtitles and its caption text passed production verification. | `create-tutorial-cover` |
+| `video-verified` | The formal video with burned-in subtitles and its caption text passed production verification; new productions include a per-shot encoded review. | `create-tutorial-cover` |
 | `cover-verified` | The lesson cover represents the current verified video and passed full-size, thumbnail, and course-family review. | `package-tutorial-course` |
 
 `video-verified` is a production status. It does not claim that representative learners were
@@ -118,7 +118,7 @@ Required cumulative lesson artifacts are:
 | `script-approved` | No new file; a fresh script snapshot plus `approvalSource` |
 | `narration-final` | `narration.wav` |
 | `storyboard-final` | `storyboard.md` |
-| `video-verified` | `video.mp4`, `captions.txt` |
+| `video-verified` | `video.mp4`, `captions.txt`, `video-shot-review.md` for records with `shotMappingRequired`, and `video-source.json` plus its editable composition for records with `videoSourceRequired` |
 | `cover-verified` | Root `cover-system.md`, root `course-cover.png`, and lesson `cover.png` |
 
 The Fish helper also keeps `narration.wav.fish-request.json` beside the WAV as local request
@@ -137,15 +137,52 @@ work; a material rewrite should establish an outline and obtain approval first.
 the script before `script-draft` is recorded; the stage recorder enforces both for new or re-recorded
 drafts. Review every shot's frame composition before human script approval. The storyboard enters
 the cumulative fingerprints only at `storyboard-final`, because it gains real time ranges after
-`narration-final`. The preview is an untimed author review artifact and is not fingerprinted; a
-visual-only refinement need not invalidate approved spoken audio. A change to `narration.txt` still
+`narration-final`. The preview is an untimed author review artifact and is not fingerprinted in the
+script or narration records; a visual-only refinement need not invalidate approved spoken audio.
+A change to `narration.txt` still
 invalidates approval and downstream records. Legacy stage records remain readable and can acquire
 these preview artifacts when the lesson next enters design work.
-New or re-recorded `script-draft` records also require a non-empty root `video-style.md` and record
-its canonical path. Validation checks that the contract and its local Markdown reference files remain
-available, without
-fingerprinting its wording: a visual-only style revision calls for a cross-lesson review, not an
-automatic narration or video rebuild. Older stage records without this marker remain valid.
+For new or re-recorded drafts, label each storyboard shot `Shot S01`, `Shot S02`, and so on. The
+preview gives each shot exactly one same-ordered `data-shot-id` container, with its initial, key,
+and settled visual states inside. The recorder sets `shotMappingRequired` at `script-draft` and
+rejects missing, duplicate, or reordered IDs. After audio alignment, every timed shot retains an
+ID; a split, merge, or reordered shot requires the preview to be updated. Older records without
+this marker remain valid. ID equality establishes coverage and traceability, not visual fidelity.
+New or re-recorded `script-draft` records also require a non-empty root `video-style.md`, a linked
+shared CSS file, and a linked shared HTML example under `series-standards/` for a series or `visual/`
+for a standalone course. Series membership in an ancestor `course-series.json` permits relative
+visual references inside that series root. The HTML example and lesson preview must load a
+common declared stylesheet through a static `<link rel="stylesheet" href="...">`. The recorder adds
+`videoStylePath`, `visualAssetsRequired`, and `videoSourceRequired` markers; validation then checks the contract, linked files,
+and stylesheet handoff remain available. Older records without these markers remain valid.
+The visual contract, its linked local assets, the lesson preview, and the recursive CSS imports/URL
+dependencies enter a separate `visualDependencies` fingerprint record at `video-verified`. This
+includes font binaries and declared license records. A visual change therefore makes the
+video and later claims stale while preserving script approval, narration, and final audio timing.
+Inspect affected previews and rendered intervals, rebuild when pixels must change, and only then
+re-record verification; never refresh fingerprints just to hide a changed visual dependency. This
+structural check cannot certify font resolution, foreground hierarchy, or visual similarity.
+At `video-verified`, a lesson with `shotMappingRequired` also needs an author-only
+`video-shot-review.md`. Record one table row per storyboard shot, in order, with its ID, an inspected
+encoded-frame timestamp, `Pass` after any correction, and a note about the preview match or justified change.
+The file is fingerprinted through later stages. The validator checks coverage and row shape; the
+producer still checks the actual frames, motion intervals, evidence, and reading time. Do not
+advance a shot with an unresolved material mismatch or put this record in the learner release.
+For a lesson with `videoSourceRequired`, `video-verified` also requires
+`lessons/<lesson-id>/video-source.json` containing only a non-empty `htmlEntries` array, with
+lesson-relative paths such as `composition/index.html`. Keep the actual editable HTML project under
+`lessons/<lesson-id>/composition/`; list every HTML file there, load only CSS declared in
+`video-style.md`, give every rendered shot a static `data-shot-id` root matching the final
+storyboard order, and keep local CSS out of the composition. The recorder fingerprints the manifest
+and every file in that source tree as `sourceDependencies`. Later source edits make `video-verified`
+and downstream claims stale. Generated render outputs and dependency caches stay outside this tree.
+Static HTML resource references outside the tree must point to `sourcePaths` evidence or visual
+assets linked from `video-style.md`; the validator rejects undeclared and network resources.
+The source checker also rejects inline visual CSS and direct script writes to shared aesthetic
+properties while allowing local placement and motion parameters. Runtime-generated visual states
+still need the encoded-frame review.
+This check proves an inspectable source dependency, not that encoded pixels came from it; compare
+the final video with the reviewed preview and inspect the encoded subtitles and motion.
 
 Run [`validate-course.mjs`](../scripts/validate-course.mjs) before resuming work and before packaging.
 It recomputes fingerprints rather than trusting declared status. A changed or missing file makes its
@@ -157,6 +194,10 @@ a changed final narration returns to `script-approved`; a changed storyboard ret
 cover-only contract returns to `video-verified`. A changed cover system or course cover also returns
 lesson covers to `video-verified` for continuity review. Legacy courses without explicit production objects
 continue to use the documented defaults and do not invalidate an existing pre-contract video record.
+For a packaged release, validation reads the ZIP entries and compares every decompressed file with
+the verified release directory. A single wrapper folder is allowed; missing, extra, changed,
+unsafe, encrypted, or unsupported-compression entries invalidate the release. The ZIP fingerprint
+alone is not a substitute for this content check.
 In addition to file presence and fingerprints, every lesson at `script-draft` or later must have
 exactly one non-empty `## Post-lesson question` section in `lesson.md`. A packaged lesson must
 also expose that question as visible static page text in a container identified by

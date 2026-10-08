@@ -6,6 +6,8 @@ import {
   LESSON_STAGES,
   checkFingerprintRecord,
   fingerprintFiles,
+  fingerprintVisualAssets,
+  fingerprintVideoSources,
   lessonContractSha256,
   loadCourseDocuments,
   productionContractSha256,
@@ -16,6 +18,8 @@ import {
   validateLessonArtifacts,
   validateStateShape,
   videoStyleIssues,
+  visualAssetIssues,
+  shotMappingIssues,
   writeJsonAtomic,
 } from "./course-state-lib.mjs";
 
@@ -95,7 +99,17 @@ try {
   if (targetStage === "script-draft") {
     const styleProblems = videoStyleIssues(root);
     if (styleProblems.length) throw new Error(styleProblems.join("; "));
+    const visualProblems = visualAssetIssues(root, lesson.id);
+    if (visualProblems.length) throw new Error(visualProblems.join("; "));
+    const mappingProblems = shotMappingIssues(root, lesson.id);
+    if (mappingProblems.length) throw new Error(mappingProblems.join("; "));
   }
+  const visualDependencies = targetStage === "video-verified" &&
+    lesson.records["script-draft"]?.visualAssetsRequired === true
+    ? await fingerprintVisualAssets(root, lesson.id) : undefined;
+  const sourceDependencies = targetStage === "video-verified" &&
+    lesson.records["script-draft"]?.videoSourceRequired === true
+    ? await fingerprintVideoSources(root, lesson.id, lesson.sourcePaths || []) : undefined;
   const fingerprints = await fingerprintFiles(root, requiredLessonFiles(lesson, targetStage));
 
   for (const stage of Object.keys(lesson.records)) {
@@ -110,6 +124,11 @@ try {
     ...(["outline-approved", "script-approved"].includes(targetStage)
       ? { approvalSource: approvalSource.trim() } : {}),
     ...(targetStage === "script-draft" ? { videoStylePath: "video-style.md" } : {}),
+    ...(targetStage === "script-draft" ? { visualAssetsRequired: true } : {}),
+    ...(targetStage === "script-draft" ? { shotMappingRequired: true } : {}),
+    ...(targetStage === "script-draft" ? { videoSourceRequired: true } : {}),
+    ...(visualDependencies ? { visualDependencies } : {}),
+    ...(sourceDependencies ? { sourceDependencies } : {}),
     fingerprints,
   };
   lesson.status = targetStage;

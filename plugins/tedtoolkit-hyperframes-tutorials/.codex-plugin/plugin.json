@@ -1,7 +1,7 @@
 {
   "name": "tedtoolkit-hyperframes-tutorials",
-  "version": "0.4.2",
-  "description": "Plan tutorial series and courses, review each lesson's narrative outline, then script, narrate, storyboard, produce, cover, validate, and package animated HyperFrames tutorials.",
+  "version": "0.5.0",
+  "description": "Plan tutorial series and courses, design their shared visual system, then review lesson outlines, script, narrate, storyboard, produce, cover, validate, and package animated HyperFrames tutorials.",
   "author": {
     "name": "TedToolkit"
   },
@@ -9,12 +9,13 @@
   "interface": {
     "displayName": "TedToolkit HyperFrames Tutorials",
     "shortDescription": "Produce narrated animated tutorial courses",
-    "longDescription": "File-based workflows for planning multi-course tutorial series and individual courses, reviewing and approving a lesson narrative outline before scripting, resuming production from verified state, detecting stale artifacts, co-designing scripts and provisional storyboards, generating narration with Fish Audio from a saved voice model ID, finalizing storyboards against verified timing, producing HyperFrames videos and coherent course and lesson covers, and packaging verified offline learner releases.",
+    "longDescription": "File-based workflows for planning multi-course tutorial series and individual courses, designing a reusable series visual system, reviewing and approving a lesson narrative outline before scripting, resuming production from verified state, detecting stale artifacts, co-designing scripts and provisional storyboards, generating narration with Fish Audio from a saved voice model ID, finalizing storyboards against verified timing, producing HyperFrames videos and coherent course and lesson covers, and packaging verified offline learner releases.",
     "developerName": "TedToolkit",
     "category": "Productivity",
     "capabilities": ["Interactive", "Write"],
     "defaultPrompt": [
       "Plan a coherent multi-course tutorial series with explicit graduation, extension, and prerequisite routes.",
+      "Design a shared visual system with reusable styles and clear course variation for a tutorial series.",
       "Plan a coherent animated tutorial course with a required Core route, optional Extension routes, a 00.00 course guide, and stable lesson workspaces.",
       "Outline one lesson's narrative spine for review before writing its spoken script.",
       "Resume a partially produced course from its verified state and detect stale artifacts.",

@@ -37,6 +37,12 @@ motion specimens when present. If a course already
 has produced lessons but lacks the contract, use its verified videos to establish continuity when
 the next visual draft or redesign is authorized; do not treat the missing file alone as a reason to
 invalidate legacy stages.
+Route a shared identity change across courses to `design-tutorial-visual-system`; keep one lesson's
+visual design with `design-tutorial` and its verified video checks with `build-tutorial`.
+When the course next enters lesson design, require the reusable CSS/HTML assets from the video
+style contract and a preview that loads the shared CSS. For records with visual asset fingerprints,
+a style-only change returns to preview/render inspection and video verification; it does not require
+new spoken approval or narration unless the spoken content changed.
 Do not infer freshness from filenames or modification times. If an older course has no state file,
 inventory it and propose a migration boundary; do not silently manufacture approvals or claim that
 existing files passed their missing gates.

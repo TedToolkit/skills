@@ -286,6 +286,12 @@ For a course lesson, compare representative frames with `video-style.md`, its re
 visual system when present, and prior lesson
 references at the intended viewing size. Identify a deliberate difference that helps this lesson in
 the storyboard or style contract; resolve an accidental mismatch before requesting script approval.
+Load the reusable course CSS in `storyboard-preview.html` and start from the course HTML examples
+where their elements fit the teaching task. Keep lesson-specific diagrams and compositions free to
+vary. If a required shared type, reading-surface, or evidence treatment cannot be expressed by the
+current asset, revise its owning course or series asset and inspect affected lesson previews instead
+of copying a near-match into this lesson alone. Check computed fonts, card focus, and the first
+reading target in rendered frames, including the intended embedded-player size.
 If a course-wide style revision is needed, update the contract and inspect earlier affected lessons.
 Do not revise approved narration or regenerate audio for a visual-only change.
 Before requesting script approval or generating narration, make the provisional storyboard visible
@@ -296,6 +302,13 @@ visual change. Use local or inline assets so the preview opens without a service
 draft, not a timed HyperFrames composition or a substitute for the final render. Do not invent audio
 durations. For a standalone lesson, provide an equivalently viewable shot sequence in the selected
 project. A short moving study may supplement frames when the motion itself needs review.
+Give each file-based shot one stable `Shot S01`, `Shot S02`, ... identifier in `storyboard.md` and
+one corresponding preview container with `data-shot-id="S01"`, `data-shot-id="S02"`, and so on, in
+the same order. Show multiple states inside that one container when a shot changes materially;
+do not repeat its shot ID on several containers. The recorder checks identifiers and order for
+new drafts. Preserve the identifiers through audio alignment and production. The preview is the
+reviewed visual contract for the shot's teaching object, evidence, text, and intended change;
+production may adjust timing and framing for actual audio without silently changing that meaning.
 Use HTML, CSS, SVG, and verified existing assets for the draft wherever they can communicate the
 shot. Generate a bitmap only when that specific shot needs imagery those sources cannot provide.
 Keep approved generated assets as local source files and reuse them in the video; change an asset
@@ -390,11 +403,14 @@ code-presentation medium. If none is recorded, select a mode from the audience, 
 existing brand or verified course footage, and intended viewing context; record the choice in
 `video-style.md` before the script-and-preview review. Authentic screenshots, applications, and
 other evidence may retain their native appearance inside that course treatment.
-Check the planned composition at the intended embedded-player size with captions and native player
-controls in view. Preserve enough area and time for the code, state, or comparison that teaches the
-shot; do not let persistent chrome or an animated ornament become the strongest visual cue. Reserve
-space so optional captions do not cover essential code, labels, or results, and plan readable contrast
-against the actual background. The final check belongs to the rendered player.
+Check the planned composition at the intended embedded-player size with a representative subtitle
+specimen in the series or course visual treatment and native player controls in view. Preserve
+enough area and time for the code, state, or comparison that teaches the shot; do not let persistent
+chrome or an animated ornament become the strongest visual cue. Reserve
+space so subtitles do not cover essential code, labels, or results, and plan readable contrast
+against the actual background. The specimen demonstrates appearance and safe area; final text and
+cue timing belong to `captions.txt` after audio verification. The final check belongs to the
+rendered player.
 
 Map every demonstration to visible evidence. Put short exact learner-facing text and illustrative
 snippets directly in `storyboard.md`. For runnable code, substantial output, diagrams, screenshots,

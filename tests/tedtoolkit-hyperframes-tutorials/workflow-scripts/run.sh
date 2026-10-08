@@ -12,6 +12,8 @@ trap 'rm -rf -- "$fixture"' EXIT
 
 narration="$fixture/narration-generate"
 mkdir -p "$narration"
+fake_fish_url=$(node -p 'require("node:url").pathToFileURL(process.argv[1]).href' "$narration/fake-fish.mjs")
+failing_fish_url=$(node -p 'require("node:url").pathToFileURL(process.argv[1]).href' "$narration/failing-fish.mjs")
 cat >"$narration/narration.txt" <<'EOF'
 先说今天的问题。我们现在开始。
 
@@ -82,28 +84,28 @@ EOF
 if node -e 'process.exit(process.allowedNodeEnvironmentFlags.has("--use-env-proxy") ? 0 : 1)'; then
     env -u NODE_USE_ENV_PROXY HTTPS_PROXY=http://127.0.0.1:9 \
         EXPECT_ENV_PROXY=1 FISH_API_KEY=fixture-key FISH_VOICE_ID=fixture-voice \
-        node --import "$narration/fake-fish.mjs" \
+        node --import "$fake_fish_url" \
         "$scripts/fish-tts.mjs" "$narration/narration.txt" "$narration/narration.wav" \
         --replace >"$narration/fish-generated.json"
 else
     FISH_API_KEY=fixture-key FISH_VOICE_ID=fixture-voice \
-        node --import "$narration/fake-fish.mjs" \
+        node --import "$fake_fish_url" \
         "$scripts/fish-tts.mjs" "$narration/narration.txt" "$narration/narration.wav" \
         --replace >"$narration/fish-generated.json"
 fi
 env -u HTTPS_PROXY -u https_proxy -u NODE_USE_ENV_PROXY \
     EXPECT_ENV_PROXY=0 FISH_API_KEY=fixture-key FISH_VOICE_ID=fixture-voice \
-    node --import "$narration/fake-fish.mjs" \
+    node --import "$fake_fish_url" \
     "$scripts/fish-tts.mjs" "$narration/narration.txt" "$narration/narration.wav" \
     --replace >"$narration/fish-no-proxy.json"
 NODE_USE_ENV_PROXY=0 HTTPS_PROXY=http://127.0.0.1:9 \
     EXPECT_ENV_PROXY=0 FISH_API_KEY=fixture-key FISH_VOICE_ID=fixture-voice \
-    node --import "$narration/fake-fish.mjs" \
+    node --import "$fake_fish_url" \
     "$scripts/fish-tts.mjs" "$narration/narration.txt" "$narration/narration.wav" \
     --replace >"$narration/fish-proxy-disabled.json"
 FISH_FETCH_MARKER="$narration/reuse-fetch-marker" \
     FISH_API_KEY=fixture-key FISH_VOICE_ID=fixture-voice \
-    node --import "$narration/fake-fish.mjs" \
+    node --import "$fake_fish_url" \
     "$scripts/fish-tts.mjs" "$narration/narration.txt" "$narration/narration.wav" \
     >"$narration/fish-reused.json"
 node -e 'if (require(process.argv[1]).reused !== true) process.exit(1)' "$narration/fish-reused.json"
@@ -119,18 +121,18 @@ cat >"$narration/failing-fish.mjs" <<'EOF'
 globalThis.fetch = async () => { throw new Error("connection lost after send"); };
 EOF
 uncertain_output=$(FISH_API_KEY=fixture-key FISH_VOICE_ID=fixture-voice \
-    node --import "$narration/failing-fish.mjs" \
+    node --import "$failing_fish_url" \
     "$scripts/fish-tts.mjs" "$narration/narration.txt" "$narration/uncertain.wav" 2>&1 || true)
 grep -Fq 'connection lost after send' <<<"$uncertain_output"
 test ! -e "$narration/uncertain.wav"
 blocked_retry_output=$(FISH_FETCH_MARKER="$narration/blocked-fetch-marker" \
     FISH_API_KEY=fixture-key FISH_VOICE_ID=fixture-voice \
-    node --import "$narration/fake-fish.mjs" \
+    node --import "$fake_fish_url" \
     "$scripts/fish-tts.mjs" "$narration/narration.txt" "$narration/uncertain.wav" 2>&1 || true)
 grep -Fq 'previous Fish request has no confirmed WAV' <<<"$blocked_retry_output"
 test ! -e "$narration/blocked-fetch-marker"
 FISH_API_KEY=fixture-key FISH_VOICE_ID=fixture-voice \
-    node --import "$narration/fake-fish.mjs" \
+    node --import "$fake_fish_url" \
     "$scripts/fish-tts.mjs" "$narration/narration.txt" "$narration/uncertain.wav" \
     --retry-uncertain >"$narration/fish-retried.json"
 node -e '
@@ -141,7 +143,7 @@ if (record.attempts.length!==2 || record.attempts[0].status!=="pending" ||
 mv "$narration/uncertain.wav" "$narration/uncertain.saved.wav"
 missing_completed_output=$(FISH_FETCH_MARKER="$narration/missing-fetch-marker" \
     FISH_API_KEY=fixture-key FISH_VOICE_ID=fixture-voice \
-    node --import "$narration/fake-fish.mjs" \
+    node --import "$fake_fish_url" \
     "$scripts/fish-tts.mjs" "$narration/narration.txt" "$narration/uncertain.wav" 2>&1 || true)
 grep -Fq 'same Fish request completed before, but its WAV is missing' <<<"$missing_completed_output"
 test ! -e "$narration/missing-fetch-marker"
@@ -332,17 +334,86 @@ grep -Fq 'lesson.md must contain at most one ## Visual descriptions section' <<<
 cp "$fixture/lesson.saved" "$course/lessons/lesson-01/lesson.md"
 missing_storyboard_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft 2>&1 || true)
 grep -Fq 'missing provisional storyboard: lessons/lesson-01/storyboard.md' <<<"$missing_storyboard_output"
-printf '# Provisional storyboard\n' >"$course/lessons/lesson-01/storyboard.md"
+cat >"$course/lessons/lesson-01/storyboard.md" <<'EOF'
+# Provisional storyboard
+
+| Shot S01 | P01 | Show the code before the result |
+| Shot S02 | P01 | Reveal the verified result |
+EOF
 missing_preview_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft 2>&1 || true)
 grep -Fq 'missing visual storyboard preview: lessons/lesson-01/storyboard-preview.html' <<<"$missing_preview_output"
-printf '<!doctype html><title>Shot 1</title><main><figure>Result panel</figure></main>\n' >"$course/lessons/lesson-01/storyboard-preview.html"
+printf '<!doctype html><title>Shot preview</title><main><section data-shot-id="S01"><figure>Code panel</figure></section><section data-shot-id="S02"><figure>Result panel</figure></section></main>\n' >"$course/lessons/lesson-01/storyboard-preview.html"
 missing_style_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft 2>&1 || true)
 grep -Fq 'course video style is missing or empty: video-style.md' <<<"$missing_style_output"
 printf '# Course video style\n\nUse a clear shared visual grammar with lesson-specific scenes.\n\n[Reference frame](style-reference.svg)\n' >"$course/video-style.md"
 missing_style_reference_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft 2>&1 || true)
 grep -Fq 'course video style reference is missing: style-reference.svg' <<<"$missing_style_reference_output"
 printf '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 9"/>\n' >"$course/style-reference.svg"
+missing_visual_assets_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft 2>&1 || true)
+grep -Fq 'course video style must link a reusable local CSS file' <<<"$missing_visual_assets_output"
+grep -Fq 'course video style must link a reusable local HTML example' <<<"$missing_visual_assets_output"
+mkdir -p "$course/visual"
+printf '\n[Course CSS](visual/style.css)\n[HTML example](visual/examples.html)\n' >>"$course/video-style.md"
+printf ':root { --course-paper: white; }\n' >"$course/visual/style.css"
+printf '<!doctype html><title>Course visual examples</title>\n' >"$course/visual/examples.html"
+missing_example_css_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft 2>&1 || true)
+grep -Fq 'course HTML example must load the declared reusable CSS' <<<"$missing_example_css_output"
+printf '<link href="style.css" rel="stylesheet">\n' >>"$course/visual/examples.html"
+missing_preview_css_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft 2>&1 || true)
+grep -Fq 'storyboard preview must load the declared reusable CSS' <<<"$missing_preview_css_output"
+printf '<!-- <link rel="stylesheet" href="../../visual/style.css"> -->\n' >>"$course/lessons/lesson-01/storyboard-preview.html"
+commented_css_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft 2>&1 || true)
+grep -Fq 'storyboard preview must load the declared reusable CSS' <<<"$commented_css_output"
+printf '<link rel=stylesheet href=../../visual/style.css>\n' >>"$course/lessons/lesson-01/storyboard-preview.html"
+cp "$course/lessons/lesson-01/storyboard-preview.html" "$fixture/preview.shared-css.saved"
+printf '<link rel="stylesheet" href="../../rogue.css">\n' >>"$course/lessons/lesson-01/storyboard-preview.html"
+extra_preview_css_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft 2>&1 || true)
+grep -Fq 'storyboard preview must load only declared reusable CSS' <<<"$extra_preview_css_output"
+mv "$fixture/preview.shared-css.saved" "$course/lessons/lesson-01/storyboard-preview.html"
+mkdir -p "$course/visual/fonts"
+printf '@import "type.css";\n' >>"$course/visual/style.css"
+printf '@font-face { font-family: Fixture; src: url("fonts/fixture.ttf"); }\n' >"$course/visual/type.css"
+missing_font_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft 2>&1 || true)
+grep -Fq 'visual CSS dependency is missing or empty: visual/fonts/fixture.ttf' <<<"$missing_font_output"
+printf 'fixture font bytes\n' >"$course/visual/fonts/fixture.ttf"
+printf 'fixture font license\n' >"$course/visual/fonts/LICENSE.txt"
+printf '\n[Font license](visual/fonts/LICENSE.txt)\n' >>"$course/video-style.md"
+cp "$course/lessons/lesson-01/storyboard-preview.html" "$fixture/shot-preview.saved"
+sed -i 's/data-shot-id="S02"/data-shot-id="S03"/' "$course/lessons/lesson-01/storyboard-preview.html"
+shot_mismatch_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft 2>&1 || true)
+grep -Fq 'shot identifiers or order differ between storyboard.md and storyboard-preview.html' <<<"$shot_mismatch_output"
+cp "$fixture/shot-preview.saved" "$course/lessons/lesson-01/storyboard-preview.html"
 node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-draft >/dev/null
+node -e '
+const state=require(process.argv[1]);
+if (state.lessons[0].records["script-draft"].shotMappingRequired !== true) process.exit(1);
+' "$course/course-state.json"
+legacy_visual="$fixture/legacy-visual"
+cp -R "$course" "$legacy_visual"
+node -e '
+const fs=require("fs"), p=process.argv[1];
+const state=JSON.parse(fs.readFileSync(p,"utf8"));
+delete state.lessons[0].records["script-draft"].visualAssetsRequired;
+fs.writeFileSync(p,JSON.stringify(state));
+' "$legacy_visual/course-state.json"
+printf '# Legacy course style\n' >"$legacy_visual/video-style.md"
+node "$scripts/validate-course.mjs" "$legacy_visual" >/dev/null
+shared_series="$fixture/shared-visual-series"
+mkdir -p "$shared_series"
+cp -R "$course" "$shared_series/course"
+mv "$shared_series/course/visual" "$shared_series/series-standards"
+printf '{"courses":[{"path":"course"}]}\n' >"$shared_series/course-series.json"
+node -e '
+const fs=require("fs"), root=process.argv[1];
+const style=root+"/course/video-style.md", preview=root+"/course/lessons/lesson-01/storyboard-preview.html";
+fs.writeFileSync(style,fs.readFileSync(style,"utf8").replaceAll("(visual/","(../series-standards/"));
+fs.writeFileSync(preview,fs.readFileSync(preview,"utf8").replaceAll("../../visual/","../../../series-standards/"));
+' "$shared_series"
+node "$scripts/record-course-stage.mjs" "$shared_series/course" lesson-01 script-draft >/dev/null
+node "$scripts/validate-course.mjs" "$shared_series/course" >/dev/null
+printf '@import "../../outside.css";\n' >>"$shared_series/series-standards/style.css"
+escaped_shared_css_output=$(node "$scripts/record-course-stage.mjs" "$shared_series/course" lesson-01 script-draft 2>&1 || true)
+grep -Fq 'path escapes the course root' <<<"$escaped_shared_css_output"
 if node "$scripts/record-course-stage.mjs" "$course" lesson-01 script-approved >/dev/null 2>&1; then
     echo "script approval advanced without explicit approval evidence" >&2
     exit 1
@@ -430,6 +501,38 @@ node "$scripts/record-course-stage.mjs" "$course" lesson-01 storyboard-final >/d
 printf 'video\n' >"$course/lessons/lesson-01/video.mp4"
 cat >"$course/lessons/lesson-01/captions.txt" <<'EOF'
 P01-01
+00:00:00.000 --> 00:00:01.000
+Hello world.
+EOF
+missing_shot_review_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 video-verified 2>&1 || true)
+grep -Fq 'missing required artifact: lessons/lesson-01/video-shot-review.md' <<<"$missing_shot_review_output"
+cat >"$course/lessons/lesson-01/video-shot-review.md" <<'EOF'
+# Encoded shot review
+
+| Shot | Encoded frame checked | Result | Notes |
+| --- | --- | --- | --- |
+| Shot S01 | 00:00:00.250 | Pass | Code is readable; motion interval checked. |
+| Shot S02 | 00:00:00.750 | Pass | Result is readable; transition checked. |
+EOF
+missing_video_source_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 video-verified 2>&1 || true)
+grep -Fq 'missing required artifact: lessons/lesson-01/video-source.json' <<<"$missing_video_source_output"
+mkdir -p "$course/lessons/lesson-01/composition"
+printf '{"htmlEntries":["composition/index.html"]}\n' >"$course/lessons/lesson-01/video-source.json"
+printf '<main data-shot-id="S01">Hello</main><main data-shot-id="S02">world</main>\n' >"$course/lessons/lesson-01/composition/index.html"
+missing_composition_css_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 video-verified 2>&1 || true)
+grep -Fq 'editable composition HTML must load only declared shared CSS' <<<"$missing_composition_css_output"
+printf '<link rel="stylesheet" href="../../../visual/style.css">\n' >>"$course/lessons/lesson-01/composition/index.html"
+cp "$course/lessons/lesson-01/video-shot-review.md" "$fixture/video-shot-review.saved"
+sed -i 's/Shot S02/Shot S03/' "$course/lessons/lesson-01/video-shot-review.md"
+wrong_shot_review_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 video-verified 2>&1 || true)
+grep -Fq 'video-shot-review.md must cover storyboard shots in order' <<<"$wrong_shot_review_output"
+cp "$fixture/video-shot-review.saved" "$course/lessons/lesson-01/video-shot-review.md"
+sed -i 's/| Pass | Result/| Fail | Result/' "$course/lessons/lesson-01/video-shot-review.md"
+failed_shot_review_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 video-verified 2>&1 || true)
+grep -Fq 'video-shot-review.md needs an encoded-frame time, Pass result, and observation' <<<"$failed_shot_review_output"
+cp "$fixture/video-shot-review.saved" "$course/lessons/lesson-01/video-shot-review.md"
+cat >"$course/lessons/lesson-01/captions.txt" <<'EOF'
+P01-01
 00:00:00.000 --> 00:00:00.800
 Hello
 
@@ -466,6 +569,37 @@ world.
 EOF
 node "$scripts/record-course-stage.mjs" "$course" lesson-01 video-verified >/dev/null
 node "$scripts/validate-course.mjs" "$course" >/dev/null
+cp "$course/lessons/lesson-01/composition/index.html" "$fixture/composition.saved.html"
+printf '<!-- changed editable video source -->\n' >>"$course/lessons/lesson-01/composition/index.html"
+changed_source_output=$(node "$scripts/validate-course.mjs" "$course" 2>&1 || true)
+grep -Fq 'editable composition source changed: lessons/lesson-01/composition/index.html' <<<"$changed_source_output"
+mv "$fixture/composition.saved.html" "$course/lessons/lesson-01/composition/index.html"
+node "$scripts/validate-course.mjs" "$course" >/dev/null
+cp "$course/lessons/lesson-01/video-shot-review.md" "$fixture/video-shot-review.verified"
+printf '\nChanged review observation.\n' >>"$course/lessons/lesson-01/video-shot-review.md"
+stale_shot_review_output=$(node "$scripts/validate-course.mjs" "$course" 2>&1 || true)
+grep -Fq 'video-verified: fingerprint changed: lessons/lesson-01/video-shot-review.md' <<<"$stale_shot_review_output"
+cp "$fixture/video-shot-review.verified" "$course/lessons/lesson-01/video-shot-review.md"
+node "$scripts/validate-course.mjs" "$course" >/dev/null
+cp "$course/visual/style.css" "$fixture/style.saved.css"
+printf ':root { --course-paper: ivory; }\n' >>"$course/visual/style.css"
+node "$scripts/validate-course.mjs" "$course" --json >"$fixture/changed-visual.json" || true
+node -e '
+const report=require(process.argv[1]), lesson=report.lessons.find(x=>x.id==="lesson-01");
+if (report.valid || lesson.staleStage!=="video-verified" || lesson.effectiveStatus!=="storyboard-final") process.exit(1);
+if (!report.errors.some(x=>x.message.includes("visual dependency changed: visual/style.css"))) process.exit(2);
+' "$fixture/changed-visual.json"
+mv "$fixture/style.saved.css" "$course/visual/style.css"
+cp "$course/visual/fonts/fixture.ttf" "$fixture/font.saved.ttf"
+printf 'changed font bytes\n' >>"$course/visual/fonts/fixture.ttf"
+node "$scripts/validate-course.mjs" "$course" --json >"$fixture/changed-font.json" || true
+node -e '
+const report=require(process.argv[1]), lesson=report.lessons.find(x=>x.id==="lesson-01");
+if (lesson.staleStage!=="video-verified" || lesson.effectiveStatus!=="storyboard-final") process.exit(1);
+if (!report.errors.some(x=>x.message.includes("visual dependency changed: visual/fonts/fixture.ttf"))) process.exit(2);
+' "$fixture/changed-font.json"
+mv "$fixture/font.saved.ttf" "$course/visual/fonts/fixture.ttf"
+node "$scripts/validate-course.mjs" "$course" >/dev/null
 
 if node "$scripts/record-course-stage.mjs" "$course" lesson-01 cover-verified >/dev/null 2>&1; then
     echo "cover-verified advanced without the course cover system and lesson cover" >&2
@@ -498,13 +632,28 @@ cat >"$course/release/index.html" <<'EOF'
   <p>The result panel shows Hello followed by world.</p>
 </section>
 EOF
-printf 'zip fixture\n' >"$course/workflow-fixture.zip"
-if node "$scripts/record-course-release.mjs" "$course" release workflow-fixture.zip >/dev/null 2>&1; then
+node "$repo_root/tests/tedtoolkit-hyperframes-tutorials/zip-fixture.mjs" "$course/release" "$course/workflow-fixture.zip"
+missing_release_captions_output=$(node "$scripts/record-course-release.mjs" "$course" release workflow-fixture.zip 2>&1 || true)
+if ! grep -Fq 'release does not contain current lessons/lesson-01/captions.txt' <<<"$missing_release_captions_output"; then
     echo "release without its referenced caption text was incorrectly accepted" >&2
     exit 1
 fi
 cp "$course/lessons/lesson-01/captions.txt" "$course/release/lessons/lesson-01/captions.txt"
+node "$repo_root/tests/tedtoolkit-hyperframes-tutorials/zip-fixture.mjs" "$course/release" "$course/workflow-fixture.zip"
 node "$scripts/record-course-release.mjs" "$course" release workflow-fixture.zip >/dev/null
+node "$scripts/validate-course.mjs" "$course" >/dev/null
+cp "$course/workflow-fixture.zip" "$fixture/release-archive.saved.zip"
+mv "$course/release/practice.md" "$fixture/practice.saved"
+node "$repo_root/tests/tedtoolkit-hyperframes-tutorials/zip-fixture.mjs" "$course/release" "$course/workflow-fixture.zip"
+mv "$fixture/practice.saved" "$course/release/practice.md"
+archive_mismatch_output=$(node "$scripts/validate-course.mjs" "$course" 2>&1 || true)
+grep -Fq 'RELEASE_ARCHIVE: ZIP differs from release directory: missing practice.md' <<<"$archive_mismatch_output"
+mv "$fixture/release-archive.saved.zip" "$course/workflow-fixture.zip"
+node "$scripts/validate-course.mjs" "$course" >/dev/null
+cp "$course/lessons/lesson-01/video-source.json" "$course/release/lessons/lesson-01/video-source.json"
+authoring_source_output=$(node "$scripts/validate-course.mjs" "$course" 2>&1 || true)
+grep -Fq 'RELEASE_AUTHORING_SOURCE: release contains authoring artifact: lessons/lesson-01/video-source.json' <<<"$authoring_source_output"
+mv "$course/release/lessons/lesson-01/video-source.json" "$fixture/release-video-source.saved"
 node "$scripts/validate-course.mjs" "$course" >/dev/null
 
 cp "$course/release/index.html" "$fixture/index.saved"

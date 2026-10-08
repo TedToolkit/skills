@@ -4,9 +4,9 @@ description: >-
   Plan or restructure a multi-course animated tutorial series. Use when the user needs to decide
   how many courses the series should contain, merge or split courses, define graduation and
   extension routes, assign outcomes and topic ownership across courses, design prerequisite courses
-  and valid learning routes, share cases and teaching rules, define a shared visual direction and
-  course-specific style variations, or maintain a series README and course-series.json. Do not use
-  for the chapter and lesson plan inside one course, a single lesson script, or video production.
+  and valid learning routes, share cases and teaching rules, or maintain a series README and
+  course-series.json. Do not use for the chapter and lesson plan inside one course, a single lesson
+  script, or video production.
 ---
 
 # Plan Tutorial Series
@@ -22,16 +22,10 @@ series artifacts. Resolve the packaged
 [`validate-series.mjs`](../../scripts/validate-series.mjs) relative to this `SKILL.md`; a missing
 linked resource is a stop condition.
 
-For a request only about series visual direction, inspect the series and course briefs, existing
-visual contracts, and representative media needed to understand the subjects; then apply the
-[tutorial video style contract](../../references/tutorial-video-style.md). Create or revise the
-authorized series visual file and its README link; include selected course `video-style.md` files
-and visual specimens only when the request includes those courses. `design-tutorial` later refines
-those course contracts against actual lesson previews. Do not run the curriculum restructuring
-workflow below or rewrite `course-series.json`, course briefs, or lessons. For a read-only visual
-review, report findings without writing. Check that local specimens open and that a moving specimen
-demonstrates any motion rule whose meaning cannot be judged from still frames; this is an authoring
-check, not a new course stage.
+For a request only about series visual direction, use `design-tutorial-visual-system`. When the
+request includes both curriculum and visual work, establish the course boundaries here and hand
+the visual work to that skill under the same authorized scope. Series planning alone does not
+authorize visual assets or course style files.
 
 ## Inspect before proposing changes
 
@@ -188,15 +182,9 @@ specializations, observable outcomes, course map and prerequisites, then teachin
 long production, visual, asset, or internal review contracts to linked series-level references when
 they would delay the learner from discovering what is required, optional, and unlocked next.
 
-When the request also asks for a shared visual direction, use the
-[tutorial video style contract](../../references/tutorial-video-style.md) to propose or revise one
-series-level visual system file linked from the README. Record only cross-course invariants, allowed
-variation, reusable element and motion rules, and representative specimens. Record each requested
-course's distinct treatment in its `video-style.md` and each lesson's shots in its storyboard. A
-curriculum-only planning request does not authorize visual specimens, course style files, or video
-production. An explicit request for the series visual system authorizes that draft file but does
-not change course plans or approval records; course style drafts require the request to include
-those courses.
+When the request also asks for a shared visual direction, pass the approved or drafted series
+boundary to `design-tutorial-visual-system`; that skill maintains the series README's visual-system
+link. Do not include visual rules in course briefs or duplicate them in the learner-facing README.
 
 When course READMEs already duplicate shared material, describe the deduplication mapping: which
 content becomes authoritative in the series README and which course-specific deltas remain local.

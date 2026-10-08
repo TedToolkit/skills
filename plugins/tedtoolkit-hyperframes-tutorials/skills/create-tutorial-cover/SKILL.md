@@ -103,6 +103,8 @@ Derive its shared identity from `video-style.md`, its linked series visual syste
 verified lesson frames when available. Adapt
 that identity for a thumbnail's different reading size and composition; do not make an unrelated
 cover style or force the video to imitate the cover layout.
+When the shared series identity needs a new rule, route that rule to
+`design-tutorial-visual-system`; keep this skill responsible for cover compositions and assets.
 Write `cover-system.md` before producing a cover family. Record only decisions that another cover
 can reproduce:
 

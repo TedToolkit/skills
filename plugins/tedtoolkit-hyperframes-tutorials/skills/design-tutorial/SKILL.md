@@ -21,15 +21,24 @@ a course outline.
 For a file-based course, follow the shared
 [tutorial workspace contract](../../references/tutorial-workspace-layout.md).
 Read the shared [video style contract](../../references/tutorial-video-style.md) when designing or
-revising lesson visuals. Read the linked series visual system when one exists. If the course has no
-`video-style.md`, draft it from its established choices, the series rules, and representative shot
-types before finishing the first visual preview. Record explicit exceptions rather than silently
-overriding a series rule. Review that draft with the script and preview; it does not create another
-approval stage. For a later lesson, inspect the contract and locally viewable reference frames or
-verified video before designing new frames. Where motion is part of the visual identity or the
+revising lesson visuals. Read the linked series visual system when one exists; use
+`design-tutorial-visual-system` when the shared identity itself needs to be created or revised.
+If the course has no `video-style.md`, draft it from its established choices, the series rules, and
+representative shot types before finishing the first visual preview. Record explicit exceptions
+rather than silently overriding a series rule. Review that draft with the script and preview; it
+does not create another approval stage. For a later lesson, inspect the contract and locally viewable
+reference frames or verified video before designing new frames. Where motion is part of the visual identity or the
 explanation, inspect or create a short moving specimen before committing to the full sequence;
 static frames alone cannot settle its rhythm or continuity. Carry forward the recognizable visual
 grammar while letting the subject determine the scene form.
+Before recording a new or revised file-based course script draft, resolve the shared
+CSS and HTML example required by that contract, link them from `video-style.md`, and make each shot
+preview load the declared CSS. Inspect the example and preview in the actual browser before seeking
+script approval; confirm the resolved fonts and the intended foreground hierarchy rather than
+trusting family names or CSS declarations alone.
+Reuse the series bundle in `series-standards/`, or maintain `visual/` for a standalone course.
+Generate HTML with shared semantic classes and shot-specific layout/motion; avoid new copies of the
+shared stylesheet or font declarations in lesson directories.
 Read the [course state contract](../../references/tutorial-course-state.md) and resolve the packaged
 [`validate-course.mjs`](../../scripts/validate-course.mjs) and
 [`record-course-stage.mjs`](../../scripts/record-course-stage.mjs) relative to this `SKILL.md` before

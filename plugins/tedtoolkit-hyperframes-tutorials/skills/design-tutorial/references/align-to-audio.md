@@ -29,6 +29,11 @@ duration, report the actual duration without splitting or shortening a clear exp
 match that estimate. If the user set a hard final-video limit, surface the conflict and identify a
 coherent split point or script revision rather than compressing instructional visuals or speeding up
 speech.
+Keep each surviving `Shot S01` identifier from the reviewed provisional storyboard. When real audio
+requires a shot split, merge, or reorder, update `storyboard-preview.html` to the resulting shot
+sequence and review the changed visual states before recording `storyboard-final`; do not reuse one
+identifier for a different teaching claim. The validator compares timed shot IDs with the preview.
+If that change alters the approved explanation or evidence, return to the script review gate.
 Also check whether the actual delivery leaves time to inspect essential code, labels, and state
 changes at the intended playback size. If the audio is shorter than estimated and compresses that
 reading or the learner's chance to predict, hold a useful state where possible; otherwise return the
@@ -54,6 +59,9 @@ audio range, every declared source exists, no critical visual contradicts the na
 overall pace follows `narration.wav`. The final storyboard must still specify paragraph IDs,
 narration cues, visual states, motion, exact on-screen text, source paths, and transitions. After it
 passes these checks, record `storyboard-final` with the packaged recorder and re-run the validator.
+Preserve the reviewed preview's shared visual rules while adapting shots to the final timing. Hand
+off `video-style.md`, its reusable CSS/HTML assets, and the current preview with the final storyboard
+so production can implement the same typography, foreground hierarchy, and evidence treatment.
 
 ## Deliver and hand off
 

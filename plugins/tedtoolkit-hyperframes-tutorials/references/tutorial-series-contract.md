@@ -10,6 +10,11 @@ use its own `course.config.json`, `course-state.json`, outline, lessons, and pro
 <series-root>/
 ├── README.md
 ├── course-series.json
+├── series-standards/              # created when shared visual work is requested
+│   ├── <shared style entry>.css
+│   ├── <reusable markup example>.html
+│   └── fonts/
+│       └── <font files and source/license records>
 ├── course-briefs/
 │   ├── <course-id>.md
 │   └── ...
@@ -26,12 +31,14 @@ root so the boundary can be reviewed before `plan-tutorial-course` creates detai
 
 ## Optional series visual system
 
-When the series needs a recognizable identity across course videos, maintain one linked visual
-system file at the series level. Its path is a project choice; `visual-system.md` or
+When the series needs a recognizable identity across course videos, use
+`design-tutorial-visual-system` to maintain one linked visual system file at the series level.
+Its path is a project choice; `visual-system.md` or
 `series-standards/visual-system.md` are examples, not required filenames. Follow the shared
 [tutorial video style contract](tutorial-video-style.md) for scope, extensible elements, motion,
-specimens, and review. Link this authoring file from the series README without duplicating its
-rules there. Each course's `video-style.md` names the series file's relative path in prose and
+specimens, and review. Keep reusable CSS, HTML examples, and font files in `series-standards/` under
+that contract. Link this authoring file from the series README without duplicating its
+rules there. Each course's `video-style.md` links the series file and shared asset paths directly and
 records its own identity, variations, and explicit exceptions. Series planning alone does not
 require a visual system or
 authorize course-level previews or video production.

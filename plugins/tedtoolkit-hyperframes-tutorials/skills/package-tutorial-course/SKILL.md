@@ -52,6 +52,14 @@ Prefer the course-local `tools/package-course.mjs`; invoke it from the course ro
 `tools/build-course-player.mjs` first so the page reflects current outline, text, and video
 metadata, then collect learner-facing Markdown/plain text, referenced assets/examples, formal
 videos, caption text, `course-cover.png`, and lesson covers into a generated output directory and ZIP.
+Keep `video-shot-review.md` in the authoring workspace; it records production verification and is
+not a learner-facing course file. Keep `video-source.json` and the editable `composition/` source
+there as well; publish the verified `video.mp4`, not the authoring project.
+The release validator rejects `video-shot-review.md`, `video-source.json`, and `composition/`
+inside a packaged lesson.
+The recorded ZIP must contain the same files and bytes as the verified release directory, either
+at ZIP root or under one wrapper folder. Rebuild the ZIP after any release-directory change; a
+valid directory with a stale or extra-file archive cannot be published as current.
 If existing course-local scripts still require a VTT track or build a transcript from spoken text,
 update them to parse and package `captions.txt` before building the release. If a different course
 lacks these scripts, adapt or create project-local scripts for its real schema before packaging; do not assume that

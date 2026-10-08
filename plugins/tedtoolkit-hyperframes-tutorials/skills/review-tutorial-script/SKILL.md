@@ -27,6 +27,10 @@ when the storyboard's visual evidence or recurring screen elements need review. 
 When a lesson uses a prediction, comparison, or inspection hold, use the shared
 [intentional pause guide](../../references/intentional-pauses.md) to review its spoken cue and
 provisional visual plan.
+For a new file-based draft, check that every `Shot S01` identifier in `storyboard.md` has one
+same-ordered `data-shot-id` container in `storyboard-preview.html`. Inspect the initial, key-change,
+and settled states within that container against the script, evidence sources, and shared style;
+matching identifiers alone do not make a misleading or unreadable preview acceptable.
 
 ## Establish the review set
 
@@ -224,6 +228,11 @@ or motion rule that breaks continuity; allow a difference that serves the learni
 explained by the course or series contract. If the style depends on movement to convey identity or
 meaning, inspect its short motion specimen and check object continuity, attention target, and a
 stable state for reading. A still-only preview cannot establish timing quality before final audio.
+For a new or materially revised file-based course style, open the CSS/HTML assets linked from
+`video-style.md` and confirm the preview actually loads the declared CSS. Inspect rendered frames
+for font fallback, main versus supporting surface depth, and a clear first reading target; a valid
+link alone does not establish the intended appearance. Return a shared-rule defect to its owning
+course or series asset rather than correcting only one preview.
 Do not require identical layouts or a fixed visual effect count.
 Return missing or mismatched frames to `design-tutorial`; revise the script and visuals together if
 the fix changes a spoken cue. Treat the preview as provisional: final motion and reading time remain
