@@ -62,6 +62,10 @@ For visual structures that recur across courses, define small semantic markup pa
 render components when the composition tooling supports them. Show their use in the HTML example;
 keep shared styling in CSS and keep lesson content and shot-specific animation in the lesson. Avoid
 copying a full example page into every scene or forcing unrelated explanations through one template.
+For recurring roles, states, or routes, define meaningful non-color shape cues (such as outlines,
+edges, gaps, or connections); keep color from carrying meaning alone. Give the same role consistent
+proportions, spacing, and minimum size at player scale, while allowing content to grow. Put repeated
+geometry in shared CSS and its HTML example; do not impose one project's shape mapping on another.
 Link a few specimens that prove the rules, including a short moving specimen when motion is part of
 the identity or teaching meaning. Mark concepts and provisional previews as such; do not present
 them as verified lesson frames. Link the visual file from the series README without copying its
@@ -80,6 +84,9 @@ readability at the intended player size, evidence labels, and motion at normal s
 subtitle contrast and clearance over unlike scenes with native player controls visible. Compare
 representative situations from different courses when available. Confirm that course variation
 remains recognizable as one series and that no shared rule forces an inaccurate demonstration.
+Compare rendered instances of recurring shapes: differences should express a declared role or
+state, and the same role should stay consistent. Confirm that course previews load and visibly use
+the shared CSS; valid paths or class names alone prove neither.
 Check Markdown links, CSS imports, fonts, and relative asset paths. A structural validator cannot
 certify visual quality.
 

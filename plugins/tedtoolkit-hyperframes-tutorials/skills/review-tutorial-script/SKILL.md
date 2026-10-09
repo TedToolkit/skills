@@ -83,14 +83,10 @@ Apply a course-direction gate before prose quality can pass. For an ordinary les
 course-level outcome or chapter exit capability it advances and verify that its depth, example,
 learner assumptions, and conclusion serve that contribution. Check that a core lesson advances the
 required route, that an extension remains optional, and that neither silently changes the promised
-audience, progression level, prerequisites, or teaching premise. The required `00.00` course guide
-must frame the real audience, route, and achievable outcomes without promising material the core
-lessons do not deliver. Verify that the learner receives an accurate whole-course guide: what it
-teaches, who it is and is not for, prerequisites, Core completion and optional Extension gains,
-distinctive teaching features, and how the major content parts and routes fit together. Reject a
-guide that makes an optional Extension necessary for course completion or implies that every
-Extension must be watched to gain value from any one route. Accurate, engaging prose still fails
-review when its dominant teaching work points away from this declared course role.
+audience, progression level, prerequisites, or teaching premise. For `00.00`, verify the real
+audience, route, Core outcome, and optional gains; reject promises the Core cannot deliver or a
+guide that makes any Extension necessary for completion or for another route's value. Accurate,
+engaging prose still fails when its dominant teaching work misses the declared course role.
 
 When the script and curriculum artifacts disagree, classify the finding rather than choosing a side:
 identify whether the script drifted from a coherent course plan or whether the title, lesson outcome,
@@ -137,24 +133,23 @@ novice-facing procedure remains unstated. When a command skips a build or anothe
 check that the script says which prior state is reused, repeats the necessary update after an edit,
 and explains a stale result using that cause rather than a generic checklist.
 
-For `00.00`, also check that the coordinated narration and storyboard cover every major course part
-at guide depth and explain their relationships rather than merely reciting headings. It should center the subject and
-scope, audience fit, prerequisites, Core completion outcome, optional Extension gains, course
-characteristics, learning routes,
-and case model. Flag lesson-number recitals, ceremonial biography, marketing-only promises, a
-compressed first technical lesson, a solved later-lesson example, or named future-video promises.
-The post-lesson question should test the learner's grasp of the course scope, audience, gains,
-features, or route rather than confidence.
-
-When a lighter or game-like voice is requested, check that one concrete learner problem carries the
-guide from its starting point to the final capability. The major parts should feel like meaningful
-progress rather than a sequence of course headings. Flag repeated topic inventories even when each
-fact is accurate, jokes that interrupt the explanation, and game language that implies features the
-course does not provide. A listener should be able to retell the actual route without the metaphor.
-When the guide claims a distinctive learning method, check that the narration and provisional
-storyboard make it tangible without teaching a later lesson's rule. A brief nontechnical learner
-action and observable feedback can show the method; a list of method names alone does not show how
-the learner will use them.
+For `00.00`, check that narration and storyboard cover the whole course at guide depth: subject and
+scope, audience fit, prerequisites, Core and optional gains, teaching features, routes, and case
+relationships. Flag heading or lesson-number recitals, ceremonial biography, marketing-only
+promises, a compressed first technical lesson, a solved later example, or named future-video promises.
+The post-lesson question should test the actual scope, audience, gains, features, or route, not
+confidence.
+Can a first-time listener identify the subject, starting point, and achievable destination from the
+opening? An evocative image does not rescue an unspecified spoken promise. If the course has a
+sustained case or progressive task, each major part should change a recognizable problem,
+capability, or result; otherwise check its actual organizing logic without demanding one artifact.
+Optional routes need plain-language reasons to choose them and stated added gains, not just names or
+terms. The ending should offer attainable Core evidence or a nearby transfer check, not repeat the
+opening's capabilities.
+For a light or game-like voice, reject repeated inventories, distracting jokes, and invented game
+features; the literal route must remain clear without the metaphor. If the guide claims a teaching
+method, require a small learner action and feedback, with visible before/after states when something
+changes. Method names and flow labels alone do not demonstrate it; do not teach a later rule here.
 
 Check the opening independently. The spoken script should begin with a concrete consequence,
 question, useful result, or action, with enough context to understand it. Flag greetings, welcomes,
@@ -217,85 +212,51 @@ timestamps or precise durations before final audio exists. If a paragraph is vis
 repetitive, or not supportable with available evidence, correct the spoken and visual drafts together
 before narration generation.
 
-Open the visual shot preview and inspect every shot in sequence at the intended viewing size before
-recommending script approval. Check that its framing, visual weight, exact labels, source evidence,
-and before/after states match the current narration and written storyboard. A text description alone
-does not settle whether the lesson's shots are repetitive, crowded, misleading, or visually stiff.
-For a course, compare representative frames side by side with the shared style references and an
-adjacent or earlier lesson when available. Check the visual handoff across different lesson forms,
-such as a guide and a demonstration. Report the specific typography, component, evidence treatment,
-or motion rule that breaks continuity; allow a difference that serves the learning task and is
-explained by the course or series contract. If the style depends on movement to convey identity or
-meaning, inspect its short motion specimen and check object continuity, attention target, and a
-stable state for reading. A still-only preview cannot establish timing quality before final audio.
-For a new or materially revised file-based course style, open the CSS/HTML assets linked from
-`video-style.md` and confirm the preview actually loads the declared CSS. Inspect rendered frames
-for font fallback, main versus supporting surface depth, and a clear first reading target; a valid
-link alone does not establish the intended appearance. Return a shared-rule defect to its owning
-course or series asset rather than correcting only one preview.
-Do not require identical layouts or a fixed visual effect count.
-Return missing or mismatched frames to `design-tutorial`; revise the script and visuals together if
-the fix changes a spoken cue. Treat the preview as provisional: final motion and reading time remain
-subject to audio-aligned storyboarding and video review.
+Open every preview shot in order at the intended size before recommending approval. Match framing,
+visual weight, exact labels, source evidence, and before/after states to narration and storyboard;
+text alone cannot settle repetition, crowding, misleading visuals, or stiffness. For a course,
+compare representative frames with shared references and an adjacent lesson, including handoffs
+between guide and demonstration. Name any typography, component, evidence, or motion mismatch;
+allow task-driven differences recorded in the style contract. If movement carries identity or
+meaning, inspect a short specimen for object continuity, attention, and a stable reading state;
+still frames cannot prove timing.
+For a new or revised course style, open linked CSS/HTML and confirm the preview loads that CSS.
+Inspect rendered font fallback, surface hierarchy, and first reading target; valid paths alone do
+not prove appearance. Fix shared defects in their course or series asset, not one preview. Require
+neither identical layouts nor an effect quota. Return mismatched frames to `design-tutorial`, revising
+speech and visuals together when needed. Audio-aligned storyboard and video review settle final
+motion and reading time.
 
-Read the shot sequence without narration as well: flag a run of nearly identical labeled cards that
-does not visibly advance the same evidence objects. Check whether the learner can see what was
-expected, what changed, and why the final comparison matters. Ask for a purposeful visual handoff or
-contrast when it would clarify the inference; do not require constant movement or decorative effects.
-Check what the learner hears, sees, and can infer at each beat. Flag a visual that merely transcribes
-the voice, a spoken inventory that the frame could show more clearly, or a result revealed before a
-prediction. Check that the narration conveys the meaning of every visual fact needed for the primary
-outcome. For a file-based course, if exact visual details remain necessary, require a learner-facing
-`## Visual descriptions` section in `lesson.md`; for a standalone lesson, require equivalent text
-with the video. Author notes and `storyboard.md` do not reach the learner. At this draft stage,
-check that the planned spoken cue and visual state belong together and that the storyboard reserves
-plausible reading or prediction space without assigning exact durations.
-For a prediction, inspect the entire cue-to-reveal sequence: an exact "expected result" label can
-give away the answer even when the actual-output area remains hidden. Leave the source inspectable
-and the answer unfilled until the learner has had a plausible chance to form an expectation.
-When a prediction or surprise carries the explanation, verify that the storyboard shows the
-decisive observation and retains a state the learner can compare with the result. Check that the
-spoken line explains what the observation means instead of reading labels or letting motion alone
-make the claim. A playful reaction should not mask the evidence or turn an analogy into a false
-physical or technical mechanism.
-For each consequential beat, check its intended inference, relevant prior knowledge, learner action
-if any, visible before and after states, and observable evidence or feedback. Flag motion that only
-decorates a claim when it obscures the evidence, a vanished state the learner must compare, or a
-still image that hides the change being taught. Expressive motion may serve rhythm or personality
-between or alongside teaching beats when the idea remains easy to inspect. Flag obvious visual
-overload, but defer normal-speed hold and reading checks
-at the intended viewing size until the generated audio and timed storyboard exist. Do not pass
-pacing from invented seconds-per-line thresholds or precise timestamps before then.
-For each consequential spoken cue, check that the provisional frame gives the learner an identifiable
-target without searching through unrelated labels or panels. Suggest removing competing detail before
-adding arrows or highlights; keep a targeted cue when the full display is needed for the lesson.
-For a change the learner must explain, require a planned stable result and enough prior state or
-trace to compare it with. Do not impose a fixed label count, pause length, or shot template.
-For a consequential pause, check that the provisional storyboard names what remains visible, what
-the learner can think through or inspect, and when the next claim or reveal resumes. Flag a prompt
-that is immediately answered or replaced by another demand without usable thinking space; do not
-require a hold after every question. Judge its actual duration only after generated audio exists.
-For each primary outcome, point to the beat that supplies enough spoken and visible evidence to
-answer an explanation or application question. If the outcome exists only in the lesson card or
-spoken promise, mark it untaught even when the storyboard looks engaging.
-Use the outline's expected reasoning and plausible confusion, when recorded, to inspect whether
-the learner can distinguish the intended explanation from a tempting but unsupported one. State
-which evidence in the script or planned visual resolves that confusion. Do not mark a draft as
-effective merely because its post-lesson question repeats the right terms.
-For a continuing case, trace its visible state across shots. Flag disconnected diagrams that require
-the learner to reconstruct the same case from scratch, or apparent continuity that contradicts the
-declared source. Note any extra on-screen information whose planned hold may be too brief; actual
-readability and phrase-level synchronization belong to the audio-aligned storyboard and video review.
-Check every planned persistent badge, progress display, lower bar, or ambient motion against the
-lesson's attention target. Ask what it helps the learner locate, compare, or infer, and flag an
-element that competes with the evidence or duplicates a player control. Course identity, mood, or
-rhythm can justify a quiet recurring element; review its effect at actual viewing size.
-Audit every persistent or repeated on-screen element for its learner-facing purpose. Flag a footer,
-shot count, progress bar, or ambient motion that draws attention from the evidence, duplicates
-the player's controls, or ambiguously presents shot timing as lesson progress. Keep a course map or
-progress cue when it accurately supports a real navigation or learning decision; ask the storyboard
-to define its units and behavior. Treat this as a coherence and interface judgment, not a claim that
-research has isolated the effect of an in-video progress bar.
+Read shots silently and in order. Flag repeated label cards that do not advance the evidence object;
+the learner should see what was expected, what changed, and why comparison matters. Seek a useful
+handoff or contrast, not constant motion. For each consequential beat, identify prior knowledge,
+what the learner hears, sees, and infers, any action, before/after states, and feedback. Flag visuals
+that transcribe speech, spoken inventories better shown, early reveals, motion that obscures
+evidence, or stills that hide a necessary change. Expressive motion may add rhythm when the idea
+remains inspectable. Narration must convey the meaning of visual facts needed for the main outcome.
+If exact visual details remain necessary,
+require learner-facing `## Visual descriptions` in `lesson.md` or equivalent standalone text;
+author notes and storyboards do not reach the learner.
+For predictions, keep source and prior state inspectable and the answer unfilled, including labels
+that might give it away. Reserve plausible thinking space before the decisive observation, then
+retain a comparable prior state and explain the inference aloud. A playful reaction must not hide
+evidence or make an analogy seem literal. Each spoken cue needs a clear visual target: remove
+competing detail before adding a highlight, and plan a stable result plus prior trace for changes
+the learner must explain. Do not impose label counts, shot templates, or pause lengths.
+For a consequential pause, name what stays visible, what the learner can inspect or think through,
+and when the next claim or reveal resumes. Flag immediate answers or demands that erase thinking
+space; not every question needs a hold. For each primary outcome, locate enough spoken and visible
+evidence to answer an explanation or application question; a card promise or question repeating
+terms is insufficient. Use any outline-recorded plausible confusion to check which evidence
+distinguishes the intended explanation. Trace a continuing case across shots; flag disconnected or
+source-contradicting continuity. Flag obvious overload or risky reading space now, but defer actual
+hold duration, normal-speed readability, and phrase synchronization until audio and video review;
+invented timestamps or seconds-per-line thresholds cannot pass pacing.
+Check each persistent badge, footer, progress cue, lower bar, or ambient motion at viewing size:
+does it aid orientation, comparison, inference, identity, mood, or rhythm without competing with
+evidence or duplicating player controls? A course map or progress cue must support a real decision
+and define truthful units and behavior, never confuse shot timing with lesson progress. Treat this
+as an interface judgment, not a claim about an isolated research effect of progress bars.
 
 Read the script aloud when possible; otherwise simulate a natural technical speaking pace including
 demonstration pauses. The estimate is provisional until generated audio exists. Flag sentences that

@@ -2,6 +2,9 @@ config:
   max_parallel_scenarios: 1
   max_parallel_runs: 1
 
+smoke_scenarios:
+  - "Give recurring visual roles reusable non-color geometry"
+
 scenarios:
   - name: "Recommend a series visual direction without changing course plans"
     prompt: >-
@@ -23,4 +26,27 @@ scenarios:
       - "It treats subtitle appearance, contrast across footage and diagrams, and safe placement as shared visual rules while leaving subtitle text and timing with each lesson."
       - "It identifies a series visual contract and shared assets as the owners of reusable rules, with course video-style documents for exceptions and storyboards for lesson shots."
       - "It does not restructure the curriculum, invent approval state, create files, or claim that it inspected actual videos."
+    timeout: 240
+
+  - name: "Give recurring visual roles reusable non-color geometry"
+    prompt: |-
+      Use $design-tutorial-visual-system for a read-only review in this conversation. Do not create
+      or change files. A three-course introductory science series shows an observed object, a future
+      target, and a condition still awaiting evidence. Each course chooses its own accent palette.
+      The current style is described only in Markdown; lesson previews hand-code similar cards with
+      slightly different outlines, padding, and minimum sizes. Some differences are meaningful, but
+      others arose by accident. The owner wants projects to use shared styles directly without
+      forcing identical compositions or assigning one color to each state.
+
+      Recommend what the series visual contract, reusable CSS/HTML example, and course-specific
+      style should each define, and how to check that a real preview uses the intended grammar.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "command", run: "test -z \"$(find . -mindepth 1 -maxdepth 1 -type f -print -quit)\"" }
+    rubric:
+      - "The response makes recurring role or state distinctions legible through declared non-color form, such as outline, edge, or connection, without making color the sole carrier of meaning."
+      - "It recommends shared CSS and a loading HTML example for reusable geometry, with coherent proportions, padding, and minimum sizes that can grow with content."
+      - "It separates series invariants from course palette choices and leaves lesson-specific composition and evidence to the storyboard."
+      - "It calls for checking actual rendered instances and stylesheet loading, not treating Markdown rules, class names, or valid paths as visual proof."
+      - "It does not prescribe the example shapes as a universal mapping for unrelated series or claim that it inspected existing previews."
     timeout: 240

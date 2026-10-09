@@ -2,6 +2,9 @@ config:
   max_parallel_scenarios: 1
   max_parallel_runs: 1
 
+smoke_scenarios:
+  - "Reject an intriguing but uninformative course-guide opening"
+
 scenarios:
   - name: "Detect structural repetition and topic drift in a first lesson"
     prompt: |-
@@ -44,4 +47,101 @@ scenarios:
       - "The review flags P-17, P-24, and P-31 as context-free spoken identifiers and flags the course counts as lesson-card or screen material rather than natural narration."
       - "The review rejects the fixed 'next lesson' preview because the course is dependency-driven and branching."
       - "The review does not pass the prose merely because structural validation and the paragraph map pass, and it gives concrete correction directions without rewriting the draft."
+    timeout: 360
+
+  - name: "Reject an intriguing but uninformative course-guide opening"
+    prompt: |-
+      Use $review-tutorial-script to review this 00.00 course-guide draft in the conversation only.
+      Do not rewrite it or change files. The audience is new to digital photography. The Core route
+      takes a learner from an automatic-mode snapshot to a small set of photographs whose framing,
+      focus, and lighting choices they can explain. The course opens on a visual of an empty album.
+
+      Draft narration:
+      一张空白相册，最后能装进什么？
+
+      这是一门从零开始的摄影课。你会练习构图、对焦和用光，最后选出一组照片。
+
+      The storyboard displays the empty album during the first sentence and later shows a camera
+      and the final photo set. Assume the remaining guide covers audience and prerequisites.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "开头" }
+      - { type: "command", run: "test -z \"$(find . -mindepth 1 -maxdepth 1 -type f -print -quit)\"" }
+    rubric:
+      - "The review distinguishes an evocative opening image from a spoken opening that identifies the subject and attainable destination."
+      - "It flags that the first question could lead to almost any course and makes the learner wait for the photography promise."
+      - "It proposes a concrete direction that keeps the empty album as useful visual context without reciting the whole curriculum or rewriting the draft."
+    timeout: 360
+
+  - name: "Find a course guide that recites chapters and obscures optional choices"
+    prompt: |-
+      Use $review-tutorial-script to review this 00.00 course-guide draft in the conversation only.
+      Do not rewrite it or change files. This beginner balcony-gardening course follows one pot of
+      herbs through the Core route: choosing a place, observing soil and leaves, then adjusting care
+      and explaining the result. An optional Extension explores low-light balconies. The audience
+      has no prior horticulture vocabulary.
+
+      Draft narration:
+      第一章介绍选址，第二章介绍土壤，第三章介绍浇水，第四章介绍观察与记录。
+
+      拓展路线讨论光周期、基质和蒸散，大家可以自由选学。
+
+      The provisional storyboard shows four disconnected chapter cards followed by one Extension
+      card listing those three terms; none shows the same pot changing state.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "章节" }
+      - { type: "output_contains", value: "拓展" }
+      - { type: "command", run: "test -z \"$(find . -mindepth 1 -maxdepth 1 -type f -print -quit)\"" }
+    rubric:
+      - "The review identifies the spoken chapter inventory despite its accurate coverage and asks for the same pot's problems and gained capabilities to connect the parts."
+      - "It flags the unexplained specialist terms and missing learner-facing reason to choose the optional low-light route."
+      - "It notices that the storyboard's disconnected cards fail to carry the declared continuous case, without imposing a continuous artifact on all courses."
+    timeout: 360
+
+  - name: "Require visible evidence for a claimed teaching method"
+    prompt: |-
+      Use $review-tutorial-script to review this 00.00 course-guide draft in the conversation only.
+      Do not rewrite it or change files. The beginner music course claims that learners will hear a
+      short phrase, predict how one changed note affects it, then play and compare the result. The
+      guide must describe the method without teaching notation rules in advance.
+
+      Draft narration:
+      我们会用预测、改一处、复听、比较这四步来学习。每次都能知道自己是否理解了。
+
+      Provisional storyboard preview: four animated cards labeled 预测, 改一处, 复听, 比较. No musical
+      phrase, changed note, before-and-after playback state, or observable feedback is shown.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "分镜" }
+      - { type: "command", run: "test -z \"$(find . -mindepth 1 -maxdepth 1 -type f -print -quit)\"" }
+    rubric:
+      - "The review rejects method names and matching flow cards as sufficient proof that learners can see how the method works."
+      - "It asks for one small learner action, the relevant changed state, and feedback that can be heard or seen without prematurely teaching a later notation rule."
+      - "It checks spoken and visual drafts together rather than prescribing animation polish alone."
+    timeout: 360
+
+  - name: "Distinguish a course-guide ending from a repeated promise"
+    prompt: |-
+      Use $review-tutorial-script to review this 00.00 course-guide draft in the conversation only.
+      Do not rewrite it or change files. A beginner data-cleaning course promises that the Core route
+      will let learners tidy a small table, explain the choices, and check the resulting values.
+      An optional Extension covers automated imports, which Core does not teach.
+
+      Draft opening:
+      一张混乱的表，怎样变成能解释、能检查的数据？
+
+      Draft ending:
+      学完后，你就能整理数据、解释数据、检查数据。现在，这张表已经变整齐了。
+
+      The closing shot shows the same tidy table from the opening example, with no new input or
+      visible check. The rest of the guide accurately states its audience, route, and prerequisites.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "结尾" }
+      - { type: "command", run: "test -z \"$(find . -mindepth 1 -maxdepth 1 -type f -print -quit)\"" }
+    rubric:
+      - "The review identifies that the ending repeats the opening's abilities and shows only an already tidy example."
+      - "It proposes an attainable learner-produced check or nearby new-table transfer that would make Core completion observable."
+      - "It does not require automated imports or another Extension-only capability as proof of Core completion."
     timeout: 360

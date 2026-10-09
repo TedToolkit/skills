@@ -4,6 +4,7 @@ config:
 
 smoke_scenarios:
   - "Preserve one lesson promise across supporting material"
+  - "Design a course guide as learner progress rather than a syllabus"
 
 scenarios:
   - name: "Preserve one lesson promise across supporting material"
@@ -76,4 +77,35 @@ scenarios:
       - "The reported duration is a provisional range and states a defensible text-count or speaking-rate basis plus allowance for demonstrations or pauses, rather than claiming one exact verified time."
       - "A provisional storyboard is anchored to the narration, makes the moisture-state comparison visible, and does not claim final audio timing."
       - "The planter example establishes the shared watering schedule before showing different moisture states, and the visual sequence carries the expected-versus-observed difference through the explanation instead of presenting only summary cards."
+    timeout: 360
+
+  - name: "Design a course guide as learner progress rather than a syllabus"
+    prompt: |-
+      Use $design-tutorial to redesign the Mandarin narration and provisional storyboard for a
+      two-to-three-minute 00.00 guide in this conversation only. Do not create or change files.
+      The approved beginner digital-photography course plan starts with an automatic-mode snapshot
+      of one familiar subject. The Core route lets learners improve its framing, focus, and lighting,
+      then choose and explain a small photo set. Optional portrait and evening-light routes answer
+      different learner needs; neither is required for Core completion. The course's distinctive
+      practice method is to predict the effect of one change, take another picture, and compare it
+      with the first. The guide should not teach camera settings yet.
+
+      The draft opens over an empty album with “一张空白相册，最后能装进什么？” It then announces
+      “第一章构图、第二章对焦、第三章用光”, names the two optional routes without explaining why to
+      choose either, and shows method labels without any changed photograph. It ends by repeating
+      that learners will frame, focus, and use light. Keep the empty album if it helps the visuals,
+      but repair the spoken and visible teaching progression. The approved guide scope is audience,
+      readiness, Core result, optional choices, method, and completion evidence.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "摄影" }
+      - { type: "output_contains", value: "分镜" }
+      - { type: "command", run: "test -z \"$(find . -mindepth 1 -maxdepth 1 -type f -print -quit)\"" }
+    rubric:
+      - "The spoken opening promptly identifies digital photography, a meaningful beginner starting point, and an attainable result; the empty album may remain visual context."
+      - "The Core route follows a recognizable subject or learner task through problems and gained capabilities instead of orally reciting chapter names."
+      - "Each optional route is explained by a plain-language reason to choose it and an added gain, without becoming a Core prerequisite."
+      - "The narration and storyboard show one small prediction, visible before-and-after change, and observable comparison without prematurely teaching camera settings."
+      - "The ending offers a nearby independent photo or explanation as Core evidence instead of repeating the opening's capability list."
+      - "The storyboard remains provisional and anchored to spoken paragraphs without fabricated audio timestamps."
     timeout: 360

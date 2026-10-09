@@ -112,30 +112,27 @@ the limits or cost of the solution, and a natural closing takeaway. Close on the
 usable result, without a recap of another lesson or a preview of a future one. Adapt this arc to an
 introduction or other non-procedural lesson rather than forcing a demonstration.
 
-For the required `00.00` course guide, make the whole course the primary subject. Across the spoken
-script and synchronized storyboard, explain what the course teaches, the real problem and scope,
-who it is and is not for, its prerequisites, what
-completing the Core route enables, what each optional Extension route adds, its distinctive teaching
-features, and how its chapters, routes, and sustained case fit together. Give every major content
-part meaningful context instead of merely reading headings or lesson numbers. Keep the guide
-concise relative to the course
-without turning it into a trailer or compressing the first technical lesson into the introduction.
-If the course requires setup before practice, state the readiness condition and a concrete success
-check in the guide; put the specific preparation video link in the learner page.
-Keep detailed dependency tables, evidence matrices, and production metadata on the course page or
-lesson card unless a learner needs a specific item to understand the route. Its post-lesson question
-should check whether the learner can explain the course scope, audience, gains, features, or learning
-route using information actually provided in the guide.
-When the guide names a distinctive practice method, a small nontechnical learner action and its
-feedback can make the method concrete. Stop before teaching a later lesson's rule or example.
+For the required `00.00` guide, make the whole course the subject. Narration and storyboard must
+explain its problem, scope, audience fit and exclusions, prerequisites, Core result, each optional
+Extension gain, distinctive teaching method, and how its parts, routes, and sustained case relate.
+Give the parts context without reciting headings or lesson numbers; keep the guide concise without
+turning it into a trailer or a compressed first technical lesson.
+Open so a new listener recognizes the subject, meaningful starting point, and achievable destination.
+An evocative scene alone cannot carry an unspecified promise; neither should the opening recite the
+curriculum. If the course has a sustained case or progressive task, trace what new problem each part
+addresses, what capability it adds, and what changes visibly. Otherwise use its actual organizing
+logic, without inventing a continuous artifact. Explain optional routes by the learner's reason to
+choose each and its added gain; names can remain on screen.
+State any required setup's readiness condition and success check; link its preparation video from
+the learner page. Keep dependency tables, evidence matrices, and production metadata on the course
+page or card unless needed aloud. The post-lesson question should test the guide's actual scope,
+audience, gains, features, or route. Show any claimed practice method through a small learner action
+and observable feedback, without teaching a later lesson's rule. Close on attainable Core evidence
+or a nearby use of it, not another list of opening promises.
 
-For a course guide that should feel light or game-like, carry one familiar learner-facing problem
-through the route: show the starting state, the useful capability gained at each major part, and the
-final result. Treat chapters as changes in what the learner can do, not as a spoken table of contents.
-Use a small amount of playful language to make a real obstacle or payoff memorable; keep the same
-metaphor coherent, and do not imply that the course has points, rewards, gates, or other game features
-unless those features actually exist. A novice should still be able to explain the literal course
-route and outcome without translating a string of jokes.
+For a light or game-like voice, let that progression carry the playfulness. Use a coherent metaphor
+or brief joke only to illuminate a real obstacle or payoff; imply no points, rewards, or gates that
+the course lacks. A novice should still be able to retell the literal route and outcome.
 
 Start every spoken script directly with a recognizable consequence, question, result, or action that
 begins the lesson. Do not add greetings, welcomes, or ceremonial lead-ins to `narration.txt`. Give
@@ -212,19 +209,12 @@ that require verification. Keep these notes out of spoken text. Do not prescribe
 animation timing in the paragraph map; those belong in `storyboard.md`. Estimate total length only
 from likely speaking pace; the generated and verified master will determine final timecodes.
 
-Use the course's requested voice. When it calls for humor or allusions, make them illuminate the
-technical point and suit the stated audience. Prefer concise, accurate references to primary
-sources; put attribution and links in `lesson.md`, and avoid invented quotations or jokes that
-obscure a failure mode. Preserve technical precision even when the prose is playful.
-When humor serves a lesson, place it where a real expectation, surprise, or human-scale consequence
-already exists. Check that the learner can still state the underlying cause without the joke and
-that the analogy does not imply a false mechanism. A visual reaction or one light line may be enough;
-do not set a joke count or force levity into every beat.
-Vary the rhythm of spoken paragraphs: alternate a concrete problem, an action the learner will take,
-and an observable payoff where the material supports it. If several consecutive paragraphs merely
-name topics or promises, connect them through one developing example or cut the recital. Humor should
-offer a quick release of tension, then return to the explanation; do not make every sentence carry a
-quip.
+Use the requested voice. Humor or allusions should suit the audience, clarify a real expectation,
+surprise, or consequence, and leave the technical cause clear without the joke. Do not invent quotes,
+imply a false mechanism, obscure a failure, set a joke quota, or force levity; one line or visual
+reaction may suffice. Keep precision, cite concise primary sources in `lesson.md`, and vary spoken
+rhythm through concrete problem, action, and payoff where apt. Connect or cut consecutive topic
+recitals; return promptly to the explanation after humor.
 When a prediction is part of the teaching, let the learner see the relevant source or prior state,
 form an expectation, and inspect the actual result before narrating the inference. Do not pose a
 prediction and answer it immediately in the next spoken line merely to check a script box. Plan a
@@ -236,39 +226,21 @@ For prediction, comparison, or inspection beats that need quiet time, follow the
 [intentional pause guide](../../../references/intentional-pauses.md). Record the cue, learner action,
 stable visual state, and reveal or resumption in the provisional storyboard. Add the needed silence
 during production editing instead of encoding its timing with punctuation.
-Before handoff, perform an oral-readability pass from `narration.txt` alone, then read the script
-alongside the provisional storyboard. Generated audio and exact synchronization are checked after
-narration generation. Read the words aloud when possible. Rewrite sentences whose referent is
-unclear even with the planned visual, contain several nested clauses,
-stack abstract nouns, or present a dense list of terms or numbers. Turn necessary lists into a
-conversational progression rather than a recital. Confirm that every name, acronym, identifier,
-notation, and numeral has an obvious spoken form and a reason to be heard. Cut repeated setup,
-restated definitions, and transitions that merely announce another lesson. Keep a transition
-within this lesson when it poses a real unanswered question.
-Write narration and learner-facing storyboard text in the course's chosen language. Retain literal
-code, commands, source strings, and necessary terms in their original form, but translate ordinary
-descriptive words that would otherwise make the speaker switch languages mid-sentence. Read those
-mixed-language passages aloud as part of the performance check.
-Perform a paragraph-continuity audit as part of that pass. Privately summarize the single job of
-each paragraph, then check that the next paragraph answers, advances, tests, or usefully reframes
-what came before. Give distinct paragraphs distinct jobs; merge, cut, or reorder passages that
-independently establish the same context, conflict, or conclusion. Treat an example as one continuous
-thread: introduce it once, and do not open with its consequence, leave for an abstract detour, then
-restart the same example later as though it were new. This audit is working analysis, not text to add
-to `narration.txt`.
-Confirm that the post-lesson question can be answered from what the lesson actually taught without
-requiring unannounced knowledge. Do not force a joke into every paragraph or lesson; a precise
-example or a brief wry observation can carry the requested voice without slowing the explanation.
+Before handoff, read `narration.txt` alone and then with the storyboard, aloud where possible.
+Rewrite unclear referents, nested clauses, stacked
+abstractions, and dense terms or numbers as conversational progression. Every name, acronym,
+identifier, notation, and numeral needs an obvious spoken form and a reason to be heard. Use the
+course language for narration and learner-facing labels; preserve literal code, commands, source
+strings, and needed terms, but translate ordinary descriptors and read mixed-language lines aloud.
+Give each paragraph one job; make the next answer, advance, test, or reframe it. Merge repeated
+setup, definitions, and separately restarted examples; keep transitions that pose a real question,
+not ones that announce another lesson. This audit stays out of `narration.txt`. Check that the
+post-lesson question needs no untaught knowledge. Generated audio settles synchronization later.
 
-Estimate the likely duration of the spoken text and demonstration against the episode's planned
-time. Base the estimate on the script's actual language and density, state the counted unit and
-assumed natural speaking rate, and add explicit allowance for demonstrations, predictions, and useful silence. Report a
-defensible range with those assumptions rather than a falsely precise single duration. If the range
-exceeds the outline's planned duration, report the difference as a planning observation and keep the
-approved teaching beats clear and complete. An estimate alone is not a reason to split the lesson,
-narrow its scope, accelerate speech, or remove an essential explanation. Revise the outline only when
-the teaching outcome or reasoning path itself needs to change. Treat every estimate as provisional
-until Fish Audio generates the narration audio.
+Estimate a duration range from the script's language, density, counted unit, and natural speaking
+rate, allowing for demonstrations, predictions, and silence. Report a likely overrun as planning
+evidence, not by itself a reason to split, narrow, rush, or cut approved teaching beats; revise the
+outline only when the outcome or reasoning path changes. Fish Audio determines actual duration.
 
 Preserve exact commands, labels, and results when correctness depends on them. Do not generate
 narration before the reviewed script receives explicit human approval.
@@ -357,20 +329,13 @@ visible evidence before its explanatory label, then show enough of the prior sta
 the result. Let the narration ask or sharpen the question and explain the inference; let motion show
 the process and a stable frame make the evidence inspectable. A reflective beat can be brief and
 need not become a forced playback pause or a quiz in the synthesized narration.
-For an element that stays on screen across teaching beats, consider whether it helps orientation,
-course identity, mood, or visual continuity and whether its motion competes with the current code,
-diagram, or evidence. A course badge, step indicator, or ambient graphic can support those roles;
-avoid a progress display that misstates progress or merely duplicates the player's controls.
-The general HyperFrames creative guidance on persistent decoration is a design option, not a
-requirement for a narrated lesson. Put navigation and playback controls in the course player when
-they do not teach a relationship inside the video.
-Choose the main visible evidence for each shot before adding titles, decoration, or course chrome.
-For a recurring footer, route label, shot count, or progress indicator, consider what it communicates
-and whether the course player already supplies the same function. If it implies measured progress,
-make the units and behavior truthful. An expressive recurring element can remain for identity or
-rhythm when it does not obscure the current evidence.
-Do not prescribe a shot-by-shot timer as lesson progress. Use highlights and reveals to point at the
-specific line, state, or relation as the narration reaches it, then let the evidence remain readable.
+Choose each shot's main evidence before adding titles or persistent chrome. A badge, step marker,
+footer, route label, or ambient graphic may aid orientation, identity, mood, or rhythm if it stays
+subordinate to code, diagrams, and results. Define the units and behavior of any progress display;
+do not present shot timing as lesson progress or duplicate player controls. Keep navigation and
+playback in the player unless they teach an in-video relationship. HyperFrames' persistent
+decoration guidance is optional here. Cue the relevant line, state, or relation as narration reaches
+it, then leave the evidence readable.
 At each spoken cue, name the code line, label, object, or result the learner should find. Remove
 simultaneous details that are not needed for that inference before adding a highlight; use a local
 cue when the necessary display remains complex. Set no universal label count or visual-density quota.
@@ -430,7 +395,7 @@ storyboard, and viewable shot preview in the user-selected project. Check that t
 taught, the example works from the
 stated prerequisites, the teaching arc still matches the script's actual progression, every paragraph
 has a clear reason to exist, the post-lesson question tests that outcome, and `narration.txt` contains
-spoken words only without the post-lesson question. Confirm that the provisional storyboard covers
+spoken words only without the post-lesson question. Confirm that the storyboard covers
 the script without fabricated timing. For each primary outcome, identify at least one beat whose
 spoken cue and visible evidence let a learner explain or apply it; check that any necessary visual-only
 fact has an accessible equivalent. Confirm that the preview covers every shot and matches the current
