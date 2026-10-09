@@ -180,7 +180,7 @@ outcome. For a file-based course, necessary exact visual details need a learner-
 `lesson.md`'s `## Visual descriptions` section for packaging; for a standalone lesson, deliver that
 text with the video. Return missing content to `design-tutorial` instead of treating author-only
 storyboard notes or speech-only captions as the equivalent. Avoid placing full narration text over
-an active diagram; the concise burned-in subtitles and separate transcript remain available.
+an active diagram; concise burned-in subtitles and the spoken script remain available.
 Give the depicted change a readable movement when it helps the learner follow the mechanism. Keep
 an inspectable stable state for exact code or comparison, and preserve a before/after pair or compact
 trace when understanding depends on both states. If actual audio timing leaves too little time to
@@ -197,34 +197,32 @@ keep any retained indicator consistent and visually subordinate to the teaching 
 playback progress, pause, and seeking to the actual player unless the approved storyboard requires
 a distinct instructional cue.
 
-For a file-based course, create `lessons/<lesson-id>/captions.txt` as a separate, edited subtitle
-text with verified timing from the final audio and storyboard. `narration.txt` is the spoken script,
-not the subtitle copy. Show exactly one concise line per cue. If it is too long at the intended
+Edit subtitle copy and timing in the editable video composition, using the final audio and storyboard.
+`narration.txt` is the spoken script, not the subtitle copy. Show one concise line at a time. If it is too long at the intended
 player size, shorten the copy without losing meaning or split it at a verified phrase boundary;
 replace spoken spellings of exact commands, filenames, and symbols with their written forms where
 the meaning remains clear (for example, `Program.cs` rather than “Program 点 C S”). Remove verbal
 filler and harmless repetition, but preserve the teaching claim, negation, order, and factual
 detail. Do not add unspoken facts or use subtitles to replace necessary visual descriptions. Omit
-authoring labels and Markdown in cue text. Use simple blocks separated by a blank line: a stable
-paragraph-derived cue ID, a `HH:MM:SS.mmm --> HH:MM:SS.mmm` timing line, then one subtitle
-line. Review edited text against the actual audio phrase by phrase, including technical
+authoring labels and Markdown in subtitle text. Keep editable text and timing with the composition,
+not in a VTT-like sidecar. Review edited text against the actual audio phrase by phrase, including technical
 terms, then check legibility and duration at the intended viewing size.
 Map narration timing onto the formal video timeline, including any intentional lead-in and inserted
-pauses, and verify the caption cues against the rendered video. If reliable word or phrase alignment
+pauses, and verify subtitle timing against the rendered video. If reliable word or phrase alignment
 is missing, align the audio and return the corrected ranges to `design-tutorial`; do not silently rewrite storyboard
 timing during production. Never estimate cue boundaries by spreading a paragraph evenly over its duration.
-Treat `captions.txt` as the canonical editable subtitle source. Generate any encoder-specific ASS
-or SRT in a temporary location from those same cues; do not maintain a second subtitle source.
-Burn these verified cues into the formal `video.mp4`. Derive the encoder's font, weight, scale,
+Render the verified subtitles into the formal `video.mp4` pixels, either as composition overlays or
+through a temporary encoder input. Do not deliver a VTT, SRT, ASS, `captions.txt`, or separate MP4
+subtitle stream. Derive the subtitle font, weight, scale,
 placement, and contrast treatment from the applicable series visual system and course
 `video-style.md`; use an explicit course exception only when the series contract allows it. Match
 the approved subtitle specimens in the shared HTML example and shot previews. CSS in an HTML
 preview does not automatically style subtitles burned by the video encoder. Check contrast and
 single-line fit at the actual embedded-player size over representative light, dark, footage, code,
 and result frames as applicable, and keep subtitles clear of essential evidence and controls.
-Keep `captions.txt` beside the video for search, transcript navigation, and later revision. Check
-the encoded pixels at several cue starts, endings, and line breaks; the mere presence of a subtitle stream does not prove that
-text was burned into the picture.
+Check the encoded pixels at several subtitle starts, endings, and line breaks. Verify the final MP4
+shows subtitles with text tracks disabled and contains no separate subtitle stream. Keep later
+revisions possible through the editable composition.
 
 Implement the selected course visual mode explicitly and deterministically. Use the course style,
 its series inheritance, and the reviewed shot preview; do not infer video colors from the learner
@@ -319,14 +317,14 @@ narration. On later revision requests, change only affected scenes and repeat ch
 scenes plus their boundaries.
 
 In a file-based course, write the formal lesson render as `lessons/<lesson-id>/video.mp4`; this file
-is the publication signal used by course packaging. Also deliver the aligned `captions.txt`.
+is the publication signal used by course packaging.
 Deliver the editable project, rendered video, and a concise note of validation performed and any
 remaining limitation. State separately whether representative learners tried the video and what
 their explanations or transfer attempts showed. If no learner trial occurred, say so without
 presenting production verification as a learning-effect result. If rendering cannot run in the
 environment, preserve the project and report the exact blocker rather than presenting a preview as
 a final video.
-After the formal video and canonical caption text pass every production check, record `video-verified`
+After the formal video and burned-in subtitles pass every production check, record `video-verified`
 with the packaged recorder and re-run the validator. A preview does not advance this state without
-the captioned video and verified caption text. `video-verified` attests to production checks, not to a
+the verified captioned video. `video-verified` attests to production checks, not to a
 measured learning gain or universal appeal to the target audience.

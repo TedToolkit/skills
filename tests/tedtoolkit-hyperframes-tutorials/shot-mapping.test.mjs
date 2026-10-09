@@ -22,7 +22,6 @@ function withLesson(callback) {
   write("narration.txt", "The result changed.\n");
   write("narration.wav", "fixture audio");
   write("video.mp4", "fixture video");
-  write("captions.txt", "P01-01\n00:00:00.000 --> 00:00:01.000\nThe result changed.\n");
   write("storyboard.md", "| Shot S01 | P01 | 00:00:00.000 --> 00:00:00.500 | Before |\n| Shot S02 | P01 | 00:00:00.500 --> 00:00:01.000 | After |\n");
   write("storyboard-preview.html", '<main><section data-shot-id="S01">Before</section><section data-shot-id="S02">After</section></main>');
   write("video-shot-review.md", "| Shot | Encoded frame checked | Result | Observation |\n| --- | --- | --- | --- |\n| Shot S01 | 00:00:00.250 | Pass | Before state is readable. |\n| Shot S02 | 00:00:00.750 | Pass | After state is readable. |\n");

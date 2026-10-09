@@ -134,7 +134,7 @@ subtitles never hide essential evidence, even during movement or with controls v
 
 Show representative subtitle specimens in the shared HTML example and lesson shot previews using
 the declared visual rules. These specimens establish appearance and clearance, not final cue text
-or timing. `captions.txt` remains the only editable source for subtitle words and cue times.
+or timing. The editable lesson composition holds subtitle words and cue times.
 Because the formal video burns subtitles into its pixels, derive the encoder's subtitle styling
 from the visual contract and compare encoded frames with the specimens. Shared CSS can style HTML
 previews, but an ASS or other encoder style needs its own matching implementation; do not assume

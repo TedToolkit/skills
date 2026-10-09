@@ -409,7 +409,7 @@ enough area and time for the code, state, or comparison that teaches the shot; d
 chrome or an animated ornament become the strongest visual cue. Reserve
 space so subtitles do not cover essential code, labels, or results, and plan readable contrast
 against the actual background. The specimen demonstrates appearance and safe area; final text and
-cue timing belong to `captions.txt` after audio verification. The final check belongs to the
+cue timing belong to the editable composition after audio verification. The final check belongs to the
 rendered player.
 
 Map every demonstration to visible evidence. Put short exact learner-facing text and illustrative

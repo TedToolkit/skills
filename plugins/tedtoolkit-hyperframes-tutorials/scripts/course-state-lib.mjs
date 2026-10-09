@@ -485,7 +485,7 @@ export function requiredLessonFiles(lesson, stage) {
     files.push(`${base}/storyboard.md`);
   }
   if (index >= stageIndex("video-verified")) {
-    files.push(`${base}/video.mp4`, `${base}/captions.txt`);
+    files.push(`${base}/video.mp4`);
     if (lesson.records?.["script-draft"]?.shotMappingRequired === true) {
       files.push(`${base}/video-shot-review.md`);
     }
@@ -796,7 +796,7 @@ function markedSectionVisibleText(html, attribute, lessonId) {
   return null;
 }
 
-function parseVttTimestamp(text) {
+function parseTimecode(text) {
   const match = /^(?:(\d{2,}):)?(\d{2}):(\d{2})\.(\d{3})$/.exec(text);
   if (!match) return Number.NaN;
   const hours = Number(match[1] || 0);
@@ -805,42 +805,6 @@ function parseVttTimestamp(text) {
   const millis = Number(match[4]);
   if (minutes > 59 || seconds > 59) return Number.NaN;
   return hours * 3600 + minutes * 60 + seconds + millis / 1000;
-}
-
-export function parseCaptionText(contents) {
-  const normalized = contents.replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n");
-  const blocks = normalized.trim().split(/\n{2,}/);
-  const cues = [];
-  const identifiers = new Set();
-  for (const block of blocks) {
-    const lines = block.split("\n").filter((line) => line.length > 0);
-    if (lines.length === 0) continue;
-    const identifier = lines[0].trim();
-    if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(identifier) || identifiers.has(identifier)) {
-      throw new Error(`caption cue needs a unique identifier: ${identifier}`);
-    }
-    identifiers.add(identifier);
-    const timingIndex = lines.findIndex((line) => line.includes("-->"));
-    if (timingIndex !== 1) throw new Error(`caption cue needs a timing line after ${identifier}`);
-    const match = /^(\S+)\s+-->\s+(\S+)(?:\s+.*)?$/.exec(lines[timingIndex]);
-    if (!match) throw new Error(`invalid caption timing line: ${lines[timingIndex]}`);
-    const start = parseVttTimestamp(match[1]);
-    const end = parseVttTimestamp(match[2]);
-    if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
-      throw new Error(`invalid caption cue range: ${lines[timingIndex]}`);
-    }
-    if (lines.length !== 3) throw new Error(`caption cue must have one text line: ${identifier}`);
-    const text = lines[2].trim();
-    if (!text) throw new Error(`caption cue has no text: ${lines[timingIndex]}`);
-    cues.push({ start, end, text });
-  }
-  if (cues.length === 0) throw new Error("captions.txt contains no cues");
-  for (let index = 1; index < cues.length; index += 1) {
-    if (cues[index].start < cues[index - 1].end - 0.001) {
-      throw new Error(`caption cues overlap or are out of order at cue ${index + 1}`);
-    }
-  }
-  return cues;
 }
 
 export function parseStoryboardTiming(contents) {
@@ -854,8 +818,8 @@ export function parseStoryboardTiming(contents) {
     if (matches.length !== 1) throw new Error("storyboard timing line must contain exactly one audio range");
     const match = matches[0];
     const range = {
-      start: parseVttTimestamp(match[1]),
-      end: parseVttTimestamp(match[2]),
+      start: parseTimecode(match[1]),
+      end: parseTimecode(match[2]),
       source: match[0],
     };
     if (!Number.isFinite(range.start) || !Number.isFinite(range.end) || range.end <= range.start) {
@@ -957,7 +921,7 @@ function videoShotReviewIssues(root, lessonId) {
     /^\s*\|\s*Shot\s+(S\d{2,})\s*\|/i.exec(line)?.[1]?.toUpperCase() ?? ""), "video-shot-review.md");
   for (const row of rows) {
     const match = /^\s*\|\s*Shot\s+S\d{2,}\s*\|\s*((?:\d{2,}:)?\d{2}:\d{2}\.\d{3})\s*\|\s*(Pass)\s*\|\s*([^|\s][^|]*)\|\s*$/i.exec(row);
-    if (!match || !Number.isFinite(parseVttTimestamp(match[1]))) {
+    if (!match || !Number.isFinite(parseTimecode(match[1]))) {
       throw new Error(`video-shot-review.md needs an encoded-frame time, Pass result, and observation: ${row.trim()}`);
     }
   }
@@ -1007,29 +971,13 @@ export function validateLessonArtifacts(root, lesson, stage) {
     const base = `lessons/${id}`;
     try {
       const storyboardPath = safeCoursePath(root, `${base}/storyboard.md`).absolute;
-      const storyboardRanges = parseStoryboardTiming(fs.readFileSync(storyboardPath, "utf8"));
+      parseStoryboardTiming(fs.readFileSync(storyboardPath, "utf8"));
       if (lesson.records?.["script-draft"]?.shotMappingRequired === true) {
         const mappingProblems = shotMappingIssues(root, id, true);
         if (mappingProblems.length) throw new Error(mappingProblems.join("; "));
       }
-
-      if (stageIndex(stage) >= stageIndex("video-verified")) {
-        const captionsPath = safeCoursePath(root, `${base}/captions.txt`).absolute;
-        const cues = parseCaptionText(fs.readFileSync(captionsPath, "utf8"));
-        // Subtitle copy is edited for reading; exact equality with the spoken script is not a gate.
-        // Meaning and technical terms require audio review by the lesson producer.
-        if (cues.some((cue) => /^\s*(?:#{1,6}\s|P\d{2}(?:-\d+)?\s|\|)/m.test(cue.text))) {
-          throw new Error("caption text contains an authoring label or Markdown formatting");
-        }
-        if (cues[0].start < storyboardRanges[0].start - 0.25) {
-          throw new Error("captions begin before the final storyboard timeline");
-        }
-        if (cues.at(-1).end > storyboardRanges.at(-1).end + 0.75) {
-          throw new Error("captions extend beyond the final storyboard timeline");
-        }
-      }
     } catch (error) {
-      errors.push(issue("STORYBOARD_TIMING_OR_CAPTIONS", error.message, id));
+      errors.push(issue("STORYBOARD_TIMING", error.message, id));
     }
   }
   if (stageIndex(stage) >= stageIndex("video-verified") &&
@@ -1195,7 +1143,26 @@ function validateReleaseReferences(root, releaseDirectory) {
       }
     }
   }
+  const pending = [directory.absolute];
+  while (pending.length) {
+    const parent = pending.pop();
+    for (const entry of fs.readdirSync(parent, { withFileTypes: true })) {
+      const absolute = path.join(parent, entry.name);
+      if (entry.isDirectory()) {
+        pending.push(absolute);
+      } else if (["captions.txt", "narration.txt"].includes(entry.name) ||
+          /^transcript\.(?:txt|md|json)$/i.test(entry.name) ||
+          /\.(?:vtt|srt|ass|ssa)$/i.test(entry.name)) {
+        const relative = path.relative(directory.absolute, absolute).split(path.sep).join("/");
+        errors.push(issue("RELEASE_SUBTITLE_SIDECAR",
+          `release contains a separate transcript or subtitle file: ${relative}`));
+      }
+    }
+  }
   const html = fs.readFileSync(indexPath, "utf8");
+  if (/<track\b/i.test(html)) {
+    errors.push(issue("RELEASE_SUBTITLE_SIDECAR", "release player contains a separate text track"));
+  }
   const tagPattern = /<(?:video|audio|source|track|img|script|link)\b[^>]*?\b(?:src|href)\s*=\s*["']([^"']+)["'][^>]*>/gi;
   for (const match of html.matchAll(tagPattern)) {
     const reference = match[1].trim();
@@ -1381,7 +1348,7 @@ export async function validateCourse(rootInput, stateOverride) {
         const learnerLinks = [...indexHtml.matchAll(/<a\b[^>]*?\bhref\s*=\s*["']([^"']+)["'][^>]*>/gi)]
           .map((match) => match[1].split(/[?#]/, 1)[0]);
         for (const lesson of lessons.filter((item) => item.effectiveStatus === "cover-verified")) {
-          for (const filename of ["video.mp4", "captions.txt", "cover.png"]) {
+          for (const filename of ["video.mp4", "cover.png"]) {
             const sourcePath = `lessons/${lesson.id}/${filename}`;
             const sourceHash = await hashFile(safeCoursePath(root, sourcePath).absolute);
             const packagedPaths = Object.entries(current)

@@ -36,7 +36,6 @@ delta.
 │       ├── narration.txt
 │       ├── narration.wav
 │       ├── narration.wav.fish-request.json
-│       ├── captions.txt
 │       ├── storyboard.md
 │       ├── storyboard-preview.html
 │       ├── video-shot-review.md
@@ -78,7 +77,6 @@ status source; lesson cards must not maintain another status field.
 | `narration.txt` | `design-tutorial`; approved spoken words only. |
 | `narration.wav` | `generate-tutorial-narration`; Fish Audio output generated directly from the approved `narration.txt`. |
 | `narration.wav.fish-request.json` | `fish-tts.mjs`; local attempt history that prevents blind duplicate requests and contains no narration or voice ID. Keep with its WAV; it is not published or a course stage record. |
-| `captions.txt` | `build-tutorial`; separately edited, timed learner-facing subtitle text used for the burned-in video subtitles. |
 | `storyboard.md` | `design-tutorial`; the provisional visual plan created with the script and later finalized against verified generated narration. |
 | `storyboard-preview.html` | `design-tutorial`; locally viewable, untimed frames for every provisional shot, reviewed with the script before narration. |
 | `video-shot-review.md` | `build-tutorial`; author-only mapping from every stable shot ID to an inspected encoded frame, moving interval, and preview comparison for new productions. |
@@ -96,10 +94,10 @@ content both fail validation.
 When essential visual meaning is absent from narration, fix the narration before approval. For
 necessary exact visual details that should remain on screen rather than in speech, use one optional
 `## Visual descriptions` section in `lesson.md`. Write it in the learner's language and scene order,
-without production IDs. `package-tutorial-course` extracts this section near the video and transcript;
+without production IDs. `package-tutorial-course` extracts this section near the video;
 the rest of the production card remains author-only. Mark the rendered section with
-`data-visual-descriptions="<lesson-id>"` so release validation can check the handoff. The spoken
-Caption cues alone do not describe visual-only facts.
+`data-visual-descriptions="<lesson-id>"` so release validation can check the handoff. Burned-in
+subtitles repeat speech and do not describe visual-only facts.
 The validator rejects duplicate or empty authored sections and checks that a packaged lesson
 shows the current text inside its marked section. Keep essential meaning in the main narration;
 the page section is not a substitute for an audio-description review when one is required.
@@ -118,13 +116,12 @@ subsequent line or row beginning with `Beat` (for example, `| Beat B01 | P01 | 0
 00:00:00.500 | Show the changed line |`). When beat rows are used, every shot must have ordered,
 gapless beats that cover its full range; a hold is an explicit beat. This label lets the validator
 distinguish nested beats from adjacent shots. Older shot-only storyboards remain valid.
-`captions.txt` is the canonical editable subtitle source, with concise reading text that may differ
-from the spoken wording in `narration.txt` while preserving meaning. Each blank-line-separated block
-contains a stable cue ID, a timestamp range, and one line of display text. Burn its cues into
-`video.mp4`. The course player may parse the same text for transcript navigation. Generate temporary
-encoder formats from these cues only when needed; do not maintain parallel subtitle sources.
+Keep concise subtitle text and verified timing in the editable video composition. The text may
+differ from spoken wording in `narration.txt` while preserving meaning. Burn the subtitles into
+`video.mp4` pixels. Encoder-specific input, when needed, is temporary; do not create or publish a
+VTT-like caption file or separate subtitle track.
 Subtitle appearance comes from the applicable series visual system and course `video-style.md`;
-the preview and encoder implement that visual contract without duplicating cue text or timing.
+the preview and render implement that visual contract.
 
 ## Production gates
 
@@ -134,7 +131,7 @@ The normal order is:
 2. Existing series visual system when present, course `video-style.md` and its reusable CSS/HTML assets, then `lesson.md`, `narration.txt`, provisional `storyboard.md`, visual `storyboard-preview.html`, and all referenced demonstration sources. Review the script and shot images against the applicable style rules together before approval; inspect a short motion specimen when movement itself defines the style or teaching relationship.
 3. Fish Audio generates `narration.wav` from the approved text and saved voice model ID.
 4. `design-tutorial` listens to that audio and writes verified shot ranges into `storyboard.md`.
-5. Editable HyperFrames composition, formal `video.mp4`, aligned `captions.txt`, and per-shot encoded review for new productions.
+5. Editable HyperFrames composition, formal `video.mp4` with burned-in subtitles, and per-shot encoded review for new productions.
 6. Course `cover-system.md` and `course-cover.png`, plus a verified lesson `cover.png` based on the current formal video.
 7. Generated offline learner release and ZIP.
 
@@ -148,12 +145,11 @@ A final video requires `lesson.md`, `narration.txt`, `narration.wav`, and final 
 demonstration source declared by the lesson. A finished release also
 requires `course-cover.png` and `cover.png` for every published lesson. A changed
 `cover-system.md` or course cover requires lesson covers to be rechecked for continuity. Upstream changes invalidate affected downstream
-timing, captions, video, cover, and packaging artifacts; refresh them in order rather than
+timing, composition subtitles, video, cover, and packaging artifacts; refresh them in order rather than
 patching around the mismatch during rendering.
 
 Keep the original Fish WAV and editable HyperFrames project as production sources. The formal
-`video.mp4` includes subtitles burned from `captions.txt`; that text remains the only canonical
-subtitle text and timing source. Preserve an uncaptioned render as an optional project-local
+`video.mp4` includes subtitles burned from the editable composition. Preserve an uncaptioned render as an optional project-local
 intermediate when useful, but do not require a second published video variant.
 
 Keep authoring sources and generated learner releases in separate directories. Never overwrite an

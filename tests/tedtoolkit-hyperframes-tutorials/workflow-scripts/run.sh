@@ -499,11 +499,6 @@ cat >"$course/lessons/lesson-01/storyboard.md" <<'EOF'
 EOF
 node "$scripts/record-course-stage.mjs" "$course" lesson-01 storyboard-final >/dev/null
 printf 'video\n' >"$course/lessons/lesson-01/video.mp4"
-cat >"$course/lessons/lesson-01/captions.txt" <<'EOF'
-P01-01
-00:00:00.000 --> 00:00:01.000
-Hello world.
-EOF
 missing_shot_review_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 video-verified 2>&1 || true)
 grep -Fq 'missing required artifact: lessons/lesson-01/video-shot-review.md' <<<"$missing_shot_review_output"
 cat >"$course/lessons/lesson-01/video-shot-review.md" <<'EOF'
@@ -531,42 +526,6 @@ sed -i 's/| Pass | Result/| Fail | Result/' "$course/lessons/lesson-01/video-sho
 failed_shot_review_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 video-verified 2>&1 || true)
 grep -Fq 'video-shot-review.md needs an encoded-frame time, Pass result, and observation' <<<"$failed_shot_review_output"
 cp "$fixture/video-shot-review.saved" "$course/lessons/lesson-01/video-shot-review.md"
-cat >"$course/lessons/lesson-01/captions.txt" <<'EOF'
-P01-01
-00:00:00.000 --> 00:00:00.800
-Hello
-
-P01-02
-00:00:00.700 --> 00:00:01.000
-world.
-EOF
-if node "$scripts/record-course-stage.mjs" "$course" lesson-01 video-verified >/dev/null 2>&1; then
-    echo "overlapping caption cues were incorrectly accepted" >&2
-    exit 1
-fi
-cat >"$course/lessons/lesson-01/captions.txt" <<'EOF'
-P01-01
-00:00:00.000 --> 00:00:00.500
-Hello
-again
-
-P01-02
-00:00:00.500 --> 00:00:01.000
-world.
-EOF
-if node "$scripts/record-course-stage.mjs" "$course" lesson-01 video-verified >/dev/null 2>&1; then
-    echo "two-line caption cue was incorrectly accepted" >&2
-    exit 1
-fi
-cat >"$course/lessons/lesson-01/captions.txt" <<'EOF'
-P01-01
-00:00:00.000 --> 00:00:00.500
-Hi
-
-P01-02
-00:00:00.500 --> 00:00:01.000
-world.
-EOF
 node "$scripts/record-course-stage.mjs" "$course" lesson-01 video-verified >/dev/null
 node "$scripts/validate-course.mjs" "$course" >/dev/null
 cp "$course/lessons/lesson-01/composition/index.html" "$fixture/composition.saved.html"
@@ -622,7 +581,6 @@ cat >"$course/release/index.html" <<'EOF'
 <video controls poster="lessons/lesson-01/cover.png">
   <source src="lessons/lesson-01/video.mp4" type="video/mp4">
 </video>
-<section data-transcript-source="lessons/lesson-01/captions.txt">Hi world.</section>
 <section data-post-lesson-question="lesson-01">
   <h2>Post-lesson question</h2>
   <p>What did this lesson demonstrate?</p>
@@ -633,12 +591,14 @@ cat >"$course/release/index.html" <<'EOF'
 </section>
 EOF
 node "$repo_root/tests/tedtoolkit-hyperframes-tutorials/zip-fixture.mjs" "$course/release" "$course/workflow-fixture.zip"
-missing_release_captions_output=$(node "$scripts/record-course-release.mjs" "$course" release workflow-fixture.zip 2>&1 || true)
-if ! grep -Fq 'release does not contain current lessons/lesson-01/captions.txt' <<<"$missing_release_captions_output"; then
-    echo "release without its referenced caption text was incorrectly accepted" >&2
-    exit 1
-fi
-cp "$course/lessons/lesson-01/captions.txt" "$course/release/lessons/lesson-01/captions.txt"
+printf 'WEBVTT\n' >"$course/release/lessons/lesson-01/captions.vtt"
+subtitle_sidecar_output=$(node "$scripts/record-course-release.mjs" "$course" release workflow-fixture.zip 2>&1 || true)
+grep -Fq 'release contains a separate transcript or subtitle file: lessons/lesson-01/captions.vtt' <<<"$subtitle_sidecar_output"
+rm "$course/release/lessons/lesson-01/captions.vtt"
+cp "$course/lessons/lesson-01/narration.txt" "$course/release/lessons/lesson-01/narration.txt"
+narration_sidecar_output=$(node "$scripts/record-course-release.mjs" "$course" release workflow-fixture.zip 2>&1 || true)
+grep -Fq 'release contains a separate transcript or subtitle file: lessons/lesson-01/narration.txt' <<<"$narration_sidecar_output"
+rm "$course/release/lessons/lesson-01/narration.txt"
 node "$repo_root/tests/tedtoolkit-hyperframes-tutorials/zip-fixture.mjs" "$course/release" "$course/workflow-fixture.zip"
 node "$scripts/record-course-release.mjs" "$course" release workflow-fixture.zip >/dev/null
 node "$scripts/validate-course.mjs" "$course" >/dev/null

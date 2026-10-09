@@ -81,7 +81,7 @@ Use these ordered states:
 | `script-approved` | The reviewed script and visual shot preview have explicit human approval for Fish narration generation. | `generate-tutorial-narration` |
 | `narration-final` | Fish Audio generated `narration.wav` from the approved script. | `design-tutorial` aligns and finalizes the storyboard |
 | `storyboard-final` | The final storyboard contains verified shot ranges aligned to the generated narration. | `build-tutorial` |
-| `video-verified` | The formal video with burned-in subtitles and its caption text passed production verification; new productions include a per-shot encoded review. | `create-tutorial-cover` |
+| `video-verified` | The formal video with burned-in subtitles passed production verification; new productions include a per-shot encoded review. | `create-tutorial-cover` |
 | `cover-verified` | The lesson cover represents the current verified video and passed full-size, thumbnail, and course-family review. | `package-tutorial-course` |
 
 `video-verified` is a production status. It does not claim that representative learners were
@@ -118,7 +118,7 @@ Required cumulative lesson artifacts are:
 | `script-approved` | No new file; a fresh script snapshot plus `approvalSource` |
 | `narration-final` | `narration.wav` |
 | `storyboard-final` | `storyboard.md` |
-| `video-verified` | `video.mp4`, `captions.txt`, `video-shot-review.md` for records with `shotMappingRequired`, and `video-source.json` plus its editable composition for records with `videoSourceRequired` |
+| `video-verified` | `video.mp4`, `video-shot-review.md` for records with `shotMappingRequired`, and `video-source.json` plus its editable composition for records with `videoSourceRequired` |
 | `cover-verified` | Root `cover-system.md`, root `course-cover.png`, and lesson `cover.png` |
 
 The Fish helper also keeps `narration.wav.fish-request.json` beside the WAV as local request
@@ -215,10 +215,9 @@ approved spoken paragraph. A line or table row beginning with `Beat` is an inter
 inside the preceding shot. If any beat is present, every shot's beats must be ordered, gapless, and
 cover that shot; explicit hold beats account for unchanged visuals. Shot-only legacy files still
 validate. The validator checks the stored ranges without requiring a second timing
-artifact. `captions.txt` must contain valid, ordered, non-overlapping timed cues, and its cues must remain
-inside the final storyboard timeline. Its separately edited wording is checked against the audio
-for meaning and technical accuracy during production review; exact text equality with
-`narration.txt` is not required.
+artifact. Subtitle text and timing live in the editable composition and are checked against the audio
+and final storyboard during production review. Verify the encoded video pixels and confirm the MP4
+has no separate subtitle stream. Exact subtitle wording need not equal `narration.txt`.
 
 All stored paths are course-root-relative, use forward slashes, and must stay inside the course root.
 Absolute paths, parent traversal, and network-dependent release media are invalid.

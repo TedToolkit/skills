@@ -41,8 +41,8 @@ test("one wrapper folder is accepted but missing or changed files are rejected",
     await compareZipToDirectory(archive, expected({ "index.html": "page", "video.mp4": "video" }));
     await assert.rejects(compareZipToDirectory(archive, expected({ "index.html": "page", "video.mp4": "different" })),
       /changed video.mp4/);
-    await assert.rejects(compareZipToDirectory(archive, expected({ "index.html": "page", "video.mp4": "video", "captions.txt": "text" })),
-      /missing captions.txt/);
+    await assert.rejects(compareZipToDirectory(archive, expected({ "index.html": "page", "video.mp4": "video", "notes.txt": "text" })),
+      /missing notes.txt/);
   });
 });
 
