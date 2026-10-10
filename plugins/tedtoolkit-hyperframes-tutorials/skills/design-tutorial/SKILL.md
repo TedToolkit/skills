@@ -18,6 +18,9 @@ timecodes. After the generated narration exists, return
 to the same storyboard, align it to verified audio timing, and finalize it for production. An existing
 `plan-tutorial-course` outline supplies the lesson's scope, but a standalone lesson does not require
 a course outline.
+Design the intended vocal delivery with the wording and visual beats; review any Fish expression or
+pause cues in `narration.txt` alongside the storyboard and preview before script approval. Verify
+their actual delivery after narration generation.
 For a file-based course, follow the shared
 [tutorial workspace contract](../../references/tutorial-workspace-layout.md).
 Read the shared [video style contract](../../references/tutorial-video-style.md) when designing or

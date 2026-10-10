@@ -9,6 +9,10 @@ Use the installed `media-use` workflow when available to inspect or transiently 
 `narration.wav`. Compare the spoken content with `narration.txt`, but do not save a separate
 transcript artifact. Surface missing, added, or meaning-changing speech instead of animating a false
 step.
+Listen for the intended delivery at each consequential Fish cue. Align the visual change to what
+the generated voice actually does, not the cue's position in the text alone. If the voice ignores
+a cue or performs it in a way that conflicts with the lesson, return the wording or cue to script
+review and regenerate approved narration; do not hide a delivery mismatch with expressive motion.
 Revisit consequential pause intents using the shared
 [intentional pause guide](../../../references/intentional-pauses.md). Verify whether the recorded
 voice and visible state give the learner usable time to predict, compare, or inspect. Mark a short

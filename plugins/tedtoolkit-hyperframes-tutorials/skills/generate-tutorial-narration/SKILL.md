@@ -14,6 +14,16 @@ pauses. If the approved text needs correction for meaning or clarity, return the
 `design-tutorial` for script review, then generate from the newly approved text. Listen to the WAV
 before finalizing it. Leave any additional instructional silence to measured editing and timeline
 synchronization in `build-tutorial`.
+Pass approved Fish expression and pause cues in `narration.txt` through unchanged. Listen at normal
+speed for emotional turns, continuity, and every pause cue.
+Audition the sentence before and after each cue change together, especially across a paragraph or
+shot boundary; correct tags on isolated sentences do not ensure a smooth spoken transition. If a
+new cue makes the voice restart, return the transition to design-tutorial for a cue revision and
+record any needed visual breathing room in the storyboard. If a cue produces a long breath, filler,
+or disconnected delivery, return to `design-tutorial` for a cue-free script revision and regenerate;
+do not approve the flawed WAV or disguise a spoken artifact as silence. Fish pause tags do not
+guarantee a duration. For a course lesson, compare delivery with the reviewed storyboard and
+preview; add any needed clean instructional silence during measured editing in `build-tutorial`.
 For a lesson with planned prediction, comparison, or inspection holds, compare the approved
 storyboard's pause intents with the recorded delivery using the shared
 [intentional pause guide](../../references/intentional-pauses.md). Report any insufficient gap by

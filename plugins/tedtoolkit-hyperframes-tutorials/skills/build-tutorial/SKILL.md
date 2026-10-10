@@ -203,10 +203,11 @@ player size, shorten the copy without losing meaning or split it at a verified p
 replace spoken spellings of exact commands, filenames, and symbols with their written forms where
 the meaning remains clear (for example, `Program.cs` rather than “Program 点 C S”). Remove verbal
 filler and harmless repetition, but preserve the teaching claim, negation, order, and factual
-detail. Do not add unspoken facts or use subtitles to replace necessary visual descriptions. Omit
-authoring labels and Markdown in subtitle text. Keep editable text and timing with the composition,
-not in a VTT-like sidecar. Review edited text against the actual audio phrase by phrase, including technical
-terms, then check legibility and duration at the intended viewing size.
+detail. Omit non-spoken Fish expression and pause cues. Do not add unspoken facts or use subtitles
+to replace necessary visual descriptions. Omit authoring labels and Markdown in subtitle text. Keep
+editable text and timing with the composition, not in a VTT-like sidecar. Review edited text against
+the actual audio phrase by phrase, including technical terms, then check legibility and duration at
+the intended viewing size.
 Map narration timing onto the formal video timeline, including any intentional lead-in and inserted
 pauses, and verify subtitle timing against the rendered video. If reliable word or phrase alignment
 is missing, align the audio and return the corrected ranges to `design-tutorial`; do not silently rewrite storyboard

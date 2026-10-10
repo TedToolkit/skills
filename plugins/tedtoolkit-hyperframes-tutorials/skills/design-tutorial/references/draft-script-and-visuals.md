@@ -152,12 +152,53 @@ lesson has established the expectation it will test.
 
 Treat `narration.txt` as performance text, not as a lesson card read aloud. Write for comprehension
 on the first viewing: use speakable sentences, plain transitions, concrete verbs, and one main idea
-per paragraph. Do not mechanically convert every outline bullet, production requirement, or
-paragraph-map row into narration. Keep planning metadata, inventory-like coverage, detailed course
+per paragraph. Before drafting, name each paragraph's distinct job for a first-time listener and
+why the next paragraph follows from it. Make that turn audible through a brief natural bridge, a
+question made necessary by the preceding result, or a change in what the learner will do. Do not
+rely on blank lines, a visual cut, an emotion cue, or added silence to supply missing logic. When a
+case returns after a necessary detour, explicitly reconnect it instead of introducing it again.
+Draft for a single audio-only pass. With the paragraph map and storyboard hidden, read the
+uncued narration at an ordinary speaking pace. After each paragraph, a first-time listener should
+know which object or question is in focus and what changed; at the next paragraph, why the move
+follows; after a list, what each item belongs to. Supply any premise that otherwise exists only in
+a label or diagram. Introduce unfamiliar objects in everyday terms before their names matter, split
+stacked new terms, and repeat a short noun when "this" or "it" could point to two things. Use
+spoken order markers when sequence matters, without turning every paragraph into a heading.
+Revise the line that causes a replay rather than compensating with pauses or repeated conclusions.
+Keep the primary route more prominent in speech than optional inventories, without forcing
+formulaic signposts or equal-length paragraphs. Do not mechanically convert every outline bullet,
+production requirement, or paragraph-map row into narration. Keep planning metadata, inventory-like coverage, detailed course
 statistics, dependency bookkeeping, source notes, and acceptance criteria out of the spoken text
 unless the learner must hear them to understand or act. Material that is useful mainly when seen
 belongs in `lesson.md` or `storyboard.md`. Let the storyboard carry exact labels, routes, code,
 comparisons, and visible state changes while narration points to them and explains their significance.
+Pair wording with a non-spoken Fish expression cue only when a real question, discovery, setback,
+or payoff needs it. The default `s2.1-pro` accepts short cues such as `[curious]` or `[emphasis]` near
+the affected words; check other models' syntax against Fish Audio's
+[emotion-control guide](https://docs.fish.audio/developer-guide/core-features/emotions). Keep at most
+one fitting emotion per sentence, with no conflicting, repeated, or unearned intensity; calm speech
+needs no cue. Let the problem, evidence, and conclusion guide vocal energy and visual mood within
+the established course voice and style.
+For Fish S2 input, prefer one complete sentence per line and a blank line between coherent spoken
+paragraphs. Review the intended delivery sentence by sentence in `lesson.md` or `storyboard.md`;
+put a sentence-level emotion cue at the start of the affected sentence and `[emphasis]` immediately
+before the stressed phrase. Leave ordinary sentences untagged instead of adding a cue to every line
+or assuming that one cue controls a whole paragraph. Line breaks make the script easier to review;
+they do not promise a particular audible gap.
+Before script approval, review adjacent emotion changes for a coherent intended transition and
+record the intended tone in the storyboard. Treat the actual delivery as unverified until approved
+narration is generated. Then audition both sides of each consequential cue change together at normal
+speed; a new cue may interrupt the flow, but may also make the transition more natural. Judge the
+heard delivery rather than an ASR word gap or pitch measure. If a cue disrupts the transition,
+revise the script through review and approval before regenerating. Do not try to repair a tonal reset
+with a Fish pause tag.
+Fish documents `[break]` and `[long-break]` as relative pause cues, but neither is a reliable
+paragraph timer. Do not add them routinely to a full lesson: an audition can turn a cue into a long
+breath, filler, or loss of continuity. For a needed section gap or learner thinking time, keep the
+Fish delivery continuous, mark the spoken boundary in the storyboard, and add measured clean silence
+after synthesis. Treat any Fish pause cue in the approved script as provisional until its sound in
+the chosen voice and context has been checked after generation; revise and reapprove the script if
+the cue harms the lesson.
 Do not read every on-screen item aloud. Put the meaning of any visual fact needed for the primary
 outcome in the narration so the spoken track can teach it. For a file-based course, when exact
 visual details still matter but would burden the speech, put a concise learner-facing equivalent
@@ -186,11 +227,13 @@ In a file-based course, save `lesson.md`, `narration.txt`, and `storyboard.md` i
 prerequisites, the teaching arc carried forward from `lesson-outline.md`, paragraph map,
 demonstrations, sources, and estimated
 duration.
-`narration.txt` is the sole TTS text source and contains only the words the selected voice should speak,
-as plain-text paragraphs. Do not put a title, Markdown heading, segment label, timestamp, citation,
-stage direction, pronunciation note, or production instruction in that file. Never make the speaker
-read a heading simply because it appears on the lesson card or screen. Put the exact question in a
-`## Post-lesson question` section of `lesson.md`, in the learner's language. Do not copy it into
+`narration.txt` is the sole TTS text source. Keep the spoken words and any intentional, non-spoken
+Fish expression and pause cues together as plain text. Do not put a title, Markdown heading,
+segment label, timestamp, citation, free-standing stage direction, pronunciation note, or production
+instruction in that file. Keep voice and visual production notes in `lesson.md` or `storyboard.md`.
+Never make the speaker read a heading simply because it appears on the lesson card or screen. Put
+the exact question in a `## Post-lesson question` section of `lesson.md`, in the learner's language.
+Do not copy it into
 `narration.txt` or turn it into a spoken pause instruction.
 Use a single `## Visual descriptions` section only when the video has necessary details that the
 spoken track and captions do not convey. Write it as plain paragraphs or simple list lines for
@@ -207,7 +250,8 @@ same order as the blank-line-separated paragraphs in `narration.txt`. For each p
 teaching purpose, any required demonstration or exact on-screen value, and the source for claims
 that require verification. Keep these notes out of spoken text. Do not prescribe camera moves or
 animation timing in the paragraph map; those belong in `storyboard.md`. Estimate total length only
-from likely speaking pace; the generated and verified master will determine final timecodes.
+from the words likely to be spoken, excluding Fish cues; the generated and verified master will
+determine final timecodes.
 
 Use the requested voice. Humor or allusions should suit the audience, clarify a real expectation,
 surprise, or consequence, and leave the technical cause clear without the joke. Do not invent quotes,
@@ -226,8 +270,8 @@ For prediction, comparison, or inspection beats that need quiet time, follow the
 [intentional pause guide](../../../references/intentional-pauses.md). Record the cue, learner action,
 stable visual state, and reveal or resumption in the provisional storyboard. Add the needed silence
 during production editing instead of encoding its timing with punctuation.
-Before handoff, read `narration.txt` alone and then with the storyboard, aloud where possible.
-Rewrite unclear referents, nested clauses, stacked
+Before handoff, read `narration.txt` alone and then with the storyboard, aloud where possible;
+bracket cues are directions, not spoken words. Rewrite unclear referents, nested clauses, stacked
 abstractions, and dense terms or numbers as conversational progression. Every name, acronym,
 identifier, notation, and numeral needs an obvious spoken form and a reason to be heard. Use the
 course language for narration and learner-facing labels; preserve literal code, commands, source
@@ -298,6 +342,11 @@ shot, specify the learner-facing visual, initial and final states, motion sequen
 text, required asset or evidence source, and transition to the next shot. Split or revise narration
 that cannot be visualized clearly, would overload the screen, or requires evidence that does not
 exist; do not postpone those script defects until after narration generation.
+At meaningful turns, align wording, Fish cue, and visible change around one teaching event. Name
+the intended delivery and visual response in the storyboard and show that state in the preview.
+Curiosity may hold a comparison until evidence appears; a conclusion may settle it for reading.
+Revise unearned excitement or surprise, and review adjacent shots for motivated shifts in voice,
+pacing, framing, color, and motion. Mood must not obscure evidence or require a reaction to every cue.
 For moving objects and scene handoffs, describe what must remain readable as elements enter,
 travel, and leave, including when an outgoing label or card gives way to its replacement. Reserve
 space for essential text, captions, and connector paths; an arrow must remain legible between the
@@ -395,7 +444,8 @@ storyboard, and viewable shot preview in the user-selected project. Check that t
 taught, the example works from the
 stated prerequisites, the teaching arc still matches the script's actual progression, every paragraph
 has a clear reason to exist, the post-lesson question tests that outcome, and `narration.txt` contains
-spoken words only without the post-lesson question. Confirm that the storyboard covers
+only spoken words and intentional Fish cues without the post-lesson question. Confirm that delivery
+cues, wording, storyboard, and preview agree at consequential turns. Confirm that the storyboard covers
 the script without fabricated timing. For each primary outcome, identify at least one beat whose
 spoken cue and visible evidence let a learner explain or apply it; check that any necessary visual-only
 fact has an accessible equivalent. Confirm that the preview covers every shot and matches the current

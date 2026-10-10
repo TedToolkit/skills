@@ -7,10 +7,16 @@ learner has something specific to examine or infer before the next spoken claim 
 ## Before narration
 
 Write punctuation and paragraph breaks for natural spoken language, not to control the length of
-instructional pauses. Keep pause lengths, stage directions, and silent-beat labels out of
-`narration.txt`. For a consequential pause, put its intent in the provisional `storyboard.md`: the
-spoken cue after which it begins, what remains visible, what the learner can do during it, and the
-next cue or reveal that ends it. For example:
+instructional pauses. Fish S2 documents `[break]` and `[long-break]`, but they do not guarantee
+silence or a number of seconds. In a full lesson, a pause cue can produce a breath, filler, or
+disconnected delivery; do not use one at every paragraph boundary to enforce pacing. Treat any
+included cue as provisional until its actual voice and surrounding text can be auditioned after
+generation. When clean, predictable quiet is needed, synthesize continuous speech and add measured
+silence at the verified boundary after narration.
+Keep exact pause lengths, stage directions, and silent-beat labels out of `narration.txt`. For a
+consequential pause, put its intent in the provisional `storyboard.md`: the spoken cue after which
+it begins, what remains visible, what the learner can do during it, and the next cue or reveal that
+ends it. For example:
 
 > Pause intent after the prediction prompt: hold the source and an unanswered result area while the
 > learner forms an expectation; reveal the observed output only when narration reaches the run.

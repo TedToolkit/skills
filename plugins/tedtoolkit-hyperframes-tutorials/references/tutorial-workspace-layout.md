@@ -74,7 +74,7 @@ status source; lesson cards must not maintain another status field.
 | `course-cover.png` | `create-tutorial-cover`; course-level visual anchor used by the learner page and cover family. |
 | `lesson-outline.md` | `outline-tutorial-lesson`; the separately reviewable narrative spine approved before scripting. |
 | `lesson.md` | `design-tutorial`; stable production card carrying the approved teaching arc, paragraph map, sources, one `## Post-lesson question`, and conditional learner-facing `## Visual descriptions`; no mutable status. |
-| `narration.txt` | `design-tutorial`; approved spoken words only. |
+| `narration.txt` | `design-tutorial`; approved spoken words and intentional non-spoken Fish expression and pause cues. |
 | `narration.wav` | `generate-tutorial-narration`; Fish Audio output generated directly from the approved `narration.txt`. |
 | `narration.wav.fish-request.json` | `fish-tts.mjs`; local attempt history that prevents blind duplicate requests and contains no narration or voice ID. Keep with its WAV; it is not published or a course stage record. |
 | `storyboard.md` | `design-tutorial`; the provisional visual plan created with the script and later finalized against verified generated narration. |
@@ -117,9 +117,10 @@ subsequent line or row beginning with `Beat` (for example, `| Beat B01 | P01 | 0
 gapless beats that cover its full range; a hold is an explicit beat. This label lets the validator
 distinguish nested beats from adjacent shots. Older shot-only storyboards remain valid.
 Keep concise subtitle text and verified timing in the editable video composition. The text may
-differ from spoken wording in `narration.txt` while preserving meaning. Burn the subtitles into
-`video.mp4` pixels. Encoder-specific input, when needed, is temporary; do not create or publish a
-VTT-like caption file or separate subtitle track.
+differ from spoken wording in `narration.txt` while preserving meaning; omit Fish expression and
+pause cues because they are not spoken. Burn the subtitles into `video.mp4` pixels. Encoder-specific
+input, when needed, is temporary; do not create or publish a VTT-like caption file or separate
+subtitle track.
 Subtitle appearance comes from the applicable series visual system and course `video-style.md`;
 the preview and render implement that visual contract.
 

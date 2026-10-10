@@ -170,6 +170,33 @@ Review `narration.txt` as something a person must say and a listener must unders
 viewing, not as written documentation. Fail the draft when it oralizes the lesson card, recites
 course metadata or dense statistics, or stacks abstract terminology. A visual may carry exact labels,
 routes, code, and state changes when the narration gives a clear cue and explains their significance.
+Test first-hearing comprehension with an audio-only, single-pass read-through. Hide the storyboard,
+paragraph map, and on-screen labels; read the uncued narration at a natural pace, or listen to
+generated audio once without pausing. After a paragraph, a learner should be able to say what is
+being discussed and what changed; at a transition, why the next point follows; after a list, what
+each item belongs to. Mark the exact place where understanding requires rereading, a visual label,
+an unstated prior fact, or guessing the referent of "this" or "it". Diagnose whether the cause is
+an unnamed object, competing referents, stacked new terms, an overloaded sentence, or an ungrouped
+list, then recommend the smallest spoken rewrite. Do not claim verified listener comprehension from
+a text-only read-through.
+Treat Fish cues as non-spoken directions: verify the selected model's syntax, placement by the
+affected words, and fit with sentence meaning and course voice. A genuine question or payoff may
+need a cue; flag conflicting, excessive, or theatrical cues, without requiring one per paragraph.
+For Fish S2, review each sentence's intended delivery; prefer one sentence per line, with blank
+lines separating coherent spoken paragraphs. Check that emotion cues start the sentence they affect,
+that `[emphasis]` precedes its phrase, and that untagged sentences do not rely on a previous cue
+persisting.
+At an adjacent cue change, review the last sentence before and first sentence after as one intended
+spoken span. Before narration exists, flag contradictions visible in the text and leave actual
+continuity for audio verification. When generated audio exists, listen across the change at normal
+speed and flag a cue whose heard delivery disrupts the intended transition; a shorter ASR word gap
+by itself does not establish better continuity.
+Do not require `[break]` or `[long-break]` at paragraph boundaries; flag routine
+pause tags in a long script. They cannot guarantee clean silence and can disrupt continuity. For
+predictable section or learner holds, require a storyboard pause intent and later measured editing.
+At consequential delivery changes, inspect storyboard and preview together: visual action should
+support the same question, discovery, setback, or resolution without early answers or decorative
+reactions. Adjacent voice and visual shifts should follow the evidence and established style.
 Check every specialized term, notation, exact label, unusual name, and number that is spoken: it
 must be necessary, introduced in plain language, easy to pronounce, and distinguishable by ear.
 Context-free labels, arbitrary placeholder data, and unexplained example rules are not neutral;
@@ -270,12 +297,16 @@ humor when the course did not request it or when a serious failure path calls fo
 Report a substantial estimated overrun for planning, but do not treat it alone as a script defect
 or require cutting approved outline content. Judge whether the explanation earns its time and teaches every
 approved beat clearly.
-Audit paragraph continuity, not only sentence quality. Privately summarize each paragraph's single
-job and verify that the following paragraph answers, advances, tests, or usefully reframes it. Flag
-two passages that independently establish the same context, conflict, or conclusion even when their
-wording differs. An example should be introduced once and then developed as one thread; opening with
-its consequence, leaving for an abstract detour, and later restarting it as a new example is a
-structural repetition, not a fresh hook.
+Audit paragraph continuity, not only sentence quality. At normal listening speed, check whether
+a first-time listener can tell what each paragraph did and why the next one follows without seeing
+the paragraph map or storyboard. Privately summarize each paragraph's single job; flag a boundary
+whose logic exists only in blank lines, a visual cut, an emotion cue, or silence. Where the reason
+for moving on is unclear, ask for a natural connective thought, the next necessary question, or a
+changed learner action rather than a formulaic heading. Compare the spoken weight of the primary
+route with optional inventories. Flag two passages that independently establish the same context,
+conflict, or conclusion even when their wording differs. An example should be introduced once and
+then developed as one thread; opening with its consequence, leaving for an abstract detour, and later
+restarting it as a new example is a structural repetition, not a fresh hook.
 Where several paragraphs restate the same observed result, keep the clearest inference and retain
 another pass only if it makes a distinct comparison or supports a new learner action. Name the
 specific passage and lost thinking opportunity when reporting a script as stiff; a generic request
@@ -284,11 +315,12 @@ When reporting a pre-generation duration, require a range based on a stated coun
 rate appropriate to the script's language and density, and explicit allowance for demonstrations,
 predictions, or silence. Do not present a single exact duration as verified before audio exists.
 
-Check that `narration.txt` has spoken words only: no title, Markdown, paragraph identifier,
-timestamp, citation URL, or production note. Match each blank-line-separated paragraph in order
-to the paragraph map in `lesson.md`; make the card's sources, teaching purpose, and required
-on-screen evidence agree with the provisional storyboard. Do not ask the speaker to read a title
-merely because it appears in the card.
+Check that `narration.txt` has only spoken words and intentional non-spoken Fish expression and
+pause cues: no title, Markdown, paragraph identifier, timestamp, citation URL, or production note.
+Exclude cues when assessing what a listener hears, estimating spoken length, and planning subtitle
+copy. Match each blank-line-separated paragraph in order to the paragraph map in `lesson.md`; make
+the card's sources, teaching purpose, and required on-screen evidence agree with the provisional
+storyboard. Do not ask the speaker to read a title merely because it appears in the card.
 
 Audit each lesson's narration and storyboard as though a learner opened that lesson directly,
 without a known viewing history. Its required starting capability should be clear; route a viewer
