@@ -58,3 +58,5 @@ current design decision.
 For a lesson with final narration and effective `narration-final` state, read
 [align to audio](references/align-to-audio.md). Use actual `narration.wav` timing to finalize
 `storyboard.md`; do not repeat draft instructions unless the script or preview must change.
+Use the [audio-visual beat contract](../../references/audio-visual-beat-verification.md) for observable
+cue-to-target checks during drafting and the typed Beat rows required by final audio alignment.

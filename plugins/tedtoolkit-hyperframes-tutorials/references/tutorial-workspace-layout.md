@@ -39,6 +39,8 @@ delta.
 │       ├── storyboard.md
 │       ├── storyboard-preview.html
 │       ├── video-shot-review.md
+│       ├── video-review.json
+│       ├── video-review/            # author-only encoded beat clips and frame evidence
 │       ├── video-source.json
 │       ├── composition/            # editable, source-only HTML video project
 │       ├── cover.png
@@ -80,6 +82,7 @@ status source; lesson cards must not maintain another status field.
 | `storyboard.md` | `design-tutorial`; the provisional visual plan created with the script and later finalized against verified generated narration. |
 | `storyboard-preview.html` | `design-tutorial`; locally viewable, untimed frames for every provisional shot, reviewed with the script before narration. |
 | `video-shot-review.md` | `build-tutorial`; author-only mapping from every stable shot ID to an inspected encoded frame, moving interval, and preview comparison for new productions. |
+| `video-review.json` and `video-review/` | `prepare-video-review.mjs` generates input-bound clips, frames, media hashes, and an Unverified review template; `build-tutorial` inspects them and records beat observations in `video-shot-review.md`. These are production evidence, not another course state or timing plan. |
 | `video-source.json` and `composition/` | `build-tutorial`; list every editable composition HTML entry in `htmlEntries` (for example `composition/index.html`), load only declared shared CSS, preserve static shot IDs, and keep editable source files here for fingerprinting. |
 | Editable composition | `build-tutorial`; implementation of the final storyboard, registered in the source manifest for new productions. |
 | `video.mp4` | `build-tutorial`; formal render and the packaging workflow's publication signal. |
@@ -116,6 +119,9 @@ subsequent line or row beginning with `Beat` (for example, `| Beat B01 | P01 | 0
 00:00:00.500 | Show the changed line |`). When beat rows are used, every shot must have ordered,
 gapless beats that cover its full range; a hold is an explicit beat. This label lets the validator
 distinguish nested beats from adjacent shots. Older shot-only storyboards remain valid.
+New or re-recorded final storyboards use the typed nine-cell Beat rows in the shared
+[audio-visual beat contract](audio-visual-beat-verification.md). Existing records retain their
+compatibility; the next final-storyboard verification adopts the new encoded evidence requirement.
 Keep concise subtitle text and verified timing in the editable video composition. The text may
 differ from spoken wording in `narration.txt` while preserving meaning; omit Fish expression and
 pause cues because they are not spoken. Burn the subtitles into `video.mp4` pixels. Encoder-specific
@@ -132,7 +138,7 @@ The normal order is:
 2. Existing series visual system when present, course `video-style.md` and its reusable CSS/HTML assets, then `lesson.md`, `narration.txt`, provisional `storyboard.md`, visual `storyboard-preview.html`, and all referenced demonstration sources. Review the script and shot images against the applicable style rules together before approval; inspect a short motion specimen when movement itself defines the style or teaching relationship.
 3. Fish Audio generates `narration.wav` from the approved text and saved voice model ID.
 4. `design-tutorial` listens to that audio and writes verified shot ranges into `storyboard.md`.
-5. Editable HyperFrames composition, formal `video.mp4` with burned-in subtitles, and per-shot encoded review for new productions.
+5. Editable HyperFrames composition, formal `video.mp4` with burned-in subtitles, per-shot encoded review, and input-bound encoded beat evidence with observed checks for new final storyboards.
 6. Course `cover-system.md` and `course-cover.png`, plus a verified lesson `cover.png` based on the current formal video.
 7. Generated offline learner release and ZIP.
 

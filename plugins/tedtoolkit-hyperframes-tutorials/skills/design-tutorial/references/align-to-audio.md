@@ -47,8 +47,10 @@ do not make them reconstruct a vanished state from memory. Check a normal-speed 
 using a universal seconds-per-line rule.
 
 Within each shot, map every materially different spoken claim or action to a visual beat anchored to
-the corresponding phrase in the generated audio. Record that beat's exact audio range, spoken cue,
-visible state or action, and exact on-screen text. A paragraph-level shot boundary alone does not
+the corresponding phrase in the generated audio. Follow the shared
+[audio-visual beat contract](../../../references/audio-visual-beat-verification.md) for the timed
+nine-cell Beat rows: cue, target, before, change, after, and observable check. Preserve exact
+on-screen text or its declared source beside the beat. A paragraph-level shot boundary alone does not
 establish audio-visual alignment: for example, a code change should appear when the narration reaches
 the change, and a test result should appear when the narration reaches verification. Keep the beat
 ranges ordered and gapless across the shot; explicitly hold an existing visual when the voice does
@@ -56,7 +58,10 @@ not call for a new state. Put each beat range on its own line or table row begin
 directly after its parent shot; label the shot row `Shot` for clarity. This format lets the course
 validator distinguish an internal beat from another shot. Check the plan at each semantic change
 against `narration.wav`, and revise
-the affected beats before calling the storyboard final.
+the affected beats before calling the storyboard final. A cue that refers to a filename or symbol
+needs that exact target visible and locatable as it is heard; an action cue needs its actual process
+or state change, not a label naming the action. Finalizing or re-recording the storyboard enables
+the corresponding encoded beat-evidence requirement for production.
 
 Mark `storyboard.md` final only when every spoken paragraph is covered, every shot has a verified
 audio range, every declared source exists, no critical visual contradicts the narration, and the

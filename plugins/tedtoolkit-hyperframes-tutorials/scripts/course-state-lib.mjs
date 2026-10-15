@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { compareZipToDirectory } from "./release-archive-lib.mjs";
 import { lintHtmlVisualStyle, lintScriptVisualStyle } from "./visual-source-lint.mjs";
+import { parseTimecode, parseVisualBeatRow, validateVideoBeatReview } from "./visual-beat-review.mjs";
 
 export const LESSON_STAGES = [
   "planned",
@@ -486,9 +487,11 @@ export function requiredLessonFiles(lesson, stage) {
   }
   if (index >= stageIndex("video-verified")) {
     files.push(`${base}/video.mp4`);
-    if (lesson.records?.["script-draft"]?.shotMappingRequired === true) {
+    if (lesson.records?.["script-draft"]?.shotMappingRequired === true ||
+        lesson.records?.["storyboard-final"]?.visualBeatReviewRequired === true) {
       files.push(`${base}/video-shot-review.md`);
     }
+    if (lesson.records?.["storyboard-final"]?.visualBeatReviewRequired === true) files.push(`${base}/video-review.json`);
     if (lesson.records?.["script-draft"]?.videoSourceRequired === true) {
       files.push(`${base}/video-source.json`);
     }
@@ -796,18 +799,7 @@ function markedSectionVisibleText(html, attribute, lessonId) {
   return null;
 }
 
-function parseTimecode(text) {
-  const match = /^(?:(\d{2,}):)?(\d{2}):(\d{2})\.(\d{3})$/.exec(text);
-  if (!match) return Number.NaN;
-  const hours = Number(match[1] || 0);
-  const minutes = Number(match[2]);
-  const seconds = Number(match[3]);
-  const millis = Number(match[4]);
-  if (minutes > 59 || seconds > 59) return Number.NaN;
-  return hours * 3600 + minutes * 60 + seconds + millis / 1000;
-}
-
-export function parseStoryboardTiming(contents) {
+export function parseStoryboardTiming(contents, { visualBeatsRequired = false } = {}) {
   const normalized = contents.replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n");
   const pattern = /((?:\d{2,}:)?\d{2}:\d{2}\.\d{3})\s+-->\s+((?:\d{2,}:)?\d{2}:\d{2}\.\d{3})/g;
   const shots = [];
@@ -836,19 +828,25 @@ export function parseStoryboardTiming(contents) {
       if (Math.abs(range.start - (previous?.end ?? shot.start)) > 0.001) {
         throw new Error("storyboard beat ranges must be ordered and gapless within each shot");
       }
-      shot.beats.push(range);
+      const beat = visualBeatsRequired ? parseVisualBeatRow(line, shot.id, range) : range;
+      if (visualBeatsRequired && shots.some((item) => item.beats.some((entry) => entry.id === beat.id))) {
+        throw new Error(`duplicate visual Beat identifier: ${beat.id}`);
+      }
+      shot.beats.push(beat);
     } else {
       const previous = shots.at(-1);
       if (previous && range.start < previous.end - 0.001) {
         throw new Error(`storyboard audio ranges overlap or are out of order at range ${shots.length + 1}`);
       }
-      shots.push({ ...range, beats: [] });
+      const id = /^\s*(?:\|\s*)?Shot\s+(S\d{2,})\b/.exec(line)?.[1];
+      if (visualBeatsRequired && (!id || shots.some((shot) => shot.id === id))) throw new Error("visual beats need unique Shot S01 identifiers on timed shot rows");
+      shots.push({ ...range, ...(visualBeatsRequired ? { id } : {}), beats: [] });
     }
   }
   if (shots.length === 0) {
     throw new Error("final storyboard.md contains no audio ranges; use HH:MM:SS.mmm --> HH:MM:SS.mmm");
   }
-  if (hasBeatRows) {
+  if (hasBeatRows || visualBeatsRequired) {
     for (const shot of shots) {
       if (shot.beats.length === 0 || Math.abs(shot.beats.at(-1).end - shot.end) > 0.001) {
         throw new Error("storyboard beat ranges must cover every shot without gaps");
@@ -971,7 +969,9 @@ export function validateLessonArtifacts(root, lesson, stage) {
     const base = `lessons/${id}`;
     try {
       const storyboardPath = safeCoursePath(root, `${base}/storyboard.md`).absolute;
-      parseStoryboardTiming(fs.readFileSync(storyboardPath, "utf8"));
+      parseStoryboardTiming(fs.readFileSync(storyboardPath, "utf8"), {
+        visualBeatsRequired: lesson.records?.["storyboard-final"]?.visualBeatReviewRequired === true,
+      });
       if (lesson.records?.["script-draft"]?.shotMappingRequired === true) {
         const mappingProblems = shotMappingIssues(root, id, true);
         if (mappingProblems.length) throw new Error(mappingProblems.join("; "));
@@ -981,11 +981,22 @@ export function validateLessonArtifacts(root, lesson, stage) {
     }
   }
   if (stageIndex(stage) >= stageIndex("video-verified") &&
-      lesson.records?.["script-draft"]?.shotMappingRequired === true) {
+      (lesson.records?.["script-draft"]?.shotMappingRequired === true ||
+       lesson.records?.["storyboard-final"]?.visualBeatReviewRequired === true)) {
     try {
       videoShotReviewIssues(root, id);
     } catch (error) {
       errors.push(issue("VIDEO_SHOT_REVIEW", error.message, id));
+    }
+  }
+  if (stageIndex(stage) >= stageIndex("video-verified") &&
+      lesson.records?.["storyboard-final"]?.visualBeatReviewRequired === true) {
+    try {
+      const lessonRoot = safeCoursePath(root, `lessons/${id}`).absolute;
+      const shots = parseStoryboardTiming(fs.readFileSync(path.join(lessonRoot, "storyboard.md"), "utf8"), { visualBeatsRequired: true });
+      validateVideoBeatReview(lessonRoot, shots.flatMap((shot) => shot.beats));
+    } catch (error) {
+      errors.push(issue("VIDEO_BEAT_REVIEW", error.message, id));
     }
   }
   if (stageIndex(stage) >= stageIndex("video-verified") &&
@@ -1003,6 +1014,9 @@ export async function checkFingerprintRecord(root, record, expectedFiles, lesson
   }
   if (!record.fingerprints || typeof record.fingerprints !== "object" || Array.isArray(record.fingerprints)) {
     return { fresh: false, errors: ["fingerprints are missing"] };
+  }
+  if (stage === "video-verified" && lesson?.records?.["storyboard-final"]?.visualBeatReviewRequired === true) {
+    errors.push(...validateLessonArtifacts(root, lesson, "video-verified").filter((item) => item.code === "VIDEO_BEAT_REVIEW").map((item) => item.message));
   }
   if (record.videoStylePath !== undefined) {
     if (record.videoStylePath !== "video-style.md") {
@@ -1135,7 +1149,7 @@ function validateReleaseReferences(root, releaseDirectory) {
   if (fs.existsSync(lessonsPath) && fs.statSync(lessonsPath).isDirectory()) {
     for (const lesson of fs.readdirSync(lessonsPath, { withFileTypes: true })) {
       if (!lesson.isDirectory()) continue;
-      for (const name of ["video-shot-review.md", "video-source.json", "composition"]) {
+      for (const name of ["video-shot-review.md", "video-review.json", "video-review", "video-source.json", "composition"]) {
         if (fs.existsSync(path.join(lessonsPath, lesson.name, name))) {
           errors.push(issue("RELEASE_AUTHORING_SOURCE",
             `release contains authoring artifact: lessons/${lesson.name}/${name}`));

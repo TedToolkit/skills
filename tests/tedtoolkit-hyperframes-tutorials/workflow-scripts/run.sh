@@ -7,6 +7,7 @@ if [[ -z $repo_root ]]; then
 fi
 repo_root=$(cd "$repo_root" && pwd -P)
 scripts="$repo_root/plugins/tedtoolkit-hyperframes-tutorials/scripts"
+node --test "$repo_root/tests/tedtoolkit-hyperframes-tutorials/visual-beat-review.test.mjs"
 fixture=$(mktemp -d)
 trap 'rm -rf -- "$fixture"' EXIT
 
@@ -492,10 +493,10 @@ cat >"$course/lessons/lesson-01/storyboard.md" <<'EOF'
 ## Final timing
 
 | Shot S01 | P01 | 00:00:00.000 --> 00:00:00.500 | Hello |
-| Beat B01 | Hello | 00:00:00.000 --> 00:00:00.200 | Show code |
-| Beat B02 | Hello | 00:00:00.200 --> 00:00:00.500 | Hold code |
+| Beat S01.1 | 00:00:00.000 --> 00:00:00.200 | reveal | Hello | source | empty | show code | code visible | code readable at cue |
+| Beat S01.2 | 00:00:00.200 --> 00:00:00.500 | hold | Hello | source | code visible | hold code | code visible | code remains readable |
 | Shot S02 | P01 | 00:00:00.500 --> 00:00:01.000 | world. |
-| Beat B03 | world. | 00:00:00.500 --> 00:00:01.000 | Show result |
+| Beat S02.1 | 00:00:00.500 --> 00:00:01.000 | reveal | world. | result | empty | show result | result visible | result readable at cue |
 EOF
 node "$scripts/record-course-stage.mjs" "$course" lesson-01 storyboard-final >/dev/null
 printf 'video\n' >"$course/lessons/lesson-01/video.mp4"
@@ -509,6 +510,7 @@ cat >"$course/lessons/lesson-01/video-shot-review.md" <<'EOF'
 | Shot S01 | 00:00:00.250 | Pass | Code is readable; motion interval checked. |
 | Shot S02 | 00:00:00.750 | Pass | Result is readable; transition checked. |
 EOF
+node "$repo_root/tests/tedtoolkit-hyperframes-tutorials/video-review-fixture.mjs" "$course/lessons/lesson-01"
 missing_video_source_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 video-verified 2>&1 || true)
 grep -Fq 'missing required artifact: lessons/lesson-01/video-source.json' <<<"$missing_video_source_output"
 mkdir -p "$course/lessons/lesson-01/composition"
@@ -522,9 +524,13 @@ sed -i 's/Shot S02/Shot S03/' "$course/lessons/lesson-01/video-shot-review.md"
 wrong_shot_review_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 video-verified 2>&1 || true)
 grep -Fq 'video-shot-review.md must cover storyboard shots in order' <<<"$wrong_shot_review_output"
 cp "$fixture/video-shot-review.saved" "$course/lessons/lesson-01/video-shot-review.md"
-sed -i 's/| Pass | Result/| Fail | Result/' "$course/lessons/lesson-01/video-shot-review.md"
+sed -i '/^| Shot S02 /s/| Pass |/| Fail |/' "$course/lessons/lesson-01/video-shot-review.md"
 failed_shot_review_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 video-verified 2>&1 || true)
 grep -Fq 'video-shot-review.md needs an encoded-frame time, Pass result, and observation' <<<"$failed_shot_review_output"
+cp "$fixture/video-shot-review.saved" "$course/lessons/lesson-01/video-shot-review.md"
+sed -i '/^| Beat S01.2 /s/| Pass |/| Unverified |/' "$course/lessons/lesson-01/video-shot-review.md"
+unverified_beat_output=$(node "$scripts/record-course-stage.mjs" "$course" lesson-01 video-verified 2>&1 || true)
+grep -Fq 'Unverified or Fail cannot advance video-verified' <<<"$unverified_beat_output"
 cp "$fixture/video-shot-review.saved" "$course/lessons/lesson-01/video-shot-review.md"
 node "$scripts/record-course-stage.mjs" "$course" lesson-01 video-verified >/dev/null
 node "$scripts/validate-course.mjs" "$course" >/dev/null

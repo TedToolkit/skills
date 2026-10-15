@@ -81,7 +81,7 @@ Use these ordered states:
 | `script-approved` | The reviewed script and visual shot preview have explicit human approval for Fish narration generation. | `generate-tutorial-narration` |
 | `narration-final` | Fish Audio generated `narration.wav` from the approved script. | `design-tutorial` aligns and finalizes the storyboard |
 | `storyboard-final` | The final storyboard contains verified shot ranges aligned to the generated narration. | `build-tutorial` |
-| `video-verified` | The formal video with burned-in subtitles passed production verification; new productions include a per-shot encoded review. | `create-tutorial-cover` |
+| `video-verified` | The formal video with burned-in subtitles passed production verification; new productions include per-shot review and encoded beat evidence with observed checks. | `create-tutorial-cover` |
 | `cover-verified` | The lesson cover represents the current verified video and passed full-size, thumbnail, and course-family review. | `package-tutorial-course` |
 
 `video-verified` is a production status. It does not claim that representative learners were
@@ -118,7 +118,7 @@ Required cumulative lesson artifacts are:
 | `script-approved` | No new file; a fresh script snapshot plus `approvalSource` |
 | `narration-final` | `narration.wav` |
 | `storyboard-final` | `storyboard.md` |
-| `video-verified` | `video.mp4`, `video-shot-review.md` for records with `shotMappingRequired`, and `video-source.json` plus its editable composition for records with `videoSourceRequired` |
+| `video-verified` | `video.mp4`, `video-shot-review.md` for records with `shotMappingRequired` or `visualBeatReviewRequired`, `video-review.json` plus its referenced media for `visualBeatReviewRequired`, and `video-source.json` plus its editable composition for `videoSourceRequired` |
 | `cover-verified` | Root `cover-system.md`, root `course-cover.png`, and lesson `cover.png` |
 
 The Fish helper also keeps `narration.wav.fish-request.json` beside the WAV as local request
@@ -168,6 +168,16 @@ encoded-frame timestamp, `Pass` after any correction, and a note about the previ
 The file is fingerprinted through later stages. The validator checks coverage and row shape; the
 producer still checks the actual frames, motion intervals, evidence, and reading time. Do not
 advance a shot with an unresolved material mismatch or put this record in the learner release.
+New or re-recorded `storyboard-final` records set `visualBeatReviewRequired`. Their final storyboard
+uses the typed Beat rows in the [audio-visual beat contract](audio-visual-beat-verification.md).
+At `video-verified`, the generated `video-review.json` binds every beat's encoded clip, before/cue/after
+frames, and their hashes to the current `video.mp4`, `narration.wav`, and `storyboard.md`. The review
+has a matching encoded interval, observed judgment, and Pass for every beat. Missing, changed,
+out-of-range, Fail, or Unverified evidence blocks verification. The manifest enters cumulative stage
+fingerprints; media hashes are rechecked when validating video freshness. This establishes evidence
+traceability, not semantic correctness or proof that the reviewer actually watched. Existing stage
+records without this marker remain valid; adopting it requires verifying and recording the final
+storyboard through the recorder, never hand-editing state. All review media and records are author-only.
 For a lesson with `videoSourceRequired`, `video-verified` also requires
 `lessons/<lesson-id>/video-source.json` containing only a non-empty `htmlEntries` array, with
 lesson-relative paths such as `composition/index.html`. Keep the actual editable HTML project under
@@ -215,7 +225,9 @@ approved spoken paragraph. A line or table row beginning with `Beat` is an inter
 inside the preceding shot. If any beat is present, every shot's beats must be ordered, gapless, and
 cover that shot; explicit hold beats account for unchanged visuals. Shot-only legacy files still
 validate. The validator checks the stored ranges without requiring a second timing
-artifact. Subtitle text and timing live in the editable composition and are checked against the audio
+artifact. New or re-recorded `storyboard-final` records require every shot's typed Beat rows with
+stable parent-prefixed IDs, kind, cue, target, before/change/after, and observable check; the shared
+beat contract defines their nine-cell format. Subtitle text and timing live in the editable composition and are checked against the audio
 and final storyboard during production review. Verify the encoded video pixels and confirm the MP4
 has no separate subtitle stream. Exact subtitle wording need not equal `narration.txt`.
 

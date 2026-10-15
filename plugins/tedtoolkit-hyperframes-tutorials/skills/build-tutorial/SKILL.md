@@ -1,8 +1,9 @@
 ---
 name: build-tutorial
 description: >-
-  Build, revise, verify, and render one narrated animated tutorial in HyperFrames from a
-  lesson script, final storyboard, and generated narration audio. Use for production or changes to an
+  Build, review, revise, verify, and render one narrated animated tutorial in HyperFrames from a
+  lesson script, final storyboard, and generated narration audio. Use for production, audio-visual
+  synchronization review, or changes to an
   existing tutorial video. Do not use for course-level curriculum planning, script-only work,
   or storyboard-only work.
 ---
@@ -26,6 +27,10 @@ Use the [visual and motion decisions](../../references/evidence-informed-guide/v
 when deciding how visual evidence, attention cues, and recurring screen elements appear in the render.
 Its animation section informs motion choices without prescribing an effect library, visual style,
 or amount of animation.
+For spoken references, teaching actions, and their production review, use the shared
+[audio-visual beat verification contract](../../references/audio-visual-beat-verification.md).
+Resolve its packaged [`prepare-video-review.mjs`](../../scripts/prepare-video-review.mjs) and
+[`visual-beat-review.mjs`](../../scripts/visual-beat-review.mjs) from this skill's location.
 
 ## Check the handoff
 
@@ -173,6 +178,10 @@ For each materially different spoken action or claim, show the matching state wh
 heard; do not reveal later results early or leave a generic summary card on screen through several
 unrelated statements. Use the storyboard's phrase ranges as the timing source, and check the exact
 transition frames on both sides of each semantic change.
+Use each beat's target, before/change/after states, and observable check as implementation criteria.
+A filename must be readable when speech refers to it; a symbol needs an unambiguous local cue;
+a promised selection or replacement needs the same object visibly changing in place. Preserve a
+valid quiet hold or finished-state comparison when that is what the teaching claim requires.
 Preserve the storyboard's division of work: visible route labels, code, comparisons, and state
 changes may carry information that narration does not read verbatim. Give each a clear spoken cue
 and adequate reading time. Confirm that the narration conveys any meaning needed for the primary
@@ -241,9 +250,12 @@ production contract when it differs from a generic rendering default, and surfac
 For each new file-based lesson, write `video-shot-review.md` after inspecting the encoded video.
 Use one table row per storyboard shot in order: `Shot S01`, a checked encoded-frame time in
 `HH:MM:SS.mmm` form, `Pass` after any correction, and the observed match or justified
-difference from the preview. Include the important moving interval and settled state in that review,
-not only a contact-sheet thumbnail. The recorder checks complete shot coverage and fingerprints
-this author-only record; it cannot determine whether the human judgment was correct. Do not record
+difference from the preview. For new or re-recorded final storyboards, prepare encoded beat clips
+and before/cue/after frames with the packaged helper, then add each beat's encoded interval, result,
+and actual observation following the shared contract. The generated template starts `Unverified`;
+inspect its sound and moving evidence before entering Pass. Include the important moving interval
+and settled state in the review, not only a contact-sheet thumbnail. Hashes bind evidence to the
+current audio, storyboard, and video; they cannot establish a correct semantic judgment. Do not record
 `video-verified` while any shot has an unresolved material mismatch. Keep the review record out of
 the learner release.
 

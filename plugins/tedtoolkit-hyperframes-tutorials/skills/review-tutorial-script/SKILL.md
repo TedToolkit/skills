@@ -31,6 +31,11 @@ For a new file-based draft, check that every `Shot S01` identifier in `storyboar
 same-ordered `data-shot-id` container in `storyboard-preview.html`. Inspect the initial, key-change,
 and settled states within that container against the script, evidence sources, and shared style;
 matching identifiers alone do not make a misleading or unreadable preview acceptable.
+Use the [audio-visual beat contract](../../references/audio-visual-beat-verification.md) to check
+whether consequential spoken references have exact visible targets and promised actions have
+observable before/change/after states. Review these as untimed plans before narration exists.
+Route a request to inspect synchronization in an existing encoded video to `build-tutorial`, which
+owns production review and its evidence; this script review cannot certify unseen motion or audio.
 
 ## Establish the review set
 

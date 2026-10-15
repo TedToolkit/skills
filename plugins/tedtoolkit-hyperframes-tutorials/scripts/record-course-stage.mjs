@@ -10,6 +10,7 @@ import {
   fingerprintVideoSources,
   lessonContractSha256,
   loadCourseDocuments,
+  parseStoryboardTiming,
   productionContractSha256,
   requiredLessonFiles,
   safeCoursePath,
@@ -81,6 +82,10 @@ try {
   }
   const artifactErrors = validateLessonArtifacts(root, lesson, targetStage);
   if (artifactErrors.length) throw new Error(artifactErrors.map((item) => item.message).join("; "));
+  if (targetStage === "storyboard-final") {
+    const storyboard = safeCoursePath(root, `lessons/${lesson.id}/storyboard.md`).absolute;
+    parseStoryboardTiming(fs.readFileSync(storyboard, "utf8"), { visualBeatsRequired: true });
+  }
   if (targetStage === "script-draft" || targetStage === "script-approved") {
     const relativePath = `lessons/${lesson.id}/storyboard.md`;
     const storyboardPath = safeCoursePath(root, relativePath).absolute;
@@ -127,6 +132,7 @@ try {
     ...(targetStage === "script-draft" ? { visualAssetsRequired: true } : {}),
     ...(targetStage === "script-draft" ? { shotMappingRequired: true } : {}),
     ...(targetStage === "script-draft" ? { videoSourceRequired: true } : {}),
+    ...(targetStage === "storyboard-final" ? { visualBeatReviewRequired: true } : {}),
     ...(visualDependencies ? { visualDependencies } : {}),
     ...(sourceDependencies ? { sourceDependencies } : {}),
     fingerprints,

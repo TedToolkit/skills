@@ -4,6 +4,7 @@ config:
 
 smoke_scenarios:
   - "Catch transient collisions and competing animations before video verification"
+  - "Review spoken references and editing actions against observable encoded evidence"
 
 scenarios:
   - name: "Catch transient collisions and competing animations before video verification"
@@ -33,4 +34,37 @@ scenarios:
       - "Finds the old and new titles overlap visibly between 13.1 and 13.5 seconds and makes the shared area clear before the new title appears, unless a deliberately readable transition is designed."
       - "Requires inspection of the corrected encoded video at normal speed and nearby consecutive frames through each risk interval, including the arrow path and title handoff; does not claim that lint or sparse stills alone prove the issues fixed."
       - "Does not report every intentional overlap as a defect and does not mark the lesson video-verified from this excerpt."
+    timeout: 360
+
+  - name: "Review spoken references and editing actions against observable encoded evidence"
+    prompt: >-
+      Use $build-tutorial for a read-only production review of an existing beginner C# lesson.
+      Do not modify files, render, or record a stage. The supplied excerpts list every visual
+      layer and animation in the selected intervals. At 182.9 seconds the verified spoken cue is
+      “按画面上的文件名保存”. A folder card is visible throughout; its filename element
+      `检查.txt` has opacity zero until 185.0 seconds, then fades in. At 79–91 seconds the
+      narration explains the quotes, parentheses, and semicolon of `Console.WriteLine("Hi");`.
+      That line stays visible at x=200,y=300; three prose notes appear at x=1300,y=700.
+      No connectors, local highlights, or other spatial cues are rendered. At 151–162 seconds
+      the narration says “只选中引号里的文字，换成 Hello，其他符号别动，然后保存”.
+      A complete original code panel and a complete edited code panel fade in side by side,
+      followed by a 保存 text label. No source object is edited and no selection or saved-state
+      transition is rendered. Two supplied encoded stills show the settled code panels and label.
+      At 170–176 seconds the narration instead says “比较修改前后的输出”; both outputs are
+      visible together throughout that comparison. A previous review has one screenshot time
+      and Pass for each shot. Assess readiness, identify changes supported by these excerpts,
+      and specify the evidence and observations needed to complete verification. Distinguish
+      what this source-and-stills review establishes from what still needs playback inspection.
+    assertions:
+      - { type: "exit_success" }
+      - { type: "output_contains", value: "检查.txt" }
+      - { type: "output_contains", value: "Unverified" }
+    rubric:
+      - "Identifies the filename reference as premature by about two seconds and requires the exact filename to be readable at the spoken reference, rather than merely aligning the enclosing shot."
+      - "Identifies the detached symbol notes as insufficient to locate each referred-to symbol and proposes precise local cues on the actual code."
+      - "Identifies that the promised selection, in-place replacement, preservation of punctuation, and save-state feedback are absent; two finished code panels and a save label do not demonstrate that process."
+      - "Accepts the finished-output comparison as a potentially appropriate static comparison because that spoken claim does not promise an editing process; does not require motion for every beat."
+      - "Calls for exact cue/target/before/change/after/observable-check beat criteria, encoded clips with sound and before/cue/after frames, and observed per-beat judgments; source excerpts and two stills do not establish normal-speed motion or heard synchronization."
+      - "Keeps uninspected checks Unverified, does not claim to have watched or listened to supplied text, and does not accept the old per-shot Pass record as proof of semantic agreement."
+      - "Keeps production review in build-tutorial and routes only a genuinely changed spoken meaning or storyboard plan upstream; does not require regenerating unchanged narration or installing a generic video-generation plugin."
     timeout: 360

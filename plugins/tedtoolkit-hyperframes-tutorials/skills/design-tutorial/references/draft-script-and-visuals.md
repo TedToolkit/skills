@@ -342,6 +342,11 @@ shot, specify the learner-facing visual, initial and final states, motion sequen
 text, required asset or evidence source, and transition to the next shot. Split or revise narration
 that cannot be visualized clearly, would overload the screen, or requires evidence that does not
 exist; do not postpone those script defects until after narration generation.
+For consequential beats, use the shared
+[audio-visual beat contract](../../../references/audio-visual-beat-verification.md) to name the
+spoken cue, exact target, before/change/after states, and observable check while these are still
+untimed. For a procedure, preview its intermediate action; for a spoken reference, make the exact
+referred-to object locatable. Final audio alignment supplies the verified ranges later.
 At meaningful turns, align wording, Fish cue, and visible change around one teaching event. Name
 the intended delivery and visual response in the storyboard and show that state in the preview.
 Curiosity may hold a comparison until evidence appears; a conclusion may settle it for reading.
