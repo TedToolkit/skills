@@ -25,6 +25,11 @@
       "description": "Request scoping, risk-scaled change design and implementation, optional work-item orchestration, repository structure, README writing, and architecture decisions."
     },
     {
+      "name": "tedtoolkit-communication",
+      "source": "./plugins/tedtoolkit-communication",
+      "description": "Audience-aware communication drafts grounded in supplied facts, starting with humble technical inquiries and feedback."
+    },
+    {
       "name": "tedtoolkit-career",
       "source": "./plugins/tedtoolkit-career",
       "description": "Candidate career evidence, target research, factual resumes, matching, review, and interview preparation."

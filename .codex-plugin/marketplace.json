@@ -53,6 +53,18 @@
       "category": "Productivity"
     },
     {
+      "name": "tedtoolkit-communication",
+      "source": {
+        "source": "local",
+        "path": "./plugins/tedtoolkit-communication"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
       "name": "tedtoolkit-career",
       "source": {
         "source": "local",

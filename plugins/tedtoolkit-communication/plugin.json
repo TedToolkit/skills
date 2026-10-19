@@ -1,0 +1,6 @@
+{
+  "name": "tedtoolkit-communication",
+  "version": "0.1.0",
+  "description": "Audience-aware communication drafts grounded in supplied facts, starting with humble technical inquiries and feedback.",
+  "skills": ["./skills/"]
+}

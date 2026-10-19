@@ -21,6 +21,7 @@ After installing or updating a plugin, start a new task so Codex loads its curre
 | [`tedtoolkit-annotations`](plugins/tedtoolkit-annotations/) | C# XML comments and explicit contracts using TedToolkit annotations for boxing, constness, documentation, maintenance, and ownership. |
 | [`tedtoolkit-roslynhelper`](plugins/tedtoolkit-roslynhelper/) | Generating C# source with `TedToolkit.RoslynHelper`. |
 | [`tedtoolkit-project-development`](plugins/tedtoolkit-project-development/) | Request scoping, risk-scaled change design and implementation, optional work-item orchestration, design-principle governance, ADRs, professional review, project scaffolding, and README writing. |
+| [`tedtoolkit-communication`](plugins/tedtoolkit-communication/) | Humble, factual technical inquiries, problem feedback, and interface-use questions drafted for colleagues, maintainers, and vendors. |
 | [`tedtoolkit-career`](plugins/tedtoolkit-career/) | One candidate's factual career workspace, company and role research, evidence matching, targeted resume writing and review, and interview preparation. |
 | [`tedtoolkit-hiring`](plugins/tedtoolkit-hiring/) | Company-scoped roles, canonical candidate records, role applications, evidence-based assessments, and fair interviewer plans. |
 | [`tedtoolkit-hyperframes-tutorials`](plugins/tedtoolkit-hyperframes-tutorials/) | Planning tutorial series and courses, resuming production, co-designing scripts and storyboards, generating Fish narration, producing HyperFrames videos and covers, and packaging verified offline courses. |

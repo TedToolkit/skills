@@ -1,0 +1,4 @@
+interface:
+  display_name: "Draft Technical Message"
+  short_description: "Draft humble, factual technical inquiries and feedback"
+  default_prompt: "Use $draft-technical-message to turn these findings into a concise message in the recipient's language, asking whether my usage or understanding needs adjustment."
