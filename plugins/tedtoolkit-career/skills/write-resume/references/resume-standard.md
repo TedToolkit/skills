@@ -121,6 +121,57 @@ When metrics are absent, use the strongest supported non-numeric result instead 
 
 Do not label an implementation as a result when the source does not establish delivery or use.
 
+### Sentence patterns and engineering judgment
+
+Make the relationship between the problem, contribution, technical choice, and result explicit.
+Choose the strongest supported angle for each bullet; these are optional patterns, not required
+fields or a fixed word order:
+
+- **Problem resolution:** `Resolved [specific failure] by [personal action and mechanism], with
+  [supported verification or outcome].`
+- **Capability delivery:** `Built [capability] using [relevant mechanism], enabling [supported use].`
+- **Design decision:** `Selected [approach] to meet [constraint or quality goal]; [supported
+  implementation or result].`
+- **Root-cause investigation:** `Traced [symptom] to [cause] using [diagnostic method], then
+  [implemented correction and supported verification].`
+
+For architecture and design work, show why the approach suited the actual constraints when that
+reason is supported and material to the role. Include an alternative or accepted trade-off only
+when the evidence establishes it and it helps explain the decision. Using a technology alone does
+not establish that the candidate selected it or compared alternatives.
+
+Use direct action verbs and concrete objects. In English resume bullets, normally omit first-person
+pronouns and open with the contribution or result; place a constraint first when it makes the work
+easier to understand. Vary sentence structure with the evidence. Keep one main claim per bullet and
+leave extended project history, theory, and step-by-step comparisons for the interview. Adapt the
+wording naturally to the requested language rather than translating a fixed sentence frame.
+
+Use the shared integrity rules when connecting clauses: purpose is not proof of impact, and a team
+outcome is not automatically attributable to one contribution. Omit unsupported parts of a pattern;
+do not invent a problem, selection rationale, comparison, causal link, or result to complete it.
+When only the work is known, state the contribution precisely without implying a verified outcome.
+
+The following examples are fictional. They illustrate how to organize supplied facts, not facts to
+reuse in a candidate's resume.
+
+**Problem resolution**
+
+- Supplied facts: implemented connection-state tracking and automatic reconnection in a C# device
+  client; regression tests confirmed that acquisition resumed after a disconnect.
+- Weak: "Responsible for device communication using C#."
+- Stronger: "Implemented connection-state tracking and automatic reconnection in a C# device client;
+  regression tests confirmed acquisition resumed after disconnects."
+
+**Design decision**
+
+- Supplied facts: the application had to retain single-process deployment; the candidate chose
+  in-process modules over separate services, separated protocol parsing from business workflows
+  through adapter interfaces, and added a second device adapter without changing those workflows.
+- Weak: "Designed a modular architecture to improve maintainability."
+- Stronger: "Chose in-process modules over separate services to retain single-process deployment;
+  isolated protocol parsing behind adapter interfaces and added a second device adapter without
+  changing business workflows."
+
 ## Repository evidence translation
 
 Code repositories are evidence sources, not the intended audience's shared context. Translate raw

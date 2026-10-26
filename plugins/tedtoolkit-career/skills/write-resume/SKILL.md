@@ -124,6 +124,10 @@ does not mention them.
 - Express personal capabilities through demonstrated engineering practice—such as diagnosis,
   design, integration, delivery, or technical ownership—not unsupported traits or self-ratings.
 - Write bullets as action plus object or constraint plus outcome, deliverable, or current state.
+- Use the optional sentence patterns in [resume-standard.md](references/resume-standard.md#sentence-patterns-and-engineering-judgment)
+  to connect the work to its purpose. For architecture and design contributions, include a supported
+  constraint or selection rationale when it helps show engineering judgment. Choose the pattern
+  that fits the evidence rather than forcing every bullet into the same structure.
 - Translate repository evidence into reader-facing engineering language before drafting each bullet:
   `system or user problem + personal action + relevant technical method + supported result`.
   The project name may provide context, but the bullet must remain understandable when the reader
