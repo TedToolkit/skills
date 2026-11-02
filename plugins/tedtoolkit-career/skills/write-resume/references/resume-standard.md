@@ -34,8 +34,8 @@ Use this default order and change it only when another order better supports the
 
 1. Name, target title, location, contact details, and professional links.
 2. Professional summary: two to four lines connecting domain, level, strengths, and proof.
-3. Core skills grouped by business problem or company value, with the most relevant group first
-   and technical evidence following the value statement.
+3. Core skills grouped by recognizable capabilities, with the most relevant group first; each
+   skill name is followed by a business-value sentence and a technical-capability sentence.
 4. Professional experience in reverse chronology.
 5. Projects beyond employment, including independent and open-source work.
 6. Patents, publications, awards, or certifications when supported.
@@ -67,6 +67,12 @@ scope through owned decisions, systems, delivery stages, or collaboration bounda
 title alone. Prefer current work scope when it is both supported and target-relevant; otherwise use
 the most relevant demonstrated scope.
 
+Before accepting the summary, compare it with the main supported product and delivery streams in
+the evidence inventory. A compact description may group related work, but should still tell the
+reader which substantial business applications the candidate has worked on. Preserve the main remit
+while weighting it for the target; do not replace a substantial application with a generic noun
+such as “3D processing” merely to save words. This does not require every project name in the summary.
+
 State years only from supported chronology, do not double-count overlapping work, and distinguish
 overall experience from experience in a particular stack or domain. If a required summary fact is
 missing, ask only when it would materially change positioning; otherwise omit it rather than infer
@@ -74,47 +80,68 @@ seniority, tenure, ownership, or results.
 
 ## Core skills and practical breadth
 
-Write core skills for HR, hiring managers, and technical colleagues in the same section. Each item
-must first make its business or company value understandable without specialist knowledge, then
-provide enough technical substance to make the ability credible:
+Write each item for HR and technical readers using this structure:
 
-`business problem or company value -> personal capability and technical method -> supported application or result`
+`**Skill name:** Business or company value sentence. Concrete technical capability and evidence sentence.`
 
-Use concrete value-oriented group labels suited to the evidence, such as workflow delivery,
-operational reliability, system integration, or team reuse and efficiency. Within each item, say
-what problem the candidate can address or what useful capability they can deliver before naming
-languages, frameworks, algorithms, or architecture. Avoid opening with a technology inventory or
-generic promises such as “empower the business.”
+- **Before the colon:** name the skill directly, for example “Windows desktop development,”
+  “C++ integration,” or “Performance analysis and testing.” Use a concise capability label; do not
+  turn it into a benefit sentence or slogan.
+- **First sentence after the colon:** explain in plain language what useful work, decision or
+  outcome this capability supports for a user, customer or company team. HR should be able to
+  understand this sentence without decoding the stack.
+- **Second sentence:** explain the candidate's concrete capability through personal methods,
+  relevant technologies, constraints and supported project application or result. A technical reader
+  should be able to assess the claim from this sentence.
 
-Substantiate every ability with a relevant mechanism, ownership boundary, constraint, verification,
-or concrete project application. Include a concise project cue or supported result when useful;
-leave the full account in project experience. Technology names and self-ratings such as “strong,”
-“excellent,” or “expert” do not establish ability on their own.
+Keep these as two sentences within one bullet, without “For HR” / “For technical readers” labels.
+Semicolons may connect closely related technical evidence inside the second sentence. Name
+technologies where they help prove the capability, rather than turning the sentence into a stack
+inventory. The skill label may itself be technical; the plain-language value sentence belongs after
+its colon.
 
-Business value must follow the same evidence rules as technical claims. When measured impact is
-absent, describe the supported capability, solved problem, or bounded current work. Do not turn a
-technical implementation into an invented revenue gain, cost saving, efficiency improvement, or
-company-wide outcome, or claim an unevidenced future need at the target employer.
+A value statement identifies who can use the work and what useful workflow, decision or action it
+supports. A delivered operational capability can establish value without a monetary metric.
+“Integrate algorithms,” “define boundaries,” and “build components” only describe engineering work;
+connect them to their supported use. Do not assume that adding “support,” “enable” or “improve”
+makes an engineering task a business benefit.
 
-Order groups and items by hiring relevance while covering every supported capability, including
-applied breadth, distinctive strengths, and demonstrated delivery or coordination abilities beyond
-the posting. Give less relevant abilities concise treatment without erasing their application or
-depth. Express unusual combinations through the useful work they enable rather than a separate
-list of technical names.
+Check each item before delivery:
 
-Do not imply the same depth for every item. Prefer capabilities backed by delivery, repeated use,
-problem solving, or a substantial project. Clearly subordinate bounded working familiarity when it
-is useful, and omit technologies that were only encountered or cannot be connected to supported
-practice. Group related abilities to keep the full range readable; remove unsupported or repeated
-claims that dilute the main capability.
+1. Does the label name a recognizable skill rather than a promised benefit?
+2. Read only the first sentence after the colon, hiding the label and second sentence. Can HR
+   identify a useful user or company outcome without specialist knowledge?
+3. Does the second sentence explain personal capability and relevant technical depth, with a
+   concrete supported application, result or bounded current state?
+4. Does the value sentence stay within that evidence? When only a capability is established,
+   describe what it makes possible without inventing savings, adoption or measured improvement.
 
-Fictional example, usable only when the underlying facts are supplied:
+If the value sentence says only that an interface, module or library was built, translate it to the
+evidenced use of that artifact. Keep the actual source domain, personal scope and delivery state.
+Technology names and self-ratings such as “strong,” “excellent” or “expert” do not establish ability.
+Leave the full project account in project experience.
 
-**Recovery from device interruptions:** Resume data collection after device disconnects using C#
-connection-state tracking and automatic reconnection, verified by disconnect regression tests.
+Business value follows the same integrity rules as technical claims. Do not turn an implementation
+into invented revenue, cost savings, efficiency, reliability improvement or company-wide impact,
+or claim an unevidenced need at a future employer.
 
-The opening explains the operational value; the method and verification let technical readers
-assess the claim without asserting an unsupported reduction in downtime.
+Order capability groups by hiring relevance while covering every supported capability and practical breadth, including
+strengths beyond the posting. Group related skills and vary technical detail by evidence strength;
+do not imply equal depth in every technology or omit a distinct supported capability solely because
+it is not requested. Omit tools that were only encountered and cannot be connected to practice.
+
+Fictional examples, usable only when the underlying facts are supplied:
+
+- **Device communication and recovery:** Operators can resume data collection after a device
+  interruption. Implemented C# connection-state tracking and automatic reconnection, verified by
+  disconnect regression tests.
+- **Inspection application development:** Inspection staff can review measurements and export a
+  pass/fail report. Connected a C++ analysis library to a C# desktop workflow and verified the
+  measurement/report path with the supplied test cases.
+
+The labels name capabilities, the first sentences explain their use, and the second sentences show
+how the candidate delivers them. A library wrapper alone would not establish an inspection or
+reporting capability, and recovery tests alone do not establish a measured reduction in downtime.
 
 ## Evidence-led bullets
 
@@ -137,56 +164,67 @@ When metrics are absent, use the strongest supported non-numeric result instead 
 
 Do not label an implementation as a result when the source does not establish delivery or use.
 
+### Public package download evidence
+
+Use official registry data for public distribution statistics, with live retrieval when the metric
+may have changed. Verify actual owner identity and included package IDs; author metadata and a
+matching name alone do not establish ownership. Keep retrieval date, exact scope and calculation
+in the claim ledger and date the resume metric. A short as-of date attached to a metric is measurement
+context, not project chronology.
+
+For NuGet, discover the SearchQueryService endpoint from the official service index and use the
+[official search API contract](https://learn.microsoft.com/en-us/nuget/api/search-query-service-resource).
+Include prerelease/SemVer scope where relevant, retrieve all result pages and deduplicate package IDs.
+Each result's totalDownloads already includes its versions: sum it once per included ID, without
+adding version-level downloads again. Search excludes unlisted packages, so describe the count as
+searchable/listed scope when completeness matters. Exclude unrelated packages and legacy prefixes
+from a narrower family total; a separately stated legacy cohort is allowed only when verified and
+clearly labeled. Do not rely on a stale cached web snippet when live official data is available.
+
+Describe the result as package downloads or a distribution signal. It does not establish unique
+users, independent organizations, installations, production adoption, revenue or time savings.
+Support reuse separately with actual downstream references or verified operational evidence. A
+multi-package ecosystem is one project family for presentation purposes; its package count does
+not establish an equal number of projects or products.
+
 ### Sentence patterns and engineering judgment
 
-Make the relationship between the problem, contribution, technical choice, and result explicit.
-Choose the strongest supported angle for each bullet; these are optional patterns, not required
-fields or a fixed word order:
+For project experience, use the concise reasoning of system-architecture project papers in every
+bullet: connect an actual problem, objective or constraint to a personal design/action, the
+relevant technical approach, and a supported result, verification or bounded current state. Keep
+this reasoning in resume-length prose rather than expanding it into an examination essay.
 
-- **Problem resolution:** `Resolved [specific failure] by [personal action and mechanism], with
-  [supported verification or outcome].`
-- **Capability delivery:** `Built [capability] using [relevant mechanism], enabling [supported use].`
-- **Design decision:** `Selected [approach] to meet [constraint or quality goal]; [supported
-  implementation or result].`
-- **Root-cause investigation:** `Traced [symptom] to [cause] using [diagnostic method], then
-  [implemented correction and supported verification].`
+Useful Chinese patterns include:
 
-For architecture and design work, show why the approach suited the actual constraints when that
-reason is supported and material to the role. Include an alternative or accepted trade-off only
-when the evidence establishes it and it helps explain the decision. Using a technology alone does
-not establish that the candidate selected it or compared alternatives.
+- “针对……问题，设计/采用……方案，通过……实施或验证，形成/实现……。”
+- “在……约束下，将……职责分离，采用……组织协作，完成……接入或交付。”
+- “为满足……需求，承担……职责，运用……实现……，成果已用于/目前处于……。”
+- “通过……定位……原因，将……调整为……，经……对照验证，结果为……。”
 
-Use direct action verbs and concrete objects. In English resume bullets, normally omit first-person
-pronouns and open with the contribution or result; place a constraint first when it makes the work
-easier to understand. Vary sentence structure with the evidence. Keep one main claim per bullet and
-leave extended project history, theory, and step-by-step comparisons for the interview. Adapt the
-wording naturally to the requested language rather than translating a fixed sentence frame.
+Adapt these patterns to the evidence and language, varying openings and sentence length. Make
+personal responsibility and the connection between clauses clear; avoid task lists held together
+only by technology names. For a research, support or early-stage item, the strongest defensible
+endpoint may be a prototype, document, submitted implementation or known contribution.
 
-Use the shared integrity rules when connecting clauses: purpose is not proof of impact, and a team
-outcome is not automatically attributable to one contribution. Omit unsupported parts of a pattern;
-do not invent a problem, selection rationale, comparison, causal link, or result to complete it.
-When only the work is known, state the contribution precisely without implying a verified outcome.
+For architectural decisions, explain the constraint and why the approach fits only when the
+sources establish them. Include compared alternatives and accepted trade-offs only when they were
+actually considered. Using a technology does not itself establish authorship of its algorithm,
+a comparative selection process, full-system ownership or a production outcome. A writing style
+does not change the candidate's actual job title or qualifications.
 
-The following examples are fictional. They illustrate how to organize supplied facts, not facts to
-reuse in a candidate's resume.
+Keep one main claim per bullet. Do not invent a problem, rationale, causal benefit, verification or
+metric to fill a pattern, and do not turn team outcomes into personal implementation claims.
+If only the contribution is known, state that scope and current deliverable precisely.
 
-**Problem resolution**
+Fictional example, usable only when the facts are supplied:
 
-- Supplied facts: implemented connection-state tracking and automatic reconnection in a C# device
-  client; regression tests confirmed that acquisition resumed after a disconnect.
-- Weak: "Responsible for device communication using C#."
-- Stronger: "Implemented connection-state tracking and automatic reconnection in a C# device client;
-  regression tests confirmed acquisition resumed after disconnects."
+- Supplied facts: a single-process application must support a second device; the candidate separated
+  protocol parsing behind an adapter and added that device without changing the business workflow.
+- Resume wording: “在保持单进程部署的约束下，将设备协议解析与业务流程分离，通过适配接口接入第二种设备，完成既有业务流程的兼容扩展。”
 
-**Design decision**
-
-- Supplied facts: the application had to retain single-process deployment; the candidate chose
-  in-process modules over separate services, separated protocol parsing from business workflows
-  through adapter interfaces, and added a second device adapter without changing those workflows.
-- Weak: "Designed a modular architecture to improve maintainability."
-- Stronger: "Chose in-process modules over separate services to retain single-process deployment;
-  isolated protocol parsing behind adapter interfaces and added a second device adapter without
-  changing business workflows."
+[Architecture-paper writing reference](https://www.educity.cn/rk/5540657.html): its original guidance
+connects project context, constraints, choices and verified results. The patterns above are concise
+resume adaptations; source evidence remains authoritative for every claim.
 
 ## Repository evidence translation
 
@@ -201,9 +239,10 @@ repository evidence through four layers before it reaches the resume:
 4. **Result:** a measured outcome, delivered capability, verified defect removal, compatibility
    boundary, reusable asset, release state, or bounded current state.
 
-A bullet should still make sense if the repository name is hidden. Repository names may remain as
-project labels when useful for chronology or interview reference, but they cannot carry the burden
-of explaining the work.
+A bullet should still make sense without a repository name. Give employer/client projects
+recognizable business or system names, and remove private repository aliases, namespaces and code
+names from titles and prose. Keep them in the evidence ledger. Authorized, established public
+portfolio names and links may remain, with a self-contained explanation of their contribution.
 
 Prefer recognizable descriptions over private code vocabulary:
 
@@ -214,9 +253,9 @@ Prefer recognizable descriptions over private code vocabulary:
 - “managed ownership and release contracts for native memory” over wrapper base-class names;
 - “background calculation with cancellation and UI-thread coordination” over patched method names.
 
-Use a private symbol only after the plain-language meaning is clear and only when the symbol adds
-material technical proof. Avoid commit hashes, file paths, issue numbers, internal module lists, and
-long sequences of class or method names in submitted resume copy.
+Use public technology names when they add material technical proof after the plain-language
+meaning is clear. Keep private identifiers, commit hashes, file paths, issue numbers and internal
+module lists out of submitted copy, along with long sequences of implementation symbols.
 
 Do not include provenance defenses such as “I am not claiming the whole system” in the resume.
 Scope ownership with a concrete verb and object, and keep audit limitations in the evidence ledger
@@ -247,15 +286,33 @@ candidate actually did and why the capability transfers.
 
 ## Project coverage and emphasis
 
-For a targeted resume, cover every supported project. Current requirements determine
-which projects lead and receive more detail; they do not determine whether a supported project is
-included. Show the distinct capability, contribution, and result of less relevant projects
-concisely. Related projects may share a heading if each remains identifiable. Remove only
-unsupported or genuinely repeated claims.
+Inventory all supported records and capabilities, but draft around actual products, projects and
+coherent project families. Current requirements determine which projects lead and receive more
+detail; lower relevance alone is not a reason to erase a distinct supported contribution.
 
-Across covered projects, cover the target's highest-priority themes without repeating the same
-proof. A useful portfolio often assigns each project a primary role, such as desktop delivery,
-device or native integration, concurrency, system design, test/reliability, or domain algorithms.
+Before drafting, classify each evidence record as a product/project, component, version/stage,
+integration adapter, supporting tool, test/benchmark, or shared asset. Map it to the actual
+initiative using business purpose, users, deliverables, ownership and dependencies. A separate
+repository, package ID, worktree or fact record does not establish a separate project.
+
+- Combine the application, its model adapter and its migration work when they are parts of one
+  product. Keep technical depth through a few problem/action/result bullets within that entry.
+- Combine an open-source package ecosystem under one project-family account. Lead with verified
+  distribution or adoption results, then group components by useful capabilities. Package count is
+  package count, not project count, and dependencies are not separate end-user outcomes.
+- Preserve material version or product boundaries. An older product's field use does not prove a
+  new architecture shipped; an accepted component does not establish whole-platform acceptance.
+- Shared libraries may serve several products. Explain that relationship once, avoiding duplicate
+  delivery counts. Related but distinct products may share a clearly labeled family heading when
+  their purposes, contribution boundaries and current states remain identifiable.
+- Do not merge solely because records share technology, employer or customer. Keep unrelated
+  support deliverables and experiments identifiable in a compact support group rather than
+  inventing one continuous product lifecycle.
+
+Complete coverage means preserving distinct capability, contribution and outcome; it does not
+require one heading per source record or repeating every implementation detail. Remove repeated
+claims and allocate evidence across the portfolio, for example desktop delivery, native integration,
+system design, reliability, domain algorithms and reusable tooling.
 
 ## Technical signature
 
@@ -291,26 +348,36 @@ label them clearly so they are not mistaken for an unstructured project bullet.
 
 ### Project time ranges
 
-Show a separate time range for every named project, including compact entries and projects grouped
-under one employer. Employment tenure does not substitute for project dates. Put the range beside
-the project name or on the next line, once only. This start-to-end range is the only chronological
-time information in the project entry. Keep calendar dates, date ranges, dated milestones, elapsed
-project durations, and participation timelines out of project prose and achievement bullets; focus
-the body on responsibilities, implementation, and supported results or current state.
+Give each named work project a supported start and end, including compact/grouped entries. Place
+the range beside the business-facing project name or on the next line, once only. Employment tenure
+is a separate fact. Keep calendar dates, intermediate milestones, elapsed durations and
+participation timelines out of project prose and bullets. An as-of date attached to a changing
+statistical metric is permitted as measurement context.
 
-- When supported, show project start through acceptance, for example
-  `2023.04 - 2024.02 (accepted)`. Use consistent locale formatting and preserve source precision;
-  year-only evidence does not justify invented months.
-- For a supported ongoing project, use `2024.03 - Present` and state its current stage when known.
-  If work has ended but acceptance is pending, show the supported work period and pending status.
-  A known completion or delivery date may be used as a clearly labeled endpoint when no formal
-  acceptance applies; never present completion, release, or delivery alone as acceptance.
-- Keep any differing personal participation dates and intermediate milestones in the evidence
-  ledger rather than adding more periods to the resume. Describe personal responsibilities precisely
-  so the project range does not imply ownership of the full lifecycle.
-- If a boundary is missing or conflicting, seek clarification when needed and report unresolved
-  dates outside the resume. Retain the project with only supported date information; do not invent
-  an endpoint, use `Present` for an unknown status, or insert date placeholders into final copy.
+- Prefer actual project start through acceptance when both are established. Label an acceptance,
+  development, delivery or maintenance endpoint according to what the evidence proves; do not
+  replace an available start-to-end range with a single acceptance date.
+- For an affirmatively ongoing project, use “start - Present.” Unknown status does not justify
+  Present, and the latest commit alone does not establish project completion or acceptance.
+- If the full project lifecycle is unknown, use a verified personal development/maintenance period
+  or an observed work-record interval, labeling that basis explicitly. First/last relevant personal
+  commits and corroborating work records can bound the observed interval; they do not prove the
+  candidate participated in the whole project or that no work occurred outside the records.
+- Preserve source precision. If work is evidenced within one month or year, both displayed
+  boundaries may be the same month or year, labeled as the known work-record interval when the full
+  period is unknown. Do not invent months from an annual summary or treat file modification and
+  repository creation timestamps alone as development/acceptance evidence.
+- For a genuine consolidated project or explicitly labeled family, show the supported initiative
+  or family range. Modules do not need separate project entries and dates solely because they
+  have separate records. Keep distinct support projects identifiable with their own ranges and
+  do not imply continuous participation across gaps.
+- Resolve gaps first through authorized canonical facts, Git authorship/history, GitLab activity and
+  work documents/messages, separating personal contribution from imports, bots and colleagues.
+  When the user requests record-based investigation without questions, search those sources and
+  report residual gaps instead of asking the person to reconstruct dates from memory.
+- If neither a project range nor a defensible participation/record interval can be established,
+  retain only supported time information and report the unresolved boundary outside the resume.
+  Do not fill it with employment dates, invented endpoints or submission placeholders.
 
 ## Length and coverage
 

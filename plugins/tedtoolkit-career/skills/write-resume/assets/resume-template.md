@@ -14,24 +14,28 @@ with one or two strongest supported outcomes, exceptional capabilities, or recur
 patterns. Make the main theme
 unmistakable; do not turn the summary into an equal-weight skill list. When source and target
 industries differ, lead with widely recognizable transferable capabilities rather than unexplained
-source-industry terminology.]
+source-industry terminology. Check this summary against the main supported product/delivery
+streams: keep a compact view of the candidate's business remit instead of letting generic
+“platform,” “3D,” or “industrial” wording hide a substantial application.]
 
 ## Core Skills
 
-[For each item, lead with a business problem or company value HR can understand, then give the
-personal capability, technical method, and supported application or result that a technical reader
-can assess. The group labels below are examples: rename, merge, or omit groups to fit the evidence.
-Cover every supported capability, including distinctive strengths beyond the posting; order and
-vary detail by target relevance. Do not invent business impact or substitute self-ratings for proof.]
+[Each bullet has a concise skill name before its colon and exactly two sentences after it.
+The first sentence states a supported business or company value in plain language for HR.
+The second explains concrete personal capability, relevant technical methods and project evidence
+for technical readers. Keep the label a skill name rather than a benefit statement; do not add
+“HR” / “technical” sublabels. Rename the capability groups below to suit the evidence, cover
+every supported capability and order by target relevance without inventing business impact.]
 
-- **Product and workflow delivery:** [Useful business or user capability the candidate can deliver;
-  relevant technologies, personally owned scope, and a supported application or result]
-- **Operational reliability and quality:** [Concrete failure or quality problem the candidate can
-  address; technical mechanism, verification, and a supported project example]
-- **System integration and adaptability:** [Integration or compatibility need the candidate can
-  handle; relevant interfaces, platforms, or design choices and their demonstrated application]
-- **Team reuse and efficiency:** [Reusable capability or evidenced efficiency benefit;
-  tooling or engineering method and supported reuse, adoption, or result]
+- **[Application development skill]:** [First sentence: useful workflow or decision for the user or
+  company]. [Second sentence: concrete personal capability, technologies and supported project proof].
+- **[Reliability and testing skill]:** [First sentence: work preserved, failure made recoverable or
+  output made checkable]. [Second sentence: failure handling, verification method and evidence].
+- **[System or native integration skill]:** [First sentence: operational use or team delivery
+  supported]. [Second sentence: interface/compatibility method, personal scope and adoption or state].
+- **[Code generation or delivery engineering skill]:** [First sentence: repeated work replaced or
+  useful team operation provided]. [Second sentence: tooling, concrete capability and consumption or
+  validation evidence].
 
 ## Professional Experience
 
@@ -39,30 +43,30 @@ vary detail by target relevance. Do not invent business impact or substitute sel
 
 [Location] | [YYYY.MM - Present]
 
-#### [Most target-relevant project or product]
+#### [Business-facing name of the most relevant project; no private repository alias]
 
-[Project start - acceptance date, with acceptance labeled; otherwise supported period and status.
-Show only this start-to-end range near the project name. Keep all chronological time information
-out of the project prose and bullets. Apply these rules to every project below; keep missing-date
-questions outside final copy.]
+[Start - End at the supported precision. Label acceptance, delivery, personal development/maintenance
+or observed work-record period accurately; an ongoing project ends in Present. Use available
+Git/GitLab/work-document evidence to recover missing boundaries. Show only this range near the
+business-facing name, without private repository aliases. Keep chronology out of project prose.]
 
-- [Personal ownership and recognizable delivered scope, expressed through transferable system or
-  business meaning before source-industry terminology when industries differ.]
-- [Important implementation mechanisms, constraints, integration boundaries, or failure modes.]
-- [Supported delivery, acceptance, production use, measured result, verified fix, or bounded current
-  state.]
+- [Actual business problem or constraint + personal design/action + relevant technical approach +
+  supported outcome or current state, using concise architecture-paper reasoning.]
+- [Another concrete problem or decision + implemented method + evidence of verification or use;
+  keep the actual contribution and delivery boundary.]
 
-#### [Second project or product showing target fit or a distinctive transferable strength]
+#### [Business-facing name of the next project showing target fit or a distinctive strength]
 
 [Project start - acceptance date or supported period and status]
 
-- [Personal ownership and why the work mattered.]
-- [Technical depth that supports a role requirement or demonstrates a substantial personal strength.]
-- [Supported outcome or current state, with collaboration boundaries preserved.]
+- [Problem/goal/constraint + personal action and technical method + supported result or state.]
+- [A distinct architectural or implementation contribution, connected to its purpose and evidence.]
 
-[Continue with every other supported project. Give target-relevant projects more detail and use
-compact, identifiable entries for the others. Add pages when complete coverage needs the space;
-two pages is a recommendation, not a limit.]
+[Continue with the other supported actual projects, consolidating repositories, modules, adapters,
+versions and test harnesses of the same initiative. Use a clearly labeled family for related
+products or packages; keep distinct products, ownership and delivery states identifiable within it.
+Complete coverage does not require one project per source record. Give target-relevant work more
+detail and use compact entries for the rest; two pages is a recommendation, not a limit.]
 
 #### [Optional architecture, refactoring, or delivery initiative]
 
@@ -75,16 +79,22 @@ two pages is a recommendation, not a limit.]
 
 [Location when supplied] | [YYYY.MM - YYYY.MM]
 
-#### [Project or product]
+#### [Business-facing project or product name]
 
 [Project start - acceptance date or supported period and status]
 
-- [Relevant system, research, product, or automation work and the candidate's contribution.]
-- [Supported delivery, acceptance, adoption, patent, publication, or other observable result.]
+- [Actual objective or constraint + personal system/research/product work + concrete method +
+  supported deliverable, acceptance, adoption or bounded result.]
 
 ## Open Source and Independent Practice
 
-- [Project or package] | [Project start - acceptance date or supported period and status]:
+[Present a maintained component ecosystem as one project family. Lead with a verified result,
+then a few capability themes and separately supported downstream reuse; do not enumerate each
+package as an independent project. If using registry downloads, verify ownership, state the
+included IDs/prefix, count total downloads once per package ID, and attach the retrieval date.
+Downloads are a distribution metric, not a user or organization count.]
+
+- [Project or project family] | [Project start - acceptance date or supported period and status]:
   [Recognizable problem, personal contribution, important technical mechanism,
   and supported release, validation, adoption, or bounded current state.] [Optional link]
 - [Optional sustained practice or portfolio evidence]: [Concrete practice and verifiable publication,

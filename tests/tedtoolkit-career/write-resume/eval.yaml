@@ -4,8 +4,21 @@ config:
 
 smoke_scenarios:
   - "Write an approved conversational resume artifact"
+  - "Present core capabilities with readable value and technical evidence"
+  - "Consolidate components while retaining distinct products and delivery states"
+  - "Use a frozen registry snapshot without scope or version double counting"
+  - "Recover authored work periods without inventing lifecycle or acceptance dates"
 
 scenarios:
+  - name: "Validate resume behavior fixtures and artifact assertions"
+    mode: "static"
+    setup:
+      commands:
+        - 'python -B "${REPO_ROOT}/tests/tedtoolkit-career/write-resume/resume_behavior.py" self-test'
+    assertions:
+      - { type: "exit_success" }
+    timeout: 60
+
   - name: "Write an approved conversational resume artifact"
     prompt: >-
       Turn these notes into the finished Markdown resume now; this exact conversational artifact is
@@ -173,7 +186,8 @@ scenarios:
       domain-model tooling. Raw Git
       evidence says: in repository WeldCore, I added Id<T>, DomainObjectResolver,
       RecordEnumValueGenerator, and changed WorkpieceManagerBase; in NativeBridge, I added
-      INativeObject, NativeArray<T>, and PooledProtobufBuffer plus release-path tests. The reader has
+      INativeObject, NativeArray<T>, and PooledProtobufBuffer plus release-path tests. WeldCore and
+      NativeBridge are private employer repository identifiers. The reader has
       never seen either repository. Preserve the supported technical depth and results, but do not
       make internal symbols or repository knowledge necessary to understand the work. No metrics
       were supplied.
@@ -181,6 +195,8 @@ scenarios:
       - { type: "exit_success" }
       - { type: "output_contains", value: "C#" }
       - { type: "output_contains", value: "native" }
+      - { type: "output_not_contains", value: "WeldCore" }
+      - { type: "output_not_contains", value: "NativeBridge" }
       - { type: "output_not_contains", value: "DomainObjectResolver" }
       - { type: "output_not_contains", value: "RecordEnumValueGenerator" }
       - { type: "output_not_contains", value: "WorkpieceManagerBase" }
@@ -190,6 +206,101 @@ scenarios:
       - "Makes the system problem, personal action, relevant C# mechanism, and supported delivery/test result understandable without repository context."
       - "Does not invent performance, adoption, production, or scale metrics."
     timeout: 360
+
+  - name: "Present core capabilities with readable value and technical evidence"
+    prompt: >-
+      Read candidate.md and the supplied role.md, then write my finished Chinese Markdown resume
+      for Acme Robotics' identified 软件工程师 role at the absent resume.md. This exact file and
+      final copy are authorized. Make the core capabilities understandable to HR and credible to
+      technical colleagues, using the supported work rather than self-ratings. Preserve the scope
+      of my business experience while tailoring emphasis to the posting. These are complete
+      synthetic, dated inputs; use only them and do not browse or change them. Create no companion
+      files. Return the full saved resume in your final response so I can review it.
+    setup:
+      commands:
+        - 'python -B "${REPO_ROOT}/tests/tedtoolkit-career/write-resume/resume_behavior.py" setup capabilities'
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_exists", path: "resume.md" }
+      - type: "command"
+        run: 'python -B "${REPO_ROOT}/tests/tedtoolkit-career/write-resume/resume_behavior.py" check capabilities'
+    rubric:
+      - "Each core-skill label names a recognizable skill, followed by exactly two sentences: a plain-language evidenced user/company value, then personal technical methods and concrete application or verification. No separate HR/technical sublabels."
+      - "The professional summary preserves inspection, beam cutting and welding as substantial business applications; generic industrial/platform/3D wording does not erase the cutting remit."
+      - "Technical depth and the source domain remain truthful; implementing integrations does not become invention of the cutting algorithm, and no revenue, savings, efficiency or downtime metric is invented."
+    timeout: 480
+
+  - name: "Consolidate components while retaining distinct products and delivery states"
+    prompt: >-
+      Read candidate.md and supplied role.md. Write my finished Chinese Markdown resume for Acme
+      Robotics' 软件工程师 role at the absent resume.md; this exact artifact and destination are
+      authorized. Make the experience concise and coherent while retaining distinct contributions
+      and results. Use the supplied business-facing product names. These are frozen synthetic
+      facts, not live research; do not browse or modify inputs or create companion files. Return
+      the full saved resume in your final response.
+    setup:
+      commands:
+        - 'python -B "${REPO_ROOT}/tests/tedtoolkit-career/write-resume/resume_behavior.py" setup boundaries'
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_exists", path: "resume.md" }
+      - type: "command"
+        run: 'python -B "${REPO_ROOT}/tests/tedtoolkit-career/write-resume/resume_behavior.py" check boundaries'
+    rubric:
+      - "Seven repository/component records become three coherent product accounts: the older welding application with its model wrapper, the redesigned planning initiative with native/import/business components, and the independently accepted cutting product. A clearly labeled family may contain distinct product accounts."
+      - "Sharing a customer, C# and geometry code does not collapse cutting and welding into one accepted delivery; shared geometry does not add another product or duplicate an outcome."
+      - "Older welding field use remains attached to that product. Native adaptation's internal validation, import review and prototype business components retain their separate states; the redesign is not called field-deployed or accepted."
+      - "Private repository identifiers stay out of titles, capability summaries and project prose, while personal technical contributions and business meaning remain identifiable."
+    timeout: 480
+
+  - name: "Use a frozen registry snapshot without scope or version double counting"
+    prompt: >-
+      Read candidate.md, role.md and every page in registry-snapshot.json. Write my finished Chinese
+      Markdown resume for Acme Robotics' 软件工程师 role at the absent resume.md; this exact file
+      is authorized. Add the supported public package-family result, including the package count,
+      total downloads, scope and one measurement date attached to the statistic. Keep project
+      chronology limited to the range near its name. The JSON is deliberately frozen synthetic
+      evidence shaped like official NuGet responses, so use it without live registry or web calls.
+      Preserve inputs, create no companion files, and return the full saved resume in your final
+      response. Do not repeat the download statistic in the summary.
+    setup:
+      commands:
+        - 'python -B "${REPO_ROOT}/tests/tedtoolkit-career/write-resume/resume_behavior.py" setup registry'
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_exists", path: "resume.md" }
+      - type: "command"
+        run: 'python -B "${REPO_ROOT}/tests/tedtoolkit-career/write-resume/resume_behavior.py" check registry'
+    rubric:
+      - "Counts TestKit.Core, TestKit.Text and the prerelease TestKit.Paths once each, including the case-variant duplicate only once. Uses totalDownloads without adding versions again, yielding three packages and 225 downloads."
+      - "Excludes LegacyTestKit.*, Other.Package and another owner's TestKit.Fork; author text does not replace verified owner membership. The published scope and measurement date match the frozen snapshot."
+      - "Presents one component family with capability themes and a dated distribution result, without inventing unique users, independent companies, production adoption or downstream reuse. The as-of date is metric context, not a project milestone or a repeated timeline."
+    timeout: 480
+
+  - name: "Recover authored work periods without inventing lifecycle or acceptance dates"
+    prompt: >-
+      Read candidate.md, role.md and the authorized local evidence repository. Write my finished
+      Chinese Markdown resume for Acme Robotics' 软件工程师 role at the absent resume.md. This
+      exact artifact is authorized. Preserve the supplied business-facing project names and
+      investigate the available records for dates; do not ask me to reconstruct them from memory.
+      Use only this synthetic local evidence, preserve it byte-for-byte and create no companion
+      files. Return the full saved resume in your final response, with any remaining fact questions
+      or limitations outside the resume artifact. Outside the artifact, briefly explain which
+      authorship records establish the date range and which records were excluded.
+    setup:
+      retain_tool_commands: true
+      commands:
+        - 'python -B "${REPO_ROOT}/tests/tedtoolkit-career/write-resume/resume_behavior.py" setup dates'
+    assertions:
+      - { type: "exit_success" }
+      - { type: "file_exists", path: "resume.md" }
+      - type: "command"
+        run: 'python -B "${REPO_ROOT}/tests/tedtoolkit-career/write-resume/resume_behavior.py" check dates'
+    rubric:
+      - "Recovers March-June 2024 from Lin Chen's authored history, and explains that source and the excluded vendor/bot/colleague records outside the artifact. Does not use employment, file timestamps or repository endpoints as personal dates."
+      - "Labels the first project's range as observed personal development/maintenance records, not complete project lifecycle, acceptance or ongoing status. Preserves the separate annual report-support record as a year-precision 2023-2023 interval without guessed months."
+      - "Places ranges near project names without project-stage dates in prose, omits private repository identifiers, retains supported contributions and keeps unresolved lifecycle/acceptance limitations outside final copy."
+    timeout: 480
 
   - name: "Block final copy without a company-role target"
     prompt: >-
