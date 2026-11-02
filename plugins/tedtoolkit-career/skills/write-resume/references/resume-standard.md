@@ -34,7 +34,8 @@ Use this default order and change it only when another order better supports the
 
 1. Name, target title, location, contact details, and professional links.
 2. Professional summary: two to four lines connecting domain, level, strengths, and proof.
-3. Core skills grouped by capability, with the most relevant group first.
+3. Core skills grouped by business problem or company value, with the most relevant group first
+   and technical evidence following the value statement.
 4. Professional experience in reverse chronology.
 5. Projects beyond employment, including independent and open-source work.
 6. Patents, publications, awards, or certifications when supported.
@@ -73,32 +74,47 @@ seniority, tenure, ownership, or results.
 
 ## Core skills and practical breadth
 
-The core-skills section should cover all supported capabilities while revealing both
-target fit and the candidate's broader usable ability. Organize them in decreasing hiring relevance:
+Write core skills for HR, hiring managers, and technical colleagues in the same section. Each item
+must first make its business or company value understandable without specialist knowledge, then
+provide enough technical substance to make the ability credible:
 
-1. **Primary capabilities:** the main stack, domain, and engineering abilities central to the target
-   and the candidate's professional identity.
-2. **Applied breadth:** adjacent languages, frameworks, platforms, tools, integration boundaries,
-   and lifecycle capabilities the candidate has used in real work or substantial projects.
-3. **Distinctive strengths:** evidence-backed capabilities or rare combinations that show depth,
-   versatility, or transferable judgment, even when the current posting does not request them.
-4. **Engineering practice and ownership:** demonstrated abilities such as requirements analysis,
-   architecture, root-cause diagnosis, refactoring, testing, delivery, field support, mentoring, or
-   cross-team technical coordination.
+`business problem or company value -> personal capability and technical method -> supported application or result`
 
-A skill does not have to appear in the job posting to earn space. Cover every supported
-ability, giving less relevant ones concise treatment while preserving the kind and depth of work
-performed. Show the capability without claiming an unevidenced future need at the employer. Connect
-important technologies to their application scope; for example, native interop, desktop
-delivery, data processing, device integration, build tooling, or production support. Describe
-personal abilities as observable work the candidate can perform, not adjectives such as “strong,”
-“excellent,” or “expert.”
+Use concrete value-oriented group labels suited to the evidence, such as workflow delivery,
+operational reliability, system integration, or team reuse and efficiency. Within each item, say
+what problem the candidate can address or what useful capability they can deliver before naming
+languages, frameworks, algorithms, or architecture. Avoid opening with a technology inventory or
+generic promises such as “empower the business.”
+
+Substantiate every ability with a relevant mechanism, ownership boundary, constraint, verification,
+or concrete project application. Include a concise project cue or supported result when useful;
+leave the full account in project experience. Technology names and self-ratings such as “strong,”
+“excellent,” or “expert” do not establish ability on their own.
+
+Business value must follow the same evidence rules as technical claims. When measured impact is
+absent, describe the supported capability, solved problem, or bounded current work. Do not turn a
+technical implementation into an invented revenue gain, cost saving, efficiency improvement, or
+company-wide outcome, or claim an unevidenced future need at the target employer.
+
+Order groups and items by hiring relevance while covering every supported capability, including
+applied breadth, distinctive strengths, and demonstrated delivery or coordination abilities beyond
+the posting. Give less relevant abilities concise treatment without erasing their application or
+depth. Express unusual combinations through the useful work they enable rather than a separate
+list of technical names.
 
 Do not imply the same depth for every item. Prefer capabilities backed by delivery, repeated use,
 problem solving, or a substantial project. Clearly subordinate bounded working familiarity when it
 is useful, and omit technologies that were only encountered or cannot be connected to supported
 practice. Group related abilities to keep the full range readable; remove unsupported or repeated
 claims that dilute the main capability.
+
+Fictional example, usable only when the underlying facts are supplied:
+
+**Recovery from device interruptions:** Resume data collection after device disconnects using C#
+connection-state tracking and automatic reconnection, verified by disconnect regression tests.
+
+The opening explains the operational value; the method and verification let technical readers
+assess the claim without asserting an unsupported reduction in downtime.
 
 ## Evidence-led bullets
 
@@ -260,7 +276,7 @@ distinctive.
 
 Use this repeated structure when several named projects benefit from explicit scanning labels:
 
-1. Project heading.
+1. Project heading and its own time range, following the rules below.
 2. **Responsibilities and implementation:** personal ownership, problem, method, or constraint.
 3. **Outcome or current state:** supported delivery, use, acceptance, scale, measurement, patent,
    publication, award, or bounded ongoing state.
@@ -272,6 +288,29 @@ the layout look complete.
 Use a `####` project heading when several projects belong to one `###` employer-role entry. Use a
 `###` heading for a standalone project. Keep role-wide achievements outside individual projects and
 label them clearly so they are not mistaken for an unstructured project bullet.
+
+### Project time ranges
+
+Show a separate time range for every named project, including compact entries and projects grouped
+under one employer. Employment tenure does not substitute for project dates. Put the range beside
+the project name or on the next line, once only. This start-to-end range is the only chronological
+time information in the project entry. Keep calendar dates, date ranges, dated milestones, elapsed
+project durations, and participation timelines out of project prose and achievement bullets; focus
+the body on responsibilities, implementation, and supported results or current state.
+
+- When supported, show project start through acceptance, for example
+  `2023.04 - 2024.02 (accepted)`. Use consistent locale formatting and preserve source precision;
+  year-only evidence does not justify invented months.
+- For a supported ongoing project, use `2024.03 - Present` and state its current stage when known.
+  If work has ended but acceptance is pending, show the supported work period and pending status.
+  A known completion or delivery date may be used as a clearly labeled endpoint when no formal
+  acceptance applies; never present completion, release, or delivery alone as acceptance.
+- Keep any differing personal participation dates and intermediate milestones in the evidence
+  ledger rather than adding more periods to the resume. Describe personal responsibilities precisely
+  so the project range does not imply ownership of the full lifecycle.
+- If a boundary is missing or conflicting, seek clarification when needed and report unresolved
+  dates outside the resume. Retain the project with only supported date information; do not invent
+  an endpoint, use `Present` for an unknown status, or insert date placeholders into final copy.
 
 ## Length and coverage
 

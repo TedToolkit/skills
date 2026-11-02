@@ -83,6 +83,12 @@ state. If only the contribution is known, describe that scope precisely without 
 or impact. Ask about a missing outcome only when it would materially change the description. A
 quantified metric is preferable when supplied, but it is not a license to invent one.
 
+Establish each project's start and acceptance dates separately from employment tenure and personal
+participation dates. Give every named project its own time range, including compact and grouped
+entries, following the [project time-range rules](references/resume-standard.md#project-time-ranges).
+Show only the project start and end beside its name or on the next line; keep chronological time
+information out of project prose and achievement bullets.
+
 ## Plan or present the strategy
 
 Before writing the complete resume, build this strategy:
@@ -116,11 +122,12 @@ does not mention them.
   has been applied, the candidate's strongest capability, current or most important role and scope,
   and one or two highest-value outcomes. Rank these facts around what is most distinctive for the
   target or candidate instead of giving every skill equal weight or turning the summary into a keyword list.
-- Build a layered core-skills section that covers every supported capability: lead with
-  target-critical abilities, then include other hands-on abilities and adjacent technologies. Give
-  evidence-backed distinctive or exceptional capabilities space even when the current posting does
-  not request them. Group skills by application or capability and vary detail by target relevance
-  instead of presenting an undifferentiated inventory.
+- Build a core-skills section for both HR and technical readers. Lead each item with the concrete
+  business problem it addresses or the company value it can support, then substantiate it with the
+  candidate's technical methods and supported project application or result. Follow the
+  [core-skills rules](references/resume-standard.md#core-skills-and-practical-breadth); technology
+  names alone do not establish ability. Cover every supported capability, including distinctive
+  strengths beyond the posting, while ordering groups and allocating detail by target relevance.
 - Express personal capabilities through demonstrated engineering practice—such as diagnosis,
   design, integration, delivery, or technical ownership—not unsupported traits or self-ratings.
 - Write bullets as action plus object or constraint plus outcome, deliverable, or current state.
@@ -186,10 +193,15 @@ alone.
 ## Verify and deliver
 
 Check every final claim against the shared integrity ledger, then verify links, tense, language,
-target terminology, duplication, and unsupported skills. Cross-check the resume against the evidence
+target terminology, duplication, and unsupported skills. Confirm that HR can understand the value
+in each core-skill item before its technical detail, and that a technical reader can identify the
+method and supported application or result behind the claim. Cross-check the resume against the evidence
 inventory to confirm that every supported capability and project is covered, with
-target-relevant items receiving greater prominence and detail. Confirm that project results and
-current states are supported where stated, the first third works
+target-relevant items receiving greater prominence and detail. Verify each project's time range
+against its start, acceptance or other supported endpoint, current state, and personal participation
+boundary. Confirm that only the project's start and end appear near its name and that the body
+contains no chronological time information; report unresolved dates outside the resume. Confirm
+that project results and current states are supported where stated, the first third works
 for a recruiter scan, and the technical detail is sufficient without becoming implementation
 transcript. Also confirm that no bullet requires familiarity with a private repository, internal
 class hierarchy, commit history, or source-industry vocabulary to understand its problem, action,
