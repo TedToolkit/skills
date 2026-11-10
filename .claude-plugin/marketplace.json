@@ -12,12 +12,7 @@
     {
       "name": "tedtoolkit-annotations",
       "source": "./plugins/tedtoolkit-annotations",
-      "description": "Skills for writing clear C# comments and annotations."
-    },
-    {
-      "name": "tedtoolkit-roslynhelper",
-      "source": "./plugins/tedtoolkit-roslynhelper",
-      "description": "Skill for composing generated C# with TedToolkit.RoslynHelper."
+      "description": "C# API documentation and comments."
     },
     {
       "name": "tedtoolkit-project-development",

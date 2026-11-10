@@ -11,12 +11,6 @@
       "category": "Productivity"
     },
     {
-      "name": "tedtoolkit-roslynhelper",
-      "source": { "source": "local", "path": "./plugins/tedtoolkit-roslynhelper" },
-      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
-      "category": "Developer Tools"
-    },
-    {
       "name": "tedtoolkit-annotations",
       "source": { "source": "local", "path": "./plugins/tedtoolkit-annotations" },
       "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
