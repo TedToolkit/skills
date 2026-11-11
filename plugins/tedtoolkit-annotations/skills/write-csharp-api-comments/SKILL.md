@@ -3,17 +3,12 @@ name: write-csharp-api-comments
 description: >-
   Document C# APIs with accurate XML documentation and focused adjacent comments. Use when writing
   or reviewing caller-visible contracts, examples, exceptions, lifecycle, ownership, concurrency,
-  or non-obvious implementation rationale, including prose required by an annotation skill.
+  or non-obvious implementation rationale.
 ---
 
 # Write C# API Comments
 
 Write caller contracts that remain true when the implementation is read line by line.
-
-When a referenced TedToolkit package can represent part of the contract, invoke
-`use-boxing-annotations`, `use-const-annotations`, `use-documentation-annotations`,
-`use-maintenance-annotations`, or `use-ownership-annotations` for its machine-readable semantics.
-This skill retains the prose.
 
 ## Steps
 
@@ -36,8 +31,6 @@ This skill retains the prose.
   benchmark-backed limit, race avoidance, or compatibility workaround.
 - Use an attribute only when a referenced annotation package represents the contract precisely. Do not
   introduce a package merely to decorate a comment.
-- When an existing TedToolkit annotation package represents the contract, apply the selected skill
-  and [attribute-arguments.md](../../references/attribute-arguments.md).
 - XML documentation comments may use literal Unicode normally, subject to well-formed XML. Add a
   familiar emoji or visible symbol proactively when it makes a caller-facing contract easier to scan:
   for example, `⚠️` for a hazard or restriction, `💡` for a usage tip, `✅` for a guarantee, and `⏱️`
@@ -82,8 +75,7 @@ This skill retains the prose.
   adds a precondition, exception, side effect, example, or other restriction.
 - Put `//` comments immediately beside the relevant code and explain why: an external protocol,
   measured performance boundary, race avoidance, compatibility constraint, or unrepresentable assumption.
-- Represent maintenance work with an actionable removal condition or issue reference; use the
-  maintenance annotation skill when its package is available.
+- Represent maintenance work with an actionable removal condition or issue reference.
 
 ## Examples
 

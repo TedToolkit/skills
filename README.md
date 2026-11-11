@@ -18,8 +18,7 @@ After installing or updating a plugin, start a new task so Codex loads its curre
 | Plugin | Use it for |
 | --- | --- |
 | [`tedtoolkit-shared`](plugins/tedtoolkit-shared/) | .NET diagnosis, Release build/test recovery, TUnit tests, atomic gitmoji commits, and safely merging the remote default branch. |
-| [`tedtoolkit-annotations`](plugins/tedtoolkit-annotations/) | C# XML comments and explicit contracts using TedToolkit annotations for boxing, constness, documentation, maintenance, and ownership. |
-| [`tedtoolkit-roslynhelper`](plugins/tedtoolkit-roslynhelper/) | Generating C# source with `TedToolkit.RoslynHelper`. |
+| [`tedtoolkit-annotations`](plugins/tedtoolkit-annotations/) | C# XML documentation and focused API comments. |
 | [`tedtoolkit-project-development`](plugins/tedtoolkit-project-development/) | Request scoping, risk-scaled change design and implementation, optional work-item orchestration, design-principle governance, ADRs, professional review, project scaffolding, and README writing. |
 | [`tedtoolkit-communication`](plugins/tedtoolkit-communication/) | Humble, factual technical inquiries, problem feedback, and interface-use questions drafted for colleagues, maintainers, and vendors. |
 | [`tedtoolkit-career`](plugins/tedtoolkit-career/) | One candidate's factual career workspace, company and role research, evidence matching, targeted resume writing and review, and interview preparation. |
@@ -34,6 +33,12 @@ as a deprecated compatibility alias for one migration release.
 `change-design` and `implement-change-tdd` remain temporary compatibility aliases.
 
 Skills are matched from natural-language intent, and can also be invoked explicitly. They follow a gate-first workflow: inspect first, present a plan or draft, wait for explicit approval, then make changes or commits.
+
+## Package skills
+
+Annotations usage skills are maintained in [TedToolkit.Annotations](https://github.com/TedToolkit/TedToolkit.Annotations). The source-generation skill is maintained in [TedToolkit.RoslynHelper](https://github.com/TedToolkit/TedToolkit.RoslynHelper). Each migrated skill keeps its name and ships in its matching NuGet package.
+
+After restoring the package version that contains the skill, use `dotnet-package-skills list` to see available skills and `dotnet-package-skills install` to import them into the consumer repository. The [tool's NuGet page](https://www.nuget.org/packages/dotnet-package-skills) lists installation commands.
 
 ## Project-development workflow
 

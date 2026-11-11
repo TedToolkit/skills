@@ -32,7 +32,6 @@ py -3.10 tests/run_evals.py --plugin tedtoolkit-project-development design-chang
 py -3.10 tests/run_evals.py --plugin tedtoolkit-project-development workflow-scripts
 py -3.10 tests/run_evals.py --plugin tedtoolkit-project-development skill-contract-release-gate --tier static
 py -3.10 tests/run_evals.py --plugin tedtoolkit-annotations annotation-skills
-py -3.10 tests/run_evals.py --plugin tedtoolkit-roslynhelper compose-roslyn-source
 ```
 
 Without `--plugin`, the runner groups `tests/<plugin>/` scenarios and loads each matching plugin in

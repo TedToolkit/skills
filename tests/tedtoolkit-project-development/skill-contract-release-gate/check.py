@@ -26,10 +26,10 @@ FORBIDDEN_REPOSITORY_ROOT_PATTERN = re.compile(
 EXPECTED_MARKETPLACE_PLUGINS = {
     "tedtoolkit-annotations",
     "tedtoolkit-career",
+    "tedtoolkit-communication",
     "tedtoolkit-hiring",
     "tedtoolkit-hyperframes-tutorials",
     "tedtoolkit-project-development",
-    "tedtoolkit-roslynhelper",
     "tedtoolkit-shared",
 }
 
